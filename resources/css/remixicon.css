@@ -1,0 +1,11 @@
+@font-face {
+  font-family: "remixicon";
+  src: url("~fonts/remixicon-ABHKITET.eot");
+  src:
+    url("~fonts/remixicon-ABHKITET.eot") format("embedded-opentype"),
+    url("~fonts/remixicon-PWIKWM2X.woff2") format("woff2"),
+    url("~fonts/remixicon-FWLTZNBS.woff") format("woff"),
+    url("~fonts/remixicon-UOHJBVLL.ttf") format("truetype"),
+    url("~fonts/remixicon-HO57T2DH.svg") format("svg");
+  font-display: swap;
+}
