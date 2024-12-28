@@ -13,6 +13,10 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        $this->call(DefaultSeeder::class);
+        $this->call([
+            WorksheetMasterData::class,
+            UnitSeeder::class,
+            DefaultSeeder::class,
+        ]);
     }
 }

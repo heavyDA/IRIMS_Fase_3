@@ -64,194 +64,194 @@ import "simplebar/dist/simplebar.min.css";
   );
 
   /* for theme primary */
-  const nanoThemes = [
-    [
-      "nano",
-      {
-        defaultRepresentation: "RGB",
-        components: {
-          preview: true,
-          opacity: false,
-          hue: true,
+  // const nanoThemes = [
+  //   [
+  //     "nano",
+  //     {
+  //       defaultRepresentation: "RGB",
+  //       components: {
+  //         preview: true,
+  //         opacity: false,
+  //         hue: true,
 
-          interaction: {
-            hex: false,
-            rgba: true,
-            hsva: false,
-            input: true,
-            clear: false,
-            save: false,
-          },
-        },
-      },
-    ],
-  ];
-  const nanoButtons = [];
-  let nanoPickr = null;
-  for (const [theme, config] of nanoThemes) {
-    const button = document.createElement("button");
-    button.innerHTML = theme;
-    nanoButtons.push(button);
+  //         interaction: {
+  //           hex: false,
+  //           rgba: true,
+  //           hsva: false,
+  //           input: true,
+  //           clear: false,
+  //           save: false,
+  //         },
+  //       },
+  //     },
+  //   ],
+  // ];
+  // const nanoButtons = [];
+  // let nanoPickr = null;
+  // for (const [theme, config] of nanoThemes) {
+  //   const button = document.createElement("button");
+  //   button.innerHTML = theme;
+  //   nanoButtons.push(button);
 
-    button.addEventListener("click", () => {
-      const el = document.createElement("p");
-      pickrContainerPrimary.appendChild(el);
+  //   button.addEventListener("click", () => {
+  //     const el = document.createElement("p");
+  //     pickrContainerPrimary.appendChild(el);
 
-      /* Delete previous instance */
-      if (nanoPickr) {
-        nanoPickr.destroyAndRemove();
-      }
+  //     /* Delete previous instance */
+  //     if (nanoPickr) {
+  //       nanoPickr.destroyAndRemove();
+  //     }
 
-      /* Apply active class */
-      for (const btn of nanoButtons) {
-        btn.classList[btn === button ? "add" : "remove"]("active");
-      }
+  //     /* Apply active class */
+  //     for (const btn of nanoButtons) {
+  //       btn.classList[btn === button ? "add" : "remove"]("active");
+  //     }
 
-      /* Create fresh instance */
-      nanoPickr = new Pickr(
-        Object.assign(
-          {
-            el,
-            theme,
-            default: "#735dff",
-          },
-          config
-        )
-      );
+  //     /* Create fresh instance */
+  //     nanoPickr = new Pickr(
+  //       Object.assign(
+  //         {
+  //           el,
+  //           theme,
+  //           default: "#735dff",
+  //         },
+  //         config
+  //       )
+  //     );
 
-      /* Set events */
-      nanoPickr.on("changestop", (source, instance) => {
-        let color = instance.getColor().toRGBA();
-        let html = document.querySelector("html");
-        html.style.setProperty(
-          "--primary-rgb",
-          `${Math.floor(color[0])}, ${Math.floor(color[1])}, ${Math.floor(
-            color[2]
-          )}`
-        );
-        /* theme color picker */
-        localStorage.setItem(
-          "primaryRGB",
-          `${Math.floor(color[0])}, ${Math.floor(color[1])}, ${Math.floor(
-            color[2]
-          )}`
-        );
-        // updateColors();
-      });
-    });
+  //     /* Set events */
+  //     nanoPickr.on("changestop", (source, instance) => {
+  //       let color = instance.getColor().toRGBA();
+  //       let html = document.querySelector("html");
+  //       html.style.setProperty(
+  //         "--primary-rgb",
+  //         `${Math.floor(color[0])}, ${Math.floor(color[1])}, ${Math.floor(
+  //           color[2]
+  //         )}`
+  //       );
+  //       /* theme color picker */
+  //       localStorage.setItem(
+  //         "primaryRGB",
+  //         `${Math.floor(color[0])}, ${Math.floor(color[1])}, ${Math.floor(
+  //           color[2]
+  //         )}`
+  //       );
+  //       // updateColors();
+  //     });
+  //   });
 
-    themeContainerPrimary.appendChild(button);
-  }
-  nanoButtons[0].click();
-  /* for theme primary */
+  //   themeContainerPrimary.appendChild(button);
+  // }
+  // nanoButtons[0].click();
+  // /* for theme primary */
 
-  /* for theme background */
-  const nanoThemes1 = [
-    [
-      "nano",
-      {
-        defaultRepresentation: "RGB",
-        components: {
-          preview: true,
-          opacity: false,
-          hue: true,
+  // /* for theme background */
+  // const nanoThemes1 = [
+  //   [
+  //     "nano",
+  //     {
+  //       defaultRepresentation: "RGB",
+  //       components: {
+  //         preview: true,
+  //         opacity: false,
+  //         hue: true,
 
-          interaction: {
-            hex: false,
-            rgba: true,
-            hsva: false,
-            input: true,
-            clear: false,
-            save: false,
-          },
-        },
-      },
-    ],
-  ];
-  const nanoButtons1 = [];
-  let nanoPickr1 = null;
-  for (const [theme, config] of nanoThemes) {
-    const button = document.createElement("button");
-    button.innerHTML = theme;
-    nanoButtons1.push(button);
+  //         interaction: {
+  //           hex: false,
+  //           rgba: true,
+  //           hsva: false,
+  //           input: true,
+  //           clear: false,
+  //           save: false,
+  //         },
+  //       },
+  //     },
+  //   ],
+  // ];
+  // const nanoButtons1 = [];
+  // let nanoPickr1 = null;
+  // for (const [theme, config] of nanoThemes) {
+  //   const button = document.createElement("button");
+  //   button.innerHTML = theme;
+  //   nanoButtons1.push(button);
 
-    button.addEventListener("click", () => {
-      const el = document.createElement("p");
-      pickrContainerBackground.appendChild(el);
+  //   button.addEventListener("click", () => {
+  //     const el = document.createElement("p");
+  //     pickrContainerBackground.appendChild(el);
 
-      /* Delete previous instance */
-      if (nanoPickr1) {
-        nanoPickr1.destroyAndRemove();
-      }
+  //     /* Delete previous instance */
+  //     if (nanoPickr1) {
+  //       nanoPickr1.destroyAndRemove();
+  //     }
 
-      /* Apply active class */
-      for (const btn of nanoButtons) {
-        btn.classList[btn === button ? "add" : "remove"]("active");
-      }
+  //     /* Apply active class */
+  //     for (const btn of nanoButtons) {
+  //       btn.classList[btn === button ? "add" : "remove"]("active");
+  //     }
 
-      /* Create fresh instance */
-      nanoPickr1 = new Pickr(
-        Object.assign(
-          {
-            el,
-            theme,
-            default: "#735dff",
-          },
-          config
-        )
-      );
+  //     /* Create fresh instance */
+  //     nanoPickr1 = new Pickr(
+  //       Object.assign(
+  //         {
+  //           el,
+  //           theme,
+  //           default: "#735dff",
+  //         },
+  //         config
+  //       )
+  //     );
 
-      /* Set events */
-      nanoPickr1.on("changestop", (source, instance) => {
-        let color = instance.getColor().toRGBA();
-        let html = document.querySelector("html");
-        html.style.setProperty(
-          "--body-bg-rgb",
-          `${color[0]}, ${color[1]}, ${color[2]}`
-        );
-        document
-          .querySelector("html")
-          .style.setProperty(
-            "--body-bg-rgb2",
-            `${color[0] + 14}, ${color[1] + 14}, ${color[2] + 14}`
-          );
-        document
-          .querySelector("html")
-          .style.setProperty(
-            "--light-rgb",
-            `${color[0] + 14}, ${color[1] + 14}, ${color[2] + 14}`
-          );
-        document
-          .querySelector("html")
-          .style.setProperty(
-            "--form-control-bg",
-            `rgb(${color[0] + 14}, ${color[1] + 14}, ${color[2] + 14})`
-          );
-          document
-            .querySelector("html")
-            .style.setProperty(
-              "--gray-3",
-              `rgb(${color[0] + 14}, ${color[1] + 14}, ${color[2] + 14})`
-            );
-        localStorage.removeItem("bgtheme");
-        // updateColors();
-        html.setAttribute("data-theme-mode", "dark");
-        html.setAttribute("data-menu-styles", "dark");
-        html.setAttribute("data-header-styles", "dark");
-        document.querySelector("#switcher-dark-theme").checked = true;
-        localStorage.setItem(
-          "bodyBgRGB",
-          `${color[0]}, ${color[1]}, ${color[2]}`
-        );
-        localStorage.setItem(
-          "bodylightRGB",
-          `${color[0] + 14}, ${color[1] + 14}, ${color[2] + 14}`
-        );
-      });
-    });
-    themeContainerBackground.appendChild(button);
-  }
-  nanoButtons1[0].click();
+  //     /* Set events */
+  //     nanoPickr1.on("changestop", (source, instance) => {
+  //       let color = instance.getColor().toRGBA();
+  //       let html = document.querySelector("html");
+  //       html.style.setProperty(
+  //         "--body-bg-rgb",
+  //         `${color[0]}, ${color[1]}, ${color[2]}`
+  //       );
+  //       document
+  //         .querySelector("html")
+  //         .style.setProperty(
+  //           "--body-bg-rgb2",
+  //           `${color[0] + 14}, ${color[1] + 14}, ${color[2] + 14}`
+  //         );
+  //       document
+  //         .querySelector("html")
+  //         .style.setProperty(
+  //           "--light-rgb",
+  //           `${color[0] + 14}, ${color[1] + 14}, ${color[2] + 14}`
+  //         );
+  //       document
+  //         .querySelector("html")
+  //         .style.setProperty(
+  //           "--form-control-bg",
+  //           `rgb(${color[0] + 14}, ${color[1] + 14}, ${color[2] + 14})`
+  //         );
+  //         document
+  //           .querySelector("html")
+  //           .style.setProperty(
+  //             "--gray-3",
+  //             `rgb(${color[0] + 14}, ${color[1] + 14}, ${color[2] + 14})`
+  //           );
+  //       localStorage.removeItem("bgtheme");
+  //       // updateColors();
+  //       html.setAttribute("data-theme-mode", "dark");
+  //       html.setAttribute("data-menu-styles", "dark");
+  //       html.setAttribute("data-header-styles", "dark");
+  //       document.querySelector("#switcher-dark-theme").checked = true;
+  //       localStorage.setItem(
+  //         "bodyBgRGB",
+  //         `${color[0]}, ${color[1]}, ${color[2]}`
+  //       );
+  //       localStorage.setItem(
+  //         "bodylightRGB",
+  //         `${color[0] + 14}, ${color[1] + 14}, ${color[2] + 14}`
+  //       );
+  //     });
+  //   });
+  //   themeContainerBackground.appendChild(button);
+  // }
+  // nanoButtons1[0].click();
   /* for theme background */
 
   /* header theme toggle */
@@ -358,22 +358,6 @@ import "simplebar/dist/simplebar.min.css";
   });
   /* card with close button */
 
-  /* card with fullscreen */
-  let cardFullscreenBtn = document.querySelectorAll(
-    '[data-bs-toggle="card-fullscreen"]'
-  );
-  cardFullscreenBtn.forEach((ele) => {
-    ele.addEventListener("click", function (e) {
-      let $this = this;
-      let card = $this.closest(DIV_CARD);
-      card.classList.toggle("card-fullscreen");
-      card.classList.remove("card-collapsed");
-      e.preventDefault();
-      return false;
-    });
-  });
-  /* card with fullscreen */
-
   /* count-up */
   var i = 1;
   setInterval(() => {
@@ -403,52 +387,6 @@ import "simplebar/dist/simplebar.min.css";
     window.scrollTo(0, 0);
   };
   /* back to top */
-
-  /* header dropdowns scroll */
-  var myHeadernotification = document.getElementById("header-notification-scroll1");
-  new SimpleBar(myHeadernotification, { autoHide: true });
-
-  /* header dropdowns scroll */
-    var myHeadernotification = document.getElementById("header-notification-scroll2");
-    new SimpleBar(myHeadernotification, { autoHide: true });
-
-  /* header dropdowns scroll */
-  var myHeadernotification = document.getElementById("header-notification-scroll3");
-  new SimpleBar(myHeadernotification, { autoHide: true });
-
-  var myHeaderCart = document.getElementById("header-cart-items-scroll");
-  new SimpleBar(myHeaderCart, { autoHide: true });
-  /* header dropdowns scroll */
-
-  // const autoCompleteJS = new autoComplete({
-  //   selector: "#header-search",
-  //   data: {
-  //     src: [
-  //       "What is the meaning of life?",
-  //       "How does gravity work?",
-  //       "Why is the sky blue?",
-  //       "What is the capital of France?",
-  //       "Who painted the Mona Lisa?",
-  //       "What is the speed of light?",
-  //       "Why do we dream?",
-  //       "How do birds fly?",
-  //       "What is the largest mammal?",
-  //       "Why do leaves change color in the fall?"
-  //     ],
-  //     cache: true,
-  //   },
-  //   resultItem: {
-  //     highlight: true
-  //   },
-  //   events: {
-  //     input: {
-  //       selection: (event) => {
-  //         const selection = event.detail.selection.value;
-  //         autoCompleteJS.input.value = selection;
-  //       }
-  //     }
-  //   }
-  // });
 })();
 
 /* full screen */

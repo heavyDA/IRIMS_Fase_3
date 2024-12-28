@@ -2,8 +2,8 @@
 
 namespace App\View\Composers;
 
-use App\Models\ACL\Menu;
-use App\Models\ACL\Role;
+use App\Models\RBAC\Menu;
+use App\Models\RBAC\Role;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Route;

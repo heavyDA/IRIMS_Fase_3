@@ -1,0 +1,3 @@
+<form id="monitoringForm">
+
+</form>

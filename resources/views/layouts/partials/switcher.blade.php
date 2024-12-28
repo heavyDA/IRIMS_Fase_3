@@ -276,7 +276,7 @@
                                 <label class="form-check-label" for="switcher-loader-enable">
                                     Enable
                                 </label>
-                                <input class="form-check-input" type="radio" name="page-loader"
+                                <input class="form-check-input" type="radio" checked name="page-loader"
                                     id="switcher-loader-enable">
                             </div>
                         </div>

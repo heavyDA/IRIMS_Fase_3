@@ -4,17 +4,23 @@
     <!-- Start::main-sidebar-header -->
     <div class="main-sidebar-header">
         <a href="index.html" class="header-logo">
-            <img src="../assets/images/brand-logos/desktop-logo.png" alt="logo" class="desktop-logo">
-            <img src="../assets/images/brand-logos/toggle-dark.png" alt="logo" class="toggle-dark">
-            <img src="../assets/images/brand-logos/desktop-dark.png" alt="logo" class="desktop-dark">
-            <img src="../assets/images/brand-logos/toggle-logo.png" alt="logo" class="toggle-logo">
+            <img src="{{ asset('assets/images/brand/logo.webp')  }}" alt="logo" class="desktop-logo" style="height: 96px;" />
+            <img src="{{ asset('assets/images/brand/favicon.ico') }}" alt="logo" class="toggle-dark">
+            <img src="{{ asset('assets/images/brand/logo.webp')  }}" alt="logo" class="desktop-dark" style="height: 96px;" />
+            <img src="{{ asset('assets/images/brand/favicon.ico') }}" alt="logo" class="toggle-logo">
         </a>
     </div>
     <!-- End::main-sidebar-header -->
 
     <!-- Start::main-sidebar -->
     <div class="main-sidebar" id="sidebar-scroll">
-
+        <div class="d-flex justify-content-center">
+            <select style="width: 80%;" class="form-select" aria-label="Default select example">
+                @foreach (auth()->user()->roles as $role)
+                    <option value="{{ $role->id }}">{{ ucwords($role->name) }}</option>
+                @endforeach
+            </select>
+        </div>
         <!-- Start::nav -->
         <nav class="main-menu-container nav nav-pills flex-column sub-open">
             <div class="slide-left" id="slide-left">

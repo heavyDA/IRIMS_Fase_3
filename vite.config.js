@@ -5,7 +5,13 @@ import path from 'path';
 export default defineConfig({
     plugins: [
         laravel({
-            input: ['resources/css/app.css', 'resources/js/app.js'],
+            input: [
+                'resources/css/app.css',
+                'resources/js/app.js',
+                'resources/js/pages/RBAC/users/index.js',
+                'resources/js/pages/risk/assessment/index.js',
+                'resources/js/pages/risk/assessment/worksheet/index.js',
+            ],
             refresh: true,
         }),
     ],
