@@ -14,7 +14,12 @@ return new class extends Migration
         Schema::create('ra_worksheet_histories', function (Blueprint $table) {
             $table->id();
             $table->foreignId('worksheet_id')->constrained('ra_worksheets')->cascadeOnDelete();
-            $table->foreignId('user_id')->nullable()->constrained('users')->nullOnDelete();
+            $table->string('created_by', 50)->nullable();
+            $table->foreign('created_by')->references('employee_id')->on('users')->nullOnDelete();
+            $table->string('created_role', 50)->nullable();
+
+            $table->foreignId('receiver_id')->nullable()->constrained('roles')->nullOnDelete();
+            $table->string('receiver_role', 50)->nullable();
             $table->text('note')->nullable();
             $table->string('status');
             $table->timestamps();

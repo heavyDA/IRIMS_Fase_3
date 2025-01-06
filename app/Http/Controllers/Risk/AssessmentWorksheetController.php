@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Risk;
 
 use App\Enums\DocumentStatus;
+use App\Enums\State;
 use App\Http\Controllers\Controller;
 use App\Models\Master\BUMNScale;
 use App\Models\Master\ControlEffectivenessAssessment;
@@ -15,7 +16,9 @@ use App\Models\Master\KRIUnit;
 use App\Models\Master\RiskTreatmentOption;
 use App\Models\Master\RiskTreatmentType;
 use App\Models\Master\RKAPProgramType;
+use App\Models\RBAC\Role;
 use App\Models\Risk\Assessment\Worksheet;
+use App\Models\Risk\Assessment\WorksheetHistory;
 use App\Models\Risk\Assessment\WorksheetIdentificationIncidentMitigation;
 use App\Models\Risk\Assessment\WorksheetIdentificationInherent;
 use App\Models\Risk\Assessment\WorksheetIdentificationResidual;
@@ -70,21 +73,13 @@ class AssessmentWorksheetController extends Controller
     {
         try {
             DB::beginTransaction();
-            $company = auth()->user()->company()->select(
-                'work_unit_code',
-                'work_unit_name',
-                'work_sub_unit_code',
-                'work_sub_unit_name',
-                'organization_code',
-                'organization_name',
-                'personal_area_code',
-                'personal_area_name',
-            )->first();
-
+            $user = auth()->user();
+            $worksheetNumber = Worksheet::subUnit($user->sub_unit_code)->activeYear()->count() + 1;
             $worksheet = Worksheet::create([
                 'worksheet_code' =>  'WR/' . date('Y') . '/' . Str::random(8),
+                'worksheet_number' => $worksheetNumber,
                 'status' => DocumentStatus::DRAFT->value
-            ] + $company->toArray());
+            ] + $user->only('organization_name', 'organization_code', 'unit_name', 'unit_code', 'sub_unit_name', 'sub_unit_code', 'personnel_area_name', 'personnel_area_code'));
 
             $target = $worksheet->target()->create([
                 'body' => $request->target_body
@@ -99,82 +94,67 @@ class AssessmentWorksheetController extends Controller
 
                 $strategies[] = $strategy;
             }
+            $strategies = $target->strategies()->createMany($strategies);
 
-            $res = $target->strategies()->createMany($strategies);
-
-            $identification = [];
+            $identification = ['created_by' => $user->employee_id];
             foreach ($request->identification as $key => $value) {
-                $key = $key != 'kbumn_target' ? str_replace('kbumn_', '', $key) : $key;
+                if (str_contains($key, 'inherent') || str_contains($key, 'residual')) {
+                    continue;
+                }
 
-                $identification[$key . '_id'] = $value == 'Pilih' || !$value ? null : $value;
-            }
-            $identification = $target->identification()->create($identification);
-
-            $incidents = [];
-            foreach ($request->identifications as $index => $item) {
-                $incident = [];
-                foreach ($item as $key => $value) {
-                    if (str_contains($key, 'inherent') || str_contains($key, 'residual')) {
+                if (in_array($key, ['existing_control_type', 'kbumn_target', 'control_effectiveness_assessment'])) {
+                    $identification[$key . '_id'] = $value == 'Pilih' || !$value ? null : $value;
+                } else if (str_contains($key, 'risk_category')) {
+                    $identification[str_replace('kbumn_', '', $key) . '_id'] = $value == 'Pilih' || !$value ? null : $value;
+                } else {
+                    if ($key == 'key' || ($key == 'id' && !$value)) {
                         continue;
                     }
 
-                    if (in_array($key, ['existing_control_type', 'control_effectiveness_assessment'])) {
-                        $key = str_replace('risk_', '', $key);
-                        $incident[$key . '_id'] = $value == 'Pilih' || !$value ? null : $value;
-                    } else {
-                        if ($key == 'key' || ($key == 'id' && !$value)) {
-                            continue;
-                        }
+                    $identification[$key] = $value == 'Pilih' || !$value ? null : $value;
+                }
+            }
 
-                        $incident[$key] = $value == 'Pilih' || !$value ? null : $value;
+            $inherent = [];
+            $residuals = [];
+            foreach ($request->identification as $key => $value) {
+                $residual = [];
+                if (str_contains($key, 'inherent')) {
+                    $key = str_replace('inherent_', '', $key);
+                    $key .= in_array($key, ['impact_probability_scale', 'impact_scale']) ? '_id' : '';
+
+                    $inherent[$key] = $value == 'Pilih' || !$value ? null : $value;
+                } else if (str_contains($key, 'residual')) {
+                    foreach ($value as $quarter => $residual) {
+                        if ($residual) {
+                            $residual['quarter'] = $quarter;
+                            foreach ($residual as $residualKey => $residualValue) {
+                                $residualKey .= in_array($residualKey, ['impact_probability_scale', 'impact_scale']) ? '_id' : '';
+                                $residual[$residualKey] = $residualValue;
+                            }
+                            $residuals[] = $residual;
+                        }
                     }
+                }
+            }
+            $identification = $target->identification()->create($identification);
+            $inherent = $identification->inherent()->create($inherent);
+            $residuals = $identification->residuals()->createMany($residuals);
+
+            $incidents = [];
+            foreach ($request->incidents as $index => $item) {
+                $incident = [];
+                foreach ($item as $key => $value) {
+                    if ($key == 'key') continue;
+
+                    $key = $key == 'kri_unit' ? $key . '_id' : $key;
+                    $incident[$key] = $value;
                 }
 
                 $incidents[] = $incident;
             }
 
             $incidents = $identification->incidents()->createMany($incidents);
-
-            foreach ($request->identifications as $index => $item) {
-                $inherent = [];
-                $residual = [];
-                $residuals = [];
-                foreach ($item as $key => $value) {
-                    if (!str_contains($key, 'inherent')) {
-                        if ($key == 'residual') {
-                            foreach ($value as $itemKey => $items) {
-                                $empty = false;
-                                if (!$items) {
-                                    continue;
-                                }
-
-                                foreach ($items as $k => $v) {
-                                    if ($k == 'impact_scale' && ($v == 'Pilih' || !$v)) {
-                                        $empty = true;
-                                    }
-
-
-                                    $k = $k == 'impact_probability_scale' || $k == 'impact_scale' ? $k . '_id' : $k;
-                                    $residual[$k] = $empty ? null : $v;
-                                }
-
-                                $residual['quarter'] = $itemKey;
-                                $residuals[] = $residual;
-                            }
-
-                            $incidents[$index]->residuals()->createMany($residuals);
-                        }
-                        continue;
-                    }
-
-                    $key = str_replace('inherent_', '', $key);
-                    $key = $key == 'impact_probability_scale' || $key == 'impact_scale' ? $key . '_id' : $key;
-
-                    $inherent[$key] = $value == 'Pilih' || !$value ? null : $value;
-                }
-
-                $incidents[$index]->inherent()->create($inherent);
-            }
 
             $mitigations = [];
             $incidents_array = $incidents->toArray();
@@ -201,13 +181,350 @@ class AssessmentWorksheetController extends Controller
                 $mitigations[] = $incidents[$incidentIndex]->mitigations()->create($mitigation);
             }
 
-            DB::commit();
-            return response()->json($mitigations);
+            $worksheet->last_history()->create([
+                'created_by' => auth()->user()->employee_id,
+                'created_role' => 'risk admin',
+                'receiver_id' => 2,
+                'receiver_role' => 'risk admin',
+                'status' => DocumentStatus::DRAFT->value,
+                'note' => 'Membuat kertas kerja baru'
+            ]);
 
-            return response()->json(['res' => $res, 'strategies' => $strategies]);
+            DB::commit();
+            return response()->json([
+                $worksheet,
+                $strategies,
+                $identification,
+                $inherent,
+                $residuals,
+                $mitigations,
+            ]);
         } catch (Exception $e) {
             DB::rollBack();
             return response()->json(['error' => $e->getMessage()], 500);
         }
+    }
+
+    public function show(string $worksheet)
+    {
+        $worksheet = Worksheet::findByEncryptedIdOrFail($worksheet);
+
+        $start = microtime(true);
+        $worksheet->load([
+            'target',
+            'target.identification',
+            'target.identification.kbumn_target',
+            'target.identification.risk_category_t2',
+            'target.identification.risk_category_t3',
+            'target.identification.incidents',
+            'target.identification.incidents.kri_unit',
+            'target.identification.incidents.mitigations',
+            'target.identification.incidents.mitigations.risk_treatment_option',
+            'target.identification.incidents.mitigations.risk_treatment_type',
+            'target.identification.incidents.mitigations.rkap_program_type',
+
+            'target.identification.inherent',
+            'target.identification.residuals',
+            'target.identification.residuals.impact_scale',
+            'target.identification.residuals.impact_probability_scale',
+            'target.identification.incidents.mitigations',
+            'target.identification.existing_control_type',
+            'target.identification.control_effectiveness_assessment',
+            'target.strategies',
+            'histories.user',
+            'last_history.user',
+        ]);
+
+        if (request()->ajax()) {
+
+            $identification = $worksheet->target->identification->toArray();
+
+            $identification['kbumn_target'] = $identification['kbumn_target_id'];
+            $identification['kbumn_risk_category'] = $identification['risk_category_id'];
+            $identification['kbumn_risk_category_t2'] = $identification['risk_category_t2_id'];
+            $identification['kbumn_risk_category_t3'] = $identification['risk_category_t3_id'];
+            $identification['existing_control_type'] = $identification['existing_control_type_id'];
+            $identification['control_effectiveness_assessment'] = $identification['control_effectiveness_assessment_id'];
+
+            $identification['inherent_body'] = $identification['inherent']['body'];
+            $identification['inherent_impact_probability'] = $identification['inherent']['impact_probability'];
+            $identification['inherent_impact_probability_scale'] = $identification['inherent']['impact_probability_scale_id'];
+            $identification['inherent_impact_scale'] = $identification['inherent']['impact_scale_id'];
+            $identification['inherent_impact_value'] = $identification['inherent']['impact_value'];
+            $identification['inherent_risk_exposure'] = $identification['inherent']['risk_exposure'];
+            $identification['inherent_risk_level'] = $identification['inherent']['risk_level'];
+            $identification['inherent_risk_scale'] = $identification['inherent']['risk_scale'];
+
+            $residuals = [];
+            $worksheet->target->identification->residuals->each(function ($residual) use (&$residuals) {
+                $residual = [
+                    "residual[{$residual['quarter']}][impact_scale]" => $residual['impact_scale_id'],
+                    "residual[{$residual['quarter']}][impact_probability]" => $residual['impact_probability_scale_id'],
+                    "residual[{$residual['quarter']}][impact_value]" => $residual['impact_value'],
+                    "residual[{$residual['quarter']}][impact_probability_scale]" => $residual['impact_probability_scale_id'],
+                    "residual[{$residual['quarter']}][risk_exposure]" => $residual['risk_exposure'],
+                    "residual[{$residual['quarter']}][risk_scale]" => $residual['risk_scale'],
+                    "residual[{$residual['quarter']}][risk_level]" => $residual['risk_level'],
+                ];
+
+                $residuals[] = $residual;
+            });
+
+            $identification = array_merge($identification, ...$residuals);
+            unset(
+                $identification['created_at'],
+                $identification['updated_at'],
+                $identification['worksheet_target_id'],
+                $identification['kbumn_target_id'],
+                $identification['risk_category_t2'],
+                $identification['risk_category_t3'],
+                $identification['incidents'],
+                $identification['inherent'],
+                $identification['residuals'],
+                $identification['risk_category_id'],
+                $identification['risk_category_t2_id'],
+                $identification['risk_category_t3_id'],
+                $identification['existing_control_type_id'],
+                $identification['control_effectiveness_assessment_id'],
+            );
+
+            $data = [
+                'context' => [
+                    'period_date' => $worksheet->created_at->format('M D, Y'),
+                    'period_year' => $worksheet->created_at->format('Y'),
+                    'risk_number' => $worksheet->worksheet_number,
+                    'target_body' => $worksheet->target->body,
+                    'unit_name' => $worksheet->unit_name,
+                ],
+                'strategies' => $worksheet->target->strategies->select([
+                    'id',
+                    'body',
+                    'expected_feedback',
+                    'risk_value',
+                    'risk_value_limit',
+                    'decision',
+                ])->map(function ($strategy) {
+                    return [
+                        'id' => $strategy['id'],
+                        'key' => $strategy['id'],
+                        'strategy_body' => $strategy['body'],
+                        'strategy_expected_feedback' => $strategy['expected_feedback'],
+                        'strategy_risk_value' => $strategy['risk_value'],
+                        'strategy_risk_value_limit' => $strategy['risk_value_limit'],
+                        'strategy_decision' => $strategy['decision'],
+                    ];
+                }),
+                'identification' => $identification,
+                'incidents' => $worksheet->target->identification->incidents->select([
+                    'id',
+                    'risk_number',
+                    'risk_chronology_body',
+                    'risk_chronology_description',
+                    'risk_cause_body',
+                    'kri_body',
+                    'kri_unit',
+                    'kri_threshold_safe',
+                    'kri_threshold_caution',
+                    'kri_threshold_danger',
+                    'risk_cause_number',
+                    'risk_cause_code',
+                ])->map(function ($incident) {
+                    $incident['key'] = $incident['id'];
+                    $incident['kri_unit'] = $incident['kri_unit']['id'];
+                    return $incident;
+                }),
+                'mitigations' => $worksheet->target->identification->incidents->flatMap(function ($incident) {
+                    return $incident->mitigations->map(function ($mitigation) {
+                        return [
+                            'id' => $mitigation['id'],
+                            'key' => $mitigation['id'],
+                            'risk_treatment_option' => $mitigation['risk_treatment_option_id'],
+                            'risk_treatment_type' => $mitigation['risk_treatment_type_id'],
+                            'mitigation_rkap_program_type' => $mitigation['mitigation_rkap_program_type_id'],
+                            'mitigation_plan' => $mitigation['mitigation_plan'],
+                            'mitigation_output' => $mitigation['mitigation_output'],
+                            'mitigation_cost' => $mitigation['mitigation_cost'],
+                            'mitigation_start_date' => $mitigation['mitigation_start_date'],
+                            'mitigation_end_date' => $mitigation['mitigation_end_date'],
+                        ];
+                    });
+                }),
+            ];
+
+            return response()->json([
+                'data' => $data,
+                'load_time' => microtime(true) - $start
+            ]);
+        }
+
+        $worksheet->target->identification->residuals = $worksheet->target->identification->residuals->select(
+            'impact_value',
+            'impact_scale',
+            'impact_probability',
+            'impact_probability_scale',
+            'risk_exposure',
+            'risk_scale',
+            'risk_level'
+        )->map(function ($item) {
+            return [
+                $item['impact_value'],
+                $item['impact_scale']['scale'],
+                $item['impact_probability'],
+                $item['impact_probability_scale']['impact_probability'],
+                $item['risk_exposure'],
+                $item['risk_scale'],
+                $item['risk_level'],
+            ];
+        });
+
+        $title = 'Detail Kertas Kerja';
+        return view('risk.assessment.worksheet.index', compact('worksheet', 'title'));
+    }
+
+    public function edit(string $worksheet)
+    {
+        $worksheet = Worksheet::findByEncryptedIdOrFail($worksheet);
+
+        $start = microtime(true);
+        $worksheet->load([
+            'target',
+            'target.identification',
+            'target.identification.kbumn_target',
+            'target.identification.risk_category_t2',
+            'target.identification.risk_category_t3',
+            'target.identification.incidents',
+            'target.identification.incidents.kri_unit',
+            'target.identification.incidents.mitigations',
+            'target.identification.incidents.mitigations.risk_treatment_option',
+            'target.identification.incidents.mitigations.risk_treatment_type',
+            'target.identification.incidents.mitigations.rkap_program_type',
+
+            'target.identification.inherent',
+            'target.identification.residuals',
+            'target.identification.residuals.impact_scale',
+            'target.identification.residuals.impact_probability_scale',
+            'target.identification.incidents.mitigations',
+            'target.identification.existing_control_type',
+            'target.identification.control_effectiveness_assessment',
+            'target.strategies',
+            'last_history.user',
+        ]);
+
+        $worksheet_number = $worksheet->worksheet_number;
+        $kbumn_risk_categories = KBUMNRiskCategory::all()->groupBy('type', true);
+        $existing_control_types = ExistingControlType::all();
+        $kbumn_targets = KBUMNTarget::all();
+        $kri_thresholds = KRIThreshold::all();
+        $kri_units = KRIUnit::all();
+        $bumn_scales = BUMNScale::all();
+        $heatmaps = Heatmap::all();
+        $control_effectiveness_assessments = ControlEffectivenessAssessment::all();
+        $rkap_program_types = RKAPProgramType::with('children')->parentOnly()->get();
+        $risk_treatment_types = RiskTreatmentType::all();
+        $risk_treatment_options = RiskTreatmentOption::all();
+
+        $title = 'Form Edit Kertas Kerja';
+        return view('risk.assessment.worksheet.index', compact(
+            'title',
+            'worksheet_number',
+            'kbumn_risk_categories',
+            'existing_control_types',
+            'kbumn_targets',
+            'kri_thresholds',
+            'kri_units',
+            'control_effectiveness_assessments',
+            'bumn_scales',
+            'heatmaps',
+            'rkap_program_types',
+            'risk_treatment_types',
+            'risk_treatment_options',
+            'worksheet'
+        ));
+    }
+
+    public function update_status(string $worksheet, Request $request)
+    {
+        $worksheet = Worksheet::findByEncryptedIdOrFail($worksheet);
+        $currentRole = session()->get('current_role');
+
+        $rule = Str::snake($currentRole->name) . '_rule';
+
+        try {
+            DB::beginTransaction();
+            $this->$rule($worksheet, $request->status, $request->note);
+            DB::commit();
+
+            flash_message('flash_message', 'Status berhasil diperbarui', State::SUCCESS);
+            return redirect()->route('risk.assessment.worksheet.show', $worksheet->id);
+        } catch (Exception $e) {
+            DB::rollBack();
+            flash_message('flash_message', $e->getMessage(), State::ERROR);
+            return redirect()->route('risk.assessment.worksheet.show', $worksheet->id);
+        }
+    }
+
+    protected function risk_admin_rule(Worksheet $worksheet, string $status, string $note): WorksheetHistory
+    {
+        $worksheet->update(['status' => DocumentStatus::ON_REVIEW->value]);
+        return $worksheet->histories()->create([
+            'created_by' => auth()->user()->employee_id,
+            'created_role' => 'risk admin',
+            'receiver_id' => 3,
+            'receiver_role' => 'risk owner',
+            'status' => DocumentStatus::ON_REVIEW->value,
+            'note' => $note
+        ]);
+    }
+
+    protected function risk_owner_rule(Worksheet $worksheet, string $status, string $note): WorksheetHistory
+    {
+        $status = DocumentStatus::tryFrom($status);
+        if ($status == DocumentStatus::DRAFT) {
+            $worksheet->update(['status' => $status->value]);
+            return $worksheet->histories()->create([
+                'created_by' => auth()->user()->employee_id,
+                'created_role' => 'risk owner',
+                'receiver_id' => 2,
+                'receiver_role' => 'risk admin',
+                'status' => $status->value,
+                'note' => $note
+            ]);
+        }
+
+        $worksheet->update(['status' => DocumentStatus::ON_CONFIRMATION->value]);
+        return $worksheet->histories()->create([
+            'created_by' => auth()->user()->employee_id,
+            'created_role' => 'risk owner',
+            'receiver_id' => 4,
+            'receiver_role' => 'risk otorisator',
+            'status' => DocumentStatus::ON_CONFIRMATION->value,
+            'note' => $note
+        ]);
+    }
+
+    protected function risk_otorisator_rule(Worksheet $worksheet, string $status, string $note): WorksheetHistory
+    {
+        $status = DocumentStatus::tryFrom($status);
+        if ($status == DocumentStatus::ON_REVIEW) {
+            $worksheet->update(['status' => $status->value]);
+            return $worksheet->histories()->create([
+                'created_by' => auth()->user()->employee_id,
+                'created_role' => 'risk otorisator',
+                'receiver_id' => 3,
+                'receiver_role' => 'risk owner',
+                'status' => $status->value,
+                'note' => $note
+            ]);
+        }
+
+        $worksheet->update(['status' => DocumentStatus::APPROVED->value]);
+        return $worksheet->histories()->create([
+            'created_by' => auth()->user()->employee_id,
+            'created_role' => 'risk otorisator',
+            'receiver_id' => 2,
+            'receiver_role' => 'risk admin',
+            'status' => DocumentStatus::APPROVED->value,
+            'note' => $note
+        ]);
     }
 }

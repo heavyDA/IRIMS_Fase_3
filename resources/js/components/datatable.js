@@ -115,42 +115,42 @@ const createDatatable = (target = 'table', options) => {
     }
 
     const datatable = new DataTables(target, {
-        dom: "<'row'<'col-3'l>>" +
-            "<'row dt-row'<'col-sm-12'tr>>" +
-            "<'row'<'col-4'i><'col-8'p>>",
-        serverSide: true,
-        ajax: window.location.href,
-        responsive: true,
-        processing: true,
-        pagingType: 'full_numbers',
-        columnDefs: [
-            {
-                className: 'dtr-control',
-                orderable: false,
-                targets: 0
-            }
-        ],
-        language: {
-            info: "Halaman _PAGE_ dari _PAGES_",
-            lengthMenu: "_MENU_ ",
-            search: "",
-            searchPlaceholder: "Pencarian",
-            loadingRecords: "Sedang memproses",
-            infoFiltered: "",
-            zeroRecords: "",
-            emptyTable: "Tidak ada data",
-            processing: "Sedang memproses",
-            infoEmpty: "",
-            paginate: {
-                first: 'Awal',
-                previous: 'Sebelumnya',
-                next: 'Selanjutnya',
-                last: 'Akhir',
-            }
-        },
-        columns: [],
-        initComplete: options.handleColumnSearchField ? handleColumnSearchField : null,
-        ...options
+        ...{
+            dom: "<'row'<'col-3'l>>" +
+                "<'row dt-row'<'col-sm-12'tr>>" +
+                "<'row'<'col-4'i><'col-8'p>>",
+            serverSide: false,
+            responsive: false,
+            processing: false,
+            pagingType: 'full_numbers',
+            columnDefs: [
+                {
+                    className: 'dtr-control',
+                    orderable: false,
+                    targets: 0
+                }
+            ],
+            language: {
+                info: "Halaman _PAGE_ dari _PAGES_",
+                lengthMenu: "_MENU_ ",
+                search: "",
+                searchPlaceholder: "Pencarian",
+                loadingRecords: "Sedang memproses",
+                infoFiltered: "",
+                zeroRecords: "",
+                emptyTable: "Tidak ada data",
+                processing: "Sedang memproses",
+                infoEmpty: "",
+                paginate: {
+                    first: 'Awal',
+                    previous: 'Sebelumnya',
+                    next: 'Selanjutnya',
+                    last: 'Akhir',
+                }
+            },
+            columns: [],
+            initComplete: options.handleColumnSearchField ? handleColumnSearchField : null,
+        }, ...options
     })
 
     const setTableColor = () => {
@@ -160,6 +160,8 @@ const createDatatable = (target = 'table', options) => {
     }
     setTableColor()
     datatable.on('draw', setTableColor)
+
+    return datatable
 }
 
 export default createDatatable

@@ -38,9 +38,9 @@
                             <div class="row gy-3">
                                 <div class="col-xl-12">
                                     <div class="position-relative">
-                                        {{ html()->email('email')->class(['form-control', 'form-control-lg'])->id('signinEmail')->placeholder('Email')->autofocus() }}
+                                        {{ html()->text('username')->class(['form-control', 'form-control-lg'])->id('signinUsername')->placeholder('username')->autofocus() }}
                                     </div>
-                                    @error('email')
+                                    @error('username')
                                         <x-forms.error>{{ $message }}</x-forms.error>
                                     @enderror
                                 </div>

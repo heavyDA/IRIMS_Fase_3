@@ -28,6 +28,11 @@ Route::group(['middleware' => 'auth'], function () {
         Route::group(['as' => 'assessment.worksheet.', 'prefix' => 'assessment/worksheet'], function () {
             Route::get('', [App\Http\Controllers\Risk\AssessmentWorksheetController::class, 'index'])->name('index');
             Route::post('', [App\Http\Controllers\Risk\AssessmentWorksheetController::class, 'store'])->name('store');
+
+
+            Route::get('{worksheet}', [App\Http\Controllers\Risk\AssessmentWorksheetController::class, 'show'])->name('show');
+            Route::get('{worksheet}/edit', [App\Http\Controllers\Risk\AssessmentWorksheetController::class, 'edit'])->name('edit');
+            Route::put('{worksheet}/status', [App\Http\Controllers\Risk\AssessmentWorksheetController::class, 'update_status'])->name('update-status');
         });
         Route::resource(
             'assessment',

@@ -14,8 +14,10 @@ use App\Models\Master\Company;
 use App\Models\Master\ExistingControlType;
 use App\Models\Master\Heatmap;
 use App\Models\Master\ControlEffectivenessAssessment;
+use App\Models\Master\IncidentCategory;
+use App\Models\Master\IncidentFrequency;
 use App\Models\Master\RiskTreatmentOption;
-use App\Models\Master\RiskTreatmentPlanType;
+use App\Models\Master\RiskTreatmentType;
 use App\Models\Master\RKAPProgramType;
 
 class WorksheetMasterData extends Seeder
@@ -591,8 +593,8 @@ class WorksheetMasterData extends Seeder
             ]
         ];
 
-        if (RiskTreatmentPlanType::count() == 0) {
-            RiskTreatmentPlanType::insert($risk_treatment_plan_types);
+        if (RiskTreatmentType::count() == 0) {
+            RiskTreatmentType::insert($risk_treatment_plan_types);
         }
 
         $risk_treatment_options = [

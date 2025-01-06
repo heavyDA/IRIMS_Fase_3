@@ -640,7 +640,7 @@ identificationRiskImpact.addEventListener('change', e => {
     }
 })
 
-identificationRiskCategoryT3.addEventListener('change', e => identificationRiskCategoryChoices.setChoiceByValue(e.detail.value));
+identificationRiskCategoryT3.addEventListener('change', e => identificationRiskCategoryChoices.setChoiceByValue(e.target.value));
 
 const identificationTargetBody = identificationForm.querySelector('[name="target_body"]');
 const identificationTargetBodyQuill = new Quill(identificationForm.querySelector('#target_body-editor'), defaultConfigQuill);
@@ -1201,3 +1201,112 @@ worksheetTabSubmitButton.addEventListener('click', (e) => {
             }
         }).catch(err => console.log(err));
 })
+
+
+const data = await axios.get(window.location.href.replace('/edit', ''))
+    .then(res => {
+        if (res.status == 200) {
+            return res.data.data
+        }
+
+        return [];
+    })
+    .catch(err => console.log(err));
+
+worksheet.context = data.context
+worksheet.identification = data.identification
+worksheet.strategies = data.strategies
+worksheet.incidents = data.incidents
+worksheet.mitigations = data.mitigations
+
+
+for (const key of Object.keys(data.context)) {
+    contextForm.querySelector(`[name="${key}"]`).value = data.context[key];
+}
+
+for (const key of Object.keys(data.identification)) {
+    if (key == 'id') {
+        continue;
+    }
+
+    if (identificationTextareas.hasOwnProperty(key)) {
+        const content = new DOMParser().parseFromString(data.identification[key], 'text/html').body.textContent;
+        identificationTextareas[key].innerHTML = content;
+
+        identificationQuills[key].clipboard.dangerouslyPasteHTML(content, 'api');
+        continue;
+    }
+
+    const input = identificationForm.querySelector(`[name="${key}"]`)
+
+    if (input.tagName == 'SELECT') {
+        if (key == 'risk_impact_category') {
+            identificationRiskImpact.value = data.identification[key];
+            identificationRiskImpactChoices.setChoiceByValue(data.identification[key].toString());
+            identificationRiskImpact.dispatchEvent(new Event('change'));
+        } else if (key == 'kbumn_target') {
+            identificationKBUMNTarget.value = data.identification[key];
+            identificationKBUMNTargetChoices.setChoiceByValue(data.identification[key].toString());
+            identificationKBUMNTarget.dispatchEvent(new Event('change'));
+        } else if (key == 'kbumn_risk_category') {
+            identificationRiskCategory.value = data.identification[key];
+            identificationRiskCategoryChoices.setChoiceByValue(data.identification[key].toString());
+            identificationRiskCategory.dispatchEvent(new Event('change'));
+        } else if (key == 'kbumn_risk_category_t2') {
+            identificationRiskCategoryT2.value = data.identification[key];
+            identificationRiskCategoryT2Choices.setChoiceByValue(data.identification[key].toString());
+            identificationRiskCategoryT2.dispatchEvent(new Event('change'));
+        } else if (key == 'kbumn_risk_category_t3') {
+            identificationRiskCategoryT3.value = data.identification[key];
+            identificationRiskCategoryT3Choices.setChoiceByValue(data.identification[key].toString());
+            identificationRiskCategoryT3.dispatchEvent(new Event('change'));
+        } else if (key == 'existing_control_type') {
+            identificationExistingControlType.value = data.identification[key];
+            identificationExistingControlTypeChoices.setChoiceByValue(data.identification[key].toString());
+            identificationExistingControlType.dispatchEvent(new Event('change'));
+        } else if (key == 'control_effectiveness_assessment') {
+            identificationControlEffectivenessAssessment.value = data.identification[key];
+            identificationControlEffectivenessAssessmentChoices.setChoiceByValue(data.identification[key].toString());
+            identificationControlEffectivenessAssessment.dispatchEvent(new Event('change'));
+        } else {
+            identificationSelects[key].value = data.identification[key];
+            identificationChoices[key].setChoiceByValue(data.identification[key]);
+            identificationSelects[key].dispatchEvent(new Event('change'));
+        }
+        continue;
+    }
+
+    if (key.includes('impact_value') || key.includes('risk_exposure')) {
+        input.value = formatNumeral(data.identification[key], defaultConfigFormatNumeral);
+    } else {
+        input.value = data.identification[key];
+    }
+    input.dispatchEvent(new Event('change'));
+
+}
+
+for (const key of Object.keys(data.context)) {
+    const contextInput = contextForm.querySelector(`[name="${key}"]`)
+    if (contextInput.tagName == 'TEXTAREA') {
+        const content = new DOMParser().parseFromString(data.context[key], 'text/html').body.textContent;
+        contextInput.innerHTML = content;
+
+        targetBodyQuill.clipboard.dangerouslyPasteHTML(content, 'api');
+    } else {
+        contextInput.value = data.context[key];
+    }
+}
+
+identificationDatePicker.setDate([data.identification.identification_start_date, data.identification.identification_end_date]);
+
+for (const strategy of worksheet.strategies) {
+    addStrategyRow(strategy);
+}
+
+for (const incident of worksheet.incidents) {
+    addIncidentRow(incident);
+}
+
+for (const mitigation of worksheet.mitigations) {
+    addTreatmentRow(mitigation);
+}

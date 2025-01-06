@@ -43,6 +43,90 @@ const formatDataToStructuredObject = (input) => {
     return data;
 }
 
+function autoMergeCells(target, excludeColumns = []) {
+    const table = document.querySelector(target);
+    const tbody = table.querySelector('tbody');
+    const rows = Array.from(tbody.querySelectorAll('tr'));
+
+    // First pass: Merge rows vertically
+    for (let col = 0; col < rows[0].cells.length; col++) {
+        // Skip excluded columns
+        if (excludeColumns.includes(col)) continue;
+
+        let currentValue = null;
+        let startRow = 0;
+        let rowsToMerge = 1;
+
+        for (let row = 0; row < rows.length; row++) {
+            const currentCell = rows[row].cells[col];
+            const currentCellValue = currentCell.innerHTML.trim();
+
+            if (currentValue === null) {
+                currentValue = currentCellValue;
+                startRow = row;
+                continue;
+            }
+
+            if (currentCellValue === currentValue) {
+                rowsToMerge++;
+                currentCell.style.display = 'none';
+            } else {
+                if (rowsToMerge > 1) {
+                    rows[startRow].cells[col].rowSpan = rowsToMerge;
+                }
+                currentValue = currentCellValue;
+                startRow = row;
+                rowsToMerge = 1;
+            }
+        }
+
+        // Handle the last group
+        if (rowsToMerge > 1) {
+            rows[startRow].cells[col].rowSpan = rowsToMerge;
+        }
+    }
+
+    // Second pass: Merge columns horizontally
+    rows.forEach(row => {
+        const cells = Array.from(row.cells)
+            .filter(cell => cell.style.display !== 'none')
+            .map((cell, index) => ({ cell, originalIndex: index }))
+            .filter(({ originalIndex }) => !excludeColumns.includes(originalIndex));
+
+        let currentValue = null;
+        let startCell = 0;
+        let cellsToMerge = 1;
+
+        for (let i = 0; i < cells.length; i++) {
+            const currentCell = cells[i].cell;
+            const currentCellValue = currentCell.innerHTML.trim();
+
+            if (currentValue === null) {
+                currentValue = currentCellValue;
+                startCell = i;
+                continue;
+            }
+
+            if (currentCellValue === currentValue) {
+                cellsToMerge++;
+                currentCell.style.display = 'none';
+            } else {
+                if (cellsToMerge > 1) {
+                    cells[startCell].cell.colSpan = cellsToMerge;
+                }
+                currentValue = currentCellValue;
+                startCell = i;
+                cellsToMerge = 1;
+            }
+        }
+
+        // Handle the last group
+        if (cellsToMerge > 1) {
+            cells[startCell].cell.colSpan = cellsToMerge;
+        }
+    });
+}
+
 function decodeHtml(html) {
     const txt = document.createElement('textarea');
     txt.innerHTML = html;
@@ -50,11 +134,48 @@ function decodeHtml(html) {
 }
 
 const defaultConfigFormatNumeral = { prefix: 'Rp.', delimiter: '.', numeralPositiveOnly: true, numeralDecimalMark: ',' }
+const defaultConfigQuill = {
+    height: 120,
+    modules: {
+        toolbar: [
+            ['bold', 'italic', 'underline', 'strike'],
+            [{ 'align': [] }],
+            [{ 'indent': '-1' }, { 'indent': '+1' }],
+        ]
+    },
+    theme: 'snow'
+};
+const defaultConfigChoices = {
+    classNames: { containerOuter: 'choices flex-grow-1' },
+    removeItems: false,
+    removeItemButton: false,
+    shouldSort: false,
+    duplicateItemsAllowed: false,
+    placeholder: true,
+    placeholderValue: null,
+    allowHTML: true,
+}
+
+const defaultLocaleFlatpickr = {
+    firstDayOfWeek: 1,
+    weekdays: {
+        shorthand: ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'],
+        longhand: ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'],
+    },
+    months: {
+        shorthand: ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'],
+        longhand: ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'],
+    }
+}
 
 
 export {
     defaultConfigFormatNumeral,
+    defaultConfigQuill,
+    defaultConfigChoices,
+    defaultLocaleFlatpickr,
     decodeHtml,
     showFormAlert,
-    formatDataToStructuredObject
+    formatDataToStructuredObject,
+    autoMergeCells
 }

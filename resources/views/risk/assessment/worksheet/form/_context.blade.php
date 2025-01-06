@@ -4,35 +4,37 @@
             <div class="row mb-1">
                 <div class="col-3">Unit Kerja</div>
                 <div class="col">
-                    <input disabled type="text" name="unit" class="form-control not-allowed"
-                        value="{{ auth()->user()->company->work_unit_name }}">
+                    <input disabled type="text" name="unit_name" class="form-control not-allowed"
+                        value="{{ isset($worksheet) ? $worksheet->unit_name : auth()->user()->unit_name }}">
                 </div>
             </div>
             <div class="row mb-1">
                 <div class="col-3">Tahun</div>
                 <div class="col">
                     <input disabled type="text" name="period_year" class="form-control not-allowed"
-                        placeholder="Tahun" value="{{ date('Y') }}">
+                        placeholder="Tahun" value="{{ isset($worksheet) ? $worksheet->period_year : date('Y') }}">
                 </div>
             </div>
             <div class="row mb-1">
                 <div class="col-3">Tanggal</div>
                 <div class="col">
                     <input disabled type="text" name="period_date" class="form-control not-allowed"
-                        value="{{ now()->format('F d, Y') }}">
+                        value="{{ isset($worksheet) ? $worksheet->period_date : now()->format('F d, Y') }}">
                 </div>
             </div>
             <div class="row mb-1">
                 <div class="col-3">Pilihan Sasaran</div>
                 <div class="col">
+                    <input type="hidden" class="form-control" name="risk_number" value="{{ $worksheet_number }}"
+                        readonly>
                     <div id="target_body-editor" class="textarea"></div>
-                    <textarea type="text" name="target_body" class="d-none"></textarea>
+                    <textarea type="text" name="target_body" class="d-none">{!! isset($worksheet) ? html_entity_decode($worksheet->target->body) : '' !!}</textarea>
                 </div>
             </div>
         </div>
     </div>
 
-    <button type="button" class="btn btn-secondary-light" data-bs-toggle="modal" data-bs-target="#strategyModal">
+    <button type="button" class="btn btn-secondary-light" id="strategyModalButton">
         <i class="ti ti-plus"></i>Tambah Pilihan Strategi Bisnis
     </button>
 
@@ -74,6 +76,7 @@
                         </div>
                         <input type="hidden" name="key">
                         <input type="hidden" name="id" value>
+
                         <div class="d-flex flex-column mb-2">
                             <div>
                                 Pilihan Strategi<span class="text-danger">*</span>

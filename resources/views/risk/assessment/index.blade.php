@@ -29,7 +29,7 @@
 @section('main-content')
     <x-card>
         <x-slot name="body">
-            <table class="table table-bordered display nowrap" style="width: 100%;"></table>
+            <table class="table table-bordered table-stripped display nowrap" style="width: 100%;"></table>
         </x-slot>
     </x-card>
 @endsection

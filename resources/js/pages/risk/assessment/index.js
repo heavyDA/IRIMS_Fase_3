@@ -1,14 +1,17 @@
-import { render } from "@fullcalendar/core/preact";
 import { formatNumeral } from "cleave-zen";
 import createDatatable from "js/components/datatable";
 import { decodeHtml, defaultConfigFormatNumeral } from "js/components/helper";
 const datatable = createDatatable('table', {
     handleColumnSearchField: false,
     responsive: false,
+    serverSide: true,
+    ajax: window.location.href,
     fixedColumns: true,
+    lengthMenu: [5, 10, 25, 50],
+    pageLength: 5,
     drawCallback: function (settings) {
         const api = this.api();
-        const columnsToMerge = [0, 1, 2, 3, 4, 5, 6, 7, 8];
+        const columnsToMerge = [0, 1, 2, 3, 4, 5, 6, 7];
 
         // Reset all cells visibility first
         api.cells().every(function () {
@@ -23,11 +26,11 @@ const datatable = createDatatable('table', {
         const groups = {};
         api.rows({ page: 'current' }).every(function (rowIdx) {
             const data = this.data();
-            const worksheetId = data.target.worksheet.id;
-            if (!groups[worksheetId]) {
-                groups[worksheetId] = [];
+            const worksheetNumber = data.target.worksheet.worksheet_number;
+            if (!groups[worksheetNumber]) {
+                groups[worksheetNumber] = [];
             }
-            groups[worksheetId].push(rowIdx);
+            groups[worksheetNumber].push(rowIdx);
         });
 
         // Process each column for each worksheet group separately
@@ -41,8 +44,7 @@ const datatable = createDatatable('table', {
                     const value = api.cell(rowIdx, colIdx).data();
                     const currentCell = api.cell(rowIdx, colIdx).node();
 
-                    // Log values for debugging
-                    console.log(`Column ${colIdx}, Row ${rowIdx}, Value:`, value);
+                    let equalStatusButton = false;
 
                     if (lastValue === null) {
                         lastValue = value;
@@ -50,8 +52,12 @@ const datatable = createDatatable('table', {
                         return;
                     }
 
+                    if (colIdx == 1) {
+                        equalStatusButton = value.includes(`worksheet_number="${currentCell.children[0]?.dataset.worksheet_number ?? 'x'}"`)
+                    }
+
                     // Strict comparison for values
-                    if (JSON.stringify(lastValue) === JSON.stringify(value)) {
+                    if (JSON.stringify(lastValue) === JSON.stringify(value) || equalStatusButton) {
                         rowsToMerge++;
                         if (currentCell) {
                             currentCell.style.display = 'none';
@@ -84,22 +90,22 @@ const datatable = createDatatable('table', {
         {
             sortable: true,
             title: 'No',
-            data: 'target.worksheet.id',
-            name: 'target.worksheet.id',
+            data: 'target.worksheet.worksheet_number',
+            name: 'target.worksheet.worksheet_number',
             width: '64px'
         },
         {
             sortable: false,
             title: 'Status',
-            data: 'target.worksheet.status',
-            name: 'target.worksheet.status',
+            data: 'status',
+            name: 'status',
             width: '128px'
         },
         {
             sortable: false,
             title: 'Organisasi',
-            data: 'target.worksheet.work_unit_name',
-            name: 'target.worksheet.work_unit_name',
+            data: 'target.worksheet.unit_name',
+            name: 'target.worksheet.unit_name',
             width: '256px'
         },
         {
@@ -211,4 +217,10 @@ const datatable = createDatatable('table', {
             name: 'decision'
         },
     ],
+})
+
+
+datatable.on('draw', function () {
+    const thead = document.querySelector('table thead')
+    thead.classList.add('table-dark')
 })

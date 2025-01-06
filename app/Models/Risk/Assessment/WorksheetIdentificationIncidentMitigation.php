@@ -5,6 +5,8 @@ namespace App\Models\Risk\Assessment;
 use App\Models\Master\RiskTreatmentOption;
 use App\Models\Master\RiskTreatmentType;
 use App\Models\Master\RKAPProgramType;
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 
 class WorksheetIdentificationIncidentMitigation extends Model
@@ -21,6 +23,20 @@ class WorksheetIdentificationIncidentMitigation extends Model
         'mitigation_cost',
         'mitigation_rkap_program_type_id',
     ];
+
+    public function FormatStartDate(): Attribute
+    {
+        return Attribute::make(
+            get: fn($value) => Carbon::parse($this->attributes['mitigation_start_date']),
+        );
+    }
+
+    public function FormatEndDate(): Attribute
+    {
+        return Attribute::make(
+            get: fn($value) => Carbon::parse($this->attributes['mitigation_end_date']),
+        );
+    }
 
     public function incident()
     {

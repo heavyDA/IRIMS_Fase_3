@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('ra_worksheet_identification_residuals', function (Blueprint $table) {
             $table->id();
             $table->unsignedTinyInteger('quarter');
-            $table->foreignId('worksheet_identification_incident_id')
-                ->constrained('ra_worksheet_identification_incidents', null, 'ra_worksheet_identification_incident_res_idx')
+            $table->foreignId('worksheet_identification_id')
+                ->constrained('ra_worksheet_identifications', null, 'ra_worksheet_identification_residual_idx')
                 ->cascadeOnDelete();
 
             $table->foreignId('impact_scale_id')

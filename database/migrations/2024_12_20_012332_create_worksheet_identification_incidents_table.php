@@ -25,22 +25,9 @@ return new class extends Migration
 
             $table->string('kri_body');
             $table->string('kri_unit');
-            $table->string('kri_threshold_safe');
-            $table->string('kri_threshold_caution');
-            $table->string('kri_threshold_danger');
-
-            $table->foreignId('existing_control_type_id')
-                ->constrained('m_existing_control_types', null, 'ra_worksheet_identification_inc_ext_control_type_idx')
-                ->cascadeOnDelete();
-            $table->string('existing_control_body');
-            $table->foreignId('control_effectiveness_assessment_id')
-                ->constrained('m_control_effectiveness_assessments', null, 'ra_worksheet_identification_inc_control_efc_assessment_idx')
-                ->cascadeOnDelete();
-
-            $table->string('risk_impact_category');
-            $table->string('risk_impact_body');
-            $table->date('risk_impact_start_date');
-            $table->date('risk_impact_end_date');
+            $table->string('kri_threshold_safe')->default('');
+            $table->string('kri_threshold_caution')->default('');
+            $table->string('kri_threshold_danger')->default('');
 
             $table->timestamps();
         });

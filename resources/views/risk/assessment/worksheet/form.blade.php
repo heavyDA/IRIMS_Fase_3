@@ -41,16 +41,16 @@
     </ul>
     <div class="tab-content">
         <div class="tab-pane border-0 p-2 show active" id="stepperContext" role="tabpanel">
-            @include('risk.assessment.worksheet._context')
+            @include('risk.assessment.worksheet.form._context')
         </div>
         <div class="tab-pane border-0 p-2" id="stepperIdentification" role="tabpanel">
-            @include('risk.assessment.worksheet._identification')
+            @include('risk.assessment.worksheet.form._identification')
         </div>
         <div class="tab-pane border-0 p-2" id="stepperTreatment" role="tabpanel">
-            @include('risk.assessment.worksheet._treatment')
+            @include('risk.assessment.worksheet.form._treatment')
         </div>
         <div class="tab-pane border-0 p-2" id="stepperMonitoring" role="tabpanel">
-            @include('risk.assessment.worksheet._monitoring')
+            @include('risk.assessment.worksheet.form._monitoring')
         </div>
         <div class="row mt-2">
             <div class="col d-flex justify-content-center">

@@ -2,6 +2,7 @@
 
 namespace App\Models\Risk\Assessment;
 
+use App\Models\Master\KRIUnit;
 use Illuminate\Database\Eloquent\Model;
 
 class WorksheetIdentificationIncident extends Model
@@ -17,19 +18,10 @@ class WorksheetIdentificationIncident extends Model
         'risk_cause_body',
 
         'kri_body',
-        'kri_unit',
+        'kri_unit_id',
         'kri_threshold_safe',
         'kri_threshold_caution',
         'kri_threshold_danger',
-
-        'existing_control_type_id',
-        'existing_control_body',
-        'control_effectiveness_assessment_id',
-
-        'risk_impact_category',
-        'risk_impact_body',
-        'risk_impact_start_date',
-        'risk_impact_end_date',
     ];
 
     public function inherent()
@@ -45,5 +37,10 @@ class WorksheetIdentificationIncident extends Model
     public function mitigations()
     {
         return $this->hasMany(WorksheetIdentificationIncidentMitigation::class);
+    }
+
+    public function kri_unit()
+    {
+        return $this->belongsTo(KRIUnit::class);
     }
 }
