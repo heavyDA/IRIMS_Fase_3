@@ -10,7 +10,6 @@ use App\Http\Controllers\Master\{
 };
 use App\Http\Controllers\Risk\AssessmentController;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\DB;
 
 
 Route::group(['prefix' => 'login', 'as' => 'auth.'], function () {
@@ -20,6 +19,7 @@ Route::group(['prefix' => 'login', 'as' => 'auth.'], function () {
 });
 
 Route::group(['middleware' => 'auth'], function () {
+    Route::post('', [AuthController::class, 'change_role'])->name('change-role');
     Route::get('/', function () {
         return view('layouts.app');
     })->name('dashboard');
