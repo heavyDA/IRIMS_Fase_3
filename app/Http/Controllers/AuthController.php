@@ -39,6 +39,10 @@ class AuthController extends Controller
                 'email' => $user['email'],
             ], $user);
 
+            if ($user->wasRecentlyCreated) {
+                $user->assignRole('risk admin');
+            }
+
             if (Auth::loginUsingId($user->id)) {
                 session()->put('current_role', auth()->user()->roles()->first());
                 return redirect()->route('dashboard');
