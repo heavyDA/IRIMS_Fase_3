@@ -24,6 +24,8 @@ class Worksheet extends Model
         'organization_name',
         'personnel_area_code',
         'personnel_area_name',
+        'company_code',
+        'company_name',
         'status',
     ];
 

@@ -78,11 +78,13 @@ class AssessmentWorksheetController extends Controller
             $worksheet = Worksheet::create([
                 'worksheet_code' =>  'WR/' . date('Y') . '/' . Str::random(8),
                 'worksheet_number' => $worksheetNumber,
+                'company_code' => 'API',
+                'company_name' => 'PT Aviasi Pariwisata Indonesia (Persero)',
                 'status' => DocumentStatus::DRAFT->value
             ] + $user->only('organization_name', 'organization_code', 'unit_name', 'unit_code', 'sub_unit_name', 'sub_unit_code', 'personnel_area_name', 'personnel_area_code'));
 
             $target = $worksheet->target()->create([
-                'body' => $request->target_body
+                'body' => $request->context['target_body']
             ]);
 
             $strategies = [];
@@ -191,14 +193,9 @@ class AssessmentWorksheetController extends Controller
             ]);
 
             DB::commit();
-            return response()->json([
-                $worksheet,
-                $strategies,
-                $identification,
-                $inherent,
-                $residuals,
-                $mitigations,
-            ]);
+            return response()->json(['data' => [
+                'id' => $worksheet->getEncryptedId()
+            ]]);
         } catch (Exception $e) {
             DB::rollBack();
             return response()->json(['error' => $e->getMessage()], 500);
@@ -290,7 +287,7 @@ class AssessmentWorksheetController extends Controller
 
             $data = [
                 'context' => [
-                    'period_date' => $worksheet->created_at->format('M D, Y'),
+                    'period_date' => $worksheet->created_at->format('M d, Y'),
                     'period_year' => $worksheet->created_at->format('Y'),
                     'risk_number' => $worksheet->worksheet_number,
                     'target_body' => $worksheet->target->body,
@@ -334,10 +331,12 @@ class AssessmentWorksheetController extends Controller
                     return $incident;
                 }),
                 'mitigations' => $worksheet->target->identification->incidents->flatMap(function ($incident) {
-                    return $incident->mitigations->map(function ($mitigation) {
+                    return $incident->mitigations->map(function ($mitigation) use ($incident) {
                         return [
                             'id' => $mitigation['id'],
                             'key' => $mitigation['id'],
+                            'risk_number' => explode('.', $incident['risk_cause_code'])[0],
+                            'risk_cause_number' => $incident['risk_cause_number'],
                             'risk_treatment_option' => $mitigation['risk_treatment_option_id'],
                             'risk_treatment_type' => $mitigation['risk_treatment_type_id'],
                             'mitigation_rkap_program_type' => $mitigation['mitigation_rkap_program_type_id'],
@@ -410,6 +409,26 @@ class AssessmentWorksheetController extends Controller
             'last_history.user',
         ]);
 
+        $worksheet->target->identification->residuals = $worksheet->target->identification->residuals->select(
+            'impact_value',
+            'impact_scale',
+            'impact_probability',
+            'impact_probability_scale',
+            'risk_exposure',
+            'risk_scale',
+            'risk_level'
+        )->map(function ($item) {
+            return [
+                $item['impact_value'],
+                $item['impact_scale']['scale'],
+                $item['impact_probability'],
+                $item['impact_probability_scale']['impact_probability'],
+                $item['risk_exposure'],
+                $item['risk_scale'],
+                $item['risk_level'],
+            ];
+        });
+
         $worksheet_number = $worksheet->worksheet_number;
         $kbumn_risk_categories = KBUMNRiskCategory::all()->groupBy('type', true);
         $existing_control_types = ExistingControlType::all();
@@ -440,6 +459,136 @@ class AssessmentWorksheetController extends Controller
             'risk_treatment_options',
             'worksheet'
         ));
+    }
+
+    public function update(string $worksheetId, Request $request)
+    {
+        try {
+            $worksheet = Worksheet::findByEncryptedIdOrFail($worksheetId);
+
+            DB::beginTransaction();
+            $user = auth()->user();
+            $worksheet->target()->delete();
+
+            $target = $worksheet->target()->create([
+                'body' => $request->context['target_body']
+            ]);
+
+            $strategies = [];
+            foreach ($request->strategies as $index => $items) {
+                $strategy = [];
+                foreach ($items as $key => $value) {
+                    $strategy[str_replace('strategy_', '', $key)] = $value;
+                }
+
+                $strategies[] = $strategy;
+            }
+            $strategies = $target->strategies()->createMany($strategies);
+
+            $identification = ['created_by' => $user->employee_id];
+            foreach ($request->identification as $key => $value) {
+                if (str_contains($key, 'inherent') || str_contains($key, 'residual')) {
+                    continue;
+                }
+
+                if (in_array($key, ['existing_control_type', 'kbumn_target', 'control_effectiveness_assessment'])) {
+                    $identification[$key . '_id'] = $value == 'Pilih' || !$value ? null : $value;
+                } else if (str_contains($key, 'risk_category')) {
+                    $identification[str_replace('kbumn_', '', $key) . '_id'] = $value == 'Pilih' || !$value ? null : $value;
+                } else {
+                    if ($key == 'key' || ($key == 'id' && !$value)) {
+                        continue;
+                    }
+
+                    $identification[$key] = $value == 'Pilih' || !$value ? null : $value;
+                }
+            }
+
+            $inherent = [];
+            $residuals = [];
+            foreach ($request->identification as $key => $value) {
+                $residual = [];
+                if (str_contains($key, 'inherent')) {
+                    $key = str_replace('inherent_', '', $key);
+                    $key .= in_array($key, ['impact_probability_scale', 'impact_scale']) ? '_id' : '';
+
+                    $inherent[$key] = $value == 'Pilih' || !$value ? null : $value;
+                } else if (str_contains($key, 'residual')) {
+                    foreach ($value as $quarter => $residual) {
+                        if ($residual) {
+                            $residual['quarter'] = $quarter;
+                            foreach ($residual as $residualKey => $residualValue) {
+                                $residualKey .= in_array($residualKey, ['impact_probability_scale', 'impact_scale']) ? '_id' : '';
+                                $residual[$residualKey] = $residualValue;
+                            }
+                            $residuals[] = $residual;
+                        }
+                    }
+                }
+            }
+            $identification = $target->identification()->create($identification);
+            $inherent = $identification->inherent()->create($inherent);
+            $residuals = $identification->residuals()->createMany($residuals);
+
+            $incidents = [];
+            foreach ($request->incidents as $index => $item) {
+                $incident = [];
+                foreach ($item as $key => $value) {
+                    if ($key == 'key') continue;
+
+                    $key = $key == 'kri_unit' ? $key . '_id' : $key;
+                    $incident[$key] = $value;
+                }
+
+                $incidents[] = $incident;
+            }
+
+            $incidents = $identification->incidents()->createMany($incidents);
+
+            $mitigations = [];
+            $incidents_array = $incidents->toArray();
+
+            foreach ($request->mitigations as $index => $item) {
+                $incidentIndex = array_search(
+                    $item['risk_cause_number'],
+                    array_column($incidents_array, 'risk_cause_number')
+                );
+
+                if ($incidentIndex === false) {
+                    continue;
+                }
+
+                foreach ($item as $key => $value) {
+                    $key =
+                        $key == 'risk_treatment_option' ||
+                        $key == 'risk_treatment_type' ||
+                        $key == 'mitigation_rkap_program_type'
+                        ? $key . '_id' : $key;
+
+                    $mitigation[$key] = $value == 'Pilih' || !$value ? null : $value;
+                }
+
+                $mitigations[] = $incidents[$incidentIndex]->mitigations()->create($mitigation);
+            }
+
+            $worksheet->last_history()->create([
+                'created_by' => auth()->user()->employee_id,
+                'created_role' => 'risk admin',
+                'receiver_id' => 2,
+                'receiver_role' => 'risk admin',
+                'status' => DocumentStatus::DRAFT->value,
+                'note' => 'Memperbarui kertas kerja'
+            ]);
+
+            DB::commit();
+            return response()->json(['data' => [
+                'id' => $worksheetId
+            ]]);
+        } catch (Exception $e) {
+            DB::rollBack();
+            logger()->error($e);
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 
     public function update_status(string $worksheet, Request $request)

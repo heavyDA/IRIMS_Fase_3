@@ -61,8 +61,8 @@
 @push('element')
     <div class="modal fade" id="strategyModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
         aria-labelledby="staticBackdropLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
+        <div class="modal-dialog" style="max-width: 100% !important;">
+            <div class="modal-content mx-auto" style="width: 80vw !important">
                 <div class="modal-header">
                     <h6 class="modal-title" id="staticBackdropLabel">Pilihan Strategi Bisnis</h6>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>

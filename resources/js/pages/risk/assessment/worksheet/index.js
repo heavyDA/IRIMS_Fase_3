@@ -1197,7 +1197,7 @@ worksheetTabSubmitButton.addEventListener('click', (e) => {
     axios.post('', data)
         .then(res => {
             if (res.status == 200) {
-                console.log(res.data);
+                window.location.replace(window.location.href + "/" + res.data.data.id);
             }
         }).catch(err => console.log(err));
 })

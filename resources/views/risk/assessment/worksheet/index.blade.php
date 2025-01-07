@@ -57,22 +57,31 @@
                             @include('risk.assessment.worksheet.table')
                             <div class="mt-4">
                                 <div class="d-flex gap-2">
-                                    <a href="{{ route('risk.assessment.index') }}" style="min-width: 128px;"
-                                        class="btn btn-light">
-                                        <span><i class="ti ti-arrow-back"></i></span>&nbsp;Kembali
-                                    </a>
+                                    @if (str_contains(request()->route()->getName(), 'edit'))
+                                        <a href="{{ route('risk.assessment.worksheet.show', $worksheet->getEncryptedId()) }}"
+                                            style="min-width: 128px;" class="btn btn-light">
+                                            <span><i class="ti ti-arrow-back"></i></span>&nbsp;Kembali
+                                        </a>
+                                    @else
+                                        <a href="{{ route('risk.assessment.index') }}" style="min-width: 128px;"
+                                            class="btn btn-light">
+                                            <span><i class="ti ti-arrow-back"></i></span>&nbsp;Kembali
+                                        </a>
+                                    @endif
 
                                     @isset($worksheet)
-                                        @if (session()->get('current_role')?->name == 'risk admin' && $worksheet->last_history->status == 'draft')
-                                            <a href="{{ route('risk.assessment.worksheet.edit', $worksheet->getEncryptedId()) }}"
-                                                style="min-width: 128px;" class="btn btn-success">
-                                                <span><i class="ti ti-edit"></i></span>&nbsp;Update
-                                            </a>
-                                            @include('risk.assessment.worksheet.partials._risk_admin')
-                                        @elseif (session()->get('current_role')?->name == 'risk owner' && $worksheet->last_history->status == 'on review')
-                                            @include('risk.assessment.worksheet.partials._risk_owner')
-                                        @elseif (session()->get('current_role')?->name == 'risk otorisator' && $worksheet->last_history->status == 'on confirmation')
-                                            @include('risk.assessment.worksheet.partials._risk_otorisator')
+                                        @if (!str_contains(request()->route()->getName(), 'edit'))
+                                            @if (session()->get('current_role')?->name == 'risk admin' && $worksheet->last_history->status == 'draft')
+                                                <a href="{{ route('risk.assessment.worksheet.edit', $worksheet->getEncryptedId()) }}"
+                                                    style="min-width: 128px;" class="btn btn-success">
+                                                    <span><i class="ti ti-edit"></i></span>&nbsp;Update
+                                                </a>
+                                                @include('risk.assessment.worksheet.partials._risk_admin')
+                                            @elseif (session()->get('current_role')?->name == 'risk owner' && $worksheet->last_history->status == 'on review')
+                                                @include('risk.assessment.worksheet.partials._risk_owner')
+                                            @elseif (session()->get('current_role')?->name == 'risk otorisator' && $worksheet->last_history->status == 'on confirmation')
+                                                @include('risk.assessment.worksheet.partials._risk_otorisator')
+                                            @endif
                                         @endif
                                     @endisset
                                 </div>

@@ -84,7 +84,6 @@ const identificationValidate = () => {
             !worksheet.identification[key] ||
             worksheet.identification[key] == 'Pilih'
         ) {
-            console.log(key, worksheet.identification[key])
             return false
         }
     }
@@ -271,6 +270,15 @@ await axios.get('/master/bumn-scale').then(res => res.status == 200 ? bumnScales
 await axios.get('/master/heatmap').then(res => res.status == 200 ? heatmaps.push(...res.data.data) : null).catch(err => console.log(err));
 await axios.get('/master/kri-unit').then(res => res.status == 200 ? kriUnits.push(...res.data.data) : null).catch(err => console.log(err));
 await axios.get('/master/existing-control-type').then(res => res.status == 200 ? existingControlTypes.push(...res.data.data) : null).catch(err => console.log(err));
+const data = await axios.get(window.location.href.replace('/edit', ''))
+    .then(res => {
+        if (res.status == 200) {
+            return res.data.data
+        }
+
+        return [];
+    })
+    .catch(err => console.log(err));
 
 const tables = {
     strategies: document.querySelector('#worksheetStrategyTable'),
@@ -678,10 +686,15 @@ const identificationDatePicker = flatpickr(identificationDateRange, {
     altFormat: 'j F Y',
     locale: defaultLocaleFlatpickr,
     onChange: (dates) => {
-        identificationStartDate.value = dates[0]?.getFullYear() + '-' + (dates[0]?.getMonth() + 1) + '-' + dates[0]?.getDate();
-        identificationEndDate.value = dates[1]?.getFullYear() + '-' + (dates[1]?.getMonth() + 1) + '-' + dates[1]?.getDate();
+        if (dates.length == 2) {
+            const [start, end] = dates;
+            identificationStartDate.value = dayjs(start).format('YYYY-MM-DD');
+            identificationEndDate.value = dayjs(end).format('YYYY-MM-DD');
+        }
     },
-    defaultDate: [identificationStartDate.value, identificationEndDate.value],
+    defaultDate: [dayjs(data.identification.risk_impact_start_date).format('YYYY-MM-DD'), dayjs(data.identification.risk_impact_end_date).format('YYYY-MM-DD')],
+    enableTime: false,
+    allowInput: false,
 })
 
 /**
@@ -887,12 +900,22 @@ incidentForm.addEventListener('reset', async () => {
     incidentModal.hide();
 });
 
+incidentModalElement.addEventListener('show.bs.modal', async () => {
+    const incidentsLength = worksheet.incidents.length;
+
+    incidentRiskNumber.value = currentRiskNumber.value;
+    incidentRiskCauseNumber.value = risk_numbers[incidentsLength];
+    incidentRiskCauseCode.value = currentRiskNumber.value + '.' + risk_numbers[incidentsLength];
+});
+
 incidentModalElement.addEventListener('hide.bs.modal', async () => {
+    const incidentsLength = worksheet.incidents.length;
+
     incidentForm.reset();
     incidentForm.querySelector('[name="key"]').value = '';
     incidentRiskNumber.value = currentRiskNumber.value;
-    incidentRiskCauseNumber.value = risk_numbers[worksheet.incidents.length];
-    incidentRiskCauseCode.value = currentRiskNumber.value + '.' + risk_numbers[worksheet.incidents.length];
+    incidentRiskCauseNumber.value = risk_numbers[incidentsLength];
+    incidentRiskCauseCode.value = currentRiskNumber.value + '.' + risk_numbers[incidentsLength];
 
     Object.keys(incidentTextareas).forEach((key) => {
         // incidentTextareas[key].innerHTML = '';
@@ -1069,7 +1092,6 @@ const mitigationDatePicker = flatpickr(
 const addTreatmentRow = (data) => {
     const body = treatmentTable.querySelector('tbody');
     const row = document.createElement('tr');
-    console.log(worksheet.mitigations.length - 1)
     const [removeButton, editButton] = addRowAction('mitigations', worksheet.mitigations.length - 1, (data) => onTreatmentEdit(data));
     const buttonCell = document.createElement('td');
     buttonCell.appendChild(editButton);
@@ -1094,10 +1116,10 @@ const updateTreatmentRow = (data) => {
 
     row.querySelector('td:nth-child(2)').innerHTML = data.mitigation_plan
     row.querySelector('td:nth-child(3)').innerHTML = data.mitigation_output
-    row.querySelector('td:nth-child(4)').textContent = mitigationProgramTypeChoices._currentState.choices.find(choice => choice.value == data.mitigation_rkap_program_type)?.label ?? ''
     row.querySelector('td:nth-child(5)').textContent = dayjs(data.mitigation_start_date).format('MMMM, DD YYYY')
     row.querySelector('td:nth-child(6)').textContent = dayjs(data.mitigation_end_date).format('MMMM, DD YYYY')
     row.querySelector('td:nth-child(7)').textContent = formatNumeral(data.mitigation_cost, defaultConfigFormatNumeral)
+    row.querySelector('td:nth-child(4)').textContent = mitigationProgramTypeChoices._currentState.choices.find(choice => choice.value == data.mitigation_rkap_program_type)?.label ?? ''
 }
 
 const onTreatmentEdit = (data) => {
@@ -1110,7 +1132,7 @@ const onTreatmentEdit = (data) => {
             element.value = formatNumeral(data[key], defaultConfigFormatNumeral)
         } else if (key == 'mitigation_rkap_program_type') {
             element.value = data[key]
-            mitigationProgramTypeChoices.setChoiceByValue(data[key])
+            mitigationProgramTypeChoices.setChoiceByValue(data[key].toString())
         } else if (element.tagName == 'TEXTAREA') {
             element.value = data[key]
             mitigationQuills[key].root.innerHTML = data[key]
@@ -1124,11 +1146,12 @@ const onTreatmentEdit = (data) => {
     // Set the flatpickr dates
     if (data.mitigation_start_date && data.mitigation_end_date) {
         mitigationDatePicker.setDate([data.mitigation_start_date, data.mitigation_end_date]);
+        console.log('test')
     }
 
     treatmentRiskCauseNumberChoices.setChoiceByValue(data.risk_cause_number);
-    treatmentForm.querySelector('[name="risk_treatment_option"]').value = data.risk_treatment_option_id;
-    treatmentForm.querySelector('[name="risk_treatment_type"]').value = data.risk_treatment_type_id;
+    treatmentForm.querySelector('[name="risk_treatment_option"]').value = data.risk_treatment_option;
+    treatmentForm.querySelector('[name="risk_treatment_type"]').value = data.risk_treatment_type;
 
     treatmentModal.show();
 }
@@ -1194,24 +1217,13 @@ worksheetTabSubmitButton.addEventListener('click', (e) => {
     const data = { ...worksheet };
 
 
-    axios.post('', data)
+    axios.put('', data)
         .then(res => {
             if (res.status == 200) {
-                console.log(res.data);
+                window.location.replace(window.location.href.replace('/edit', ''));
             }
         }).catch(err => console.log(err));
 })
-
-
-const data = await axios.get(window.location.href.replace('/edit', ''))
-    .then(res => {
-        if (res.status == 200) {
-            return res.data.data
-        }
-
-        return [];
-    })
-    .catch(err => console.log(err));
 
 worksheet.context = data.context
 worksheet.identification = data.identification
@@ -1282,7 +1294,6 @@ for (const key of Object.keys(data.identification)) {
         input.value = data.identification[key];
     }
     input.dispatchEvent(new Event('change'));
-
 }
 
 for (const key of Object.keys(data.context)) {
@@ -1297,11 +1308,26 @@ for (const key of Object.keys(data.context)) {
     }
 }
 
-identificationDatePicker.setDate([data.identification.identification_start_date, data.identification.identification_end_date]);
+const treatmentIncidentChoices = [{
+    id: 'Pilih',
+    value: 'Pilih',
+    label: 'Pilih',
+}]
+for (let incident of worksheet.incidents) {
+    treatmentIncidentChoices.push({
+        id: incident.risk_cause_number,
+        value: incident.risk_cause_number,
+        label: incident.risk_cause_number,
+    })
+}
+
+treatmentRiskCauseNumber.innerHTML = '<option>Pilih</option>'
+treatmentRiskCauseNumberChoices.clearStore().clearChoices().setChoices(treatmentIncidentChoices).setChoiceByValue('Pilih');
 
 for (const strategy of worksheet.strategies) {
     addStrategyRow(strategy);
 }
+
 
 for (const incident of worksheet.incidents) {
     addIncidentRow(incident);

@@ -67,8 +67,8 @@
 
                         @foreach ($worksheet->target->identification->incidents as $incident)
                             <tr>
-                                <td>{{ $worksheet->work_unit_name }}</td>
-                                <td>{{ $worksheet->work_unit_code }}</td>
+                                <td>{{ $worksheet->unit_name }}</td>
+                                <td>{{ $worksheet->unit_code }}</td>
                                 <td>{!! html_entity_decode($worksheet->target->body) !!}</td>
                                 <td>{{ $worksheet->target->identification->kbumn_target->name }}</td>
                                 <td>{{ $worksheet->target->identification->risk_category_t3->name }}</td>
@@ -85,13 +85,13 @@
                                 <td>{{ $incident?->kri_threshold_caution }}</td>
                                 <td>{{ $incident?->kri_threshold_danger }}</td>
                                 <td>{{ $worksheet->target->identification->existing_control_type->name }}</td>
-                                <td>{!! $worksheet->target->identification->existing_control_type_body !!}</td>
+                                <td>{!! html_entity_decode($worksheet->target->identification->existing_control_type_body) !!}</td>
                                 <td>{{ $worksheet->target->identification->control_effectiveness_assessment->name }}</td>
                                 <td>{{ $worksheet->target->identification->risk_impact_category }}</td>
-                                <td>{!! $worksheet->target->identification->risk_impact_body !!}</td>
+                                <td>{!! html_entity_decode($worksheet->target->identification->risk_impact_body) !!}</td>
                                 <td>{{ $worksheet->target->identification->format_risk_start_date->format('d F Y') . ' s.d. ' . $worksheet->target->identification->format_risk_end_date->format('d F Y') }}
                                 </td>
-                                <td>{{ $worksheet->target->identification->inherent->body }}</td>
+                                <td>{!! html_entity_decode($worksheet->target->identification->inherent->body) !!}</td>
                                 <td>{{ $worksheet->target->identification->inherent->impact_value }}</td>
                                 <td>-</td>
                                 <td>{{ $worksheet->target->identification->inherent->impact_scale->scale }}</td>
@@ -109,7 +109,7 @@
                                 @for ($i = 0; $i < 7; $i++)
                                     @for ($j = 0; $j < count($worksheet->target->identification->residuals); $j++)
                                         @if ($i == 0 || $i == 4)
-                                            <td>Rp.{{ number_format((int) $worksheet->target->identification->residuals[$j][$i], 2, ',', '.') }}
+                                            <td>Rp.{{ number_format((float) $worksheet->target->identification->residuals[$j][$i], 2, ',', '.') }}
                                             </td>
                                         @else
                                             <td>{{ $worksheet->target->identification->residuals[$j][$i] }}</td>
