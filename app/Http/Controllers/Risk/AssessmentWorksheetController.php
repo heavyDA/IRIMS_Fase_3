@@ -16,12 +16,8 @@ use App\Models\Master\KRIUnit;
 use App\Models\Master\RiskTreatmentOption;
 use App\Models\Master\RiskTreatmentType;
 use App\Models\Master\RKAPProgramType;
-use App\Models\RBAC\Role;
 use App\Models\Risk\Assessment\Worksheet;
 use App\Models\Risk\Assessment\WorksheetHistory;
-use App\Models\Risk\Assessment\WorksheetIdentificationIncidentMitigation;
-use App\Models\Risk\Assessment\WorksheetIdentificationInherent;
-use App\Models\Risk\Assessment\WorksheetIdentificationResidual;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -591,9 +587,9 @@ class AssessmentWorksheetController extends Controller
         }
     }
 
-    public function update_status(string $worksheet, Request $request)
+    public function update_status(string $worksheetId, Request $request)
     {
-        $worksheet = Worksheet::findByEncryptedIdOrFail($worksheet);
+        $worksheet = Worksheet::findByEncryptedIdOrFail($worksheetId);
         $currentRole = session()->get('current_role');
 
         $rule = Str::snake($currentRole->name) . '_rule';
@@ -604,11 +600,11 @@ class AssessmentWorksheetController extends Controller
             DB::commit();
 
             flash_message('flash_message', 'Status berhasil diperbarui', State::SUCCESS);
-            return redirect()->route('risk.assessment.worksheet.show', $worksheet->id);
+            return redirect()->route('risk.assessment.worksheet.show', $worksheetId);
         } catch (Exception $e) {
             DB::rollBack();
             flash_message('flash_message', $e->getMessage(), State::ERROR);
-            return redirect()->route('risk.assessment.worksheet.show', $worksheet->id);
+            return redirect()->route('risk.assessment.worksheet.show', $worksheetId);
         }
     }
 
