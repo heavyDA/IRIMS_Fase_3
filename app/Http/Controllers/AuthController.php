@@ -23,11 +23,12 @@ class AuthController extends Controller
     {
         try {
             $response = Http::withHeader('Authorization', env('EOFFICE_TOKEN'))
+                ->timeout(10)
                 ->asForm()
                 ->post(env('EOFFICE_URL') . '/login_user', $request->only('username', 'password'));
 
             if ($response->failed() || $response->serverError() || $response->clientError()) {
-                throw new Exception('Failed to login through E Office Service.', $response->status(), $response->toException());
+                throw new Exception('Failed to login through E Office Service. ', $response->status(), $response->toException());
             }
 
             $user = ['is_active' => true];
