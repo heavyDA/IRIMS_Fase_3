@@ -9,6 +9,7 @@ use App\Http\Controllers\Master\{
     KRIUnitController
 };
 use App\Http\Controllers\Risk\AssessmentController;
+use App\Http\Controllers\DashboardController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\DB;
 
@@ -20,9 +21,10 @@ Route::group(['prefix' => 'login', 'as' => 'auth.'], function () {
 });
 
 Route::group(['middleware' => 'auth'], function () {
-    Route::get('/', function () {
-        return view('layouts.app');
-    })->name('dashboard');
+    
+    Route::view('/', 'dashboard.index')->name('dashboard.index');
+   
+    Route::get('/dashboard/getheatmap', [DashboardController::class, 'getheatmap'])->name('getheatmap');
 
     Route::group(['as' => 'risk.', 'prefix' => 'risk'], function () {
         Route::group(['as' => 'assessment.worksheet.', 'prefix' => 'assessment/worksheet'], function () {

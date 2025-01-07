@@ -11,6 +11,7 @@ export default defineConfig({
                 'resources/js/pages/RBAC/users/index.js',
                 'resources/js/pages/risk/assessment/index.js',
                 'resources/js/pages/risk/assessment/worksheet/index.js',
+                'resources/js/pages/dashboard/index.js',
             ],
             refresh: true,
         }),
