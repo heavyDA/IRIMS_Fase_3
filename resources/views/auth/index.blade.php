@@ -64,7 +64,7 @@
                     </div>
                 </div>
                 <div class="my-2 text-center d-flex flex-column justify-content-center">
-                    <p style="height:8px">INTEGRATED RISK MANAGEMENT SYSTEM (IRIMS)</p>
+                    <p style="height:8px">INTEGRATED RISK MANAGEMENT SYSTEM (IRIMS) powered by <strong>MR</strong></p>
                     <p style="height:8px">2024 © PT ANGKASA PURA II</p>
                 </div>
             </div>
