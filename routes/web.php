@@ -24,6 +24,8 @@ Route::group(['middleware' => 'auth'], function () {
         return view('layouts.app');
     })->name('dashboard');
 
+    Route::get('profile/unit_head', [AuthController::class, 'get_unit_head'])->name('profile.get_unit_head');
+
     Route::group(['as' => 'risk.', 'prefix' => 'risk'], function () {
         Route::group(['as' => 'assessment.worksheet.', 'prefix' => 'assessment/worksheet'], function () {
             Route::get('', [App\Http\Controllers\Risk\AssessmentWorksheetController::class, 'index'])->name('index');
@@ -35,6 +37,7 @@ Route::group(['middleware' => 'auth'], function () {
             Route::put('{worksheet}/edit', [App\Http\Controllers\Risk\AssessmentWorksheetController::class, 'update'])->name('update');
             Route::put('{worksheet}/status', [App\Http\Controllers\Risk\AssessmentWorksheetController::class, 'update_status'])->name('update-status');
         });
+
         Route::resource(
             'assessment',
             AssessmentController::class,
