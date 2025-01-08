@@ -54,7 +54,6 @@ const identificationValidate = () => {
         if (item.tagName == 'TEXTAREA') {
             identificationData.append(item.name, item.innerHTML);
         } else {
-            console.log(item.name)
             if (item.name.includes('impact_value') || item.name.includes('risk_exposure')) {
                 identificationData.append(item.name, unformatNumeral(item.value, defaultConfigFormatNumeral));
             } else {
@@ -78,7 +77,6 @@ const identificationValidate = () => {
                     if (residual) {
                         for (const itemKey of Object.keys(residual)) {
                             if (!residual[itemKey] || residual[itemKey] == 'Pilih') {
-                                console.log(itemKey, residual[itemKey])
                                 return false
                             }
                         }
@@ -116,7 +114,6 @@ const contextValidate = () => {
             !worksheet.context[key] ||
             worksheet.context[key] == 'Pilih'
         ) {
-            console.log(key, worksheet.context[key])
             return false
         }
     }
@@ -280,7 +277,7 @@ await axios.get('/master/kri-unit').then(res => res.status == 200 ? kriUnits.pus
 await axios.get('/master/existing-control-type').then(res => res.status == 200 ? existingControlTypes.push(...res.data.data) : null).catch(err => console.log(err));
 await axios.get('/profile/unit_head').then(res => {
     if (res.status == 200) {
-        unit_head.pic_name = res.data.data.pic_name
+        unit_head.pic_name = res.data.data?.pic_name || ''
     }
 }).catch(err => console.log(err))
 
@@ -370,11 +367,6 @@ const addRowAction = (type, index, callback) => {
     removeButton.innerHTML = `<i class="ti ti-x"></i>`;
 
     removeButton.addEventListener('click', () => {
-        console.log(
-            type,
-            tables[type].querySelector('tbody'),
-            tables[type].querySelector('tbody').children[index]
-        )
         tables[type].querySelector('tbody').children[index].remove();
         worksheet[type].splice(index, 1);
     })
@@ -1187,7 +1179,6 @@ const onTreatmentEdit = (data) => {
     // Set the flatpickr dates
     if (data.mitigation_start_date && data.mitigation_end_date) {
         mitigationDatePicker.setDate([data.mitigation_start_date, data.mitigation_end_date]);
-        console.log('test')
     }
 
     treatmentRiskCauseNumberChoices.setChoiceByValue(data.risk_cause_number);
