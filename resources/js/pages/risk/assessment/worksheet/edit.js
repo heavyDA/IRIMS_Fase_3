@@ -47,9 +47,14 @@ const worksheetTabSubmitButton = document.querySelector('#worksheetTabSubmitButt
 const identificationValidate = () => {
     const identificationData = new FormData(identificationForm);
     for (let item of identificationForm.querySelectorAll('input:disabled, textarea, select, select:disabled')) {
+        if (item.name == 'search_terms') {
+            continue;
+        }
+
         if (item.tagName == 'TEXTAREA') {
             identificationData.append(item.name, item.innerHTML);
         } else {
+            console.log(item.name)
             if (item.name.includes('impact_value') || item.name.includes('risk_exposure')) {
                 identificationData.append(item.name, unformatNumeral(item.value, defaultConfigFormatNumeral));
             } else {
@@ -57,6 +62,8 @@ const identificationValidate = () => {
             }
         }
     }
+    identificationData.set('inherent_impact_value', unformatNumeral(identificationData.get('inherent_impact_value'), defaultConfigFormatNumeral));
+
     worksheet.identification = formatDataToStructuredObject(identificationData);
 
     for (let key of Object.keys(worksheet.identification)) {

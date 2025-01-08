@@ -252,7 +252,7 @@ class AssessmentWorksheetController extends Controller
             $worksheet->target->identification->residuals->each(function ($residual) use (&$residuals) {
                 $residual = [
                     "residual[{$residual['quarter']}][impact_scale]" => $residual['impact_scale_id'],
-                    "residual[{$residual['quarter']}][impact_probability]" => $residual['impact_probability_scale_id'],
+                    "residual[{$residual['quarter']}][impact_probability]" => $residual['impact_probability'],
                     "residual[{$residual['quarter']}][impact_value]" => $residual['impact_value'],
                     "residual[{$residual['quarter']}][impact_probability_scale]" => $residual['impact_probability_scale_id'],
                     "residual[{$residual['quarter']}][risk_exposure]" => $residual['risk_exposure'],

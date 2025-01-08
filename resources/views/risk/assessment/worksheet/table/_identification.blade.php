@@ -85,27 +85,29 @@
                                 <td>{{ $incident?->kri_threshold_caution }}</td>
                                 <td>{{ $incident?->kri_threshold_danger }}</td>
                                 <td>{{ $worksheet->target->identification->existing_control_type->name }}</td>
-                                <td>{!! html_entity_decode($worksheet->target->identification->existing_control_type_body) !!}</td>
+                                <td>{!! html_entity_decode($worksheet->target->identification->existing_control_body) !!}</td>
                                 <td>{{ $worksheet->target->identification->control_effectiveness_assessment->name }}</td>
                                 <td>{{ $worksheet->target->identification->risk_impact_category }}</td>
                                 <td>{!! html_entity_decode($worksheet->target->identification->risk_impact_body) !!}</td>
                                 <td>{{ $worksheet->target->identification->format_risk_start_date->format('d F Y') . ' s.d. ' . $worksheet->target->identification->format_risk_end_date->format('d F Y') }}
                                 </td>
                                 <td>{!! html_entity_decode($worksheet->target->identification->inherent->body) !!}</td>
-                                <td>-</td>
-                                <td>{{ $worksheet->target->identification->inherent->impact_value }}</td>
-                                <td>-</td>
+                                <td>Rp.{{ number_format((float) $worksheet->target->identification->inherent->impact_value, 2, ',', '.') }}
+                                </td>
                                 <td>{{ $worksheet->target->identification->inherent->impact_scale->scale }}</td>
+                                <td>-</td>
                                 <td>{{ $worksheet->target->identification->inherent->impact_probability }}</td>
                                 <td>{{ $worksheet->target->identification->inherent->impact_probability_scale->impact_probability }}
                                 </td>
                                 <td>-</td>
-                                <td>{{ $worksheet->target->identification->inherent->risk_exposure }}</td>
-                                <td>-</td>
+                                <td>Rp.{{ number_format((float) $worksheet->target->identification->inherent->risk_exposure, 2, ',', '.') }}
+                                </td>
                                 <td>{{ $worksheet->target->identification->inherent->impact_probability_scale->risk_scale }}
                                 </td>
+                                <td>-</td>
                                 <td>{{ $worksheet->target->identification->inherent->impact_probability_scale->risk_level }}
                                 </td>
+                                <td>-</td>
                                 @for ($i = 0; $i < 7; $i++)
                                     @for ($j = 0; $j < count($worksheet->target->identification->residuals); $j++)
                                         @if ($i == 0 || $i == 4)

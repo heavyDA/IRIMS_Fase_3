@@ -50,6 +50,7 @@ const identificationValidate = () => {
         if (item.tagName == 'TEXTAREA') {
             identificationData.append(item.name, item.innerHTML);
         } else {
+            console.log(item.name)
             if (item.name.includes('impact_value') || item.name.includes('risk_exposure')) {
                 identificationData.append(item.name, unformatNumeral(item.value, defaultConfigFormatNumeral));
             } else {

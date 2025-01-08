@@ -31,7 +31,7 @@
                                     <td>{!! $mitigation->mitigation_output !!}</td>
                                     <td>{{ $mitigation->format_start_date->format('d M Y') }}</td>
                                     <td>{{ $mitigation->format_end_date->format('d M Y ') }}</td>
-                                    <td>{{ $mitigation->mitigation_cost }}</td>
+                                    <td>Rp.{{ number_format((float) $mitigation->mitigation_cost, 2, ',', '.') }}</td>
                                     <td>{{ $mitigation->rkap_program_type->name }}</td>
                                     <td>{{ $mitigation->mitigation_pic }}</td>
                                 </tr>

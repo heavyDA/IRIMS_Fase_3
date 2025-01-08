@@ -20,7 +20,7 @@
                             <td>{!! $strategy->body !!}</td>
                             <td>{!! $strategy->expected_feedback !!}</td>
                             <td>{!! $strategy->risk_value !!}</td>
-                            <td>Rp.{{ number_format((int) $strategy->risk_value_limit, 2, ',', '.') }}</td>
+                            <td>Rp.{{ number_format((float) $strategy->risk_value_limit, 2, ',', '.') }}</td>
                             <td>{{ $strategy->decision }}</td>
                         </tr>
                     @endforeach
