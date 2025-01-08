@@ -126,7 +126,7 @@ worksheetTabNextButton.addEventListener('click', e => {
         (!contextValidate() || worksheet.strategies.length <= 0)
     ) {
         Swal.fire({
-            icon: 'error',
+            icon: 'warning',
             text: 'Pastikan pilihan sasaran dan strategi bisnis telah terisi',
         });
         currentStep -= 1
@@ -136,7 +136,7 @@ worksheetTabNextButton.addEventListener('click', e => {
         (!identificationValidate() || worksheet.incidents.length <= 0)
     ) {
         Swal.fire({
-            icon: 'error',
+            icon: 'warning',
             text: 'Pastikan identifikasi risiko dan peristiwa risiko telah terisi',
         });
         currentStep -= 1
@@ -145,7 +145,7 @@ worksheetTabNextButton.addEventListener('click', e => {
         currentStep == 3 && worksheet.mitigations.length <= 0
     ) {
         Swal.fire({
-            icon: 'error',
+            icon: 'warning',
             text: 'Pastikan rencana mitigasi telah terisi',
         });
         currentStep -= 1
@@ -266,11 +266,17 @@ const heatmaps = [];
 const kriUnits = [];
 const existingControlTypes = [];
 const risk_numbers = ['a', 'b', 'c', 'd', 'e'];
+const unit_head = { pic_name: "" };
 
 await axios.get('/master/bumn-scale').then(res => res.status == 200 ? bumnScales.push(...res.data.data) : null).catch(err => console.log(err));
 await axios.get('/master/heatmap').then(res => res.status == 200 ? heatmaps.push(...res.data.data) : null).catch(err => console.log(err));
 await axios.get('/master/kri-unit').then(res => res.status == 200 ? kriUnits.push(...res.data.data) : null).catch(err => console.log(err));
 await axios.get('/master/existing-control-type').then(res => res.status == 200 ? existingControlTypes.push(...res.data.data) : null).catch(err => console.log(err));
+await axios.get('/profile/unit_head').then(res => {
+    if (res.status == 200) {
+        unit_head.pic_name = res.data.data.pic_name
+    }
+}).catch(err => console.log(err))
 
 const tables = {
     strategies: document.querySelector('#worksheetStrategyTable'),
@@ -307,7 +313,7 @@ const strategyForm = document.querySelector('#strategyForm');
 strategyModalButton.addEventListener('click', () => {
     if (worksheet.context.target_body == '') {
         Swal.fire({
-            icon: 'error',
+            icon: 'warning',
             title: '',
             text: 'Pastikan pilihan sasaran telah terisi.',
         })
@@ -402,6 +408,18 @@ const updateStrategyRow = (data) => {
 }
 
 const onStrategySave = (data) => {
+
+    for (let key of Object.keys(data)) {
+        if (key == 'key' || key == 'id') {
+            continue
+        }
+
+        if (!data[key] || data[key] == 'Pilih') {
+            Swal.fire('Peringatan', 'Pastikan semua isian harus terisi', 'warning');
+            return;
+        }
+    }
+
     data.strategy_risk_value_limit = unformatNumeral(data.strategy_risk_value_limit, defaultConfigFormatNumeral).replaceAll('.', ',');
     if (data.key) {
         worksheet.strategies[worksheet.strategies.findIndex(item => item.key == data.key)] = data;
@@ -880,7 +898,6 @@ incidentForm.addEventListener('submit', (e) => {
         delete data.search_terms;
     }
     onIncidentSave(data)
-    setTimeout(() => incidentModal.hide(), 500);
 });
 
 incidentForm.addEventListener('reset', async () => {
@@ -895,18 +912,26 @@ incidentModalElement.addEventListener('hide.bs.modal', async () => {
     incidentRiskCauseCode.value = currentRiskNumber.value + '.' + risk_numbers[worksheet.incidents.length];
 
     Object.keys(incidentTextareas).forEach((key) => {
-        // incidentTextareas[key].innerHTML = '';
         incidentQuills[key].deleteText(0, incidentQuills[key].getLength());
     });
 });
 
 
 const onIncidentSave = (data) => {
-    Object.keys(data).forEach(key => {
+    for (let key of Object.keys(data)) {
+        if (key == 'key' || key == 'id') {
+            continue
+        }
+
+        if (!data[key] || data[key] == 'Pilih') {
+            Swal.fire('Peringatan', 'Pastikan semua isian harus terisi', 'warning');
+            return;
+        }
+
         if (key.includes('impact_value') || key.includes('risk_exposure')) {
             data[key] = unformatNumeral(data[key], defaultConfigFormatNumeral).replaceAll('.', ',');
         }
-    })
+    }
 
     if (data.key) {
         worksheet.incidents[worksheet.incidents.findIndex(item => item.key == data.key)] = data;
@@ -1027,6 +1052,8 @@ const mitigationCost = treatmentMitigationForm.querySelector('[name="mitigation_
 mitigationCost.addEventListener('keyup', (e) => {
     e.target.value = formatNumeral(e.target.value, defaultConfigFormatNumeral);
 })
+const mitigationPic = treatmentMitigationForm.querySelector('[name="mitigation_pic"]');
+mitigationPic.value = unit_head.pic_name
 
 const mitigationProgramType = treatmentMitigationForm.querySelector('[name="mitigation_rkap_program_type"]');
 let mitigationProgramTypeChoices = new Choices(mitigationProgramType, defaultConfigChoices);
@@ -1077,12 +1104,14 @@ const addTreatmentRow = (data) => {
 
     row.id = `treatment-${data.key}`;
     row.innerHTML = `
+        <td>${data.risk_cause_number}</td>
         <td>${data.mitigation_plan}</td>
         <td>${data.mitigation_output}</td>
         <td>${dayjs(data.mitigation_start_date).format('MMMM, DD YYYY')}</td>
         <td>${dayjs(data.mitigation_end_date).format('MMMM, DD YYYY')}</td>
         <td>${formatNumeral(data.mitigation_cost, defaultConfigFormatNumeral)}</td>
         <td>${mitigationProgramTypeChoices._currentState.choices.find(choice => choice.value == data.mitigation_rkap_program_type)?.label ?? ''}</td>
+        <td>${data.mitigation_pic}</td>
     `;
     row.prepend(buttonCell);
 
@@ -1092,12 +1121,14 @@ const addTreatmentRow = (data) => {
 const updateTreatmentRow = (data) => {
     const row = treatmentTable.querySelector('#treatment-' + data.key);
 
-    row.querySelector('td:nth-child(2)').innerHTML = data.mitigation_plan
-    row.querySelector('td:nth-child(3)').innerHTML = data.mitigation_output
-    row.querySelector('td:nth-child(4)').textContent = mitigationProgramTypeChoices._currentState.choices.find(choice => choice.value == data.mitigation_rkap_program_type)?.label ?? ''
-    row.querySelector('td:nth-child(5)').textContent = dayjs(data.mitigation_start_date).format('MMMM, DD YYYY')
-    row.querySelector('td:nth-child(6)').textContent = dayjs(data.mitigation_end_date).format('MMMM, DD YYYY')
-    row.querySelector('td:nth-child(7)').textContent = formatNumeral(data.mitigation_cost, defaultConfigFormatNumeral)
+    row.querySelector('td:nth-child(2)').innerHTML = data.risk_cause_number
+    row.querySelector('td:nth-child(3)').innerHTML = data.mitigation_plan
+    row.querySelector('td:nth-child(4)').innerHTML = data.mitigation_output
+    row.querySelector('td:nth-child(5)').textContent = mitigationProgramTypeChoices._currentState.choices.find(choice => choice.value == data.mitigation_rkap_program_type)?.label ?? ''
+    row.querySelector('td:nth-child(6)').textContent = dayjs(data.mitigation_start_date).format('MMMM, DD YYYY')
+    row.querySelector('td:nth-child(7)').textContent = dayjs(data.mitigation_end_date).format('MMMM, DD YYYY')
+    row.querySelector('td:nth-child(8)').textContent = formatNumeral(data.mitigation_cost, defaultConfigFormatNumeral)
+    row.querySelector('td:nth-child(9)').textContent = data.mitigation_pic
 }
 
 const onTreatmentEdit = (data) => {
@@ -1129,11 +1160,23 @@ const onTreatmentEdit = (data) => {
     treatmentRiskCauseNumberChoices.setChoiceByValue(data.risk_cause_number);
     treatmentForm.querySelector('[name="risk_treatment_option"]').value = data.risk_treatment_option_id;
     treatmentForm.querySelector('[name="risk_treatment_type"]').value = data.risk_treatment_type_id;
+    mitigationPic.value = unit_head.pic_name
 
     treatmentModal.show();
 }
 
 const onTreatmentSave = (data) => {
+    for (let key of Object.keys(data)) {
+        if (key == 'key' || key == 'id') {
+            continue
+        }
+
+        if (!data[key] || data[key] == 'Pilih') {
+            Swal.fire('Peringatan', 'Pastikan semua isian harus terisi', 'warning');
+            return;
+        }
+    }
+
     data.mitigation_cost = unformatNumeral(data.mitigation_cost, defaultConfigFormatNumeral).replaceAll('.', ',');
     if (data.key) {
         worksheet.mitigations[worksheet.mitigations.findIndex(item => item.key == data.key)] = data;
@@ -1156,6 +1199,7 @@ treatmentMitigationForm.addEventListener('submit', (e) => {
         delete data.search_terms;
     }
 
+    data.mitigation_pic = mitigationPic.value
     data.risk_number = treatmentForm.querySelector('[name="risk_number"]').value;
     data.risk_cause_number = treatmentRiskCauseNumberChoices.getValue(true);
     data.risk_treatment_option_id = treatmentForm.querySelector('[name="risk_treatment_option"]').value;
@@ -1182,6 +1226,7 @@ treatmentModalElement.addEventListener('hidden.bs.modal', () => {
     mitigationProgramTypeChoices.destroy();
     mitigationProgramTypeChoices = new Choices(mitigationProgramType, defaultConfigChoices);
 
+    mitigationPic.value = unit_head.pic_name
     Object.keys(mitigationTextareas).forEach((key) => {
         mitigationTextareas[key].innerHTML = '';
         mitigationQuills[key].deleteText(0, mitigationQuills[key].getLength());

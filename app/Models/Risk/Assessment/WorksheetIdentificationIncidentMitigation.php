@@ -22,6 +22,7 @@ class WorksheetIdentificationIncidentMitigation extends Model
         'mitigation_end_date',
         'mitigation_cost',
         'mitigation_rkap_program_type_id',
+        'mitigation_pic',
     ];
 
     public function FormatStartDate(): Attribute

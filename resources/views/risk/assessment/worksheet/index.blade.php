@@ -2,6 +2,16 @@
 
 @push('top-script')
     <style>
+        .popover {
+            width: 418px !important;
+            max-width: 418px !important;
+        }
+
+        .popover-body {
+            overflow-y: auto;
+            max-height: 512px !important;
+        }
+
         .table {
             th {
                 vertical-align: bottom;

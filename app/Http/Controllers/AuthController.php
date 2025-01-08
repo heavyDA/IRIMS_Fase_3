@@ -77,4 +77,37 @@ class AuthController extends Controller
         }
         return redirect()->back();
     }
+
+    public function get_unit_head()
+    {
+        $data = null;
+        try {
+            $subUnit = auth()->user()->sub_unit_code;
+            $response = Http::withHeader('Authorization', env('EOFFICE_TOKEN'))
+                ->timeout(10)
+                ->asForm()
+                ->post(env('EOFFICE_URL') . '/pejabat_get', [
+                    'effective_date' => '2025-01-06',
+                    'organization_code' => $subUnit
+                ]);
+
+            if ($response->failed() || $response->serverError() || $response->clientError()) {
+                throw new Exception("Failed to get unit head data with organization code {$subUnit} from E Office Service. ", $response->status(), $response->toException());
+            }
+
+            $json = $response->json();
+
+            if ($json['totalData'] > 0) {
+                $subUnitHead = $json['data'][0];
+
+                $data = [
+                    'pic_name' => $subUnitHead['POSITION_NAME']
+                ];
+            }
+        } catch (Exception $e) {
+            logger()->error($e);
+        }
+
+        return response()->json(['data' => $data]);
+    }
 }

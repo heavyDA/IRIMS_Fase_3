@@ -14,6 +14,7 @@
                     <input disabled type="text" name="period_year" class="form-control not-allowed"
                         placeholder="Tahun" value="{{ isset($worksheet) ? $worksheet->period_year : date('Y') }}">
                 </div>
+
             </div>
             <div class="row mb-1">
                 <div class="col-3">Tanggal</div>
@@ -23,7 +24,21 @@
                 </div>
             </div>
             <div class="row mb-1">
-                <div class="col-3">Pilihan Sasaran</div>
+                <div class="col-3">
+                    <span>Pilihan Sasaran <span class="text-danger">*</span></span>
+                    <a tabindex="0"
+                        class="link-secondary link-offset-2 link-underline-opacity-0 link-underline-opacity-50-hover text-decoration-underline mx-1"
+                        role="button" data-bs-toggle="popover" data-bs-trigger="focus" data-bs-placement="right"
+                        title="Information" data-bs-html="true"
+                        data-bs-content="
+                    <p>Diisi dengan berbagai pilihan sasaran yang menjadi dinamika dalam perencanaan penyusunan rancangan/pencapaian RKAP.</p>
+                    <p><strong>Sasaran</strong> adalah tujuan yang akan dicapai meliputi tingkat pertumbuhan dan kesehatan perusahaan serta sasaran bidang/unit kegiatan secara kuantitatif dan spesifik setiap tahunnya.</p>
+                    <p>Note: Sasaran disusun secara lengkap. </p>
+                    <p>Sebagai contoh: <strong>Peningkatan market share segmen corporate dari 20% menjadi 30% pada akhir tahun 2024</strong></p>
+                    "><i
+                            class="ti ti-info-circle h5 text-secondary"></i>
+                    </a>
+                </div>
                 <div class="col">
                     <input type="hidden" class="form-control" name="risk_number" value="{{ $worksheet_number }}"
                         readonly>
@@ -80,6 +95,16 @@
                         <div class="d-flex flex-column mb-2">
                             <div>
                                 Pilihan Strategi<span class="text-danger">*</span>
+                                <a tabindex="0"
+                                    class="link-secondary link-offset-2 link-underline-opacity-0 link-underline-opacity-50-hover text-decoration-underline mx-1"
+                                    role="button" data-bs-toggle="popover" data-bs-trigger="focus"
+                                    data-bs-placement="right" title="Information" data-bs-html="true"
+                                    data-bs-content='
+                                        <p>Diisi dengan berbagai pilihan strategi yang menjadi dinamika dalam perencanaan penyusunan rancangan/pencapaian RKAP.</p>
+                                        <p><strong>Strategi</strong> adalah cara yang digunakan untuk mencapai sasaran, meliputi strategi korporasi sesuai posisi perusahaan, strategi bisnis, dan strategi fungsional tiap bidang/unit kegiatan.</p>
+                                    '><i
+                                        class="ti ti-info-circle h5 text-secondary"></i>
+                                </a>
                             </div>
                             <div>
                                 <div id="strategy_body-editor" class="textarea"></div>
@@ -89,6 +114,15 @@
                         <div class="d-flex flex-column mb-2">
                             <div>
                                 Hasil yang diharapkan dapat diterima perusahaan<span class="text-danger">*</span>
+                                <a tabindex="0"
+                                    class="link-secondary link-offset-2 link-underline-opacity-0 link-underline-opacity-50-hover text-decoration-underline mx-1"
+                                    role="button" data-bs-toggle="popover" data-bs-trigger="focus"
+                                    data-bs-placement="right" title="Information" data-bs-html="true"
+                                    data-bs-content='
+                                        <p>Diisi dengan nilai kuantitatif dalam mata uang rupiah/mata uang fungsional pembukuan atas hasil yang diharapkan dari pelaksanaan sasaran dan strategi yang akan dijalankan pada tahun berjalan.<br>(satuan dalam rupiah/mata uang fungsional pembukuan).</p>
+                                    '><i
+                                        class="ti ti-info-circle h5 text-secondary"></i>
+                                </a>
                             </div>
                             <div>
                                 <div id="strategy_expected_feedback-editor" class="textarea"></div>
@@ -98,6 +132,15 @@
                         <div class="d-flex flex-column mb-2">
                             <div>
                                 Nilai Risiko Yang Akan Timbul<span class="text-danger">*</span>
+                                <a tabindex="0"
+                                    class="link-secondary link-offset-2 link-underline-opacity-0 link-underline-opacity-50-hover text-decoration-underline mx-1"
+                                    role="button" data-bs-toggle="popover" data-bs-trigger="focus"
+                                    data-bs-placement="right" title="Information" data-bs-html="true"
+                                    data-bs-content='
+                                        <p>Diisi dengan nilai risiko yang akan timbul sebagai konsekuensi dari suatu sasaran dan strategi yang akan dijalankan.</p>
+                                    '><i
+                                        class="ti ti-info-circle h5 text-secondary"></i>
+                                </a>
                             </div>
                             <div>
                                 <div id="strategy_risk_value-editor" class="textarea"></div>
@@ -108,17 +151,45 @@
                             <div>
                                 Nilai limit risiko sesuai dengan parameter risiko dalam Metrik Strategi Risiko<span
                                     class="text-danger">*</span>
+                                <a tabindex="0"
+                                    class="link-secondary link-offset-2 link-underline-opacity-0 link-underline-opacity-50-hover text-decoration-underline mx-1"
+                                    role="button" data-bs-toggle="popover" data-bs-trigger="focus"
+                                    data-bs-placement="right" title="Information" data-bs-html="true"
+                                    data-bs-content='
+                                        <p>Diisi dengan batasan risiko / limit risiko sesuai dengan parameter risiko dalam metrik strategi risiko.</p>
+                                        <ol>
+                                            <li>Limit Korporasi</li>
+                                            <li>Limit Kantor Pusat</li>
+                                            <li>Limit Unit Atau Kantor Cabang</li>
+                                        </ol>
+                                        <p>(satuan dalam rupiah/mata uang fungsional pembukuan).</p>
+                                    '><i
+                                        class="ti ti-info-circle h5 text-secondary"></i>
+                                </a>
                             </div>
                             <div>
-                                <input required type="text" class="form-control" name="strategy_risk_value_limit">
+                                <input type="text" class="form-control" name="strategy_risk_value_limit">
                             </div>
                         </div>
                         <div class="d-flex flex-column mb-2">
                             <div>
                                 Keputusan Penetapan<span class="text-danger">*</span>
+                                <a tabindex="0"
+                                    class="link-secondary link-offset-2 link-underline-opacity-0 link-underline-opacity-50-hover text-decoration-underline mx-1"
+                                    role="button" data-bs-toggle="popover" data-bs-trigger="focus"
+                                    data-bs-placement="right" title="Information" data-bs-html="true"
+                                    data-bs-content='
+                                        <p>Diisi dengan pilihan:</p>
+                                        <ul>
+                                            <li>Accept: apabila sasaran dan strategi diterima menjadi sasaran dan strategi yang akan dijalankan dalam rancangan RKAP.</li>
+                                            <li>Avoid: apabila sasaran dan strategi tidak dapat diterima dan tidak dapat dimasukkan dalam sasaran dan strategi yang akan dijalankan di dalam rancangan RKAP.</li>
+                                        </ul>
+                                    '><i
+                                        class="ti ti-info-circle h5 text-secondary"></i>
+                                </a>
                             </div>
                             <div>
-                                <select required class="form-select" name="strategy_decision">
+                                <select class="form-select" name="strategy_decision">
                                     <option>Pilih</option>
                                     <option value="accept">Accept</option>
                                     <option value="avoid">Avoid</option>

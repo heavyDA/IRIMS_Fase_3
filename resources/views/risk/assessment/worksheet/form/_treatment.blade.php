@@ -23,7 +23,15 @@
                 </div>
             </div>
             <div class="row mb-3">
-                <div class="col-3">Opsi Perlakuan Risiko</div>
+                <div class="col-3">Opsi Perlakuan Risiko<span class="text-danger">*</span>
+                    <a tabindex="0"
+                        class="link-secondary link-offset-2 link-underline-opacity-0 link-underline-opacity-50-hover text-decoration-underline mx-1"
+                        role="button" data-bs-toggle="popover" data-bs-trigger="focus" data-bs-placement="right"
+                        title="Information" data-bs-html="true"
+                        data-bs-content='<ol><li><b>Accept/monitor&nbsp;</b>yaitu menerima Risiko dengan melakukan kegiatan perlakuan Risiko sesual existing control berdasarkan pengendalian internal yang sudah ada tanpa melakukan upaya tambahan untuk mengurangi, mentransfer atau membagi Risiko. Kegiatan perlakuannya adalah memonitor efektivitas pelaksanaan pengendalian internal.</li><li><b>Reduce/mitigate</b>&nbsp;yaitu melakukan perlakuan Risiko dengan mengurangiDampak dan/atau Probabilitas Risiko terhadap perusahaan, di mana Risiko tetap melekat dan menjadi tanggung jawab perusahaan. <b>Contoh</b> dari perlakuan Risiko ini adalah penyusunan kebijakan, pelatihan dan implementasi business continuity management (BCM).</li><li><b>Transfer/sharing</b> yaitu melakukan perlakuan Risiko dengan mengalihkan sebagian Risiko ke entitas lain (misalnya, pihak ketiga atau mitra) yang dapat mengontrol atau menyerap Risiko. Langkah ini akan mengurangi Dampak dan/atau Probabilitas Risiko. Tanggung jawab Risiko menjadi tanggungan bersama/dibagi bersama pihak eksternal. <b>Contoh</b> dari perlakuan Risiko ini adalah pembelian asuransi, pembelian produk&nbsp; lindung nilai/hedging, dan&nbsp; outsourcing.&nbsp;</li><li><b>Avoid/ hindari</b>&nbsp; yaitu melakukan perlakuan Risiko dengan tidak memulai atau melanjutkan aktivitas yang menimbulkan Risiko di atas pernyataan Selera Risiko atau biaya yang timbul di luar ambang batas yang dapat diterima oleh perusahaan.</li></ol>'><i
+                            class="ti ti-info-circle h5 text-secondary"></i>
+                    </a>
+                </div>
                 <div class="col">
                     <div class="input-group">
                         <span class="input-group-text">
@@ -39,7 +47,28 @@
                 </div>
             </div>
             <div class="row mb-3">
-                <div class="col-3">Jenis Rencana Perlakuan Risiko</div>
+                <div class="col-3">Jenis Rencana Perlakuan Risiko<span class="text-danger">*</span>
+                    <a tabindex="0"
+                        class="link-secondary link-offset-2 link-underline-opacity-0 link-underline-opacity-50-hover text-decoration-underline mx-1"
+                        role="button" data-bs-toggle="popover" data-bs-trigger="focus" data-bs-placement="right"
+                        title="Information" data-bs-html="true"
+                        data-bs-content='<p>Diisi dengan pilihan jenis rencana perlakuan risiko:<br><ol><li>Peningkatan
+  Kecukupan Desain Kontrol</li><li>Peningkatan Efektivitas Pelaksanaan
+  Kontrol</li><li>Perbaikan Melalui Breakthrough Project</li><li>Peningkatan
+  Kecukupan Desain Kontrol dan Peningkatan Efektivitas Pelaksanaan Kontrol</li><li>Peningkatan
+  Kecukupan Desain Kontrol dan Perbaikan Melalui Breakthrough Project</li><li>Peningkatan
+  Efektivitas Pelaksanaan Kontrol dan Perbaikan Melalui Breakthrough
+  Project
+ 
+ 
+  Peningkatan
+  Kecukupan Desain Kontrol,</li><li>Peningkatan Efektivitas Pelaksanaan Kontrol, dan
+  Pebaikan Melalui Breakthrough Project&nbsp;</li><li>
+ Lainnya</li></ol>
+  </p>'><i
+                            class="ti ti-info-circle h5 text-secondary"></i>
+                    </a>
+                </div>
                 <div class="col">
                     <div class="input-group">
                         <span class="input-group-text">
@@ -66,6 +95,7 @@
                 <thead class="table-dark">
                     <tr style="vertical-align: bottom;">
                         <th style="">Aksi</th>
+                        <th style="">No. Penyebab Risiko</th>
                         <th style="">Rencana Perlakuan Risiko</th>
                         <th style="width: 220px !important;">Ouput Perlakuan Risiko</th>
                         <th style="">Tanggal Mulai</th>
@@ -98,7 +128,7 @@
                         <input type="hidden" name="key">
                         <div class="d-flex flex-column mb-2">
                             <div>
-                                Rencana Perlakuan Risiko
+                                Rencana Perlakuan Risiko<span class="text-danger">*</span>
                             </div>
                             <div>
                                 <div id="mitigation_plan-editor" class="textarea"></div>
@@ -107,7 +137,7 @@
                         </div>
                         <div class="d-flex flex-column mb-2">
                             <div>
-                                Output Perlakuan Risiko
+                                Output Perlakuan Risiko<span class="text-danger">*</span>
                             </div>
                             <div>
                                 <div id="mitigation_output-editor" class="textarea"></div>
@@ -116,7 +146,7 @@
                         </div>
                         <div class="d-flex flex-column mb-2">
                             <div>
-                                Tanggal Mitigasi
+                                Tanggal Mitigasi<span class="text-danger">*</span>
                             </div>
                             <div>
                                 <input type="hidden" name="mitigation_start_date" value="2024-01-01">
@@ -129,7 +159,7 @@
                         </div>
                         <div class="d-flex flex-column mb-2">
                             <div>
-                                Biaya Mitigasi
+                                Biaya Mitigasi<span class="text-danger">*</span>
                             </div>
                             <div>
                                 <input type="text" class="form-control" name="mitigation_cost">
@@ -137,7 +167,7 @@
                         </div>
                         <div class="d-flex flex-column mb-2">
                             <div>
-                                Jenis Program Dalam RKAP
+                                Jenis Program Dalam RKAP<span class="text-danger">*</span>
                             </div>
                             <div>
                                 <select name="mitigation_rkap_program_type" class="form-select">
@@ -154,7 +184,7 @@
                         </div>
                         <div class="d-flex flex-column mb-2">
                             <div>
-                                PIC (Unit Kerja)
+                                PIC (Unit Kerja)<span class="text-danger">*</span>
                             </div>
                             <div>
                                 <input type="text" class="form-control not-allowed" name="mitigation_pic" disabled>

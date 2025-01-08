@@ -15,14 +15,30 @@
                 </div>
             </div>
             <div class="row mb-3">
-                <div class="col-3">Sasaran Perusahaan</div>
+                <div class="col-3">Sasaran Perusahaan<span class="text-danger">*</span>
+                </div>
                 <div class="col">
                     <div id="target_body-editor" class="textarea"></div>
                     <textarea disabled class="form-control not-allowed resize-none d-none" name="target_body" rows="4"></textarea>
                 </div>
             </div>
             <div class="row mb-3">
-                <div class="col-3">Sasaran KBUMN</div>
+                <div class="col-3">Sasaran KBUMN<span class="text-danger">*</span>
+                    <a tabindex="0"
+                        class="link-secondary link-offset-2 link-underline-opacity-0 link-underline-opacity-50-hover text-decoration-underline mx-1"
+                        role="button" data-bs-toggle="popover" data-bs-trigger="focus" data-bs-placement="right"
+                        title="Information" data-bs-html="true"
+                        data-bs-content='
+                            <p><strong>Nilai ekonomi dan sosial untuk Indonesia</strong>, merupakan KPI untuk mengukur kinerja keuangan, operasional, dan sosial (termasuk peran BUM N sebagai agen  pembangunan)  secara berkesinambungan, dengan  mempertimbangkan tingkat risiko (risk appetite) perusahaan yang ditetapkan.</p>
+<p><strong>Inovasi model bisnis</strong>, merupakan variabel KPI untuk mengukur keberhasilan inovasi perusahaan, antara lain:a) inovasi model bisnis inti;b) restrukturisasi; c) pengembangan konten lokal dan hilirisasi (downstream),d) penciptaan ekosistem, mitra serta kolaborasi usaha mikro, kecil dan menengah.</p>
+<p><strong>Kepemimpinan teknologi</strong>, merupakan variabel KPI untuk mengukur, antara lain: a) keberhasilan, dalam mengembangkan dan menginstitusionalkan kapabilitas teknologi/digital pada skala umum; b) penciptaan nilai dari kumpulan data (big data) dan kecerdasan buatan  (artificial intelligence); dan/atau ,c) dukungan Indonesia menjadi yang terdepan pada area teknologi strategis.</p>
+<p><strong>Peningkatan investasi</strong>, merupakan variabel KPI untuk mengukur, antara lain: a) produktivitas dari aset berwujud (tangible assets) dan aset tidak berwujud (intangible assets); 
+b) keberhasilan menarik investasi luar dari pihak swasta, asing, dan investor sosial; c) efektivitas adopsi mekanisme kondisi pasar (market-based); d) efektivitas implementasi kelincahan (agile) dalam birokrasi, dan kemudahan dalam melaksanakan bisnis; dan/atau e) progres investasi yang didanai dari tambahan  PMN</p>
+<p><strong>Pengembangan talenta</strong>, merupakan variabel KPI untuk mengukur seberapa baik perusahaan, antara lain: a) meningkatkan kemampuan dan melatih tenaga kerja terkait teknologi terbaru; b) meningkatkan tata kelola yang baik dalam penunjukan Direksi dan Dewan Komisaris/Dewan Pengawas; c) membentuk wadah talenta BUMN (talent poof) pada level menengah; dan/atau d) menerapkan lingkungan yang inklusif, dinamis, inovatif dan berakhlak. </p>
+                        '><i
+                            class="ti ti-info-circle h5 text-secondary"></i>
+                    </a>
+                </div>
                 <div class="col">
                     <select class="form-select" name="kbumn_target">
                         <option>Pilih</option>
@@ -44,18 +60,18 @@
                 </div>
             </div>
             <div class="row mb-3">
-                <div class="col-3">Kategori Risiko T3</div>
-                <div class="col">
-                    <select class="form-select" name="kbumn_risk_category_t3">
-                        <option>Pilih</option>
-                        @foreach ($kbumn_risk_categories['T3'] as $item)
-                            <option value="{{ $item->id }}">{{ $item->name }}</option>
-                        @endforeach
-                    </select>
+                <div class="col-3">Kategori Risiko T2<span class="text-danger">*</span>
+                    <a tabindex="0"
+                        class="link-secondary link-offset-2 link-underline-opacity-0 link-underline-opacity-50-hover text-decoration-underline mx-1"
+                        role="button" data-bs-toggle="popover" data-bs-trigger="focus" data-bs-placement="right"
+                        title="Information" data-bs-html="true"
+                        data-bs-content='
+                            <div>Diisi dengan pilihan kategori risiko Portofolio BUMN Kementerian BUMN berikut:</div>
+                            <ol><li><b>Risiko Fiskal - Dividen</b> (peristiwa Risiko yang disebabkan oleh kegagalan dan ketidakmampuan dalam membayar dividen kepada APBN)</li><li><b>Risiko Fiskal - PMN</b> (peristiwa Risiko yang disebabkan oleh Ketidakcukupan besaran PMN dan kegagalan pelaksanaan proyek PMN)</li><li><b>Risiko Fiskal - Subsidi &amp; Kompensasi </b>(peristiwa Risiko yang disebabkan oleh Kekurangan, keterlambatan, dan kerugian penerimaan subsidi dan kompensasi serta ketidakmampuan merealisasikan supply volume penyaluran subsidi dan kompensasi)</li><li><b>Risiko Kebijakan - SDM</b> (peristiwa Risiko yang disebabkan oleh penerapan kebijakan pemilihan, pengangkatan dan penetapan KPI Direksi dan Dekom atau Dewan Pengawas BUMN serta kebijakan SDM BUMN yang bersifat strategis)</li><li><b>Risiko Kebijakan - Sektoral </b>(peristiwa Risiko yang disebabkan oleh ketidakselarasan kebijakan yang dikeluarkan oleh Kementerian Teknis dan lembaga regulator yang dapat mempengaruhi ketidakpastian penerimaan atau operasi BUMN secara material)</li><li><b>Risiko Komposisi - Konsentrasi Portofolio </b>(peristiwa Risiko yang ditimbulkan oleh komposisi Portofolio BUMN yang terkonsentrasi pada industri tertentu)</li><li><b>Risiko Struktur - Struktur Korporasi </b>(peristiwa Risiko kerugian yang ditimbulkan dari Anak Perusahaan BUMN dan/atau Perusahaan Afiliasi BUMN)</li><li><b>Risiko Restrukturisasi &amp; Reorganisasi - Penggabungan, Pengambilalihan, Peleburan, Pemisahan, Pembubaran, Likuidasi, Kemitraan, dan Restrukturisasi</b> (peristiwa Risiko yang disebabkan oleh transaksi aksi korporasi atas Penggabungan, Pengambilalihan, Peleburan, Pemisahan, Pembubaran, Likuidasi, Kemitraan, dan Restrukturisasi yang material yang dapat mempengaruhi posisi strategis BUMN di masa yang akan datang)</li><li><b>Risiko Industri Umum - Formulasi Strategis</b> (peristiwa Risiko yang disebabkan oleh ketidakpastian kondisi BUMN dalam peta industri di mana BUMN tersebut beroperasi, termasuk ketidaktepatan arahan kebijakan strategis masing-masing BUMN yang dapat memberikan dampak yang material terhadap posisi BUMN dalam industri di mana BUMN tersebut beroperasi)</li><li><b>Risiko Industri Umum - Pasar &amp; Makroekonomi</b> (peristiwa Risiko yang disebabkan oleh pergerakan-pergerakan variabel makro ekonomi global seperti pergerakan tingkat bunga referensi, pergerakan nilai tukar Rupiah, dan/atau pergerakan harga-harga komoditas yang tidak dapat dikendalikan oleh BUMN)</li><li><b>Risiko Industri Umum - Keuangan </b>(peristiwa Risiko yang disebabkan oleh struktur dan akses pendanaan, terkait perpajakan, anggaran, akuntansi, piutang, pengelolaan modal kerja dan arus kas serta Risiko integritas atas penyusunan dan pelaporan keuangan)</li><li><b>Risiko Industri Umum - Reputasi &amp; Kepatuhan</b> (peristiwa Risiko yang disebabkan oleh tindakan dan/atau tuntutan hukum, kecurangan dalam konteks korupsi, kolusi dan nepotisme, perburukan reputasi BUMN dan ketidakpatuhan pada peraturan perundang-undangan yang berlaku yang dapat berpengaruh terhadap reputasi dan kinerja BUMN)</li><li><b>Risiko Industri Umum - Proyek</b> (peristiwa Risiko yang disebabkan oleh proyek-proyek yang dijalankan oleh BUMN mulai dari proses pemilihan proyek, pemilihan konsorsium, Risiko kontraktual proyek, Risiko eksekusi proyek dan penyelesaian proyek. Risiko ini terutama berasal dari BUMN yang memiliki sumber pendapatan yang berasal dari kontrak-kontrak jangka panjang, dan atau BUMN yang sedang menjalankan proyek jangka panjang untuk kepentingan ekspansi)</li><li><b>Risiko Industri Umum - Teknologi &amp; Keamanan Siber</b> (Risiko yang disebabkan oleh kegagalan perangkat lunak, perangkat keras, jaringan, atau sistem teknologi informasi lainnya pada BUMN termasuk Risiko yang diakibatkan oleh serangan siber (cyber attacks), kehilangan data, pelanggaran privasi, manipulasi data berbahaya, dan/atau pengelolaan akses data)</li><li><b>Risiko Industri Umum - Sosial &amp; Lingkungan</b> (potensi eksposur yang disebabkan oleh peristiwa perubahan iklim fisik, dan/atau Risiko transisi terkait perubahan kebijakan lingkungan, Risiko terkait hubungan yang tidak baik dengan komunitas/masyarakat sekitar dan social engagement)</li><li><b>Risiko Industri Umum - Operasional</b> (potensi kerugian yang disebabkan oleh proses internal, kegagalan sistem, kecelakaan dalam kesehatan keselamatan kerja, kesalahan manusia, atau kejadian eksternal (seperti gangguan rantai pasok, logistik, dan lain sebagainya) yang mempengaruhi operasi bisnis sehari-hari)</li><li><b>Risiko Industri Perbankan - Kredit</b> (peristiwa Risiko yang disebabkan oleh potensi debitur gagal membayar utang yang diwajibkan secara tepat waktu, yang mengakibatkan keterlambatan dan/atau penundaan pembayaran)</li><li><b>Risiko Industri Perbankan - Likuiditas</b> (Risiko ketidakmampuan Bank BUMN untuk memenuhi kewajiban yang jatuh tempo dari sumber pendanaan arus kas dan/atau dari aset likuid yang dapat dengan mudah dikonversi menjadi kas, tanpa mengganggu aktivitas dan kondisi keuangan Bank BUMN)</li><li><b>Risiko Industri Asuransi - Investasi</b> (kemungkinan kerugian atau terganggunya likuiditas Perusahaan, akibat dari aktivitas investasi, yang disebabkan terdapat concentration risk, default risk, settlement risk, general market risk, atau specific market risk, Risiko konsentrasi investasi (kurangnya diversifikasi/akumulasi Risiko dalam buku penjaminan/underwriting), investasi, dan lain-lain)</li><li><b>Risiko Industri Asuransi - Aktuarial</b> (potensi kegagalan Perusahaan untuk memenuhi kewajiban kepada pemegang polis, akibat kelemahan aktivitas aktuaria, yang disebabkan ketidakakuratan asumsi aktuaria/modelling yang digunakan, ketidakcukupan premi/ kontribusi yang ditetapkan, ketidakcukupan pembentukan cadangan teknis, atau volatilitas yang tidak terduga dalam faktor-faktor utama (seperti perubahan demografi, bencana luar biasa, tingkat kematian, tingkat harapan hidup, tingkat kecacatan, biaya kesehatan, biaya operasional, dan sebagainya)</li></ol>
+                        '><i
+                            class="ti ti-info-circle h5 text-secondary"></i>
+                    </a>
                 </div>
-            </div>
-            <div class="row mb-3">
-                <div class="col-3">Kategori Risiko T2</div>
                 <div class="col">
                     <select class="form-select" name="kbumn_risk_category_t2">
                         <option>Pilih</option>
@@ -66,7 +82,28 @@
                 </div>
             </div>
             <div class="row mb-3">
-                <div class="col-3">Jenis Existing Control</div>
+                <div class="col-3">Kategori Risiko T3<span class="text-danger">*</span></div>
+                <div class="col">
+                    <select class="form-select" name="kbumn_risk_category_t3">
+                        <option>Pilih</option>
+                        @foreach ($kbumn_risk_categories['T3'] as $item)
+                            <option value="{{ $item->id }}">{{ $item->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-3">Jenis Existing Control<span class="text-danger">*</span>
+                    <a tabindex="0"
+                        class="link-secondary link-offset-2 link-underline-opacity-0 link-underline-opacity-50-hover text-decoration-underline mx-1"
+                        role="button" data-bs-toggle="popover" data-bs-trigger="focus" data-bs-placement="right"
+                        title="Information" data-bs-html="true"
+                        data-bs-content='
+                            <p>Diisi dengan pilihan pada hirarki pertama:<br><ul><li>Kontrol operasi</li><li>Kontrol kepatuhan (compliance)</li><li>Kontrol pelaporan</li></ul><div><br></div><div>Setelah hirarki pertama dipilih, dilanjutkan dengan pilihan hirarki kedua:</div><ul><li>Kontrol pada level entitas/kantor pusat</li><li>Kontral pada level operasi</li></ul></p>
+                        '><i
+                            class="ti ti-info-circle h5 text-secondary"></i>
+                    </a>
+                </div>
                 <div class="col">
                     <select class="form-select" name="existing_control_type">
                         <option>Pilih</option>
@@ -77,7 +114,17 @@
                 </div>
             </div>
             <div class="row mb-3">
-                <div class="col-3">Existing Control</div>
+                <div class="col-3">Existing Control<span class="text-danger">*</span>
+                    <a tabindex="0"
+                        class="link-secondary link-offset-2 link-underline-opacity-0 link-underline-opacity-50-hover text-decoration-underline mx-1"
+                        role="button" data-bs-toggle="popover" data-bs-trigger="focus" data-bs-placement="right"
+                        title="Information" data-bs-html="true"
+                        data-bs-content='
+                        <p>BUMN dapat mengisikan semua existing control yang relevan terhadap suatu risiko. Existing control tersebut dapat berupa kontrol SOP, sistem, kebijakan, dl</p>
+                    '><i
+                            class="ti ti-info-circle h5 text-secondary"></i>
+                    </a>
+                </div>
                 <div class="col">
                     <div class="mb-2">
                         <div id="existing_control_body-editor" class="textarea"></div>
@@ -86,7 +133,19 @@
                 </div>
             </div>
             <div class="row mb-3">
-                <div class="col-3">Penilaian Efektivitas Kontrol</div>
+                <div class="col-3">Penilaian Efektivitas Kontrol<span class="text-danger">*</span>
+                    <a tabindex="0"
+                        class="link-secondary link-offset-2 link-underline-opacity-0 link-underline-opacity-50-hover text-decoration-underline mx-1"
+                        role="button" data-bs-toggle="popover" data-bs-trigger="focus" data-bs-placement="right"
+                        title="Information" data-bs-html="true"
+                        data-bs-content='
+                        <div class="col-md-12" style="padding:20px;">
+                        <div>Dipilih&nbsp;penilaian terhadap efektivitas kontrol saat ini (existing control) dengan pilihan sebagai berikut:</div><ol><li>Cukup dan Efektif;</li><li>Cukup dan Efektif Sebagian;</li><li>Cukup dan Tidak Efektif;</li><li>Tidak Cukup dan Efektif Sebagian; dan</li><li>Tidak Cukup dan Tidak Efektif.</li></ol>
+                    </div>
+                    '><i
+                            class="ti ti-info-circle h5 text-secondary"></i>
+                    </a>
+                </div>
                 <div class="col">
                     <select class="form-select" name="control_effectiveness_assessment">
                         <option>Pilih</option>
@@ -97,7 +156,7 @@
                 </div>
             </div>
             <div class="row mb-3">
-                <div class="col-3">Kategori Dampak</div>
+                <div class="col-3">Kategori Dampak<span class="text-danger">*</span></div>
                 <div class="col">
                     <select class="form-select" name="risk_impact_category">
                         <option>Pilih</option>
@@ -107,7 +166,15 @@
                 </div>
             </div>
             <div class="row mb-3">
-                <div class="col-3">Deskripsi Dampak</div>
+                <div class="col-3">Deskripsi Dampak<span class="text-danger">*</span>
+                    <a tabindex="0"
+                        class="link-secondary link-offset-2 link-underline-opacity-0 link-underline-opacity-50-hover text-decoration-underline mx-1"
+                        role="button" data-bs-toggle="popover" data-bs-trigger="focus" data-bs-placement="right"
+                        title="Information" data-bs-html="true"
+                        data-bs-content='<p>Diisi dengan pilihan kategori dampak:<br><ul><li>Dampak kuantitatif: Risiko yang memiliki dampak finansial terhadap pencapaian target laba BUMN.</li><li>Dampak kualitatif: Risiko yang tidak memiliki dampak finansial terhadap pencapaian target laba BUMN.</li></ul></p>'><i
+                            class="ti ti-info-circle h5 text-secondary"></i>
+                    </a>
+                </div>
                 <div class="col">
                     <div class="mb-2">
                         <div id="risk_impact_body-editor" class="textarea"></div>
@@ -116,7 +183,7 @@
                 </div>
             </div>
             <div class="row mb-3">
-                <div class="col-3">Perkiraan Waktu Terpapar Risiko</div>
+                <div class="col-3">Perkiraan Waktu Terpapar Risiko<span class="text-danger">*</span></div>
                 <div class="col">
                     <input type="hidden" name="risk_impact_start_date" value="2024-01-01">
                     <input type="hidden" name="risk_impact_end_date" value="2024-06-30">
@@ -141,10 +208,18 @@
             <div class="tab-content" id="identificationTabs">
                 <div class="tab-pane border-0 p-2 show active" id="identificationInherentTab">
                     <div class="row mb-3">
-                        <div data-kualitatif="Penjelasan Dampak Kualitatif"
-                            data-kuantitatif="Asumsi Perhitungan Dampak Kuantitatif"
+                        <div data-kualitatif="Penjelasan Dampak Kualitatif <span class='text-danger'>*</span>"
+                            data-kuantitatif="Asumsi Perhitungan Dampak Kuantitatif <span class='text-danger'>*</span>"
                             class="col-3 label-category-risk">
-                            Dampak</div>
+                            Dampak<span class="text-danger">*</span>
+                            <a tabindex="0"
+                                class="link-secondary link-offset-2 link-underline-opacity-0 link-underline-opacity-50-hover text-decoration-underline mx-1"
+                                role="button" data-bs-toggle="popover" data-bs-trigger="focus"
+                                data-bs-placement="right" title="Information" data-bs-html="true"
+                                data-bs-content='<p>Diisi penjelasan atas asumsi/pendekatan yang dipakai untuk menghitung nilai dampak.</p>'><i
+                                    class="ti ti-info-circle h5 text-secondary"></i>
+                            </a>
+                        </div>
                         <div class="col">
                             <div class="mb-2">
                                 <div id="inherent_body-editor" class="textarea"></div>
@@ -154,7 +229,7 @@
                     </div>
                     <div class="row mb-3">
                         <div class="col-3">Nilai Dampak Inheren <span
-                                class="label-category-risk text-capitalize"></span>
+                                class="label-category-risk text-capitalize"></span><span class="text-danger">*</span>
                         </div>
                         <div class="col">
                             <input type="text" class="form-control" name="inherent_impact_value">
@@ -162,7 +237,15 @@
                     </div>
                     <div class="row mb-3">
                         <div class="col-3">Skala Dampak Inheren <span
-                                class="label-category-risk text-capitalize"></span>
+                                class="label-category-risk text-capitalize"></span><span class="text-danger">*</span>
+                            <a tabindex="0"
+                                class="link-secondary link-offset-2 link-underline-opacity-0 link-underline-opacity-50-hover text-decoration-underline mx-1"
+                                role="button" data-bs-toggle="popover" data-bs-trigger="focus"
+                                data-bs-placement="right" title="Information" data-bs-html="true"
+                                data-bs-content='<p>Diisi dengan penilaian dampak Risiko Inheren dengan skala 1 s.d. 5
+                                <br><strong>Reference to Table Skala KBUMN</strong></p>'><i
+                                    class="ti ti-info-circle h5 text-secondary"></i>
+                            </a>
                         </div>
                         <div class="col">
                             <select data-placeholder="Pilih" disabled data-custom class="form-select"
@@ -172,7 +255,8 @@
                         </div>
                     </div>
                     <div class="row mb-3">
-                        <div class="col-3">Nilai Probabilitas Inheren <span class="label-category-risk"></span></div>
+                        <div class="col-3">Nilai Probabilitas Inheren <span class="label-category-risk"></span><span
+                                class="text-danger">*</span></div>
                         <div class="col">
                             <div class="input-group">
                                 <input type="text" class="form-control" name="inherent_impact_probability">
@@ -233,7 +317,7 @@
                     </div>
                     <div class="row mb-3">
                         <div class="col-3">Skala Dampak Residual <span
-                                class="label-category-risk text-capitalize"></span>
+                                class="label-category-risk text-capitalize"></span><span class="text-danger">*</span>
                         </div>
                         <div class="col row">
                             @for ($quarter = 1; $quarter < 5; $quarter++)
@@ -249,7 +333,8 @@
                     </div>
                     <div class="row mb-3">
                         <div class="col-3">Nilai Probabilitas Residual <span
-                                class="label-category-risk text-capitalize"></span></div>
+                                class="label-category-risk text-capitalize"></span><span class="text-danger">*</span>
+                        </div>
                         <div class="col row">
                             @for ($quarter = 1; $quarter < 5; $quarter++)
                                 <div class="col-12 col-md-6 col-lg-3">
@@ -380,7 +465,7 @@
                             </div>
                         </div>
                         <div class="row mb-3">
-                            <div class="col-3">Peristiwa Risiko</div>
+                            <div class="col-3">Peristiwa Risiko<span class="text-danger">*</span></div>
                             <div class="col">
                                 <div class="mb-2">
                                     <div id="risk_chronology_body-editor" class="textarea"></div>
@@ -389,7 +474,7 @@
                             </div>
                         </div>
                         <div class="row mb-3">
-                            <div class="col-3">Deskripsi Peristiwa Risiko</div>
+                            <div class="col-3">Deskripsi Peristiwa Risiko<span class="text-danger">*</span></div>
                             <div class="col">
                                 <div class="mb-2">
                                     <div id="risk_chronology_description-editor" class="textarea"></div>
@@ -412,7 +497,7 @@
                             </div>
                         </div>
                         <div class="row mb-3">
-                            <div class="col-3">Penyebab Risiko</div>
+                            <div class="col-3">Penyebab Risiko<span class="text-danger">*</span></div>
                             <div class="col">
                                 <div class="mb-2">
                                     <div id="risk_cause_body-editor" class="textarea"></div>
@@ -421,13 +506,13 @@
                             </div>
                         </div>
                         <div class="row mb-3">
-                            <div class="col-3">Key Risk Indicators</div>
+                            <div class="col-3">Key Risk Indicators<span class="text-danger">*</span></div>
                             <div class="col">
                                 <input type="text" class="form-control" name="kri_body">
                             </div>
                         </div>
                         <div class="row mb-3">
-                            <div class="col-3">Unit Satuan KRI</div>
+                            <div class="col-3">Unit Satuan KRI<span class="text-danger">*</span></div>
                             <div class="col">
                                 <select name="kri_unit" class="form-select">
                                     <option>Pilih</option>
@@ -438,7 +523,7 @@
                             </div>
                         </div>
                         <div class="row mb-3">
-                            <div class="col-3">Kategori Threshold KRI</div>
+                            <div class="col-3">Kategori Threshold KRI<span class="text-danger">*</span></div>
                             <div class="col">
                                 <div class="d-flex flex-column">
                                     <div class="row">

@@ -29,7 +29,7 @@ class AssessmentWorksheetController extends Controller
     {
         $title = 'Form Kertas Kerja';
 
-        $worksheet_number = Worksheet::activeYear()->count() + 1;
+        $worksheet_number = Worksheet::subUnit(auth()->user()->sub_unit_code)->activeYear()->count() + 1;
 
         $kbumn_risk_categories = KBUMNRiskCategory::all()->groupBy('type', true);
         $existing_control_types = ExistingControlType::all();
@@ -341,6 +341,7 @@ class AssessmentWorksheetController extends Controller
                             'mitigation_cost' => $mitigation['mitigation_cost'],
                             'mitigation_start_date' => $mitigation['mitigation_start_date'],
                             'mitigation_end_date' => $mitigation['mitigation_end_date'],
+                            'mitigation_pic' => $mitigation['mitigation_pic'],
                         ];
                     });
                 }),
