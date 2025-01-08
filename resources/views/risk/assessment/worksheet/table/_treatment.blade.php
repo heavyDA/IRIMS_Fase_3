@@ -33,7 +33,7 @@
                                     <td>{{ $mitigation->format_end_date->format('d M Y ') }}</td>
                                     <td>{{ $mitigation->mitigation_cost }}</td>
                                     <td>{{ $mitigation->rkap_program_type->name }}</td>
-                                    <td>{{ $mitigation->pic }}</td>
+                                    <td>{{ $mitigation->mitigation_pic }}</td>
                                 </tr>
                             @endforeach
                         @empty

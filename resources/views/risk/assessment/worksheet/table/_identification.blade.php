@@ -92,18 +92,18 @@
                                 <td>{{ $worksheet->target->identification->format_risk_start_date->format('d F Y') . ' s.d. ' . $worksheet->target->identification->format_risk_end_date->format('d F Y') }}
                                 </td>
                                 <td>{!! html_entity_decode($worksheet->target->identification->inherent->body) !!}</td>
+                                <td>-</td>
                                 <td>{{ $worksheet->target->identification->inherent->impact_value }}</td>
                                 <td>-</td>
                                 <td>{{ $worksheet->target->identification->inherent->impact_scale->scale }}</td>
-                                <td>-</td>
                                 <td>{{ $worksheet->target->identification->inherent->impact_probability }}</td>
                                 <td>{{ $worksheet->target->identification->inherent->impact_probability_scale->impact_probability }}
                                 </td>
+                                <td>-</td>
                                 <td>{{ $worksheet->target->identification->inherent->risk_exposure }}</td>
                                 <td>-</td>
                                 <td>{{ $worksheet->target->identification->inherent->impact_probability_scale->risk_scale }}
                                 </td>
-                                <td>-</td>
                                 <td>{{ $worksheet->target->identification->inherent->impact_probability_scale->risk_level }}
                                 </td>
                                 @for ($i = 0; $i < 7; $i++)
