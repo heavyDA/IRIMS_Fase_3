@@ -6,5 +6,5 @@ use Illuminate\Database\Eloquent\Model;
 
 class IncidentCategory extends Model
 {
-    protected $table = 'm_incident_category';
+    protected $table = 'm_incident_categories';
 }

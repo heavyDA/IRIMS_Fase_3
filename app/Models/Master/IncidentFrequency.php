@@ -6,5 +6,5 @@ use Illuminate\Database\Eloquent\Model;
 
 class IncidentFrequency extends Model
 {
-    protected $table = 'm_incident_frequency';
+    protected $table = 'm_incident_frequencies';
 }

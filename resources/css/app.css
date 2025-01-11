@@ -32830,3 +32830,13 @@ ul.timeline > li > .timeline-panel:after {
   right: auto;
 }
 }
+
+        .popover {
+            width: 418px !important;
+            max-width: 418px !important;
+        }
+
+        .popover-body {
+            overflow-y: auto;
+            max-height: 512px !important;
+        }

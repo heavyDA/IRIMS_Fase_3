@@ -6,7 +6,8 @@ use App\Http\Controllers\Master\{
     ExistingControlTypeController,
     HeatmapController,
     KBUMNRiskCategoryController,
-    KRIUnitController
+    KRIUnitController,
+    PICController
 };
 use App\Http\Controllers\Risk\AssessmentController;
 use Illuminate\Support\Facades\Route;
@@ -38,6 +39,17 @@ Route::group(['middleware' => 'auth'], function () {
             Route::put('{worksheet}/status', [App\Http\Controllers\Risk\AssessmentWorksheetController::class, 'update_status'])->name('update-status');
         });
 
+        Route::group(['as' => 'process.monitoring.', 'prefix' => 'process/monitoring'], function () {
+            Route::get('', [App\Http\Controllers\Risk\ProcessMonitoringController::class, 'index'])->name('index');
+            Route::get('{worksheet}', [App\Http\Controllers\Risk\ProcessMonitoringController::class, 'show'])->name('show');
+            Route::get('{worksheet}/create', [App\Http\Controllers\Risk\ProcessMonitoringController::class, 'create'])->name('create');
+            Route::post('{worksheet}/create', [App\Http\Controllers\Risk\ProcessMonitoringController::class, 'store'])->name('store');
+            Route::get('detail/{monitoringId}', [App\Http\Controllers\Risk\ProcessMonitoringController::class, 'show_monitoring'])->name('show_monitoring');
+            Route::get('edit/{monitoringId}', [App\Http\Controllers\Risk\ProcessMonitoringController::class, 'edit_monitoring'])->name('edit_monitoring');
+            Route::put('edit/{monitoringId}', [App\Http\Controllers\Risk\ProcessMonitoringController::class, 'update_monitoring'])->name('update_monitoring');
+            Route::put('status/{monitoringId}', [App\Http\Controllers\Risk\ProcessMonitoringController::class, 'update_status_monitoring'])->name('update_status_monitoring');
+        });
+
         Route::resource(
             'assessment',
             AssessmentController::class,
@@ -58,6 +70,14 @@ Route::group(['middleware' => 'auth'], function () {
             ]
         );
         Route::resource(
+            'existing-control-type',
+            ExistingControlTypeController::class,
+            [
+                'names' => custom_route_names('existing-control-type'),
+                'parameters' => ['existing-control-type' => 'existing-control-type']
+            ]
+        );
+        Route::resource(
             'heatmap',
             HeatmapController::class,
             [
@@ -73,20 +93,21 @@ Route::group(['middleware' => 'auth'], function () {
                 'parameters' => ['kbumn-risk-category' => 'kbumn-risk-category']
             ]
         );
-        Route::resource(
-            'existing-control-type',
-            ExistingControlTypeController::class,
-            [
-                'names' => custom_route_names('existing-control-type'),
-                'parameters' => ['existing-control-type' => 'existing-control-type']
-            ]
-        );
+
         Route::resource(
             'kri-unit',
             KRIUnitController::class,
             [
                 'names' => custom_route_names('kri-unit'),
                 'parameters' => ['kri-unit' => 'kri-unit']
+            ]
+        );
+        Route::resource(
+            'pic',
+            PICController::class,
+            [
+                'names' => custom_route_names('pic'),
+                'parameters' => ['pic' => 'pic']
             ]
         );
     });

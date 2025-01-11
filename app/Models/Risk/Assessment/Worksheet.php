@@ -27,6 +27,7 @@ class Worksheet extends Model
         'company_code',
         'company_name',
         'status',
+        'status_monitoring',
     ];
 
 
@@ -67,5 +68,10 @@ class Worksheet extends Model
     public function histories()
     {
         return $this->hasMany(WorksheetHistory::class)->latest();
+    }
+
+    public function monitorings()
+    {
+        return $this->hasMany(WorksheetMonitoring::class);
     }
 }

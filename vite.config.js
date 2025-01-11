@@ -14,6 +14,10 @@ export default defineConfig({
                 'resources/js/pages/risk/assessment/worksheet/index.js',
                 'resources/js/pages/risk/assessment/worksheet/edit.js',
                 'resources/js/pages/risk/assessment/worksheet/table_view.js',
+
+                'resources/js/pages/risk/process/index.js',
+                'resources/js/pages/risk/process/monitoring/index.js',
+                'resources/js/pages/risk/process/monitoring/detail.js',
             ],
             refresh: true,
         }),

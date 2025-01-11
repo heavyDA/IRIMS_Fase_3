@@ -14,7 +14,8 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <form action="{{ route('risk.assessment.worksheet.update-status', $worksheet->getEncryptedId()) }}"
+                    <form
+                        action="{{ route('risk.process.monitoring.update_status_monitoring', $monitoring->getEncryptedId()) }}"
                         id="reviseForm" method="POST">
                         @csrf
                         @method('PUT')
@@ -24,7 +25,7 @@
                                 Catatan
                             </div>
                             <div>
-                                {{-- <div id="note-editor" class="textarea"></div> --}}
+                                <div id="note-editor" class="textarea"></div>
                                 <textarea class="form-control" name="note" rows="4"></textarea>
                             </div>
                         </div>
@@ -46,7 +47,8 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <form action="{{ route('risk.assessment.worksheet.update-status', $worksheet->getEncryptedId()) }}"
+                    <form
+                        action="{{ route('risk.process.monitoring.update_status_monitoring', $monitoring->getEncryptedId()) }}"
                         id="approveForm" method="POST">
                         @csrf
                         @method('PUT')

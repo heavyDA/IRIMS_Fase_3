@@ -2122,5 +2122,30 @@ class WorksheetMasterData extends Seeder
         if (Company::count() == 0) {
             Company::insert($companies);
         }
+
+        $incidentCategories = [
+            ['name' => 'Perampokan bersenjata'],
+            ['name' => 'Kecelakaan'],
+            ['name' => 'Tabrakan'],
+            ['name' => 'Kejahatan siber'],
+            ['name' => 'Gempa bumi'],
+            ['name' => 'Pengaturan/penanganan yang salah'],
+            ['name' => 'Kecurangan (penipuan)'],
+            ['name' => 'Kebakaran'],
+            ['name' => 'Banjir'],
+            ['name' => 'Penyakit'],
+            ['name' => 'Petir'],
+            ['name' => 'Kelalaian'],
+            ['name' => 'Kerusuhan/perang'],
+            ['name' => 'Korsleting/arus pendek'],
+            ['name' => 'Mogok Kerja'],
+            ['name' => 'Pencurian'],
+            ['name' => 'Angin topan/badai'],
+            ['name' => 'Lainnya'],
+        ];
+
+        if (IncidentCategory::count() == 0) {
+            IncidentCategory::insert($incidentCategories);
+        }
     }
 }
