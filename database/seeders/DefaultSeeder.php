@@ -318,13 +318,15 @@ class DefaultSeeder extends Seeder
             ],
         ];
 
-        foreach ($menus as $key => $menu) {
-            $children = $menu['children'] ?? [];
-            unset($menu['children']);
+        if (Menu::count() == 0) {
+            foreach ($menus as $key => $menu) {
+                $children = $menu['children'] ?? [];
+                unset($menu['children']);
 
-            $menu = Menu::firstOrCreate(['name' => $menu['name'], 'route' => $menu['route']], $menu + ['position' => $key + 1]);
-            if ($children) {
-                $menu->children()->createMany($children);
+                $menu = Menu::firstOrCreate(['name' => $menu['name'], 'route' => $menu['route']], $menu + ['position' => $key + 1]);
+                if ($children) {
+                    $menu->children()->createMany($children);
+                }
             }
         }
 
@@ -354,20 +356,23 @@ class DefaultSeeder extends Seeder
             }
         }
 
-        $permissions = Permission::insert($permissions);
-        $roles = [['name' => 'root'], ['name' => 'risk admin'], ['name' => 'risk owner'], ['name' => 'risk otorisator'], ['name' => 'risk analis']];
-
+        if (Permission::count() == 0) {
+            $permissions = Permission::insert($permissions);
+            $roles = [['name' => 'root'], ['name' => 'risk admin'], ['name' => 'risk owner'], ['name' => 'risk otorisator'], ['name' => 'risk analis']];
+        }
         $permissions = Permission::where('name', 'not like', '%access%')->get();
 
-        foreach ($roles as $role) {
-            $role = Role::create($role);
+        if (Role::count() == 0) {
+            foreach ($roles as $role) {
+                $role = Role::create($role);
 
-            if ($role->name == 'root') {
-                $role->syncPermissions($permissions->pluck('name'));
-                $role->menus()->sync($menus->pluck('id'));
-            } else {
-                $role->syncPermissions($permissions->pluck('name'));
-                $role->menus()->sync($menus->filter(fn($menu) => !str_contains($menu->route, 'access') || str_contains($menu->route, 'master.') || $menu->route == 'master')->pluck('id'));
+                if ($role->name == 'root') {
+                    $role->syncPermissions($permissions->pluck('name'));
+                    $role->menus()->sync($menus->pluck('id'));
+                } else {
+                    $role->syncPermissions($permissions->pluck('name'));
+                    $role->menus()->sync($menus->filter(fn($menu) => !str_contains($menu->route, 'access') || str_contains($menu->route, 'master.') || $menu->route == 'master')->pluck('id'));
+                }
             }
         }
 
@@ -579,9 +584,11 @@ class DefaultSeeder extends Seeder
 
         ];
 
-        foreach ($users as $user) {
-            $newUser = User::create($user[0]);
-            $newUser->assignRole($user[1]);
+        if (User::count() == 0) {
+            foreach ($users as $user) {
+                $newUser = User::create($user[0]);
+                $newUser->assignRole($user[1]);
+            }
         }
     }
 }

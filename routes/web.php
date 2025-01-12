@@ -10,8 +10,12 @@ use App\Http\Controllers\Master\{
     PICController
 };
 use App\Http\Controllers\Risk\AssessmentController;
+use App\Jobs\PositionJob;
 use Illuminate\Support\Facades\Route;
 
+Route::get('test', function () {
+    PositionJob::dispatch();
+});
 
 Route::group(['prefix' => 'login', 'as' => 'auth.'], function () {
     Route::get('', fn() => view('auth.index'))->name('login');
@@ -26,6 +30,7 @@ Route::group(['middleware' => 'auth'], function () {
     })->name('dashboard');
 
     Route::get('profile/unit_head', [AuthController::class, 'get_unit_head'])->name('profile.get_unit_head');
+    Route::get('profile/risk_metric', [AuthController::class, 'get_risk_metric'])->name('profile.get_risk_metric');
 
     Route::group(['as' => 'risk.', 'prefix' => 'risk'], function () {
         Route::group(['as' => 'assessment.worksheet.', 'prefix' => 'assessment/worksheet'], function () {

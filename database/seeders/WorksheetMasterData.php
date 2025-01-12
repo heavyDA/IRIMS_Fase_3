@@ -16,6 +16,7 @@ use App\Models\Master\Heatmap;
 use App\Models\Master\ControlEffectivenessAssessment;
 use App\Models\Master\IncidentCategory;
 use App\Models\Master\IncidentFrequency;
+use App\Models\Master\RiskMetric;
 use App\Models\Master\RiskTreatmentOption;
 use App\Models\Master\RiskTreatmentType;
 use App\Models\Master\RKAPProgramType;
@@ -2146,6 +2147,75 @@ class WorksheetMasterData extends Seeder
 
         if (IncidentCategory::count() == 0) {
             IncidentCategory::insert($incidentCategories);
+        }
+
+        $riskMetrics = [
+            [
+                'organization_code' => 'ap.50',
+                'personnel_area_code' => 'KST',
+                'personnel_area_name' => 'Kantor Pusat',
+                'capacity' => '10000000000',
+                'appetite' => '7500000000',
+                'tolerancy' => '12500000000',
+                'limit' => '10000000000',
+            ],
+            [
+                'organization_code' => 'ap.51',
+                'personnel_area_code' => 'CGK',
+                'personnel_area_name' => 'BANDARA SOEKARNNO-HATTA',
+                'capacity' => '3000000000',
+                'appetite' => '2000000000',
+                'tolerancy' => '3250000000',
+                'limit' => '3000000000',
+            ],
+            [
+                'organization_code' => 'ap.52',
+                'personnel_area_code' => 'DPS',
+                'personnel_area_name' => 'BANDARA I GUSTI NGURAH RAI',
+                'capacity' => '3000000000',
+                'appetite' => '2000000000',
+                'tolerancy' => '3250000000',
+                'limit' => '3000000000',
+            ],
+            [
+                'organization_code' => 'ap.53',
+                'personnel_area_code' => 'KNO',
+                'personnel_area_name' => 'Bandara Kualanamu',
+                'capacity' => '3000000000',
+                'appetite' => '2000000000',
+                'tolerancy' => '3250000000',
+                'limit' => '3000000000',
+            ],
+            [
+                'organization_code' => 'ap.54',
+                'personnel_area_code' => 'YIA',
+                'personnel_area_name' => 'Bandara Internasional Yogyakarta',
+                'capacity' => '3000000000',
+                'appetite' => '2000000000',
+                'tolerancy' => '3250000000',
+                'limit' => '3000000000',
+            ],
+            [
+                'organization_code' => 'ap.55',
+                'personnel_area_code' => 'BPN',
+                'personnel_area_name' => 'Bandara Internasional Sepinggan',
+                'capacity' => '3000000000',
+                'appetite' => '2000000000',
+                'tolerancy' => '3250000000',
+                'limit' => '3000000000',
+            ],
+            [
+                'organization_code' => 'ap.56',
+                'personnel_area_code' => 'UPG',
+                'personnel_area_name' => 'Bandara Sultan Hasanuddin',
+                'capacity' => '3000000000',
+                'appetite' => '2000000000',
+                'tolerancy' => '3250000000',
+                'limit' => '3000000000',
+            ],
+        ];
+        if (RiskMetric::count() == 0) {
+            RiskMetric::insert($riskMetrics);
         }
     }
 }

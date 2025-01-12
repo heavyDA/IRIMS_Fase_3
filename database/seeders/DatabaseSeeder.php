@@ -17,6 +17,7 @@ class DatabaseSeeder extends Seeder
             WorksheetMasterData::class,
             UnitSeeder::class,
             DefaultSeeder::class,
+            PositionSeeder::class,
         ]);
     }
 }

@@ -12,7 +12,7 @@ class PICController extends Controller
 {
     public function index()
     {
-        $data = Cache::get('master.pics', []);
+        $data = Cache::get('master.positions', []);
 
         if (empty($data)) {
             try {
@@ -30,7 +30,7 @@ class PICController extends Controller
                         $data[] = $_item;
                     }
 
-                    Cache::put('master.pics', $data, now()->addMinutes(5));
+                    Cache::put('master.positions', $data, now()->addMinutes(5));
                 }
             } catch (Exception $e) {
                 return response()->json(['message' => 'gagal memuat data pic'], 500);

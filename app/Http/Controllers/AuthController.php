@@ -4,11 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Enums\State;
 use App\Http\Requests\LoginRequest;
+use App\Models\Master\Position;
+use App\Models\Master\RiskMetric;
 use App\Models\RBAC\Role;
 use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -31,25 +34,32 @@ class AuthController extends Controller
                 throw new Exception('Failed to login through E Office Service. ', $response->status(), $response->toException());
             }
 
-            $user = ['is_active' => true];
+            $data = ['is_active' => true];
             foreach ($response->json()['data'][0] as $key => $value) {
-                $user[strtolower($key)] = $value;
+                $data[strtolower($key)] = $value;
             }
+            DB::beginTransaction();
 
             $user = User::firstOrCreate([
-                'email' => $user['email'],
-            ], $user);
+                'email' => $data['email'],
+            ], $data);
 
-            if ($user->wasRecentlyCreated) {
-                $user->assignRole('risk admin');
+            if (!$user->wasRecentlyCreated) {
+                $user->update($data);
             }
 
+            $assigned_roles = Position::userAssignedRoles($user->personnel_area_code, $user->position_name)->first();
+            $assigned_roles = $assigned_roles?->assigned_roles ? explode(',', $assigned_roles->assigned_roles) : ['risk admin'];
+            $user->syncRoles($assigned_roles);
+
             if (Auth::loginUsingId($user->id)) {
-                session()->put('current_role', auth()->user()->roles()->first());
+                DB::commit();
+
+                session()->put('current_role', $user->roles()->first());
                 return redirect()->route('dashboard');
             }
         } catch (Exception $e) {
-            Log::error($e->getMessage());
+            logger()->error('[Authentication] ' . $e->getMessage());
         }
 
         if (Auth::attempt($request->only('username', 'password'))) {
@@ -80,7 +90,7 @@ class AuthController extends Controller
 
     public function get_unit_head()
     {
-        $data = null;
+        $data = ['pic_name' => ''];
         try {
             $subUnit = auth()->user()->sub_unit_code;
             $response = Http::withHeader('Authorization', env('EOFFICE_TOKEN'))
@@ -109,5 +119,11 @@ class AuthController extends Controller
         }
 
         return response()->json(['data' => $data]);
+    }
+
+    public function get_risk_metric()
+    {
+        $risk_metric = RiskMetric::where('organization_code', '=', substr(auth()->user()->sub_unit_code, 0, 5))->first();
+        return response()->json(['data' => $risk_metric]);
     }
 }
