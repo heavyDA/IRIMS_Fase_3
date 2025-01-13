@@ -31,7 +31,12 @@ class AuthController extends Controller
                 ->post(env('EOFFICE_URL') . '/login_user', $request->only('username', 'password'));
 
             if ($response->failed() || $response->serverError() || $response->clientError()) {
-                throw new Exception('Failed to login through E Office Service. ', $response->status(), $response->toException());
+                if ($response->status() < 500) {
+                    $json = $response->json();
+                    throw new Exception('[Authentication] ' . $json['message'], $response->status(), $response->toException());
+                }
+
+                throw new Exception('[Authentication] Failed to login through E Office Service. ', $response->status(), $response->toException());
             }
 
             $data = ['is_active' => true];
