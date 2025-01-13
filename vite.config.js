@@ -9,6 +9,7 @@ export default defineConfig({
                 'resources/css/app.css',
                 'resources/css/icons.css',
                 'resources/js/app.js',
+                'resources/js/pages/dashboard/index.js',
                 'resources/js/pages/RBAC/users/index.js',
                 'resources/js/pages/risk/assessment/index.js',
                 'resources/js/pages/risk/assessment/worksheet/index.js',

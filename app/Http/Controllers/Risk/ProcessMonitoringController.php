@@ -223,7 +223,7 @@ class ProcessMonitoringController extends Controller
 
                 foreach ($actual as $key => $value) {
                     if (str_contains($key, 'actualization_progress')) {
-                        if ($value) {
+                        if ($value && !is_string($value)) {
                             foreach ($value as $v) {
                                 if ($v) {
                                     $actualization['actualization_progress'] = $v;
@@ -275,7 +275,8 @@ class ProcessMonitoringController extends Controller
     {
         $monitoring = WorksheetMonitoring::findByEncryptedIdOrFail($monitoringId);
         $monitoring->load([
-            'residual',
+            'residual.impact_scale',
+            'residual.impact_probability_scale',
             'actualizations',
             'alteration',
             'incident',
@@ -466,12 +467,12 @@ class ProcessMonitoringController extends Controller
         ]);
     }
 
-    protected function risk_otorisator_rule(Worksheet $worksheet, string $status, string $note): WorksheetMonitoringHistory
+    protected function risk_otorisator_rule(WorksheetMonitoring $monitoring, string $status, string $note): WorksheetMonitoringHistory
     {
         $status = DocumentStatus::tryFrom($status);
         if ($status == DocumentStatus::ON_REVIEW) {
-            $worksheet->update(['status' => $status->value]);
-            return $worksheet->histories()->create([
+            $monitoring->update(['status' => $status->value]);
+            return $monitoring->histories()->create([
                 'created_by' => auth()->user()->employee_id,
                 'created_role' => 'risk otorisator',
                 'receiver_id' => 3,
@@ -481,8 +482,8 @@ class ProcessMonitoringController extends Controller
             ]);
         }
 
-        $worksheet->update(['status' => DocumentStatus::APPROVED->value]);
-        return $worksheet->histories()->create([
+        $monitoring->update(['status' => DocumentStatus::APPROVED->value]);
+        return $monitoring->histories()->create([
             'created_by' => auth()->user()->employee_id,
             'created_role' => 'risk otorisator',
             'receiver_id' => 2,

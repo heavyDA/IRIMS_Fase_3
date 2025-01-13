@@ -73,6 +73,34 @@
                 </tr>
             </thead>
             <tbody>
+                @isset($monitoring)
+
+                    <tr>
+                        <td>{{ $worksheet->worksheet_number }}</td>
+
+                        <td>{!! html_entity_decode($worksheet->target?->identification?->inherent?->body) !!}</td>
+                        @for ($i = 1; $i <= 4; $i++)
+                            @if ($i == $monitoring->residual->quarter)
+                                <td>{{ $monitoring->residual->impact_value }}</td>
+                            @else
+                                <td>-</td>
+                            @endif
+                        @endfor
+                        @for ($i = 1; $i <= 4; $i++)
+                            @if ($i == $monitoring->residual->quarter)
+                                <td>{{ $monitoring->residual->impact_scale?->scale }}</td>
+                            @else
+                                <td>-</td>
+                            @endif
+                        @endfor
+                        <td>-</td>
+                        <td>-</td>
+                        <td>-</td>
+                        <td>-</td>
+
+                    </tr>
+                @endisset
+
             </tbody>
         </table>
 
