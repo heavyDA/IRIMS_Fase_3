@@ -67,6 +67,7 @@
             @include('risk.process.monitoring.form._actualization')
         </div>
         <div class="tab-pane border-0 p-2" id="stepperMap" role="tabpanel">
+            @include('risk.process.monitoring.form._map')
         </div>
         <div class="tab-pane border-0 p-2" id="stepperAlteration" role="tabpanel">
             @include('risk.process.monitoring.form._alteration')

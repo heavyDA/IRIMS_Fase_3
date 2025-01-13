@@ -20,11 +20,11 @@ return new class extends Migration
                 ->on('ra_worksheet_identification_incident_mitigations')
                 ->nullOnDelete();
 
-            $table->string('quarter');
+            $table->string('quarter')->default('');
 
-            $table->text('actualization_mitigation_plan');
-            $table->string('actualization_cost');
-            $table->string('actualization_cost_absorption');
+            $table->text('actualization_mitigation_plan')->default('');
+            $table->string('actualization_cost')->default('');
+            $table->string('actualization_cost_absorption')->default('');
 
             $table->json('documents')->nullable();
 
@@ -34,17 +34,18 @@ return new class extends Migration
                 ->on('m_kri_units')
                 ->nullOnDelete();
 
-            $table->string('kri_threshold');
-            $table->string('kri_threshold_score');
+            $table->string('kri_threshold')->default('');
+            $table->string('kri_threshold_score')->default('');
 
-            $table->string('actualization_plan_status');
-            $table->string('actualization_plan_body');
-            $table->string('actualization_plan_progress');
+            $table->string('actualization_plan_status')->default('');
+            $table->string('actualization_plan_body')->default('');
+            $table->string('actualization_plan_output')->default('');
+            $table->string('actualization_plan_progress')->default('');
 
-            $table->string('unit_code');
-            $table->string('unit_name');
-            $table->string('personnel_area_code');
-            $table->string('personnel_area_name');
+            $table->string('unit_code')->default('');
+            $table->string('unit_name')->default('');
+            $table->string('personnel_area_code')->default('');
+            $table->string('personnel_area_name')->default('');
             $table->timestamps();
         });
     }
