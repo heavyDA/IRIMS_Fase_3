@@ -795,19 +795,21 @@ const calculateRisk = (
         }
     }
 
+    const impactValue = parseFloat(unformatNumeral(targetImpactValue.value, defaultConfigFormatNumeral));
     if (scale?.customProperties?.scale && probability) {
-        const impactValue = parseFloat(unformatNumeral(targetImpactValue.value, defaultConfigFormatNumeral));
         const probabilityValue = parseFloat(targetImpactProbability.value);
 
-        if (impactValue && probabilityValue && identificationRiskImpact.value == 'kuantitatif') {
+        if (impactValue >= 0 && probabilityValue && identificationRiskImpact.value == 'kuantitatif') {
             targetExposure.value = formatNumeral(
                 (impactValue * (probabilityValue / 100)).toString().replaceAll('.', ','),
                 defaultConfigFormatNumeral
             );
-        } else if (impactValue && probabilityValue && identificationRiskImpact.value == 'kualitatif') {
+        } else if (probabilityValue && identificationRiskImpact.value == 'kualitatif') {
             targetExposure.value = formatNumeral(
-                (1 / 100 * parseFloat(fetchers.risk_metric.limit) * parseInt(scale.customProperties.scale) * (probabilityValue / 100)).toString().replaceAll('.', ','),
+                (1 / 100 * parseFloat(fetchers?.risk_metric?.limit ?? '0') * parseInt(scale.customProperties.scale) * (probabilityValue / 100)).toString().replaceAll('.', ','),
                 defaultConfigFormatNumeral)
+        } else {
+            targetExposure.value = formatNumeral("0", defaultConfigFormatNumeral);
         }
 
         const result = targetImpactProbabilityScale._currentState.choices.find(
@@ -875,7 +877,6 @@ residualItemsInit();
 
 identificationInherentImpactValue.addEventListener('input', (e) => {
     const value = formatNumeral(e.target.value, defaultConfigFormatNumeral);
-    const limit = fetchers.risk_metric.limit
 
     e.target.value = value;
     for (let i = 0; i < 4; i++) {

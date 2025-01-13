@@ -756,7 +756,7 @@ const calculateRisk = (
         if (scale?.customProperties?.scale) {
             if (quarter == 1) {
                 if (identificationRiskImpact.value == 'kualitatif') {
-                    targetImpactValue.value = formatNumeral(fetchers.risk_metric.limit, defaultConfigFormatNumeral)
+                    targetImpactValue.value = formatNumeral(fetchers?.risk_metric?.limit ?? '0', defaultConfigFormatNumeral)
                 } else {
                     targetImpactValue.value = identificationInherentImpactValue.value
                 }
@@ -785,20 +785,22 @@ const calculateRisk = (
         }
     }
 
+    const impactValue = parseFloat(unformatNumeral(targetImpactValue.value, defaultConfigFormatNumeral));
     if (scale?.customProperties?.scale && probability) {
-        const impactValue = parseFloat(unformatNumeral(targetImpactValue.value, defaultConfigFormatNumeral));
         const probabilityValue = parseFloat(targetImpactProbability.value);
-
-        if (impactValue && probabilityValue && identificationRiskImpact.value == 'kuantitatif') {
+        if (impactValue >= 0 && probabilityValue && identificationRiskImpact.value == 'kuantitatif') {
+            console.log(impactValue)
             targetExposure.value = formatNumeral(
                 (impactValue * (probabilityValue / 100)).toString().replaceAll('.', ','),
                 defaultConfigFormatNumeral
             );
-        } else if (impactValue && probabilityValue && identificationRiskImpact.value == 'kualitatif') {
+        } else if (probabilityValue && identificationRiskImpact.value == 'kualitatif') {
             targetExposure.value = formatNumeral(
-                (1 / 100 * parseFloat(fetchers.risk_metric.limit) * parseInt(scale.customProperties.scale) * (probabilityValue / 100)).toString().replaceAll('.', ','),
+                parseFloat(1 / 100 * parseFloat(fetchers?.risk_metric?.limit ?? '0') * parseInt(scale.customProperties.scale) * (probabilityValue / 100)).toFixed(2).toString().replaceAll('.', ','),
                 defaultConfigFormatNumeral
             );
+        } else {
+            targetExposure.value = formatNumeral("0", defaultConfigFormatNumeral);
         }
 
         const result = targetImpactProbabilityScale._currentState.choices.find(

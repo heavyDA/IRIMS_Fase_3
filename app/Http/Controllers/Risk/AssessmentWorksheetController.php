@@ -75,7 +75,7 @@ class AssessmentWorksheetController extends Controller
                 'worksheet_code' =>  'WR/' . date('Y') . '/' . Str::random(8),
                 'worksheet_number' => $worksheetNumber,
                 'company_code' => 'API',
-                'company_name' => 'PT Aviasi Pariwisata Indonesia (Persero)',
+                'company_name' => 'PT Angkasa Pura Indonesia',
                 'status' => DocumentStatus::DRAFT->value
             ] + $user->only('organization_name', 'organization_code', 'unit_name', 'unit_code', 'sub_unit_name', 'sub_unit_code', 'personnel_area_name', 'personnel_area_code'));
 

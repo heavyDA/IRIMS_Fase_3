@@ -4,7 +4,7 @@
             <div class="row mb-3">
                 <div class="col-3">Nama Perusahaan</div>
                 <div class="col">
-                    <input value="PT Aviasi Pariwisata Indonesia (Persero)" type="text" name="company_name"
+                    <input value="PT Angkasa Pura Indonesia" type="text" name="company_name"
                         class="form-control not-allowed" disabled>
                 </div>
             </div>
