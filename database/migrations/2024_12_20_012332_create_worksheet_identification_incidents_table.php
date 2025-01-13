@@ -24,7 +24,7 @@ return new class extends Migration
             $table->string('risk_cause_body');
 
             $table->string('kri_body');
-            $table->string('kri_unit');
+            $table->foreignId('kri_unit_id')->nullable()->constrained('m_kri_units', null, 'ra_worksheet_identification_kri_unit_idx')->nullOnDelete();
             $table->string('kri_threshold_safe')->default('');
             $table->string('kri_threshold_caution')->default('');
             $table->string('kri_threshold_danger')->default('');

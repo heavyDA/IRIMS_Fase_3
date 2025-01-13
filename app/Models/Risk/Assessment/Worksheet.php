@@ -30,7 +30,6 @@ class Worksheet extends Model
         'status_monitoring',
     ];
 
-
     public function scopeActiveYear($query, $year = null)
     {
         return $query->whereYear('created_at', $year ?? date('Y'));
@@ -38,7 +37,12 @@ class Worksheet extends Model
 
     public function scopeSubUnit($query, $sub_unit_code)
     {
-        return $query->where('sub_unit_code', $sub_unit_code);
+        $role = session()->get('current_role')?->name;
+        if (in_array($role, ['risk admin', 'risk owner'])) {
+            return $query->where('sub_unit_code', $sub_unit_code);
+        } else if (in_array($role, ['risk otorisator', 'risk analis'])) {
+            return $query->where('sub_unit_code', 'like', $sub_unit_code . '%');
+        }
     }
 
     protected function periodDate(): Attribute

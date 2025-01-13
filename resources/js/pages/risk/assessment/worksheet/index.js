@@ -259,22 +259,34 @@ const worksheet = {
     mitigations: [],
 };
 
-const bumnScales = [];
-const heatmaps = [];
-const kriUnits = [];
-const existingControlTypes = [];
 const risk_numbers = ['a', 'b', 'c', 'd', 'e'];
-const unit_head = { pic_name: "" };
 
-await axios.get('/master/bumn-scale').then(res => res.status == 200 ? bumnScales.push(...res.data.data) : null).catch(err => console.log(err));
-await axios.get('/master/heatmap').then(res => res.status == 200 ? heatmaps.push(...res.data.data) : null).catch(err => console.log(err));
-await axios.get('/master/kri-unit').then(res => res.status == 200 ? kriUnits.push(...res.data.data) : null).catch(err => console.log(err));
-await axios.get('/master/existing-control-type').then(res => res.status == 200 ? existingControlTypes.push(...res.data.data) : null).catch(err => console.log(err));
-await axios.get('/profile/unit_head').then(res => {
-    if (res.status == 200) {
-        unit_head.pic_name = res.data.data?.pic_name || ''
-    }
-}).catch(err => console.log(err))
+const fetchers = {
+    bumn_scales: [],
+    heat_maps: [],
+    unit_head: { pic_name: '' },
+    risk_metric: {},
+}
+
+const fetchData = async () => {
+    await Promise.allSettled([
+        axios.get('/master/bumn-scale'),
+        axios.get('/master/heatmap'),
+        axios.get('/profile/unit_head'),
+        axios.get('/profile/risk_metric'),
+    ]).then(res => {
+        for (let [index, key] of Object.keys(fetchers).entries()) {
+            if (res[index].status == 'fulfilled') {
+                const response = res[index].value
+                if (response.status == 200) {
+                    fetchers[key] = response.data.data
+                }
+            }
+        }
+    })
+}
+
+await fetchData()
 
 const tables = {
     strategies: document.querySelector('#worksheetStrategyTable'),
@@ -510,7 +522,7 @@ const identificationChoicesInit = async () => {
 
         if (hasCustomData) {
             if (key.includes('[impact_scale]') || key == 'inherent_impact_scale') {
-                for (let item of bumnScales) {
+                for (let item of fetchers.bumn_scales) {
                     choices.push({
                         value: item.id,
                         label: item.scale,
@@ -518,7 +530,7 @@ const identificationChoicesInit = async () => {
                     })
                 }
             } else if (key.includes('[impact_probability_scale]') || key == 'inherent_impact_probability_scale') {
-                for (let item of heatmaps) {
+                for (let item of fetchers.heat_maps) {
                     choices.push({
                         value: item.id,
                         label: item.impact_probability,
@@ -551,7 +563,7 @@ const identificationChoicesInit = async () => {
             identificationChoices.inherent_impact_scale.enable();
 
             let choices = [];
-            for (let item of bumnScales) {
+            for (let item of fetchers.bumn_scales) {
                 if (item.impact_category !== risk_impact_category) continue;
                 choices.push({
                     id: item.id,
@@ -608,7 +620,7 @@ identificationRiskImpact.addEventListener('change', e => {
         identificationChoices.inherent_impact_scale.enable();
 
         let choices = [];
-        for (let item of bumnScales) {
+        for (let item of fetchers.bumn_scales) {
             if (item.impact_category !== risk_impact_category) continue;
             choices.push({
                 id: item.id,
@@ -727,7 +739,8 @@ const calculateRisk = (
     targetExposure,
     targetRiskScale,
     targetRiskLevel,
-    isResidual = false
+    isResidual = false,
+    quarter
 ) => {
     let scale, probability;
 
@@ -741,10 +754,28 @@ const calculateRisk = (
 
     if (isResidual) {
         if (scale?.customProperties?.scale) {
-            targetImpactValue.value = formatNumeral(
-                (unformatNumeral(identificationInherentImpactValue.value, defaultConfigFormatNumeral) * scale.customProperties.scale).toString().replaceAll('.', ','),
-                defaultConfigFormatNumeral
-            );
+            if (quarter == 1) {
+                if (identificationRiskImpact.value == 'kualitatif') {
+                    targetImpactValue.value = formatNumeral(fetchers.risk_metric.limit, defaultConfigFormatNumeral)
+                } else {
+                    targetImpactValue.value = identificationInherentImpactValue.value
+                }
+            } else {
+                const scaleQ1 = identificationChoices[`residual[1][impact_scale]`].getValue(false)
+                if (scaleQ1?.value != 'Pilih') {
+                    const riskValueByLimit = parseFloat(
+                        (parseInt(scale.customProperties.scale) / parseInt(scaleQ1.customProperties.scale)) * parseFloat(
+                            unformatNumeral(identificationResidualImpactValues[0].value, defaultConfigFormatNumeral)
+                        )
+                    ).toFixed(2);
+                    targetImpactValue.value = formatNumeral(riskValueByLimit.toString().replaceAll('.', ','), defaultConfigFormatNumeral)
+                } else {
+                    targetImpactValue.value = formatNumeral("0", defaultConfigFormatNumeral)
+                    targetExposure.value = formatNumeral("0", defaultConfigFormatNumeral);
+                    targetRiskScale.value = null;
+                    targetRiskLevel.value = null;
+                }
+            }
 
         } else {
             targetImpactValue.value = formatNumeral("0", defaultConfigFormatNumeral)
@@ -765,7 +796,7 @@ const calculateRisk = (
             );
         } else if (impactValue && probabilityValue && identificationRiskImpact.value == 'kualitatif') {
             targetExposure.value = formatNumeral(
-                (1 / 100 * impactValue * parseInt(scale.customProperties.scale) * (probabilityValue / 100)).toString().replaceAll('.', ','),
+                (1 / 100 * parseFloat(fetchers.risk_metric.limit) * parseInt(scale.customProperties.scale) * (probabilityValue / 100)).toString().replaceAll('.', ','),
                 defaultConfigFormatNumeral
             );
         }
@@ -818,14 +849,13 @@ const residualItemsInit = () => {
             identificationResidualRiskExposures[i - 1],
             identificationResidualRiskScales[i - 1],
             identificationResidualRiskLevels[i - 1],
-            true
+            true,
+            i
         ]
-
 
         identificationSelects[`residual[${i}][impact_scale]`].addEventListener('change', e => {
             calculateRisk(...residualItem);
         })
-
         identificationForm.querySelector(`[name="residual[${i}][impact_probability]"`)
             .addEventListener('keyup', debounce(() => calculateRisk(...residualItem), 500))
 
@@ -836,10 +866,13 @@ residualItemsInit();
 
 identificationInherentImpactValue.addEventListener('input', (e) => {
     const value = formatNumeral(e.target.value, defaultConfigFormatNumeral);
+    const limit = fetchers.risk_metric.limit
 
     e.target.value = value;
     for (let i = 0; i < 4; i++) {
-        identificationResidualImpactValues[i].value = value;
+        if (identificationRiskImpact.value == 'kuantitatif') {
+            identificationResidualImpactValues[i].value = value;
+        }
         identificationResidualImpactValues[i].dispatchEvent(new Event('keyup'));
         identificationResidualImpactProbabilities[i].dispatchEvent(new Event('keyup'));
     }
@@ -1046,7 +1079,7 @@ mitigationCost.addEventListener('keyup', (e) => {
     e.target.value = formatNumeral(e.target.value, defaultConfigFormatNumeral);
 })
 const mitigationPic = treatmentMitigationForm.querySelector('[name="mitigation_pic"]');
-mitigationPic.value = unit_head.pic_name
+mitigationPic.value = fetchers.unit_head.pic_name
 
 const mitigationProgramType = treatmentMitigationForm.querySelector('[name="mitigation_rkap_program_type"]');
 let mitigationProgramTypeChoices = new Choices(mitigationProgramType, defaultConfigChoices);
@@ -1152,7 +1185,7 @@ const onTreatmentEdit = (data) => {
     treatmentRiskCauseNumberChoices.setChoiceByValue(data.risk_cause_number);
     treatmentForm.querySelector('[name="risk_treatment_option"]').value = data.risk_treatment_option_id;
     treatmentForm.querySelector('[name="risk_treatment_type"]').value = data.risk_treatment_type_id;
-    mitigationPic.value = unit_head.pic_name
+    mitigationPic.value = fetchers.unit_head.pic_name
 
     treatmentModal.show();
 }
@@ -1218,7 +1251,7 @@ treatmentModalElement.addEventListener('hidden.bs.modal', () => {
     mitigationProgramTypeChoices.destroy();
     mitigationProgramTypeChoices = new Choices(mitigationProgramType, defaultConfigChoices);
 
-    mitigationPic.value = unit_head.pic_name
+    mitigationPic.value = fetchers.unit_head.pic_name
     Object.keys(mitigationTextareas).forEach((key) => {
         mitigationTextareas[key].innerHTML = '';
         mitigationQuills[key].deleteText(0, mitigationQuills[key].getLength());

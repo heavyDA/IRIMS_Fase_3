@@ -75,7 +75,7 @@ class DefaultSeeder extends Seeder
                     ],
                     [
                         'name' => 'Risk Monitoring BUMN',
-                        'route' => 'risk.monitoring.index',
+                        'route' => 'risk.process.monitoring.index',
                         'icon_name' => 'grid',
                         'position' => 3,
                     ],
@@ -371,7 +371,7 @@ class DefaultSeeder extends Seeder
                     $role->menus()->sync($menus->pluck('id'));
                 } else {
                     $role->syncPermissions($permissions->pluck('name'));
-                    $role->menus()->sync($menus->filter(fn($menu) => !str_contains($menu->route, 'access') || str_contains($menu->route, 'master.') || $menu->route == 'master')->pluck('id'));
+                    $role->menus()->sync($menus->filter(fn($menu) => str_contains($menu->route, 'risk.') || $menu->route == 'risk' || str_contains($menu->route, 'dashboard'))->pluck('id'));
                 }
             }
         }
@@ -384,15 +384,15 @@ class DefaultSeeder extends Seeder
                     'password' => bcrypt('root'),
                     'employee_id' => '99999999',
                     'employee_name' => 'ROOT',
-                    'unit_code' => 'ap.50.1',
-                    'unit_name' => 'Direktorat Strategi & Pengembangan Teknologi',
-                    'sub_unit_code' => 'ap.50.1.5',
-                    'sub_unit_name' => 'echnology & Digitalization',
-                    'organization_code' => 'ap.50.1.5',
-                    'organization_name' => 'echnology & Digitalization',
+                    'unit_code' => 'ap',
+                    'unit_name' => 'Administrator',
+                    'sub_unit_code' => 'ap',
+                    'sub_unit_name' => 'Administrator',
+                    'organization_code' => 'ap',
+                    'organization_name' => 'Administrator',
                     'personnel_area_code' => 'PST',
                     'personnel_area_name' => 'Kantor Pusat',
-                    'position_name' => 'Staff of Technology & Digitalization',
+                    'position_name' => 'Administrator',
                     'employee_grade_code' => '-',
                     'employee_grade' => '-',
                     'image_url' => '',
@@ -445,29 +445,6 @@ class DefaultSeeder extends Seeder
                     'is_active' => true,
                 ],
                 ['risk admin'],
-            ],
-            [
-                [
-                    'username' => 'restu.pratiwi',
-                    'email' => 'restu.pratiwi@injourneyairports.id',
-                    'password' => bcrypt('restu.pratiwi'),
-                    'employee_id' => '20241632',
-                    'employee_name' => 'Restu Pratiwi',
-                    'unit_code' => 'ap.50.6.1',
-                    'unit_name' => 'Governance & Risk Management',
-                    'sub_unit_code' => 'ap.50.6.1.2',
-                    'sub_unit_name' => 'Enterprise Risk Management',
-                    'organization_code' => 'ap.50.1.5',
-                    'organization_name' => 'Enterprise Risk Management',
-                    'personnel_area_code' => 'PST',
-                    'personnel_area_name' => 'Kantor Pusat',
-                    'position_name' => 'Enterprise Risk Management Division Head',
-                    'employee_grade_code' => '-',
-                    'employee_grade' => '-',
-                    'image_url' => '',
-                    'is_active' => true,
-                ],
-                ['risk analis', 'risk owner', 'risk otorisator', 'risk admin'],
             ],
             [
                 [
@@ -558,30 +535,6 @@ class DefaultSeeder extends Seeder
                 ],
                 ['risk owner', 'risk admin']
             ],
-            [
-                [
-                    "username" => "ahmad.mustofa",
-                    "password" => bcrypt("ahmad.mustofa"),
-                    "employee_name" => "AHMAD MUSTOFA",
-                    "employee_id" => "20002708",
-                    "organization_code" => "ap.50.6.1.2",
-                    "organization_name" => "Enterprise Risk Management",
-                    "email" => "ahmad.mustofa@injourneyairports.id",
-                    "personnel_area_name" => "Kantor Pusat",
-                    "personnel_area_code" => "PST",
-                    "position_name" => "Enterprise Risk Management Specialist",
-                    "unit_name" => "Governance & Risk Management",
-                    "sub_unit_name" => "Enterprise Risk Management",
-                    "unit_code" => "ap.50.6.1",
-                    "sub_unit_code" => "ap.50.6.1.2",
-                    "employee_grade_code" => "-",
-                    "employee_grade" => "-",
-                    'is_active' => true,
-                    "image_url" => "https://eoffice.injourneyairports.id/assets/img/profile/photoAP2/20002708.JPG"
-                ],
-                ['risk admin']
-            ]
-
         ];
 
         if (User::count() == 0) {

@@ -56,7 +56,7 @@ class AuthController extends Controller
                 DB::commit();
 
                 session()->put('current_role', $user->roles()->first());
-                return redirect()->route('dashboard');
+                return redirect()->route('dashboard.index');
             }
         } catch (Exception $e) {
             logger()->error('[Authentication] ' . $e->getMessage());
@@ -64,7 +64,7 @@ class AuthController extends Controller
 
         if (Auth::attempt($request->only('username', 'password'))) {
             session()->put('current_role', auth()->user()->roles()->first());
-            return redirect()->route('dashboard');
+            return redirect()->route('dashboard.index');
         }
 
         flash_message('validation', __('auth.failed'), State::ERROR);

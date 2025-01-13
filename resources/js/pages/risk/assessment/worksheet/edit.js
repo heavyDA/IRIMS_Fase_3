@@ -264,32 +264,35 @@ const worksheet = {
     mitigations: [],
 };
 
-const bumnScales = [];
-const heatmaps = [];
-const kriUnits = [];
-const existingControlTypes = [];
 const risk_numbers = ['a', 'b', 'c', 'd', 'e'];
-const unit_head = { pic_name: "" };
+const fetchers = {
+    data: {},
+    bumn_scales: [],
+    heat_maps: [],
+    unit_head: { pic_name: '' },
+    risk_metric: {},
+}
 
-await axios.get('/master/bumn-scale').then(res => res.status == 200 ? bumnScales.push(...res.data.data) : null).catch(err => console.log(err));
-await axios.get('/master/heatmap').then(res => res.status == 200 ? heatmaps.push(...res.data.data) : null).catch(err => console.log(err));
-await axios.get('/master/kri-unit').then(res => res.status == 200 ? kriUnits.push(...res.data.data) : null).catch(err => console.log(err));
-await axios.get('/master/existing-control-type').then(res => res.status == 200 ? existingControlTypes.push(...res.data.data) : null).catch(err => console.log(err));
-await axios.get('/profile/unit_head').then(res => {
-    if (res.status == 200) {
-        unit_head.pic_name = res.data.data?.pic_name || ''
-    }
-}).catch(err => console.log(err))
-
-const data = await axios.get(window.location.href.replace('/edit', ''))
-    .then(res => {
-        if (res.status == 200) {
-            return res.data.data
+const fetchData = async () => {
+    await Promise.allSettled([
+        axios.get(window.location.href.replace('/edit', '')),
+        axios.get('/master/bumn-scale'),
+        axios.get('/master/heatmap'),
+        axios.get('/profile/unit_head'),
+        axios.get('/profile/risk_metric'),
+    ]).then(res => {
+        for (let [index, key] of Object.keys(fetchers).entries()) {
+            if (res[index].status == 'fulfilled') {
+                const response = res[index].value
+                if (response.status == 200) {
+                    fetchers[key] = response.data.data
+                }
+            }
         }
-
-        return [];
     })
-    .catch(err => console.log(err));
+}
+
+await fetchData()
 
 const tables = {
     strategies: document.querySelector('#worksheetStrategyTable'),
@@ -525,7 +528,7 @@ const identificationChoicesInit = async () => {
 
         if (hasCustomData) {
             if (key.includes('[impact_scale]') || key == 'inherent_impact_scale') {
-                for (let item of bumnScales) {
+                for (let item of fetchers.bumn_scales) {
                     choices.push({
                         value: item.id,
                         label: item.scale,
@@ -533,7 +536,7 @@ const identificationChoicesInit = async () => {
                     })
                 }
             } else if (key.includes('[impact_probability_scale]') || key == 'inherent_impact_probability_scale') {
-                for (let item of heatmaps) {
+                for (let item of fetchers.heat_maps) {
                     choices.push({
                         value: item.id,
                         label: item.impact_probability,
@@ -566,7 +569,7 @@ const identificationChoicesInit = async () => {
             identificationChoices.inherent_impact_scale.enable();
 
             let choices = [];
-            for (let item of bumnScales) {
+            for (let item of fetchers.bumn_scales) {
                 if (item.impact_category !== risk_impact_category) continue;
                 choices.push({
                     id: item.id,
@@ -623,7 +626,7 @@ identificationRiskImpact.addEventListener('change', e => {
         identificationChoices.inherent_impact_scale.enable();
 
         let choices = [];
-        for (let item of bumnScales) {
+        for (let item of fetchers.bumn_scales) {
             if (item.impact_category !== risk_impact_category) continue;
             choices.push({
                 id: item.id,
@@ -710,7 +713,7 @@ const identificationDatePicker = flatpickr(identificationDateRange, {
             identificationEndDate.value = dayjs(end).format('YYYY-MM-DD');
         }
     },
-    defaultDate: [dayjs(data.identification.risk_impact_start_date).format('YYYY-MM-DD'), dayjs(data.identification.risk_impact_end_date).format('YYYY-MM-DD')],
+    defaultDate: [dayjs(fetchers.data.identification.risk_impact_start_date).format('YYYY-MM-DD'), dayjs(fetchers.data.identification.risk_impact_end_date).format('YYYY-MM-DD')],
     enableTime: false,
     allowInput: false,
 })
@@ -747,7 +750,8 @@ const calculateRisk = (
     targetExposure,
     targetRiskScale,
     targetRiskLevel,
-    isResidual = false
+    isResidual = false,
+    quarter
 ) => {
     let scale, probability;
 
@@ -761,11 +765,28 @@ const calculateRisk = (
 
     if (isResidual) {
         if (scale?.customProperties?.scale) {
-            targetImpactValue.value = formatNumeral(
-                (unformatNumeral(identificationInherentImpactValue.value, defaultConfigFormatNumeral) * scale.customProperties.scale).toString().replaceAll('.', ','),
-                defaultConfigFormatNumeral
-            );
-
+            if (quarter == 1) {
+                if (identificationRiskImpact.value == 'kualitatif') {
+                    targetImpactValue.value = formatNumeral(fetchers.risk_metric.limit, defaultConfigFormatNumeral)
+                } else {
+                    targetImpactValue.value = identificationInherentImpactValue.value
+                }
+            } else {
+                const scaleQ1 = identificationChoices[`residual[1][impact_scale]`].getValue(false)
+                if (scaleQ1?.value != 'Pilih') {
+                    const riskValueByLimit = parseFloat(
+                        (parseInt(scale.customProperties.scale) / parseInt(scaleQ1.customProperties.scale)) * parseFloat(
+                            unformatNumeral(identificationResidualImpactValues[0].value, defaultConfigFormatNumeral)
+                        )
+                    ).toFixed(2);
+                    targetImpactValue.value = formatNumeral(riskValueByLimit.toString().replaceAll('.', ','), defaultConfigFormatNumeral)
+                } else {
+                    targetImpactValue.value = formatNumeral("0", defaultConfigFormatNumeral)
+                    targetExposure.value = formatNumeral("0", defaultConfigFormatNumeral);
+                    targetRiskScale.value = null;
+                    targetRiskLevel.value = null;
+                }
+            }
         } else {
             targetImpactValue.value = formatNumeral("0", defaultConfigFormatNumeral)
             targetExposure.value = formatNumeral("0", defaultConfigFormatNumeral);
@@ -785,9 +806,8 @@ const calculateRisk = (
             );
         } else if (impactValue && probabilityValue && identificationRiskImpact.value == 'kualitatif') {
             targetExposure.value = formatNumeral(
-                (1 / 100 * impactValue * parseInt(scale.customProperties.scale) * (probabilityValue / 100)).toString().replaceAll('.', ','),
-                defaultConfigFormatNumeral
-            );
+                (1 / 100 * parseFloat(fetchers.risk_metric.limit) * parseInt(scale.customProperties.scale) * (probabilityValue / 100)).toString().replaceAll('.', ','),
+                defaultConfigFormatNumeral)
         }
 
         const result = targetImpactProbabilityScale._currentState.choices.find(
@@ -838,14 +858,13 @@ const residualItemsInit = () => {
             identificationResidualRiskExposures[i - 1],
             identificationResidualRiskScales[i - 1],
             identificationResidualRiskLevels[i - 1],
-            true
+            true,
+            i
         ]
-
 
         identificationSelects[`residual[${i}][impact_scale]`].addEventListener('change', e => {
             calculateRisk(...residualItem);
         })
-
         identificationForm.querySelector(`[name="residual[${i}][impact_probability]"`)
             .addEventListener('keyup', debounce(() => calculateRisk(...residualItem), 500))
 
@@ -856,10 +875,13 @@ residualItemsInit();
 
 identificationInherentImpactValue.addEventListener('input', (e) => {
     const value = formatNumeral(e.target.value, defaultConfigFormatNumeral);
+    const limit = fetchers.risk_metric.limit
 
     e.target.value = value;
     for (let i = 0; i < 4; i++) {
-        identificationResidualImpactValues[i].value = value;
+        if (identificationRiskImpact.value == 'kuantitatif') {
+            identificationResidualImpactValues[i].value = value;
+        }
         identificationResidualImpactValues[i].dispatchEvent(new Event('keyup'));
         identificationResidualImpactProbabilities[i].dispatchEvent(new Event('keyup'));
     }
@@ -1078,7 +1100,7 @@ mitigationCost.addEventListener('keyup', (e) => {
     e.target.value = formatNumeral(e.target.value, defaultConfigFormatNumeral);
 })
 const mitigationPic = treatmentMitigationForm.querySelector('[name="mitigation_pic"]');
-mitigationPic.value = unit_head.pic_name
+mitigationPic.value = fetchers.unit_head.pic_name
 
 const mitigationProgramType = treatmentMitigationForm.querySelector('[name="mitigation_rkap_program_type"]');
 let mitigationProgramTypeChoices = new Choices(mitigationProgramType, defaultConfigChoices);
@@ -1184,7 +1206,7 @@ const onTreatmentEdit = (data) => {
     treatmentRiskCauseNumberChoices.setChoiceByValue(data.risk_cause_number);
     treatmentForm.querySelector('[name="risk_treatment_option"]').value = data.risk_treatment_option;
     treatmentForm.querySelector('[name="risk_treatment_type"]').value = data.risk_treatment_type;
-    mitigationPic.value = unit_head.pic_name
+    mitigationPic.value = fetchers.unit_head.pic_name
 
     treatmentModal.show();
 }
@@ -1250,7 +1272,7 @@ treatmentModalElement.addEventListener('hidden.bs.modal', () => {
     mitigationProgramTypeChoices.destroy();
     mitigationProgramTypeChoices = new Choices(mitigationProgramType, defaultConfigChoices);
 
-    mitigationPic.value = unit_head.pic_name
+    mitigationPic.value = fetchers.unit_head.pic_name
     Object.keys(mitigationTextareas).forEach((key) => {
         mitigationTextareas[key].innerHTML = '';
         mitigationQuills[key].deleteText(0, mitigationQuills[key].getLength());
@@ -1271,31 +1293,31 @@ worksheetTabSubmitButton.addEventListener('click', (e) => {
         }).catch(err => console.log(err));
 })
 
-worksheet.context = data.context
-worksheet.identification = data.identification
-worksheet.strategies = data.strategies
-worksheet.incidents = data.incidents
-worksheet.mitigations = data.mitigations
+worksheet.context = fetchers.data.context
+worksheet.identification = fetchers.data.identification
+worksheet.strategies = fetchers.data.strategies
+worksheet.incidents = fetchers.data.incidents
+worksheet.mitigations = fetchers.data.mitigations
 
 
 if (worksheet?.mitigations[0]?.mitigation_pic) {
-    unit_head.pic_name = worksheet.mitigations[0].mitigation_pic
+    fetchers.unit_head.pic_name = worksheet.mitigations[0].mitigation_pic
     mitigationPic.value = worksheet.mitigations[0].mitigation_pic
 }
 
 
 
-for (const key of Object.keys(data.context)) {
-    contextForm.querySelector(`[name="${key}"]`).value = data.context[key];
+for (const key of Object.keys(fetchers.data.context)) {
+    contextForm.querySelector(`[name="${key}"]`).value = fetchers.data.context[key];
 }
 
-for (const key of Object.keys(data.identification)) {
+for (const key of Object.keys(fetchers.data.identification)) {
     if (key == 'id') {
         continue;
     }
 
     if (identificationTextareas.hasOwnProperty(key)) {
-        const content = new DOMParser().parseFromString(data.identification[key], 'text/html').body.textContent;
+        const content = new DOMParser().parseFromString(fetchers.data.identification[key], 'text/html').body.textContent;
         identificationTextareas[key].innerHTML = content;
 
         identificationQuills[key].clipboard.dangerouslyPasteHTML(content, 'api');
@@ -1306,58 +1328,58 @@ for (const key of Object.keys(data.identification)) {
 
     if (input.tagName == 'SELECT') {
         if (key == 'risk_impact_category') {
-            identificationRiskImpact.value = data.identification[key];
-            identificationRiskImpactChoices.setChoiceByValue(data.identification[key].toString());
+            identificationRiskImpact.value = fetchers.data.identification[key];
+            identificationRiskImpactChoices.setChoiceByValue(fetchers.data.identification[key].toString());
             identificationRiskImpact.dispatchEvent(new Event('change'));
         } else if (key == 'kbumn_target') {
-            identificationKBUMNTarget.value = data.identification[key];
-            identificationKBUMNTargetChoices.setChoiceByValue(data.identification[key].toString());
+            identificationKBUMNTarget.value = fetchers.data.identification[key];
+            identificationKBUMNTargetChoices.setChoiceByValue(fetchers.data.identification[key].toString());
             identificationKBUMNTarget.dispatchEvent(new Event('change'));
         } else if (key == 'kbumn_risk_category') {
-            identificationRiskCategory.value = data.identification[key];
-            identificationRiskCategoryChoices.setChoiceByValue(data.identification[key].toString());
+            identificationRiskCategory.value = fetchers.data.identification[key];
+            identificationRiskCategoryChoices.setChoiceByValue(fetchers.data.identification[key].toString());
             identificationRiskCategory.dispatchEvent(new Event('change'));
         } else if (key == 'kbumn_risk_category_t2') {
-            identificationRiskCategoryT2.value = data.identification[key];
-            identificationRiskCategoryT2Choices.setChoiceByValue(data.identification[key].toString());
+            identificationRiskCategoryT2.value = fetchers.data.identification[key];
+            identificationRiskCategoryT2Choices.setChoiceByValue(fetchers.data.identification[key].toString());
             identificationRiskCategoryT2.dispatchEvent(new Event('change'));
         } else if (key == 'kbumn_risk_category_t3') {
-            identificationRiskCategoryT3.value = data.identification[key];
-            identificationRiskCategoryT3Choices.setChoiceByValue(data.identification[key].toString());
+            identificationRiskCategoryT3.value = fetchers.data.identification[key];
+            identificationRiskCategoryT3Choices.setChoiceByValue(fetchers.data.identification[key].toString());
             identificationRiskCategoryT3.dispatchEvent(new Event('change'));
         } else if (key == 'existing_control_type') {
-            identificationExistingControlType.value = data.identification[key];
-            identificationExistingControlTypeChoices.setChoiceByValue(data.identification[key].toString());
+            identificationExistingControlType.value = fetchers.data.identification[key];
+            identificationExistingControlTypeChoices.setChoiceByValue(fetchers.data.identification[key].toString());
             identificationExistingControlType.dispatchEvent(new Event('change'));
         } else if (key == 'control_effectiveness_assessment') {
-            identificationControlEffectivenessAssessment.value = data.identification[key];
-            identificationControlEffectivenessAssessmentChoices.setChoiceByValue(data.identification[key].toString());
+            identificationControlEffectivenessAssessment.value = fetchers.data.identification[key];
+            identificationControlEffectivenessAssessmentChoices.setChoiceByValue(fetchers.data.identification[key].toString());
             identificationControlEffectivenessAssessment.dispatchEvent(new Event('change'));
         } else {
-            identificationSelects[key].value = data.identification[key];
-            identificationChoices[key].setChoiceByValue(data.identification[key]);
+            identificationSelects[key].value = fetchers.data.identification[key];
+            identificationChoices[key].setChoiceByValue(fetchers.data.identification[key]);
             identificationSelects[key].dispatchEvent(new Event('change'));
         }
         continue;
     }
 
     if (key.includes('impact_value') || key.includes('risk_exposure')) {
-        input.value = formatNumeral(data.identification[key], defaultConfigFormatNumeral);
+        input.value = formatNumeral(fetchers.data.identification[key], defaultConfigFormatNumeral);
     } else {
-        input.value = data.identification[key];
+        input.value = fetchers.data.identification[key];
     }
     input.dispatchEvent(new Event('change'));
 }
 
-for (const key of Object.keys(data.context)) {
+for (const key of Object.keys(fetchers.data.context)) {
     const contextInput = contextForm.querySelector(`[name="${key}"]`)
     if (contextInput.tagName == 'TEXTAREA') {
-        const content = new DOMParser().parseFromString(data.context[key], 'text/html').body.textContent;
+        const content = new DOMParser().parseFromString(fetchers.data.context[key], 'text/html').body.textContent;
         contextInput.innerHTML = content;
 
         targetBodyQuill.clipboard.dangerouslyPasteHTML(content, 'api');
     } else {
-        contextInput.value = data.context[key];
+        contextInput.value = fetchers.data.context[key];
     }
 }
 

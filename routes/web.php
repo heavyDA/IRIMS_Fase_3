@@ -26,8 +26,8 @@ Route::group(['prefix' => 'login', 'as' => 'auth.'], function () {
 Route::group(['middleware' => 'auth'], function () {
     Route::post('', [AuthController::class, 'change_role'])->name('change-role');
     Route::get('/', function () {
-        return view('layouts.app');
-    })->name('dashboard');
+        return view('dashboard.index');
+    })->name('dashboard.index');
 
     Route::get('profile/unit_head', [AuthController::class, 'get_unit_head'])->name('profile.get_unit_head');
     Route::get('profile/risk_metric', [AuthController::class, 'get_risk_metric'])->name('profile.get_risk_metric');
