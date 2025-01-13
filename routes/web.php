@@ -10,12 +10,7 @@ use App\Http\Controllers\Master\{
     PICController
 };
 use App\Http\Controllers\Risk\AssessmentController;
-use App\Jobs\PositionJob;
 use Illuminate\Support\Facades\Route;
-
-Route::get('test', function () {
-    PositionJob::dispatch();
-});
 
 Route::group(['prefix' => 'login', 'as' => 'auth.'], function () {
     Route::get('', fn() => view('auth.index'))->name('login');
