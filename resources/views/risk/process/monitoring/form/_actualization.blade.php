@@ -4,8 +4,6 @@
             <thead class="table-dark">
                 <tr>
                     <th rowspan="2">Aksi</th>
-                    <th class="d-none" rowspan="2" style="width: 100px;"></th>
-                    <th class="d-none" rowspan="2" style="width: 100px;"></th>
                     <th rowspan="2" style="width: 100px;">No. Penyebab Risiko</th>
                     <th rowspan="2" style="width: 240px;">Rencana Perlakuan Risiko</th>
                     <th rowspan="2" style="width: 240px;">Realisasi Perlakuan Risiko</th>
@@ -30,7 +28,7 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach ($worksheet->target->identification->incidents as $incident)
+                {{-- @foreach ($worksheet->target->identification->incidents as $incident)
                     @foreach ($incident->mitigations as $key => $mitigation)
                         <tr>
                             <td>
@@ -62,7 +60,7 @@
                             <td data-name="actualization_progress[4]"></td>
                         </tr>
                     @endforeach
-                @endforeach
+                @endforeach --}}
             </tbody>
         </table>
     </div>
@@ -83,7 +81,7 @@
                         <input type="hidden" name="id">
                         <input type="hidden" name="key">
                         <input type="hidden" name="quarter">
-                        <input type="hidden" name="mitigation_id">
+                        <input type="hidden" name="actualization_mitigation_id">
                         <div class="row mb-2">
                             <div class="col-3">
                                 No. Penyeybab Risiko
@@ -117,6 +115,15 @@
                             <div class="col">
                                 <div id="actualization_plan_output-editor" class="textarea"></div>
                                 <textarea class="form-control d-none" name="actualization_plan_output" rows="4"></textarea>
+                            </div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-3">
+                                Dokumen Pendukung<span class="text-danger">*</span>
+                            </div>
+                            <div class="col">
+                                <input type="file" class="form-control" name="actualization_document">
+                                <div id="actualization_document_wrapper" class="row d-none gap-2 mt-1 px-4"></div>
                             </div>
                         </div>
                         <div class="row mb-2">
@@ -158,7 +165,7 @@
                                 Key Risk Indicators<span class="text-danger">*</span>
                             </div>
                             <div class="col">
-                                <input type="text" class="form-control" name="actualization_kri">
+                                <input type="text" class="form-control not-allowed" disabled name="actualization_kri">
                             </div>
                         </div>
                         <div class="row mb-2">
@@ -168,11 +175,16 @@
                             <div class="col row">
                                 <div class="col">
                                     <label class="badge bg-success">Threshold</label>
-                                    <input type="text" class="form-control" name="actualization_kri_threshold">
+                                    <select name="actualization_kri_threshold" class="form-select">
+                                        <option>Pilih</option>
+                                        <option value="hijau">hijau</option>
+                                        <option value="kuning">kuning</option>
+                                        <option value="merah">merah</option>
+                                    </select>
                                 </div>
                                 <div class="col">
                                     <label class="badge bg-secondary">Skor</label>
-                                    <input type="number" class="form-control" name="actualization_kri_score">
+                                    <input type="number" class="form-control" name="actualization_kri_threshold_score">
                                 </div>
                             </div>
                         </div>
@@ -181,7 +193,7 @@
                                 Status Rencana Perlakuan Risiko<span class="text-danger">*</span>
                             </div>
                             <div class="col">
-                                <select name="actualization_status" class="form-select">
+                                <select name="actualization_plan_status" class="form-select">
                                     <option>Pilih</option>
                                     <option value="discontinue">Discontinue</option>
                                     <option value="continue">Continue</option>
@@ -194,8 +206,8 @@
                                 Penjelasan Status Rencana Perlakuan<span class="text-danger">*</span>
                             </div>
                             <div class="col">
-                                <div id="actualization_explanation-editor" class="textarea"></div>
-                                <textarea class="form-control d-none" name="actualization_explanation" rows="4"></textarea>
+                                <div id="actualization_plan_explanation-editor" class="textarea"></div>
+                                <textarea class="form-control d-none" name="actualization_plan_explanation" rows="4"></textarea>
                             </div>
                         </div>
                         <div class="row mb-2">
@@ -206,9 +218,9 @@
                                 @for ($i = 1; $i <= 4; $i++)
                                     <div class="col">
                                         <label
-                                            for="actualization_progress[{{ $i }}]">Q{{ $i }}</label>
+                                            for="actualization_plan_progress[{{ $i }}]">Q{{ $i }}</label>
                                         <input type="number" class="form-control not-allowed"
-                                            name="actualization_progress[{{ $i }}]" disabled>
+                                            name="actualization_plan_progress[{{ $i }}]" disabled>
                                     </div>
                                 @endfor
                             </div>

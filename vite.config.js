@@ -18,6 +18,7 @@ export default defineConfig({
 
                 'resources/js/pages/risk/process/index.js',
                 'resources/js/pages/risk/process/monitoring/index.js',
+                'resources/js/pages/risk/process/monitoring/edit.js',
                 'resources/js/pages/risk/process/monitoring/detail.js',
             ],
             refresh: true,

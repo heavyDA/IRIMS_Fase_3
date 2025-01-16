@@ -26,15 +26,15 @@
             <div class="row mb-1">
                 <div class="col-3">No. Risiko</div>
                 <div class="col">
-                    <input type="text" name="risk_number" disabled class="not-allowed form-control"
-                        value="{{ $worksheet->worksheet_number }}">
+                    <input type="text" value="{{ $worksheet->worksheet_number }}" name="risk_number" disabled
+                        class="not-allowed form-control" value="{{ $worksheet->worksheet_number }}">
                 </div>
             </div>
             <div class="row mb-1">
                 <div class="col-3">No. Penyebab Risiko</div>
                 <div class="col">
-                    <input type="text" name="risk_number" disabled class="not-allowed form-control"
-                        value="{{ $worksheet->worksheet_number }}">
+                    <select name="risk_cause_number" class="form-select">
+                    </select>
                 </div>
             </div>
             <div class="row mb-1">
@@ -42,8 +42,8 @@
                     Peristiwa Risiko
                 </div>
                 <div class="col">
-                    <div id="target_body-editor" class="textarea not-allowed"></div>
-                    <textarea type="text" name="target_body" class="d-none">{!! html_entity_decode($worksheet->target->body) !!}</textarea>
+                    <div id="risk_chronology_body-editor" class="textarea not-allowed"></div>
+                    <textarea type="text" name="risk_chronology_body" class="d-none"></textarea>
                 </div>
             </div>
             <div class="row mb-1">
@@ -149,7 +149,7 @@
                 </div>
             </div>
             <div class="row mb-3">
-                <div class="col-3">Level Risiko Inheren {{ $isQuantitative ? 'Kuantitatif' : 'Kualitatif' }}
+                <div class="col-3">Level Risiko Residual {{ $isQuantitative ? 'Kuantitatif' : 'Kualitatif' }}
                 </div>
                 <div class="col row">
                     @for ($quarter = 1; $quarter < 5; $quarter++)
@@ -165,10 +165,19 @@
                 <div class="col-3">Efektifitas Perlakuan Risiko</div>
                 <div class="col">
                     <select class="form-select w-100" name="risk_mitigation_effectiveness">
-                        <option>Pilih</option>
+                        <option value="">Pilih</option>
                         <option value="0">Tidak Efektif</option>
                         <option value="1">Efektif</option>
                     </select>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-3"></div>
+                <div class="col">
+                    <div class="d-flex">
+                        <button type="button" form="residualForm" class="btn btn-success"
+                            id="residualFormButton">Simpan Realisasi Risiko Residual</button>
+                    </div>
                 </div>
             </div>
         </div>

@@ -15,6 +15,7 @@ use App\Models\Risk\Assessment\WorksheetStrategy;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\Response;
 use Yajra\DataTables\Facades\DataTables;
@@ -110,52 +111,62 @@ class ProcessMonitoringController extends Controller
     public function create(string $worksheetId)
     {
         $worksheet = Worksheet::findByEncryptedIdOrFail($worksheetId);
-        $worksheet->load([
-            'target',
-            'target.identification',
-            'target.identification.kbumn_target',
-            'target.identification.risk_category_t2',
-            'target.identification.risk_category_t3',
-            'target.identification.incidents',
-            'target.identification.incidents.kri_unit',
-            'target.identification.incidents.mitigations',
-            'target.identification.incidents.mitigations.risk_treatment_option',
-            'target.identification.incidents.mitigations.risk_treatment_type',
-            'target.identification.incidents.mitigations.rkap_program_type',
+        if (request()->ajax()) {
+            $worksheet = $worksheet->load([
+                'target.identification.incidents.mitigations'
+            ]);
 
-            'target.identification.inherent',
-            'target.identification.residuals',
-            'target.identification.residuals.impact_scale',
-            'target.identification.residuals.impact_probability_scale',
-            'target.identification.incidents.mitigations',
-            'target.identification.existing_control_type',
-            'target.identification.control_effectiveness_assessment',
-            'target.strategies',
-            'histories.user',
-            'last_history.user',
+            $actualizations = [];
+            $residuals = [];
 
-            'monitorings',
-        ]);
+            $actualizationsIndex = 0;
+            $worksheet->target->identification->incidents->each(function ($incident) use ($worksheet, &$actualizations, &$residuals, &$actualizationsIndex) {
+                $quarter = ceil(date('m') / 3);
+                $residuals[] = [
+                    'incident_id' => $incident->id,
+                    'period_date' => date('Y-m-d'),
+                    'quarter' => $quarter,
+                    'risk_cause_number' => $incident->risk_cause_number,
+                    'risk_chronology_body' => $incident->risk_chronology_body,
+                    'risk_impact_category' => $worksheet->target->identification->risk_impact_category,
+                    'risk_mitigation_effectiveness' => '',
+                    'residual' => [],
+                ];
+                $incident->mitigations->each(function ($mitigation) use ($incident, $quarter, &$actualizations, &$actualizationsIndex) {
+                    $actualizations[] = [
+                        'key' => $actualizationsIndex,
+                        'risk_cause_number' => $incident->risk_cause_number,
+                        'actualization_mitigation_id' => $mitigation->id,
+                        'actualization_mitigation_plan' => $mitigation->mitigation_plan,
+                        'actualization_cost' => '',
+                        'actualization_cost_absorption' => '',
+                        'quarter' => $quarter,
+                        'actualization_documents' => [],
+                        'actualization_kri' => $incident->kri_body,
+                        'actualization_kri_threshold' => '',
+                        'actualization_kri_threshold_score' => '',
+                        'actualization_plan_body' => '',
+                        'actualization_plan_output' => '',
+                        "actualization_plan_progress[{$quarter}]" => '',
+                        'actualization_plan_status' => '',
+                        'actualization_plan_explanation' => '',
+                        'actualization_pic' => $mitigation->mitigation_pic,
+                        'actualization_pic_related' => '',
+                    ];
 
-        $worksheet->target->identification->residuals = $worksheet->target->identification->residuals->select(
-            'impact_value',
-            'impact_scale',
-            'impact_probability',
-            'impact_probability_scale',
-            'risk_exposure',
-            'risk_scale',
-            'risk_level'
-        )->map(function ($item) {
-            return [
-                $item['impact_value'],
-                $item['impact_scale']['scale'],
-                $item['impact_probability'],
-                $item['impact_probability_scale']['impact_probability'],
-                $item['risk_exposure'],
-                $item['risk_scale'],
-                $item['risk_level'],
-            ];
-        });
+                    $actualizationsIndex +=  1;
+                });
+            });
+
+            return response()->json([
+                'data' => [
+                    'residuals' => $residuals,
+                    'actualizations' => $actualizations
+                ]
+            ]);
+        }
+
+        $worksheet->load('target.identification');
 
         $isQuantitative = $worksheet->target->identification->risk_impact_category == 'kuantitatif';
 
@@ -177,33 +188,43 @@ class ProcessMonitoringController extends Controller
     public function store(string $worksheetId, Request $request)
     {
         $worksheet = Worksheet::findByEncryptedIdOrFail($worksheetId);
+        $directory = '';
         $user = auth()->user();
+
         try {
             $monitoring = $worksheet->monitorings()->create([
-                'period_date' => $request->residual['period_date'],
+                'period_date' => $request->residuals[0]['period_date'],
                 'created_by' => $user->employee_id,
                 'status' => DocumentStatus::DRAFT->value
             ]);
-            $monitoring->alteration()->create($request->alteration);
 
-            $residual = $request->residual;
-            if ($residual['residual']) {
-                foreach ($residual['residual'] ?? [] as $key => $item) {
-                    if ($item) {
-                        foreach ($item as $key => $value) {
-                            if ($key == 'impact_scale' || $key == 'impact_probability_scale') {
-                                $residual[$key . '_id'] = $value == 'Pilih' ? null : $value;
-                            } else {
-                                $residual[$key] = $value ?: '';
+            $residuals = [];
+            foreach ($request->residuals as $residual) {
+                $_residual = [
+                    'worksheet_identification_incident_id' => $residual['incident_id'],
+                    'quarter' => $residual['quarter'],
+                    'risk_mitigation_effectiveness' => (bool) $residual['risk_mitigation_effectiveness'],
+                ];
+
+                if (array_key_exists('residual', $residual)) {
+                    foreach ($residual['residual'] as $key => $item) {
+                        if ($item) {
+                            foreach ($item as $key => $value) {
+                                if ($key == 'impact_scale' || $key == 'impact_probability_scale') {
+                                    $_residual[$key . '_id'] = $value == 'Pilih' ? null : $value;
+                                } else {
+                                    $_residual[$key] = $value ?: '';
+                                }
                             }
+                            break;
                         }
-                        break;
                     }
                 }
+                $residuals[] = $_residual;
             }
 
-            unset($residual['residual'], $residual['inherent_body'], $residual['period_date']);
-            $monitoring->residual()->create($residual);
+            $monitoring->residuals()->createMany($residuals);
+            $monitoring->alteration()->create($request->alteration);
 
             $incident = [];
             foreach ($request->incident as $key => $value) {
@@ -232,8 +253,8 @@ class ProcessMonitoringController extends Controller
                         }
                     } else if (str_contains($key, 'kri')) {
                         $actualization[str_replace('actualization_', '', $key)] = $value ?: '';
-                    } else if ($key == 'mitigation_id') {
-                        $actualization['worksheet_incident_' . $key] = $value ?: null;
+                    } else if ($key == 'actualization_mitigation_id') {
+                        $actualization['worksheet_incident_mitigation_id'] = $value ?: null;
                     } else {
                         $actualization[$key] = $value ?: '';
                     }
@@ -241,8 +262,7 @@ class ProcessMonitoringController extends Controller
 
                 $actualizations[] = $actualization;
             }
-
-            $monitoring->actualizations()->createMany($actualizations);
+            $actualizations = $monitoring->actualizations()->createMany($actualizations);
             $monitoring->histories()->create([
                 'created_by' => $user->employee_id,
                 'created_role' => 'risk admin',
@@ -253,6 +273,42 @@ class ProcessMonitoringController extends Controller
             ]);
 
             $worksheet->update(['status_monitoring' => DocumentStatus::ON_PROGRESS_MONITORING->value]);
+
+
+            foreach ($request->actualizations as $key => $item) {
+                $directory = $user->sub_unit_code
+                    . '/risk_monitoring/'
+                    . $monitoring->period_date_format->translatedFormat('F')
+                    . '/'
+                    . $item['actualization_mitigation_id'];
+
+                if (!Storage::disk('local')->exists($directory)) {
+                    Storage::disk('local')->makeDirectory($directory);
+                }
+
+                $documents = [];
+                if ($request->hasFile("actualizations.{$key}.actualization_documents")) {
+                    $files = $request->actualizations[$key]['actualization_documents'];
+                    if ($files) {
+                        foreach ($files as $file) {
+                            if ($file) {
+                                $documents[] = [
+                                    'name' => $file->getClientOriginalName(),
+                                    'size' => $file->getSize(),
+                                    'type' => $file->getClientOriginalExtension(),
+                                    'path' => $directory . '/' . $file->getClientOriginalName(),
+                                ];
+
+                                $file->storeAs($directory, $file->getClientOriginalName());
+                            }
+                        }
+                    }
+                }
+
+                if ($documents) {
+                    $actualizations[$key]->update(['documents' => json_encode($documents)]);
+                }
+            }
 
             DB::commit();
             return response()->json([
@@ -271,13 +327,14 @@ class ProcessMonitoringController extends Controller
         }
     }
 
-    public function show_monitoring(string $monitoringId)
+    public function show_monitoring(string $monitoring_id)
     {
-        $monitoring = WorksheetMonitoring::findByEncryptedIdOrFail($monitoringId);
+        $monitoring = WorksheetMonitoring::findByEncryptedIdOrFail($monitoring_id);
         $monitoring->load([
-            'residual.impact_scale',
-            'residual.impact_probability_scale',
-            'actualizations',
+            'residuals.impact_scale',
+            'residuals.impact_probability_scale',
+            'residuals.incident',
+            'actualizations.mitigation.incident',
             'alteration',
             'incident',
             'histories',
@@ -285,109 +342,130 @@ class ProcessMonitoringController extends Controller
         ]);
 
         $worksheet = Worksheet::findOrFail($monitoring->worksheet_id);
-        $worksheet->load([
-            'target',
-            'target.identification',
-            'target.identification.kbumn_target',
-            'target.identification.risk_category_t2',
-            'target.identification.risk_category_t3',
-            'target.identification.incidents',
-            'target.identification.incidents.kri_unit',
-            'target.identification.incidents.mitigations',
-            'target.identification.incidents.mitigations.risk_treatment_option',
-            'target.identification.incidents.mitigations.risk_treatment_type',
-            'target.identification.incidents.mitigations.rkap_program_type',
-
-            'target.identification.inherent',
-            'target.identification.residuals',
-            'target.identification.residuals.impact_scale',
-            'target.identification.residuals.impact_probability_scale',
-            'target.identification.incidents.mitigations',
-            'target.identification.existing_control_type',
-            'target.identification.control_effectiveness_assessment',
-            'target.strategies'
-        ]);
-
-        $worksheet->target->identification->residuals = $worksheet->target->identification->residuals->select(
-            'impact_value',
-            'impact_scale',
-            'impact_probability',
-            'impact_probability_scale',
-            'risk_exposure',
-            'risk_scale',
-            'risk_level'
-        )->map(function ($item) {
-            return [
-                $item['impact_value'],
-                $item['impact_scale']['scale'],
-                $item['impact_probability'],
-                $item['impact_probability_scale']['impact_probability'],
-                $item['risk_exposure'],
-                $item['risk_scale'],
-                $item['risk_level'],
-            ];
-        });
+        $worksheet->load('target.identification.inherent');
 
         $title = 'Risk Monitoring';
         return view('risk.process.monitoring.show', compact('title', 'worksheet', 'monitoring'));
     }
 
-    public function edit_monitoring(string $monitoringId)
+    public function edit_monitoring(string $monitoring_id)
     {
-        $monitoring = WorksheetMonitoring::findByEncryptedIdOrFail($monitoringId);
+        $monitoring = WorksheetMonitoring::findByEncryptedIdOrFail($monitoring_id);
         $monitoring->load([
-            'residual',
+            'residuals',
             'actualizations',
             'alteration',
             'incident',
         ]);
         $worksheet = Worksheet::findOrFail($monitoring->worksheet_id);
-        $worksheet->load([
-            'target',
-            'target.identification',
-            'target.identification.kbumn_target',
-            'target.identification.risk_category_t2',
-            'target.identification.risk_category_t3',
-            'target.identification.incidents',
-            'target.identification.incidents.kri_unit',
-            'target.identification.incidents.mitigations',
-            'target.identification.incidents.mitigations.risk_treatment_option',
-            'target.identification.incidents.mitigations.risk_treatment_type',
-            'target.identification.incidents.mitigations.rkap_program_type',
+        if (request()->ajax()) {
+            $actualizations = [];
+            $residuals = [];
 
-            'target.identification.inherent',
-            'target.identification.residuals',
-            'target.identification.residuals.impact_scale',
-            'target.identification.residuals.impact_probability_scale',
-            'target.identification.incidents.mitigations',
-            'target.identification.existing_control_type',
-            'target.identification.control_effectiveness_assessment',
-            'target.strategies',
-            'histories.user',
-            'last_history.user',
+            $actualizationsIndex = 0;
 
-            'monitorings',
-        ]);
+            $monitoring->load([
+                'residuals.incident',
+                'actualizations.mitigation.incident',
+            ]);
 
-        $worksheet->target->identification->residuals = $worksheet->target->identification->residuals->select(
-            'impact_value',
-            'impact_scale',
-            'impact_probability',
-            'impact_probability_scale',
-            'risk_exposure',
-            'risk_scale',
-            'risk_level'
-        )->map(function ($item) {
-            return [
-                $item['impact_value'],
-                $item['impact_scale']['scale'],
-                $item['impact_probability'],
-                $item['impact_probability_scale']['impact_probability'],
-                $item['risk_exposure'],
-                $item['risk_scale'],
-                $item['risk_level'],
+            foreach ($monitoring->residuals as $index => $residual) {
+                $values = [];
+                for ($i = 0; $i <= 4; $i++) {
+                    if ($i == $residual->quarter) {
+                        $values[] =
+                            [
+                                'impact_probability' =>     $residual->impact_probability,
+                                'impact_probability_scale' => $residual->impact_probability_scale_id ?? '',
+                                'impact_scale' => $residual->impact_scale_id ?? '',
+                                'impact_value' => $residual->impact_value,
+                                'risk_exposure' => $residual->risk_exposure,
+                                'risk_level' => $residual->risk_level,
+                                'risk_scale' => $residual->risk_scale,
+                            ];
+                    } else {
+                        $values[] = [];
+                    }
+                }
+
+                $residuals[] = [
+                    'key' => $index,
+                    'id' => $residual->id,
+                    'period_date' => $monitoring->period_date,
+                    'incident_id' => $residual->incident->id,
+                    'risk_cause_number' => $residual->incident->risk_cause_number,
+                    'risk_chronology_body' => $residual->incident->risk_chronology_body,
+                    'risk_impact_category' => $worksheet->target->identification->risk_impact_category,
+                    'risk_mitigation_effectiveness' => $residual->risk_mitigation_effectiveness,
+                    'quarter' => $residual->quarter,
+                    "residual" => $values
+                ];
+            }
+
+            foreach ($monitoring->actualizations as $index => $actualization) {
+                $actualizations[] = [
+                    'key' => $index,
+                    'id' => $monitoring->actualizations[$index]->id,
+                    'risk_cause_number' => $actualization->mitigation->incident->risk_cause_number,
+                    'actualization_mitigation_id' => $actualization->mitigation->id,
+                    'actualization_mitigation_plan' => $actualization->mitigation->mitigation_plan,
+                    'actualization_cost' => $monitoring->actualizations[$index]->actualization_cost,
+                    'actualization_cost_absorption' => $monitoring->actualizations[$index]->actualization_cost_absorption,
+                    'quarter' => $monitoring->residuals[0]->quarter,
+                    'actualization_documents' => $monitoring->actualizations[$index]->documents,
+                    'actualization_kri' => $actualization->mitigation->incident->kri_body,
+                    'actualization_kri_threshold' => $monitoring->actualizations[$index]->kri_threshold ?? '',
+                    'actualization_kri_threshold_score' => $monitoring->actualizations[$index]->kri_threshold_score ?? '',
+                    'actualization_plan_body' => $monitoring->actualizations[$index]->actualization_plan_body,
+                    'actualization_plan_output' => $monitoring->actualizations[$index]->actualization_plan_output,
+                    "actualization_plan_progress[{$monitoring->residuals[0]->quarter}]" => $monitoring->actualizations[$index]->actualization_plan_progress,
+                    'actualization_plan_status' => $monitoring->actualizations[$index]->actualization_plan_status,
+                    'actualization_plan_explanation' => $monitoring->actualizations[$index]->actualization_plan_explanation,
+                    'actualization_pic' => $actualization->mitigation->mitigation_pic,
+                    'actualization_pic_related' => $monitoring->actualizations[$index]->unit_code,
+                ];
+            }
+
+            $alteration = [
+                'body' => $monitoring->alteration->body,
+                'impact' => $monitoring->alteration->impact,
+                'description' => $monitoring->alteration->description
             ];
-        });
+
+            $incident = [
+                'incident_body' => $monitoring->incident->incident_body,
+                'incident_identification' => $monitoring->incident->incident_identification,
+                'incident_category' => $monitoring->incident->incident_category_id,
+                'incident_source' => $monitoring->incident->incident_source,
+                'incident_cause' => $monitoring->incident->incident_cause,
+                'incident_handling' => $monitoring->incident->incident_handling,
+                'incident_description' => $monitoring->incident->incident_description,
+                'risk_category_t2' => $monitoring->incident->risk_category_t2_id,
+                'risk_category_t3' => $monitoring->incident->risk_category_t3_id,
+                'loss_description' => $monitoring->incident->loss_description,
+                'loss_value' => $monitoring->incident->loss_value,
+                'incident_repetitive' => $monitoring->incident->incident_repetitive,
+                'incident_frequency' => $monitoring->incident->incident_frequency_id,
+                'mitigation_plan' => $monitoring->incident->mitigation_plan,
+                'actualization_plan' => $monitoring->incident->actualization_plan,
+                'follow_up_plan' => $monitoring->incident->follow_up_plan,
+                'related_party' => $monitoring->incident->related_party,
+                'insurance_status' => $monitoring->incident->insurance_status,
+                'insurance_permit' => $monitoring->incident->insurance_permit,
+                'insurance_claim' => $monitoring->incident->insurance_claim,
+            ];
+
+            return response()->json([
+                'data' => [
+                    'residuals' => $residuals,
+                    'actualizations' => $actualizations,
+                    'alteration' => $alteration,
+                    'incident' => $incident,
+                ]
+            ]);
+        }
+
+        $worksheet->load('target.identification.inherent');
 
         $isQuantitative = $worksheet->target->identification->risk_impact_category == 'kuantitatif';
 
@@ -396,7 +474,7 @@ class ProcessMonitoringController extends Controller
         $incident_categories = IncidentCategory::all();
 
         $title = 'Form Risk Monitoring';
-        return view('risk.process.monitoring.create', compact(
+        return view('risk.process.monitoring.edit', compact(
             'title',
             'monitoring',
             'worksheet',
@@ -407,9 +485,171 @@ class ProcessMonitoringController extends Controller
         ));
     }
 
-    public function update_status_monitoring(string $monitoringId, Request $request)
+    public function update_monitoring(string $monitoring_id, Request $request)
     {
-        $monitoring = WorksheetMonitoring::findByEncryptedIdOrFail($monitoringId);
+        $user = auth()->user();
+        $monitoring = WorksheetMonitoring::findByEncryptedIdOrFail($monitoring_id);
+        $monitoring->load(['alteration', 'incident']);
+        try {
+            DB::beginTransaction();
+            $monitoring->update(['period_date' => $request->residuals[0]['period_date']]);
+            $residuals = [];
+            $residuals_new  = [];
+            foreach ($request->residuals as $residual) {
+                $_residual = [
+                    'worksheet_identification_incident_id' => $residual['incident_id'],
+                    'quarter' => $residual['quarter'],
+                    'risk_mitigation_effectiveness' => (bool) $residual['risk_mitigation_effectiveness'],
+                ];
+
+                if (array_key_exists('residual', $residual)) {
+                    foreach ($residual['residual'] as $key => $item) {
+                        if ($item) {
+                            foreach ($item as $key => $value) {
+                                if ($key == 'impact_scale' || $key == 'impact_probability_scale') {
+                                    $_residual[$key . '_id'] = $value == 'Pilih' ? null : $value;
+                                } else {
+                                    $_residual[$key] = $value ?: '';
+                                }
+                            }
+                            break;
+                        }
+                    }
+                }
+
+                if ($residual['id']) {
+                    $monitoring->residuals()->where('id', $residual['id'])->update($_residual);
+                    $residuals[] = $_residual;
+                } else {
+                    $residuals_new[] = $_residual;
+                }
+            }
+
+            $monitoring->residuals()->createMany($residuals_new);
+
+            $monitoring->alteration->update($request->alteration);
+
+            $incident = [];
+            foreach ($request->incident as $key => $value) {
+                if (str_contains($key, 'category') || $key == 'incident_frequency') {
+                    $incident[$key . '_id'] = $value == 'Pilih' ? null : $value;
+                } else if ($key == 'incident_repetitive' || $key == 'insurance_status') {
+                    $incident[$key] = $value == 'Pilih' || $value == '0' ? false : $value;
+                } else {
+                    $incident[$key] = $value ?: '';
+                }
+            }
+            $monitoring->incident->update($incident);
+
+            $actualizations = [];
+            $actualizations_new = [];
+            foreach ($request->actualizations as $actual) {
+                $actualization = [];
+                foreach ($actual as $key => $value) {
+                    if (str_contains($key, 'kri')) {
+                        $actualization[str_replace('actualization_', '', $key)] = $value ?: '';
+                    } else if ($key == 'actualization_mitigation_id') {
+                        $actualization['worksheet_incident_mitigation_id'] = $value ?: null;
+                    } else if ($key == 'actualization_pic_related') {
+                        $actualization['unit_code'] = $value ?: '';
+                    } else {
+                        $actualization[$key] = $value ?: '';
+                    }
+                }
+
+                unset(
+                    $actualization['actualization_documents'],
+                    $actualization['actualization_pic'],
+                    $actualization['key'],
+                    $actualization['kri'],
+                    $actualization['risk_cause_number'],
+                    $actualization['actualization_mitigation_plan'],
+                    $actualization['actualization_pic'],
+                );
+
+                if ($actual['id']) {
+                    $monitoring->actualizations()->where('id', $actual['id'])->update($actualization);
+                    $actualizations[] = $actualization;
+                } else {
+                    $actualizations_new[] = $actualization;
+                }
+            }
+
+            $actualizations_new = $monitoring->actualizations()->createMany($actualizations_new)->toArray();
+            $monitoring->histories()->create([
+                'created_by' => $user->employee_id,
+                'created_role' => session()->get('current_role')->name,
+                'receiver_id' => 2,
+                'receiver_role' => session()->get('current_role')->name,
+                'status' => DocumentStatus::DRAFT->value,
+                'note' => 'Memperbarui laporan monitoring'
+            ]);
+
+            $monitoring->worksheet()->update(['status_monitoring' => DocumentStatus::ON_PROGRESS_MONITORING->value]);
+
+
+            foreach ($request->actualizations as $key => $item) {
+                $directory = $user->sub_unit_code
+                    . '/risk_monitoring/'
+                    . $monitoring->period_date_format->translatedFormat('F')
+                    . '/'
+                    . $item['actualization_mitigation_id'];
+
+                if (!Storage::disk('local')->exists($directory)) {
+                    Storage::disk('local')->makeDirectory($directory);
+                }
+
+                $documents = [];
+                if ($request->hasFile("actualizations.{$item['key']}.actualization_documents")) {
+                    $files = $request->actualizations[$item['key']]['actualization_documents'];
+                    if ($files) {
+                        foreach ($files as $file) {
+                            if (is_array($file)) {
+                                $documents[] = $file;
+                            } else if ($file) {
+                                $documents[] = [
+                                    'name' => $file->getClientOriginalName(),
+                                    'size' => $file->getSize(),
+                                    'type' => $file->getClientOriginalExtension(),
+                                    'path' => $directory . '/' . $file->getClientOriginalName(),
+                                ];
+
+                                $file->storeAs($directory, $file->getClientOriginalName());
+                            }
+                        }
+                    }
+                }
+                if ($documents) {
+                    if (array_key_exists($item['key'], $actualizations_new) && !$item['id']) {
+                        $monitoring
+                            ->actualizations()
+                            ->where('id', $actualizations_new[$key]['id'])
+                            ->update(['documents' => json_encode($documents)]);
+                        continue;
+                    }
+
+                    $index = array_search($item['id'], array_column($actualizations, 'id'));
+                    $monitoring
+                        ->actualizations()
+                        ->where('id', $actualizations[$index]['id'])
+                        ->update(['documents' => json_encode($documents)]);
+                }
+            }
+
+            DB::commit();
+            return response()->json([
+                'data' => ['redirect' => route('risk.process.monitoring.show_monitoring', $monitoring_id)]
+            ]);
+        } catch (Exception $e) {
+            DB::rollBack();
+            logger()->error('[Worksheet Monitoring] Update Monitoring with ID ' . $monitoring->id . ' ' . $e->getMessage());
+            return response()->json(['message' => 'Gagal memperbarui laporan monitoring'], Response::HTTP_BAD_REQUEST);
+        }
+    }
+
+    public function update_status_monitoring(string $monitoring_id, Request $request)
+    {
+        $monitoring = WorksheetMonitoring::findByEncryptedIdOrFail($monitoring_id);
         $currentRole = session()->get('current_role');
 
         $rule = Str::snake($currentRole->name) . '_rule';
@@ -420,11 +660,11 @@ class ProcessMonitoringController extends Controller
             DB::commit();
 
             flash_message('flash_message', 'Status berhasil diperbarui', State::SUCCESS);
-            return redirect()->route('risk.process.monitoring.show_monitoring', $monitoringId);
+            return redirect()->route('risk.process.monitoring.show_monitoring', $monitoring_id);
         } catch (Exception $e) {
             DB::rollBack();
             flash_message('flash_message', $e->getMessage(), State::ERROR);
-            return redirect()->route('risk.process.monitoring.show_monitoring', $monitoringId);
+            return redirect()->route('risk.process.monitoring.show_monitoring', $monitoring_id);
         }
     }
 

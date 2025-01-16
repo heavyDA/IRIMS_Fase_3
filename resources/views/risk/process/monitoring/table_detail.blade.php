@@ -70,11 +70,17 @@
 
                                 @isset($monitoring)
                                     @if (!str_contains(request()->route()->getName(), 'edit'))
-                                        @if (session()->get('current_role')?->name == 'risk admin' && $monitoring->last_history->status == 'draft')
+                                        @if (
+                                            (session()->get('current_role')?->name == 'risk admin' && $monitoring->last_history->status == 'draft') ||
+                                                (session()->get('current_role')?->name == 'risk owner' &&
+                                                    in_array($monitoring->last_history->status, ['draft', 'on review'])) ||
+                                                session()->get('current_role')?->name == 'risk analis')
                                             <a href="{{ route('risk.process.monitoring.edit_monitoring', $monitoring->getEncryptedId()) }}"
                                                 style="min-width: 128px;" class="btn btn-success">
                                                 <span><i class="ti ti-edit"></i></span>&nbsp;Update
                                             </a>
+                                        @endif
+                                        @if (session()->get('current_role')?->name == 'risk admin' && $monitoring->last_history->status == 'draft')
                                             @include('risk.process.monitoring.history._risk_admin')
                                         @elseif (session()->get('current_role')?->name == 'risk owner' && $monitoring->last_history->status == 'on review')
                                             @include('risk.process.monitoring.history._risk_owner')

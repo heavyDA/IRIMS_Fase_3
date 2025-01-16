@@ -6,9 +6,7 @@
                         <th rowspan="3">Nama Perusahaan</th>
                         <th rowspan="3">Kode Perusahaan</th>
                         <th rowspan="3">Sasaran Perusahaan</th>
-                        <th rowspan="3">Sasaran KBUMN</th>
-                        <th rowspan="3">Kategori Risiko BUMN</th>
-                        <th rowspan="3">Kategori Risiko T2 & T3 KBUMN</th>
+                        <th rowspan="3">Kategori Risiko T2 & T3</th>
                         <th style="width: 220px !important;" rowspan="3">Peristiwa Risiko</th>
                         <th style="width: 220px !important;" rowspan="3">Deskripsi Peristiwa Risiko</th>
                         <th style="" rowspan="3">No. Penyebab Risiko</th>
@@ -23,21 +21,21 @@
                         <th style="" rowspan="3">Kategori Dampak</th>
                         <th style="" rowspan="3">Deskripsi Dampak</th>
                         <th style="" rowspan="3">Perkiraan Waktu Terpapar Risiko</th>
-                        <th style="" colspan="12">Risiko Inheren</th>
+                        <th style="" colspan="8">Risiko Inheren</th>
                         <th style="" colspan="28">Target Risiko Residual</th>
                     </tr>
                     <tr style="vertical-align: bottom;">
                         <th rowspan="2">Aman</th>
                         <th rowspan="2">Hati-Hati</th>
                         <th rowspan="2">Bahaya</th>
-                        <th style="" rowspan="2">Asumsi Perhitungan Dampak</th>
-                        <th style="" rowspan="2">Nilai Dampak</th>
-                        <th style="" rowspan="1" colspan="2">Skala Dampak</th>
-                        <th style="" rowspan="2">Nilai Probabilitas (%)</th>
-                        <th style="" rowspan="1" colspan="2">Skala Probabilitas</th>
-                        <th style="" rowspan="2">Eksposur Risiko</th>
-                        <th style="" rowspan="1" colspan="2">Skala Risiko</th>
-                        <th style="" rowspan="1" colspan="2">Level Risiko</th>
+                        <th rowspan="2" style="">Asumsi Perhitungan Dampak</th>
+                        <th rowspan="2" style="">Nilai Dampak</th>
+                        <th rowspan="2" style="">Skala Dampak</th>
+                        <th rowspan="2" style="">Nilai Probabilitas (%)</th>
+                        <th rowspan="2" style="">Skala Probabilitas</th>
+                        <th rowspan="2" style="">Eksposur Risiko</th>
+                        <th rowspan="2" style="">Skala Risiko</th>
+                        <th rowspan="2" style="">Level Risiko</th>
                         <th colspan="4">Nilai Dampak</th>
                         <th colspan="4">Skala Dampak</th>
                         <th colspan="4">Nilai Probabilitas (%)</th>
@@ -47,14 +45,6 @@
                         <th colspan="4">Level Risiko</th>
                     </tr>
                     <tr style="vertical-align: bottom;">
-                        <th>BUMN</th>
-                        <th>KBUMN</th>
-                        <th>BUMN</th>
-                        <th>KBUMN</th>
-                        <th>BUMN</th>
-                        <th>KBUMN</th>
-                        <th>BUMN</th>
-                        <th>KBUMN</th>
                         @for ($i = 0; $i < 7; $i++)
                             @for ($q = 1; $q <= 4; $q++)
                                 <th>Q{{ $q }}</th>
@@ -70,8 +60,6 @@
                                 <td>{{ $worksheet->unit_name }}</td>
                                 <td>{{ $worksheet->unit_code }}</td>
                                 <td>{!! html_entity_decode($worksheet->target->body) !!}</td>
-                                <td>{{ $worksheet->target->identification->kbumn_target->name }}</td>
-                                <td>{{ $worksheet->target->identification->risk_category_t3->name }}</td>
                                 <td>{{ $worksheet->target->identification->risk_category_t2->name . ' & ' . $worksheet->target->identification->risk_category_t3->name }}
                                 </td>
                                 <td>{!! html_entity_decode($incident->risk_chronology_body) !!}</td>
@@ -95,19 +83,15 @@
                                 <td>Rp.{{ number_format((float) $worksheet->target->identification->inherent->impact_value, 2, ',', '.') }}
                                 </td>
                                 <td>{{ $worksheet->target->identification->inherent->impact_scale->scale }}</td>
-                                <td>-</td>
                                 <td>{{ $worksheet->target->identification->inherent->impact_probability }}</td>
                                 <td>{{ $worksheet->target->identification->inherent->impact_probability_scale->impact_probability }}
                                 </td>
-                                <td>-</td>
                                 <td>Rp.{{ number_format((float) $worksheet->target->identification->inherent->risk_exposure, 2, ',', '.') }}
                                 </td>
                                 <td>{{ $worksheet->target->identification->inherent->impact_probability_scale->risk_scale }}
                                 </td>
-                                <td>-</td>
                                 <td>{{ $worksheet->target->identification->inherent->impact_probability_scale->risk_level }}
                                 </td>
-                                <td>-</td>
                                 @for ($i = 0; $i < 7; $i++)
                                     @for ($j = 0; $j < count($worksheet->target->identification->residuals); $j++)
                                         @if ($i == 0 || $i == 4)

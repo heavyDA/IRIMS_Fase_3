@@ -14,3 +14,9 @@ if (!function_exists('flash_message')) {
         session()->flash($name, ['message' => $message, 'type' => $type]);
     }
 }
+if (!function_exists('money_format')) {
+    function money_format($value = 0, $prefix = 'Rp.')
+    {
+        return $prefix . number_format($value, 2, ',', '.');
+    }
+}

@@ -27,7 +27,9 @@ class PICController extends Controller
                             $_item[strtolower($key)] = $item[$key];
                         }
 
-                        $data[] = $_item;
+                        if ($_item['unit_code']) {
+                            $data[] = $_item;
+                        }
                     }
 
                     Cache::put('master.positions', $data, now()->addMinutes(5));

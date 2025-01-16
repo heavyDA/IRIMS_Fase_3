@@ -76,6 +76,6 @@ class Worksheet extends Model
 
     public function monitorings()
     {
-        return $this->hasMany(WorksheetMonitoring::class);
+        return $this->hasMany(WorksheetMonitoring::class)->oldest('period_date');
     }
 }

@@ -137,12 +137,15 @@ const fetchData = async () => {
 
                 monitoring.residuals = data.residuals
                 monitoring.actualizations = data.actualizations
+                monitoring.alteration = data.alteration
+                monitoring.incident = data.incident
             }
         }
     })
 }
 
 await fetchData()
+
 let currentQuarter = 1;
 const residualForm = document.querySelector('#residualForm');
 const residualFormButton = residualForm.querySelector('#residualFormButton');
@@ -170,7 +173,7 @@ const monitoringPeriodPicker = flatpickr(monitoringPeriodDate, {
         const value = dayjs(dateStr)
         currentQuarter = Math.ceil((value.month() + 1) / 3)
 
-        monitoring.residuals.forEach((residual, index) => {
+        monitoring.residuals.forEach((index, residual) => {
             residualFormSubmit(index)
         })
         monitoringEnableQuarter(currentQuarter)
@@ -182,7 +185,6 @@ const residualRiskCauseNumber = residualForm.querySelector('[name="risk_cause_nu
 const residualRiskCauseNumberChoices = new Choices(residualRiskCauseNumber, defaultConfigChoices);
 const residualRiskMitigationEffectiveness = residualForm.querySelector('[name="risk_mitigation_effectiveness"]');
 const riskNumbers = [];
-
 for (const [key, residual] of monitoring.residuals.entries()) {
     riskNumbers.push({
         value: key,
@@ -193,9 +195,9 @@ for (const [key, residual] of monitoring.residuals.entries()) {
 }
 
 residualRiskCauseNumberChoices.clearChoices().setChoices(riskNumbers);
-
 let currentResidual = 0;
 residualRiskCauseNumber.addEventListener('change', (e) => {
+
     const selected = residualRiskCauseNumberChoices.getValue(false)
     if (!selected) return
     const item = selected.customProperties
@@ -206,8 +208,8 @@ residualRiskCauseNumber.addEventListener('change', (e) => {
     residualTextareas['risk_chronology_body'].value = item.risk_chronology_body
     residualQuills['risk_chronology_body'].root.innerHTML = item.risk_chronology_body
     residualQuills['risk_chronology_body'].emitter.emit('text-change')
-
     let current = monitoring.residuals[currentResidual]
+    currentQuarter = current.quarter
     let residual = {}
     current?.residual?.forEach((item, key) => {
         if (key == currentQuarter) {
@@ -215,8 +217,8 @@ residualRiskCauseNumber.addEventListener('change', (e) => {
         }
     })
 
-    residualImpactValue[`residual[${currentQuarter}][impact_value]`].value = residual?.impact_value ? formatNumeral(residual.impact_value, defaultConfigFormatNumeral) : ''
-    residualImpactScaleSelects[`residual[${currentQuarter}][impact_scale]`].setChoiceByValue(residual?.impact_scale ?? 'Pilih')
+    residualImpactValue[`residual[${currentQuarter}][impact_value]`].value = residual?.impact_value ? formatNumeral(residual.impact_value.replaceAll('.', ','), defaultConfigFormatNumeral) : ''
+    residualImpactScaleSelects[`residual[${currentQuarter}][impact_scale]`].setChoiceByValue(residual?.impact_scale?.toString() ?? 'Pilih')
     residualImpactProbability[`residual[${currentQuarter}][impact_probability]`].value = residual?.impact_probability ?? ''
     residualRiskMitigationEffectiveness.value = current?.risk_mitigation_effectiveness ?? ''
 
@@ -266,24 +268,23 @@ for (let element of residualForm.querySelectorAll('input, select')) {
     } else if (element.name.includes('[impact_probability]')) {
         residualImpactProbability[element.name] = element
         residualImpactProbability[element.name].addEventListener('input', e => {
-            const choices = [];
-            fetchers.heat_maps.forEach(heatmap => {
-                choices.push({
-                    value: heatmap.id,
-                    label: heatmap.impact_probability,
-                    selected: heatmap.id == element.value,
-                    customProperties: heatmap
-                })
-            });
-
-            residualImpactProbabilityScaleSelects[element.name.replaceAll('[impact_probability]', '[impact_probability_scale]')].setChoices(choices).disable();
 
             calculateRisk(currentQuarter)
         })
     } else if (element.name.includes('[impact_probability_scale]')) {
         residualImpactProbabilityScale[element.name] = element
         residualImpactProbabilityScaleSelects[element.name] = new Choices(element, defaultConfigChoices)
-        residualImpactProbabilityScaleSelects[element.name].disable()
+        residualImpactProbabilityScaleSelects[element.name].setChoices(
+            fetchers.heat_maps.reduce((heat_maps, item) => {
+                heat_maps.push({
+                    value: item.id,
+                    label: item.impact_probability,
+                    selected: item.id == element.value,
+                    customProperties: item
+                })
+                return heat_maps;
+            }, [])
+        ).disable()
     } else if (element.name.includes('[risk_exposure]')) {
         residualRiskExposure[element.name] = element
     } else if (element.name.includes('[risk_scale]')) {
@@ -309,7 +310,7 @@ const calculateRisk = (quarter) => {
 
     let impactValue = ''
     if (residualRiskImpactCategory.value.toLowerCase() == 'kualitatif') {
-        impactValue = fetchers.risk_metric?.limit ?? '0'
+        impactValue = parseFloat(fetchers.risk_metric?.limit ?? '0')
     } else {
         impactValue = parseFloat(unformatNumeral(residualImpactValue[`residual[${quarter}][impact_value]`].value, defaultConfigFormatNumeral));
     }
@@ -514,6 +515,12 @@ monitoring.actualizations.forEach((actualization, index) => {
     editButton.type = 'button'
     editButton.classList.add('btn', 'btn-sm', 'btn-info-light')
     editButton.innerHTML = `<span><i class="ti ti-edit"></i></span>`
+
+    const picRelated = fetchers.pics.find(pic => pic.unit_code == actualization.actualization_pic_related)
+    let picRelatedLabel = ''
+    if (picRelated) {
+        picRelatedLabel = `[${picRelated.unit_code}] ${picRelated.position_name}`
+    }
     row.innerHTML = `
         <td class="text-center">${actualization.risk_cause_number}</td>
         <td class="text-center">${actualization.actualization_mitigation_plan}</td>
@@ -522,11 +529,12 @@ monitoring.actualizations.forEach((actualization, index) => {
         <td class="text-center">${actualization.actualization_cost ? formatNumeral(actualization.actualization_cost, defaultConfigFormatNumeral) : ''}</td>
         <td class="text-center">${actualization.actualization_cost_absorption ? actualization.actualization_cost_absorption + '%' : ''}</td>
         <td class="text-center">${actualization.actualization_pic}</td>
-        <td class="text-center">${actualization.actualization_pic_related}</td>
+        <td class="text-center">${picRelatedLabel}</td>
         <td class="text-center">${actualization.actualization_kri}</td>
         <td class="text-center">${actualization.actualization_kri_threshold}</td>
         <td class="text-center">${actualization.actualization_kri_threshold_score ? actualization.actualization_kri_threshold_score + '%' : ''}</td>
         <td class="text-center">${actualization.actualization_plan_status}</td>
+        <td class="text-center">${actualization.actualization_plan_explanation}</td>
         <td class="text-center">${actualization.hasOwnProperty('actualization_plan_progress[1]') ? actualization['actualization_plan_progress[1]'] + '%' : ''}</td>
         <td class="text-center">${actualization.hasOwnProperty('actualization_plan_progress[2]') ? actualization['actualization_plan_progress[2]'] + '%' : ''}</td>
         <td class="text-center">${actualization.hasOwnProperty('actualization_plan_progress[3]') ? actualization['actualization_plan_progress[3]'] + '%' : ''}</td>
@@ -544,6 +552,7 @@ monitoring.actualizations.forEach((actualization, index) => {
 const actualizationEdit = (index, data) => {
     for (let key of Object.keys(data)) {
         const input = actualizationInputs[key]
+
         if (input) {
             input.value = data[key]
         } else if (key == 'actualization_pic_related') {
@@ -558,6 +567,32 @@ const actualizationEdit = (index, data) => {
         }
     }
 
+    if (data?.actualization_documents?.length > 0) {
+        for (const file of data.actualization_documents) {
+            const index = temporaryDocuments.length
+            const item = document.createElement('div')
+            const button = document.createElement('button')
+            button.type = 'button'
+            button.classList.add('btn', 'btn-sm', 'btn-danger-light')
+            button.innerHTML = `<span><i class="ti ti-x"></i></span>`
+            button.addEventListener('click', () => {
+                temporaryDocuments = temporaryDocuments.filter((document, key) => key == index)
+                actualizationDocumentWrapper.querySelector(`#actualization-document-items-${index}`).remove()
+            })
+
+            item.id = `actualization-document-items-${index}`
+            item.classList.add('col-12', 'd-flex', 'align-items-center', 'justify-content-between', 'badge', 'bg-outline-dark', 'p-2')
+            item.innerHTML = `<span>${file.name} (${convertFileSize(file.size)})</span>`
+            item.append(button)
+
+            actualizationDocumentWrapper.append(item)
+            temporaryDocuments.push(file)
+        }
+
+        actualizationDocumentWrapper.classList.remove('d-none')
+        temporaryDocuments = data.actualization_documents
+    }
+
     actualizationModal.show()
 }
 
@@ -566,16 +601,14 @@ actualizationForm.addEventListener('submit', (e) => {
     const data = Object.fromEntries(new FormData(e.target))
     data.actualization_cost = unformatNumeral(data.actualization_cost, defaultConfigFormatNumeral)
 
-    const actualization = monitoring.actualizations[data.key]
-    actualization.actualization_documents = temporaryDocuments
-
-    for (const key of Object.keys(actualization)) {
-        if (key != 'actualization_documents') {
-            actualization[key] = data[key]?.toString() ?? actualization[key].toString()
-        }
+    const current = monitoring.actualizations[data.key]
+    current.actualization_documents = temporaryDocuments
+    for (const key of Object.keys(current)) {
+        if (key == 'key' || key == 'id') continue
+        current[key] = data[key] ?? current[key]
     }
 
-    onActualizationSave(actualization)
+    onActualizationSave(current)
 });
 
 actualizationModalElement.addEventListener('hidden.bs.modal', (e) => {
@@ -759,12 +792,18 @@ const alterationTextareas = {}
 const alterationQuills = {}
 
 for (const textarea of alterationForm.querySelectorAll('textarea')) {
+    let value = monitoring?.alteration[textarea.name] ?? ''
+    textarea.innerHTML = value
+
     alterationTextareas[textarea.name] = textarea
     alterationQuills[textarea.name] = new Quill(alterationForm.querySelector('#' + textarea.name + '-editor'), defaultConfigQuill);
+    alterationQuills[textarea.name].root.innerHTML = value
     alterationQuills[textarea.name].on('text-change', (delta, oldDelta, source) => {
         alterationTextareas[textarea.name].innerHTML = alterationQuills[textarea.name].root.innerHTML;
     })
 }
+
+
 
 const alterationFormSubmit = () => {
     const data = Object.fromEntries(new FormData(alterationForm));
@@ -776,8 +815,12 @@ const incidentTextareas = {}
 const incidentQuills = {}
 
 for (const textarea of incidentForm.querySelectorAll('textarea')) {
+    let value = monitoring?.incident[textarea.name] ?? ''
+    textarea.innerHTML = value
+
     incidentTextareas[textarea.name] = textarea
     incidentQuills[textarea.name] = new Quill(incidentForm.querySelector('#' + textarea.name + '-editor'), defaultConfigQuill);
+    incidentQuills[textarea.name].root.innerHTML = value
     incidentQuills[textarea.name].on('text-change', (delta, oldDelta, source) => {
         incidentTextareas[textarea.name].innerHTML = incidentQuills[textarea.name].root.innerHTML;
     })
@@ -788,31 +831,23 @@ const incidentChoices = {}
 for (let select of incidentForm.querySelectorAll('.form-select')) {
     incidentSelects[select.name] = select
     incidentChoices[select.name] = new Choices(select, defaultConfigChoices);
-
-    if (select.name == 'risk_category') {
-        incidentChoices[select.name].disable()
-        continue;
-    }
-
-    if (select.name == 'risk_category_t3') {
-        incidentSelects[select.name].addEventListener('change', e => {
-            incidentSelects['risk_category'].value = e.target.value
-            incidentChoices['risk_category'].setChoiceByValue(e.target.value.toString())
-        })
-    }
+    incidentChoices[select.name].setChoiceByValue(monitoring?.incident[select.name]?.toString() ?? 'Pilih')
 }
 
 const incidentLossValue = incidentForm.querySelector('[name="loss_value"]');
+incidentLossValue.value = monitoring.incident.loss_value ? formatNumeral(monitoring.incident.loss_value, defaultConfigFormatNumeral) : ''
 incidentLossValue.addEventListener('input', e => {
     e.target.value = formatNumeral(e.target.value, defaultConfigFormatNumeral);
 });
 
 const incidentInsurancePermit = incidentForm.querySelector('[name="insurance_permit"]');
+incidentInsurancePermit.value = monitoring.incident.insurance_permit ? formatNumeral(monitoring.incident.insurance_permit, defaultConfigFormatNumeral) : ''
 incidentInsurancePermit.addEventListener('input', e => {
     e.target.value = formatNumeral(e.target.value, defaultConfigFormatNumeral);
 });
 
 const incidentInsuranceClaim = incidentForm.querySelector('[name="insurance_claim"]');
+incidentInsuranceClaim.value = monitoring.incident.insurance_claim ? formatNumeral(monitoring.incident.insurance_claim, defaultConfigFormatNumeral) : ''
 incidentInsuranceClaim.addEventListener('input', e => {
     e.target.value = formatNumeral(e.target.value, defaultConfigFormatNumeral);
 });
@@ -839,8 +874,9 @@ const save = async () => {
 
         return actualization;
     })
-    console.log(data.actualizations)
+
     const formData = jsonToFormData(data)
+    formData.set('_method', 'PUT')
     const response = await axios.post(window.location.href, formData);
     let redirect = false;
 
