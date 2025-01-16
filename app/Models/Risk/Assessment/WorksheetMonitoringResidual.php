@@ -12,6 +12,7 @@ class WorksheetMonitoringResidual extends Model
 
     protected $fillable = [
         'worksheet_monitoring_id',
+        'worksheet_identification_incident_id',
         'quarter',
         'impact_scale_id',
         'impact_probability_scale_id',
@@ -31,5 +32,10 @@ class WorksheetMonitoringResidual extends Model
     public function impact_probability_scale()
     {
         return $this->belongsTo(Heatmap::class, 'impact_probability_scale_id', 'id');
+    }
+
+    public function incident()
+    {
+        return $this->belongsTo(WorksheetIdentificationIncident::class, 'worksheet_identification_incident_id');
     }
 }

@@ -15,7 +15,7 @@
 @endpush
 
 @push('bottom-script')
-    @vite(['resources/js/pages/risk/process/monitoring/index.js'])
+    @vite(['resources/js/pages/risk/process/monitoring/edit.js'])
 @endpush
 
 @section('header-content')
@@ -35,7 +35,7 @@
 @endsection
 
 @section('main-content')
-    @include('risk.process.monitoring.table')
+    @include('risk.process.monitoring.table_detail')
     <div class="row mb-3">
         <div class="col">
             <div class="accordion accordion-solid-info">

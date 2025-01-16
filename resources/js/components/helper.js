@@ -168,6 +168,30 @@ const defaultLocaleFlatpickr = {
     }
 }
 
+const convertFileSize = (number) => {
+    return `${(number / 1e6).toFixed(2)} MB`
+}
+
+const buildFormData = (formData, data, parentKey) => {
+    if (data && typeof data === 'object' && !(data instanceof Date) && !(data instanceof File) && !(data instanceof Blob)) {
+        Object.keys(data).forEach(key => {
+            buildFormData(formData, data[key], parentKey ? `${parentKey}[${key}]` : key);
+        });
+    } else {
+        const value = data == null ? '' : data;
+
+        formData.append(parentKey, value);
+    }
+}
+
+function jsonToFormData(data) {
+    const formData = new FormData();
+
+    buildFormData(formData, data);
+
+    return formData;
+}
+
 
 export {
     defaultConfigFormatNumeral,
@@ -177,5 +201,8 @@ export {
     decodeHtml,
     showFormAlert,
     formatDataToStructuredObject,
-    autoMergeCells
+    autoMergeCells,
+    convertFileSize,
+    buildFormData,
+    jsonToFormData
 }

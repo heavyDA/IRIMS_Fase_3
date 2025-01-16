@@ -42,9 +42,14 @@ class WorksheetMonitoring extends Model
         );
     }
 
+    public function worksheet()
+    {
+        return $this->belongsTo(Worksheet::class);
+    }
+
     public function histories()
     {
-        return $this->hasMany(WorksheetMonitoringHistory::class);
+        return $this->hasMany(WorksheetMonitoringHistory::class)->latest();
     }
 
     public function last_history()
@@ -67,8 +72,8 @@ class WorksheetMonitoring extends Model
         return $this->hasOne(WorksheetMonitoringIncident::class);
     }
 
-    public function residual()
+    public function residuals()
     {
-        return $this->hasOne(WorksheetMonitoringResidual::class);
+        return $this->hasMany(WorksheetMonitoringResidual::class);
     }
 }

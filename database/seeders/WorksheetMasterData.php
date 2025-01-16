@@ -2217,5 +2217,17 @@ class WorksheetMasterData extends Seeder
         if (RiskMetric::count() == 0) {
             RiskMetric::insert($riskMetrics);
         }
+
+        $frequencies = [
+            ['name' => '2 kali dalam 1 tahun'],
+            ['name' => '3 kali dalam 1 tahun'],
+            ['name' => '4 kali dalam 1 tahun'],
+            ['name' => '5 kali dalam 1 tahun'],
+            ['name' => '>5 kali dalam 1 tahun'],
+        ];
+
+        if (IncidentFrequency::count() == 0) {
+            IncidentFrequency::insert($frequencies);
+        }
     }
 }

@@ -66,17 +66,6 @@
         </div>
     </div>
     <div class="row mb-3">
-        <div class="col-3">Kategori Risiko BUMN</div>
-        <div class="col">
-            <select data-custom class="form-select not-allowed" disabled name="risk_category">
-                <option>Pilih</option>
-                @foreach ($kbumn_risk_categories['T3'] as $item)
-                    <option value="{{ $item->id }}">{{ $item->name }}</option>
-                @endforeach
-            </select>
-        </div>
-    </div>
-    <div class="row mb-3">
         <div class="col-3">Kategori Risiko T2</div>
         <div class="col">
             <select class="form-select" name="risk_category_t2">

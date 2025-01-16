@@ -20,14 +20,19 @@ class WorksheetMonitoringActualization extends Model
         'kri_unit_id',
         'kri_threshold',
         'kri_threshold_score',
-        'actualization_plan_status',
         'actualization_plan_body',
         'actualization_plan_output',
+        'actualization_plan_status',
+        'actualization_plan_explanation',
         'actualization_plan_progress',
         'unit_code',
         'unit_name',
         'personnel_area_code',
         'personnel_area_name',
+    ];
+
+    protected $casts = [
+        'documents' => 'json',
     ];
 
     public function monitoring()
