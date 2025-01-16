@@ -262,7 +262,6 @@ class ProcessMonitoringController extends Controller
 
                 $actualizations[] = $actualization;
             }
-
             $actualizations = $monitoring->actualizations()->createMany($actualizations);
             $monitoring->histories()->create([
                 'created_by' => $user->employee_id,

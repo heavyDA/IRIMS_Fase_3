@@ -29,6 +29,7 @@ class WorksheetMonitoringActualization extends Model
         'unit_name',
         'personnel_area_code',
         'personnel_area_name',
+        'position_name',
     ];
 
     protected $casts = [

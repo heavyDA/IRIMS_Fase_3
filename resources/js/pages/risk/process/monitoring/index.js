@@ -839,7 +839,7 @@ const save = async () => {
 
         return actualization;
     })
-
+    console.log(data.actualizations)
     const formData = jsonToFormData(data)
     const response = await axios.post(window.location.href, formData);
     let redirect = false;
