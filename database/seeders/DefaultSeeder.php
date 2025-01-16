@@ -27,31 +27,31 @@ class DefaultSeeder extends Seeder
                         'route' => 'dashboard.index',
                         'position' => 1,
                     ],
-                    [
-                        'name' => 'Residual Top Risk',
-                        'route' => 'dashboard.residual_top_risk.index',
-                        'position' => 2,
-                    ],
-                    [
-                        'name' => 'Top Risk',
-                        'route' => 'dashboard.top_risk.index',
-                        'position' => 3,
-                    ],
-                    [
-                        'name' => 'Operational Risk',
-                        'route' => 'dashboard.operational_risk,index',
-                        'position' => 4,
-                    ],
-                    [
-                        'name' => 'KRIs Dashboard',
-                        'route' => 'dashboard.kris.index',
-                        'position' => 5,
-                    ],
-                    [
-                        'name' => 'Risk Profile Dashboard',
-                        'route' => 'dashboard.risk_profile.index',
-                        'position' => 6,
-                    ]
+                    // [
+                    //     'name' => 'Residual Top Risk',
+                    //     'route' => 'dashboard.residual_top_risk.index',
+                    //     'position' => 2,
+                    // ],
+                    // [
+                    //     'name' => 'Top Risk',
+                    //     'route' => 'dashboard.top_risk.index',
+                    //     'position' => 3,
+                    // ],
+                    // [
+                    //     'name' => 'Operational Risk',
+                    //     'route' => 'dashboard.operational_risk,index',
+                    //     'position' => 4,
+                    // ],
+                    // [
+                    //     'name' => 'KRIs Dashboard',
+                    //     'route' => 'dashboard.kris.index',
+                    //     'position' => 5,
+                    // ],
+                    // [
+                    //     'name' => 'Risk Profile Dashboard',
+                    //     'route' => 'dashboard.risk_profile.index',
+                    //     'position' => 6,
+                    // ]
                 ]
             ],
             // Risk Process BUMN section
@@ -62,28 +62,16 @@ class DefaultSeeder extends Seeder
                 'position' => 4,
                 'children' => [
                     [
-                        'name' => 'Risk Assessment BUMN',
+                        'name' => 'Risk Assessment',
                         'route' => 'risk.assessment.index',
                         'icon_name' => 'list',
                         'position' => 1,
                     ],
                     [
-                        'name' => 'Risk Worksheet',
-                        'route' => 'risk.assessment.worksheet.index',
-                        'icon_name' => 'grid',
-                        'position' => 2,
-                    ],
-                    [
-                        'name' => 'Risk Monitoring BUMN',
+                        'name' => 'Risk Monitoring',
                         'route' => 'risk.process.monitoring.index',
                         'icon_name' => 'grid',
                         'position' => 3,
-                    ],
-                    [
-                        'name' => 'Monev Risk BUMN',
-                        'route' => 'risk.monitoring-evaluation.index',
-                        'icon_name' => 'grid',
-                        'position' => 4,
                     ],
                 ],
             ],
@@ -336,6 +324,16 @@ class DefaultSeeder extends Seeder
         $menus = Menu::all();
         $actions = ['index', 'show', 'create', 'store', 'edit', 'update', 'destroy'];
         $permissions = [];
+
+        foreach ($actions as $action) {
+            $permissions[] = [
+                'name' => 'risk.assessment.worksheet.' . $action,
+                'guard_name' => 'web',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
+        }
+
         foreach ($menus as $menu) {
             if (str_contains($menu->route, 'index')) {
                 foreach ($actions as $action) {
@@ -381,7 +379,7 @@ class DefaultSeeder extends Seeder
                 [
                     'username' => 'root',
                     'email' => 'root@example.com',
-                    'password' => bcrypt('root'),
+                    'password' => bcrypt('rootR4h4s1A_'),
                     'employee_id' => '99999999',
                     'employee_name' => 'ROOT',
                     'unit_code' => 'ap.50',
@@ -399,95 +397,6 @@ class DefaultSeeder extends Seeder
                     'is_active' => true,
                 ],
                 ['root', 'risk admin', 'risk owner', 'risk otorisator', 'risk analis'],
-            ],
-            [
-                [
-                    'email' => 'wahyu.c@injourneyairports.id',
-                    'username' => 'wahyu.c',
-                    'password' => bcrypt('wahyu.c'),
-                    'employee_id' => '20002554',
-                    'employee_name' => 'WAHYU CAHYADI',
-                    'unit_code' => 'ap.50.1',
-                    'unit_name' => 'Direktorat Strategi & Pengembangan Teknologi',
-                    'sub_unit_code' => 'ap.50.1.5',
-                    'sub_unit_name' => 'Technology & Digitalization',
-                    'organization_code' => 'ap.50.1.5',
-                    'organization_name' => 'Technology & Digitalization',
-                    'personnel_area_code' => 'PST',
-                    'personnel_area_name' => 'Kantor Pusat',
-                    'position_name' => 'Technology & Digitalization Group Head',
-                    'employee_grade_code' => '-',
-                    'employee_grade' => '-',
-                    'image_url' => '',
-                    'is_active' => true,
-                ],
-                ['risk otorisator'],
-            ],
-            [
-                [
-                    "username" => "nicolas.prima",
-                    "password" => bcrypt("nicolas.prima"),
-                    "employee_name" => "NICOLAS PRIMA K. A.",
-                    "employee_id" => "20002891",
-                    "organization_code" => "ap.50.6.1",
-                    "organization_name" => "Governance & Risk Management",
-                    "email" => "nicolas.prima@injourneyairports.id",
-                    "personnel_area_name" => "Kantor Pusat",
-                    "personnel_area_code" => "PST",
-                    "position_name" => "Governance & Risk Management Group Head",
-                    "unit_name" => "Direktorat Manajemen Risiko",
-                    "sub_unit_name" => "Governance & Risk Management",
-                    "unit_code" => "ap.50.6",
-                    "sub_unit_code" => "ap.50.6.1",
-                    "employee_grade_code" => "-",
-                    "employee_grade" => "-",
-                    'is_active' => true,
-                ],
-                ['risk otorisator']
-            ],
-            [
-                [
-                    "username" => "budi.wijayanto",
-                    "password" => bcrypt("budi.wijayanto"),
-                    "employee_name" => "BUDI TRI WIJAYANTO",
-                    "employee_id" => "20241670",
-                    "organization_code" => "ap.50.6.1.1",
-                    "organization_name" => "Governance Assurance",
-                    "email" => "budi.wijayanto@injourneyairports.id",
-                    "personnel_area_name" => "Kantor Pusat",
-                    "personnel_area_code" => "PST",
-                    "position_name" => "Governance Assurance Division Head",
-                    "unit_name" => "Governance & Risk Management",
-                    "sub_unit_name" => "Governance Assurance",
-                    "unit_code" => "ap.50.6.1",
-                    "sub_unit_code" => "ap.50.6.1.1",
-                    "employee_grade_code" => "-",
-                    "employee_grade" => "-",
-                    'is_active' => true,
-                ],
-                ['risk otorisator']
-            ],
-            [
-                [
-                    "username" => "restu.pratiwi",
-                    "password" => bcrypt("restu.pratiwi"),
-                    "employee_name" => "RESTU PRATIWI",
-                    "employee_id" => "20241632",
-                    "organization_code" => "ap.50.6.1.2",
-                    "organization_name" => "Enterprise Risk Management",
-                    "email" => "restu.pratiwi@injourneyairports.id",
-                    "personnel_area_name" => "Kantor Pusat",
-                    "personnel_area_code" => "PST",
-                    "position_name" => "Enterprise Risk Management Division Head",
-                    "unit_name" => "Governance & Risk Management",
-                    "sub_unit_name" => "Enterprise Risk Management",
-                    "unit_code" => "ap.50.6.1",
-                    "sub_unit_code" => "ap.50.6.1.2",
-                    "employee_grade_code" => "-",
-                    "employee_grade" => "-",
-                    'is_active' => true,
-                ],
-                ['risk owner', 'risk admin']
             ],
         ];
 

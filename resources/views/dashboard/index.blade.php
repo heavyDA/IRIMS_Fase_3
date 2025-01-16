@@ -47,7 +47,7 @@
     </x-card>
     <!-- Start:: row-4-->
     <div class="row">
-        <div class="col-xxl-3 col-xl-6">
+        <div class="col-xxl-4 col-xl-6">
             <div class="card custom-card p-2">
                 <div class="card-body bg-light border">
                     <div class="d-flex align-items-start justify-content-between">
@@ -63,7 +63,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-xxl-3 col-xl-6">
+        <div class="col-xxl-4 col-xl-6">
             <div class="card custom-card p-2">
                 <div class="card-body bg-light border">
                     <div class="d-flex align-items-start justify-content-between">
@@ -79,7 +79,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-xxl-3 col-xl-6">
+        <div class="col-xxl-4 col-xl-6">
             <div class="card custom-card p-2">
                 <div class="card-body bg-light border">
                     <div class="d-flex align-items-start justify-content-between">
@@ -95,23 +95,6 @@
                 </div>
             </div>
         </div>
-        <div class="col-xxl-3 col-xl-6">
-            <div class="card custom-card p-2">
-                <div class="card-body bg-light border">
-                    <div class="d-flex align-items-start justify-content-between">
-                        <div>
-                            <p class="mb-0 fs-16 fw-semibold">Proses <br />Mitigasi </p>
-
-                        </div>
-                        <div> <span class="avatar avatar-xl bg-info fw-semibold">
-                                <span>120</span> </span>
-                        </div>
-                    </div>
-
-                </div>
-            </div>
-        </div>
-
 
     </div>
     <!-- End:: row-4 -->
@@ -119,23 +102,7 @@
     <!-- Start:: row-1 -->
     <!-- Start:: row-4-->
     <div class="row">
-        <div class="col-xxl-3 col-xl-6">
-            <div class="card custom-card p-2">
-                <div class="card-body bg-light border">
-                    <div class="d-flex align-items-start justify-content-between">
-                        <div>
-                            <p class="mb-0 fs-16 fw-semibold">Jumlah Risiko <br />Termitigasi </p>
-
-                        </div>
-                        <div> <span class="avatar avatar-xl bg-success fw-semibold">
-                                <span>120</span> </span>
-                        </div>
-                    </div>
-
-                </div>
-            </div>
-        </div>
-        <div class="col-xxl-3 col-xl-6">
+        <div class="col-xxl-4 col-xl-6">
             <div class="card custom-card p-2">
                 <div class="card-body bg-light border">
                     <div class="d-flex align-items-start justify-content-between">
@@ -152,7 +119,7 @@
             </div>
         </div>
 
-        <div class="col-xxl-3 col-xl-6">
+        <div class="col-xxl-4 col-xl-6">
             <div class="card custom-card p-2">
                 <div class="card-body bg-light border">
                     <div class="d-flex align-items-start justify-content-between">
@@ -169,7 +136,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-xxl-3 col-xl-6">
+        <div class="col-xxl-4 col-xl-6">
             <div class="card custom-card p-2">
                 <div class="card-body bg-light border">
                     <div class="d-flex align-items-start justify-content-between">
@@ -1043,13 +1010,13 @@
                             </thead>
                             <tbody>
                                 <!-- <tr>
-                           <td>1</td>
-                           <td>2</td>
-                           <td>3</td>
-                           <td>4</td>
-                           <td>5</td>
-                           <td>6</td>
-                         <tr>				 -->
+                                   <td>1</td>
+                                   <td>2</td>
+                                   <td>3</td>
+                                   <td>4</td>
+                                   <td>5</td>
+                                   <td>6</td>
+                                 <tr>				 -->
 
                             </tbody>
                         </table>
