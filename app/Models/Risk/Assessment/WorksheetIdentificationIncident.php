@@ -24,9 +24,14 @@ class WorksheetIdentificationIncident extends Model
         'kri_threshold_danger',
     ];
 
+    public function identification()
+    {
+        return $this->belongsTo(WorksheetIdentification::class, 'worksheet_identification_id');
+    }
+
     public function inherent()
     {
-        return $this->hasOne(WorksheetIdentificationInherent::class);
+        return $this->belongsTo(WorksheetIdentificationInherent::class, 'worksheet_identification_id', 'worksheet_identification_id');
     }
 
     public function residuals()

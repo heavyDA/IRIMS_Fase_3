@@ -59,7 +59,12 @@ const identificationValidate = () => {
     }
     worksheet.identification = formatDataToStructuredObject(identificationData);
 
+    const isQualitative = worksheet.identification.risk_impact_category == 'kualitatif';
     for (let key of Object.keys(worksheet.identification)) {
+        if (key == 'inherent_impact_value' && isQualitative) {
+            continue
+        }
+
         if (key == 'search_terms') {
             delete worksheet.identification.search_terms
             continue
@@ -70,6 +75,13 @@ const identificationValidate = () => {
                 for (const residual of worksheet.identification[key]) {
                     if (residual) {
                         for (const itemKey of Object.keys(residual)) {
+                            if (
+                                (itemKey == 'impact_value' && isQualitative) ||
+                                itemKey == 'id'
+                            ) {
+                                continue
+                            }
+
                             if (!residual[itemKey] || residual[itemKey] == 'Pilih') {
                                 return false
                             }
@@ -198,6 +210,7 @@ worksheetTabPreviousButton.addEventListener('click', e => {
 const worksheet = {
     context: {
         unit_name: '',
+        risk_number: '',
         period_date: '',
         period_year: 0,
         target_body: '',
@@ -296,6 +309,11 @@ const tables = {
 
 const contextForm = document.querySelector('#contextForm');
 const currentRiskNumber = contextForm.querySelector('[name="risk_number"]');
+currentRiskNumber.addEventListener('input', e => {
+    incidentRiskNumber.value = e.target.value
+    incidentRiskCauseCode.value = e.target.value + '.' + incidentRiskCauseNumber.value
+    treatmentRiskNumber.value = e.target.value
+})
 
 const targetUnitName = contextForm.querySelector('[name="unit_name"]');
 const targetPeriodYear = contextForm.querySelector('[name="period_year"]');
@@ -347,10 +365,7 @@ for (let editor of strategyForm.querySelectorAll('.textarea')) {
 }
 
 const strategyRiskValueLimit = strategyForm.querySelector('[name="strategy_risk_value_limit"]')
-strategyRiskValueLimit.addEventListener('input', (e) => {
-    e.target.value = formatNumeral(e.target.value, defaultConfigFormatNumeral);
-})
-
+strategyRiskValueLimit.value = fetchers?.risk_metric?.limit ? formatNumeral(fetchers?.risk_metric?.limit, defaultConfigFormatNumeral) : ''
 const strategyDecision = strategyForm.querySelector('[name="strategy_decision"]');
 let strategyDecisionChoices = new Choices(strategyDecision, defaultConfigChoices);
 
@@ -454,6 +469,8 @@ strategyForm.addEventListener('submit', (e) => {
 
     const formData = new FormData(e.target);
     const data = Object.fromEntries(formData)
+
+    data.strategy_risk_value_limit = unformatNumeral(strategyRiskValueLimit.value, defaultConfigFormatNumeral);
     if (data.hasOwnProperty('search_terms')) {
         delete data.search_terms;
     }
@@ -464,7 +481,7 @@ strategyModalElement.addEventListener('hidden.bs.modal', () => {
     strategyForm.reset();
     strategyForm.querySelector('[name="key"]').value = '';
 
-    strategyRiskValueLimit.value = '';
+    strategyRiskValueLimit.value = fetchers?.risk_metric?.limit ? formatNumeral(fetchers?.risk_metric?.limit, defaultConfigFormatNumeral) : '';
     strategyDecisionChoices.destroy();
     strategyDecisionChoices = new Choices(strategyDecision, defaultConfigChoices);
 
@@ -485,16 +502,12 @@ const identificationDateRange = identificationForm.querySelector('#risk_impact_d
 const identificationStartDate = identificationForm.querySelector('[name="risk_impact_start_date"]');
 const identificationEndDate = identificationForm.querySelector('[name="risk_impact_end_date"]');
 
-const identificationKBUMNTarget = identificationForm.querySelector('[name="kbumn_target"]');
-const identificationRiskCategory = identificationForm.querySelector('[name="kbumn_risk_category"]');
 const identificationRiskCategoryT2 = identificationForm.querySelector('[name="kbumn_risk_category_t2"]');
 const identificationRiskCategoryT3 = identificationForm.querySelector('[name="kbumn_risk_category_t3"]');
 const identificationExistingControlType = identificationForm.querySelector('[name="existing_control_type"]');
 const identificationControlEffectivenessAssessment = identificationForm.querySelector('[name="control_effectiveness_assessment"]');
 const identificationRiskImpact = identificationForm.querySelector('[name="risk_impact_category"]');
 
-const identificationKBUMNTargetChoices = new Choices(identificationKBUMNTarget, defaultConfigChoices);
-const identificationRiskCategoryChoices = new Choices(identificationRiskCategory, defaultConfigChoices);
 const identificationRiskCategoryT2Choices = new Choices(identificationRiskCategoryT2, defaultConfigChoices);
 const identificationRiskCategoryT3Choices = new Choices(identificationRiskCategoryT3, defaultConfigChoices);
 const identificationExistingControlTypeChoices = new Choices(identificationExistingControlType, defaultConfigChoices);
@@ -561,6 +574,12 @@ const identificationChoicesInit = async () => {
         const risk_impact_category = identificationRiskImpactChoices.getValue(true)
         if (risk_impact_category !== "Pilih") {
             identificationChoices.inherent_impact_scale.enable();
+            if (risk_impact_category == 'kualitatif') {
+                identificationInherentImpactValue.value = ''
+                identificationInherentImpactValue.disabled = true
+            } else {
+                identificationInherentImpactValue.disabled = false
+            }
 
             let choices = [];
             for (let item of fetchers.bumn_scales) {
@@ -663,8 +682,6 @@ identificationRiskImpact.addEventListener('change', e => {
     }
 })
 
-identificationRiskCategoryT3.addEventListener('change', e => identificationRiskCategoryChoices.setChoiceByValue(e.detail.value));
-
 const identificationTargetBody = identificationForm.querySelector('[name="target_body"]');
 const identificationTargetBodyQuill = new Quill(identificationForm.querySelector('#target_body-editor'), defaultConfigQuill);
 identificationTargetBodyQuill.enable(false);
@@ -755,14 +772,10 @@ const calculateRisk = (
     if (isResidual) {
         if (scale?.customProperties?.scale) {
             if (quarter == 1) {
-                if (identificationRiskImpact.value == 'kualitatif') {
-                    targetImpactValue.value = formatNumeral(fetchers?.risk_metric?.limit ?? '0', defaultConfigFormatNumeral)
-                } else {
-                    targetImpactValue.value = identificationInherentImpactValue.value
-                }
+                targetImpactValue.value = identificationInherentImpactValue.value
             } else {
                 const scaleQ1 = identificationChoices[`residual[1][impact_scale]`].getValue(false)
-                if (scaleQ1?.value != 'Pilih') {
+                if (scaleQ1?.value != 'Pilih' && identificationRiskImpact.value == 'kuantitatif') {
                     const riskValueByLimit = parseFloat(
                         (parseInt(scale.customProperties.scale) / parseInt(scaleQ1.customProperties.scale)) * parseFloat(
                             unformatNumeral(identificationResidualImpactValues[0].value, defaultConfigFormatNumeral)
@@ -770,26 +783,29 @@ const calculateRisk = (
                     ).toFixed(2);
                     targetImpactValue.value = formatNumeral(riskValueByLimit.toString().replaceAll('.', ','), defaultConfigFormatNumeral)
                 } else {
-                    targetImpactValue.value = formatNumeral("0", defaultConfigFormatNumeral)
-                    targetExposure.value = formatNumeral("0", defaultConfigFormatNumeral);
-                    targetRiskScale.value = null;
-                    targetRiskLevel.value = null;
+                    targetImpactValue.value = ''
+                    targetExposure.value = ''
+                    targetRiskScale.value = '';
+                    targetRiskLevel.value = '';
                 }
             }
-
         } else {
-            targetImpactValue.value = formatNumeral("0", defaultConfigFormatNumeral)
-            targetExposure.value = formatNumeral("0", defaultConfigFormatNumeral);
-            targetRiskScale.value = null;
-            targetRiskLevel.value = null;
+            targetImpactValue.value = '';
+            targetExposure.value = '';
+            targetRiskScale.value = '';
+            targetRiskLevel.value = '';
         }
     }
 
-    const impactValue = parseFloat(unformatNumeral(targetImpactValue.value, defaultConfigFormatNumeral));
+    let impactValue = 0;
+
+    if (identificationRiskImpact.value == 'kuantitatif') {
+        impactValue = parseFloat(unformatNumeral(targetImpactValue.value, defaultConfigFormatNumeral));
+    }
+
     if (scale?.customProperties?.scale && probability) {
         const probabilityValue = parseFloat(targetImpactProbability.value);
         if (impactValue >= 0 && probabilityValue && identificationRiskImpact.value == 'kuantitatif') {
-            console.log(impactValue)
             targetExposure.value = formatNumeral(
                 (impactValue * (probabilityValue / 100)).toString().replaceAll('.', ','),
                 defaultConfigFormatNumeral
@@ -1058,7 +1074,8 @@ const updateIncidentRow = (data) => {
 }
 
 const treatmentForm = document.querySelector('#treatmentForm');
-const treatmentRiskCauseNumber = document.querySelector('[name="risk_cause_number"]');
+const treatmentRiskNumber = treatmentForm.querySelector('[name="risk_number"]');
+const treatmentRiskCauseNumber = treatmentForm.querySelector('[name="risk_cause_number"]');
 const treatmentRiskCauseNumberChoices = new Choices(treatmentRiskCauseNumber, defaultConfigChoices);
 treatmentRiskCauseNumber.addEventListener('change', (e) => {
     const value = treatmentRiskCauseNumberChoices.getValue(true)
@@ -1227,7 +1244,7 @@ treatmentMitigationForm.addEventListener('submit', (e) => {
     }
 
     data.mitigation_pic = mitigationPic.value
-    data.risk_number = treatmentForm.querySelector('[name="risk_number"]').value;
+    data.risk_number = currentRiskNumber.value;
     data.risk_cause_number = treatmentRiskCauseNumberChoices.getValue(true);
     data.risk_treatment_option_id = treatmentForm.querySelector('[name="risk_treatment_option"]').value;
     data.risk_treatment_type_id = treatmentForm.querySelector('[name="risk_treatment_type"]').value;
@@ -1245,6 +1262,7 @@ treatmentModalElement.addEventListener('hidden.bs.modal', () => {
     treatmentRiskCauseNumberChoices.setChoiceByValue('Pilih');
     treatmentForm.querySelector('[name="risk_treatment_option"]').value = null;
     treatmentForm.querySelector('[name="risk_treatment_type"]').value = null;
+    treatmentRiskNumber.value = currentRiskNumber.value
     treatmentRiskCauseBody.innerHTML = '';
     treatmentRiskCauseBodyQuill.root.innerHTML = '';
 
@@ -1262,14 +1280,23 @@ treatmentModalElement.addEventListener('hidden.bs.modal', () => {
 
 
 
-worksheetTabSubmitButton.addEventListener('click', (e) => {
-    const data = { ...worksheet };
+worksheetTabSubmitButton.addEventListener('click', async (e) => {
+    const response = await axios.post(window.location.href, { ...worksheet });
+    let data = {}
 
+    if (response.status == 200) {
+        data = response.data.data
+    }
 
-    axios.post('', data)
-        .then(res => {
-            if (res.status == 200) {
-                window.location.replace(window.location.href + "/" + res.data.data.id);
+    Swal.fire({
+        icon: response.status == 200 ? 'success' : 'error',
+        title: response.status == 200 ? 'Berhasil' : 'Gagal',
+        text: data?.message,
+    }).then(() => {
+        setTimeout(() => {
+            if (data.redirect) {
+                window.location.replace(data.redirect)
             }
-        }).catch(err => console.log(err));
+        }, 375);
+    })
 })

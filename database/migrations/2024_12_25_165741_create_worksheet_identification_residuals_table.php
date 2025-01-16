@@ -27,7 +27,7 @@ return new class extends Migration
                 ->constrained('m_heatmaps', null, 'ra_w_identification_res_scale_idx')
                 ->cascadeOnDelete();
             $table->string('impact_probability');
-            $table->string('impact_value');
+            $table->string('impact_value')->default('');
             $table->string('risk_exposure');
             $table->string('risk_level');
             $table->string('risk_scale');

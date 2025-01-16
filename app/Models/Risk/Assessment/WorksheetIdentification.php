@@ -44,6 +44,11 @@ class WorksheetIdentification extends Model
         );
     }
 
+    public function target()
+    {
+        return $this->belongsTo(WorksheetTarget::class, 'worksheet_target_id');
+    }
+
     public function inherent()
     {
         return $this->hasOne(WorksheetIdentificationInherent::class);

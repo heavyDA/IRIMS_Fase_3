@@ -4,7 +4,7 @@
             <div class="row mb-1">
                 <div class="col-3">No. Risiko</div>
                 <div class="col">
-                    <input type="text" class="form-control" disabled name="risk_number" value="{{ $worksheet_number }}">
+                    <input type="text" class="form-control" disabled name="risk_number">
                 </div>
             </div>
             <div class="row mb-3">

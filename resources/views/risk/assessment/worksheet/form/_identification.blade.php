@@ -23,43 +23,6 @@
                 </div>
             </div>
             <div class="row mb-3">
-                <div class="col-3">Sasaran KBUMN<span class="text-danger">*</span>
-                    <a tabindex="0"
-                        class="link-secondary link-offset-2 link-underline-opacity-0 link-underline-opacity-50-hover text-decoration-underline mx-1"
-                        role="button" data-bs-toggle="popover" data-bs-trigger="focus" data-bs-placement="right"
-                        title="Information" data-bs-html="true"
-                        data-bs-content='
-                            <p><strong>Nilai ekonomi dan sosial untuk Indonesia</strong>, merupakan KPI untuk mengukur kinerja keuangan, operasional, dan sosial (termasuk peran BUM N sebagai agen  pembangunan)  secara berkesinambungan, dengan  mempertimbangkan tingkat risiko (risk appetite) perusahaan yang ditetapkan.</p>
-<p><strong>Inovasi model bisnis</strong>, merupakan variabel KPI untuk mengukur keberhasilan inovasi perusahaan, antara lain:a) inovasi model bisnis inti;b) restrukturisasi; c) pengembangan konten lokal dan hilirisasi (downstream),d) penciptaan ekosistem, mitra serta kolaborasi usaha mikro, kecil dan menengah.</p>
-<p><strong>Kepemimpinan teknologi</strong>, merupakan variabel KPI untuk mengukur, antara lain: a) keberhasilan, dalam mengembangkan dan menginstitusionalkan kapabilitas teknologi/digital pada skala umum; b) penciptaan nilai dari kumpulan data (big data) dan kecerdasan buatan  (artificial intelligence); dan/atau ,c) dukungan Indonesia menjadi yang terdepan pada area teknologi strategis.</p>
-<p><strong>Peningkatan investasi</strong>, merupakan variabel KPI untuk mengukur, antara lain: a) produktivitas dari aset berwujud (tangible assets) dan aset tidak berwujud (intangible assets); 
-b) keberhasilan menarik investasi luar dari pihak swasta, asing, dan investor sosial; c) efektivitas adopsi mekanisme kondisi pasar (market-based); d) efektivitas implementasi kelincahan (agile) dalam birokrasi, dan kemudahan dalam melaksanakan bisnis; dan/atau e) progres investasi yang didanai dari tambahan  PMN</p>
-<p><strong>Pengembangan talenta</strong>, merupakan variabel KPI untuk mengukur seberapa baik perusahaan, antara lain: a) meningkatkan kemampuan dan melatih tenaga kerja terkait teknologi terbaru; b) meningkatkan tata kelola yang baik dalam penunjukan Direksi dan Dewan Komisaris/Dewan Pengawas; c) membentuk wadah talenta BUMN (talent poof) pada level menengah; dan/atau d) menerapkan lingkungan yang inklusif, dinamis, inovatif dan berakhlak. </p>
-                        '><i
-                            class="ti ti-info-circle h5 text-secondary"></i>
-                    </a>
-                </div>
-                <div class="col">
-                    <select class="form-select" name="kbumn_target">
-                        <option>Pilih</option>
-                        @foreach ($kbumn_targets as $target)
-                            <option value="{{ $target->id }}">{{ $target->name }}</option>
-                        @endforeach
-                    </select>
-                </div>
-            </div>
-            <div class="row mb-3">
-                <div class="col-3">Kategori Risiko BUMN</div>
-                <div class="col">
-                    <select data-custom class="form-select not-allowed" disabled name="kbumn_risk_category">
-                        <option>Pilih</option>
-                        @foreach ($kbumn_risk_categories['T3'] as $item)
-                            <option value="{{ $item->id }}">{{ $item->name }}</option>
-                        @endforeach
-                    </select>
-                </div>
-            </div>
-            <div class="row mb-3">
                 <div class="col-3">Kategori Risiko T2<span class="text-danger">*</span>
                     <a tabindex="0"
                         class="link-secondary link-offset-2 link-underline-opacity-0 link-underline-opacity-50-hover text-decoration-underline mx-1"
@@ -305,10 +268,12 @@ b) keberhasilan menarik investasi luar dari pihak swasta, asing, dan investor so
                         <div class="col-3">Nilai Dampak Residual <span
                                 class="label-category-risk text-capitalize"></span>
                         </div>
+
                         <div class="col row">
                             @for ($quarter = 1; $quarter < 5; $quarter++)
                                 <div class="col-12 col-md-6 col-lg-3">
                                     <label>Q{{ $quarter }}</label>
+                                    <input type="hidden" name="residual[{{ $quarter }}][id]">
                                     <input type="text" class="form-control" disabled
                                         name="residual[{{ $quarter }}][impact_value]">
                                 </div>
@@ -460,8 +425,7 @@ b) keberhasilan menarik investasi luar dari pihak swasta, asing, dan investor so
                         <div class="row mb-3">
                             <div class="col-3">No. Risiko</div>
                             <div class="col">
-                                <input type="text" class="form-control" name="risk_number"
-                                    value="{{ $worksheet_number }}" readonly>
+                                <input type="text" class="form-control" name="risk_number" readonly>
                             </div>
                         </div>
                         <div class="row mb-3">
@@ -492,8 +456,7 @@ b) keberhasilan menarik investasi luar dari pihak swasta, asing, dan investor so
                         <div class="row mb-3">
                             <div class="col-3">Kode Penyebab Risiko</div>
                             <div class="col">
-                                <input type="text" class="form-control" disabled name="risk_cause_code"
-                                    value="{{ $worksheet_number }}.a">
+                                <input type="text" class="form-control" disabled name="risk_cause_code">
                             </div>
                         </div>
                         <div class="row mb-3">

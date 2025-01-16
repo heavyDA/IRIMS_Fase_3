@@ -18,7 +18,7 @@ return new class extends Migration
                 ->cascadeOnDelete();
 
             $table->string('body');
-            $table->string('impact_value');
+            $table->string('impact_value')->default('');
             $table->foreignId('impact_scale_id')
                 ->constrained('m_bumn_scales', null, 'ra_w_identification_in_impact_scale_idx')
                 ->cascadeOnDelete();

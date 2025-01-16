@@ -5,6 +5,7 @@ const datatable = createDatatable('table', {
     handleColumnSearchField: false,
     responsive: false,
     serverSide: true,
+    ordering: false,
     ajax: window.location.href,
     fixedColumns: true,
     lengthMenu: [5, 10, 25, 50],
@@ -26,7 +27,7 @@ const datatable = createDatatable('table', {
         const groups = {};
         api.rows({ page: 'current' }).every(function (rowIdx) {
             const data = this.data();
-            const worksheetNumber = data.target.worksheet.worksheet_number;
+            const worksheetNumber = data.identification.target.worksheet.worksheet_number;
             if (!groups[worksheetNumber]) {
                 groups[worksheetNumber] = [];
             }
@@ -89,9 +90,9 @@ const datatable = createDatatable('table', {
     columns: [
         {
             sortable: true,
-            title: 'No',
-            data: 'target.worksheet.worksheet_number',
-            name: 'target.worksheet.worksheet_number',
+            title: 'No.',
+            data: 'identification.target.worksheet.worksheet_number',
+            name: 'identification.target.worksheet.worksheet_number',
             width: '64px'
         },
         {
@@ -104,15 +105,22 @@ const datatable = createDatatable('table', {
         {
             sortable: false,
             title: 'Organisasi',
-            data: 'target.worksheet.unit_name',
-            name: 'target.worksheet.unit_name',
-            width: '256px'
+            data: 'identification.target.worksheet.sub_unit_name',
+            name: 'identification.target.worksheet.sub_unit_name',
+            width: '256px',
+            render: function (data, type, row) {
+                if (type !== 'display') {
+                    return data
+                }
+
+                return `[${row.identification.target.worksheet.sub_unit_code}] ${row.identification.target.worksheet.sub_unit_name}`
+            }
         },
         {
             sortable: false,
             title: 'Pilihan Sasaran',
-            data: 'target_body',
-            name: 'target_body',
+            data: 'identification.target.body',
+            name: 'identification.target.body',
             width: '256px',
             render: function (data, type, row) {
                 if (type !== 'display') {
@@ -131,9 +139,9 @@ const datatable = createDatatable('table', {
         },
         {
             sortable: false,
-            title: 'Pilihan Strategi',
-            data: 'body',
-            name: 'body',
+            title: 'Peristiwa Risiko',
+            data: 'risk_chronology_body',
+            name: 'risk_chronology_body',
             width: '256px',
             render: function (data, type, row) {
                 if (type !== 'display') {
@@ -152,9 +160,9 @@ const datatable = createDatatable('table', {
         },
         {
             sortable: false,
-            title: 'Hasil yang diharapkan dapat diterima perusahaan',
-            data: 'expected_feedback',
-            name: 'expected_feedback',
+            title: 'Penyebab Risiko',
+            data: 'risk_cause_body',
+            name: 'risk_cause_body',
             width: '256px',
             render: function (data, type, row) {
                 if (type !== 'display') {
@@ -173,9 +181,9 @@ const datatable = createDatatable('table', {
         },
         {
             sortable: false,
-            title: 'Nilai risiko yang akan timbul',
-            data: 'risk_value',
-            name: 'risk_value',
+            title: 'Dampak',
+            data: 'identification.risk_impact_body',
+            name: 'identification.risk_impact_body',
             width: '256px',
             render: function (data, type, row) {
                 if (type !== 'display') {
@@ -194,27 +202,15 @@ const datatable = createDatatable('table', {
         },
         {
             sortable: false,
-            title: 'Nilai risiko yang akan timbul',
-            data: 'risk_value_limit',
-            name: 'risk_value_limit',
-            width: '256px',
-            render: function (data, type, row) {
-                if (type !== 'display') {
-                    return data
-                }
-
-                if (!data) {
-                    return 'Rp. 0';
-                }
-
-                return formatNumeral(data, defaultConfigFormatNumeral);
-            }
+            title: 'Level',
+            data: 'inherent.risk_level',
+            name: 'inherent.risk_level'
         },
         {
             sortable: false,
-            title: 'Keputusan Penetapan',
-            data: 'decision',
-            name: 'decision'
+            title: 'Skala Risiko',
+            data: 'inherent.risk_scale',
+            name: 'inherent.risk_scale'
         },
     ],
 })

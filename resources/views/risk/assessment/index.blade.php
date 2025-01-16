@@ -17,19 +17,35 @@
         </div>
     </div>
     <div class="btn-list">
-        @can('risk.assessment.worksheet.index')
+        @if (auth()->user()->can('risk.assessment.worksheet.index') && auth()->user()->can('risk.assessment.worksheet.store'))
             <a href="{{ route('risk.assessment.worksheet.index') }}"
                 class="btn btn-primary-light btn-wave me-2 waves-effect waves-light">
                 <i class="ti ti-plus align-middle"></i> Tambah Kertas Kerja
             </a>
-        @endcan
+        @endif
     </div>
 @endsection
 
 @section('main-content')
     <x-card>
         <x-slot name="body">
-            <table class="table table-bordered table-stripped display nowrap" style="width: 100%;"></table>
+            <div class="w-100" style="overflow-x: auto;">
+                <table class="table table-bordered table-stripped display nowrap" style="width: 100%;">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>No.</th>
+                            <th>Status</th>
+                            <th>Organisasi</th>
+                            <th>Pilihan Sasaran</th>
+                            <th>Peristiwa Risiko</th>
+                            <th>Penyebab Risiko</th>
+                            <th>Dampak</th>
+                            <th>Level</th>
+                            <th>Skala Risiko</th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
         </x-slot>
     </x-card>
 @endsection

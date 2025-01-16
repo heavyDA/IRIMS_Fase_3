@@ -52,12 +52,12 @@
         <div class="tab-pane border-0 p-2" id="stepperMonitoring" role="tabpanel">
             @include('risk.assessment.worksheet.form._monitoring')
         </div>
-        <div class="row mt-2">
-            <div class="col d-flex justify-content-center">
-                <button type="button" id="worksheetTabPreviousButton" class="d-none btn btn-light">Sebelumnya</button>
-                <button type="button" id="worksheetTabNextButton" class="btn btn-primary">Selanjutnya</button>
-                <button type="button" id="worksheetTabSubmitButton" class="d-none btn btn-success">Simpan</button>
-            </div>
+    </div>
+    <div class="row mt-2">
+        <div class="col d-flex justify-content-center">
+            <button type="button" id="worksheetTabPreviousButton" class="d-none btn btn-light">Sebelumnya</button>
+            <button type="button" id="worksheetTabNextButton" class="btn btn-primary">Selanjutnya</button>
+            <button type="button" id="worksheetTabSubmitButton" class="d-none btn btn-success">Simpan</button>
         </div>
     </div>
 </div>

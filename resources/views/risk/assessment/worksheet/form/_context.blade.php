@@ -14,13 +14,19 @@
                     <input disabled type="text" name="period_year" class="form-control not-allowed"
                         placeholder="Tahun" value="{{ isset($worksheet) ? $worksheet->period_year : date('Y') }}">
                 </div>
-
             </div>
             <div class="row mb-1">
                 <div class="col-3">Tanggal</div>
                 <div class="col">
                     <input disabled type="text" name="period_date" class="form-control not-allowed"
                         value="{{ isset($worksheet) ? $worksheet->period_date : now()->format('F d, Y') }}">
+                </div>
+            </div>
+            <div class="row mb-1">
+                <div class="col-3">No. Risiko</div>
+                <div class="col">
+                    <input type="text" class="form-control" name="risk_number" value=""
+                        placeholder="AREA-SUB_UNIT-NO_URUT">
                 </div>
             </div>
             <div class="row mb-1">
@@ -40,8 +46,6 @@
                     </a>
                 </div>
                 <div class="col">
-                    <input type="hidden" class="form-control" name="risk_number" value="{{ $worksheet_number }}"
-                        readonly>
                     <div id="target_body-editor" class="textarea"></div>
                     <textarea type="text" name="target_body" class="d-none">{!! isset($worksheet) ? html_entity_decode($worksheet->target->body) : '' !!}</textarea>
                 </div>
@@ -168,7 +172,8 @@
                                 </a>
                             </div>
                             <div>
-                                <input type="text" class="form-control" name="strategy_risk_value_limit">
+                                <input type="text" class="not-allowed form-control" name="strategy_risk_value_limit"
+                                    disabled>
                             </div>
                         </div>
                         <div class="d-flex flex-column mb-2">
