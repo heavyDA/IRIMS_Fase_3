@@ -37,7 +37,7 @@
             <!-- Start::header-element -->
             <li class="header-element header-theme-mode">
                 <!-- Start::header-link|layout-setting -->
-                <a href="javascript:void(0);" class="header-link layout-setting">
+                <a href="javascript:void(0);" class="header-link layout-setting d-none">
                     <span class="light-layout">
                         <!-- Start::header-link-icon -->
                         <svg xmlns="http://www.w3.org/2000/svg" class="header-link-icon" viewBox="0 0 256 256">
@@ -94,10 +94,11 @@
                     <div class="d-flex align-items-center">
                         <div class="me-xl-2 me-0">
                             <img src="{{ auth()->user()->image_url ?: asset('assets/images/media/user_blank.jpg') }}"
-                                alt="img" class="avatar avatar-sm avatar-rounded">
+                                alt="img" style="height:  42px; width: 42px;"
+                                class="avatar avatar-sm avatar-rounded">
                         </div>
                         <div class="d-xl-block d-none lh-1">
-                            <span class="fw-medium lh-1">Mr. {{ auth()->user()->employee_name }}</span>
+                            <span class="fw-medium lh-1">{{ auth()->user()->employee_name }}</span>
                         </div>
                     </div>
                 </a>
