@@ -6426,7 +6426,7 @@ class PositionSeeder extends Seeder
         ];
 
 
-        if (Position::count() == 0) {
+        if (cache()->get('master.positions')->isEmpty()) {
             PositionJob::dispatch();
             sleep(10);
         }
