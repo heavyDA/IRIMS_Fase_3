@@ -19,13 +19,25 @@
     </ul>
     <div class="tab-content">
         <div class="tab-pane border-0 p-2 show active" id="tableContext" role="tabpanel">
-            @include('risk.assessment.worksheet.table._context')
+            <div class="row mt-2">
+                <div class="col py-2" style="overflow-x: scroll;">
+                    @include('risk.assessment.worksheet.table._context')
+                </div>
+            </div>
         </div>
         <div class="tab-pane border-0 p-2" id="tableIdentification" role="tabpanel">
-            @include('risk.assessment.worksheet.table._identification')
+            <div class="row mt-2">
+                <div class="col py-2" style="overflow-x: scroll;">
+                    @include('risk.assessment.worksheet.table._identification')
+                </div>
+            </div>
         </div>
         <div class="tab-pane border-0 p-2" id="tableTreatment" role="tabpanel">
-            @include('risk.assessment.worksheet.table._treatment')
+            <div class="row mt-2">
+                <div class="col py-2" style="overflow-x: scroll;">
+                    @include('risk.assessment.worksheet.table._treatment')
+                </div>
+            </div>
         </div>
     </div>
 </div>

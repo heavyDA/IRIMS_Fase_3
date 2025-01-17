@@ -1,5 +1,3 @@
-    <div class="row mt-2">
-        <div class="col" style="overflow-x: scroll;">
             <table class="table table-bordered table-stripped" style="width:100%">
                 <thead class="table-dark">
                     <tr style="vertical-align: bottom;">
@@ -41,5 +39,3 @@
                     @endisset
                 </tbody>
             </table>
-        </div>
-    </div>

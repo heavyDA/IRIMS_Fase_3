@@ -1,15 +1,38 @@
-import { formatNumeral } from "cleave-zen";
+import Choices from "choices.js";
 import createDatatable from "js/components/datatable";
-import { decodeHtml, defaultConfigFormatNumeral } from "js/components/helper";
+import { decodeHtml, defaultConfigFormatNumeral, defaultConfigChoices } from "js/components/helper";
+
+const worksheetTableFilter = document.querySelector('#worksheet-table-filter')
+const selectYear = worksheetTableFilter.querySelector('select[name="year"]')
+const selectLength = worksheetTableFilter.querySelector('select[name="length"]')
+
+new Choices(selectYear, defaultConfigChoices)
+new Choices(selectLength, defaultConfigChoices)
+
+selectLength.addEventListener('change', e => {
+    datatable.page.len(e.target.value).draw()
+})
+selectYear.addEventListener('change', e => {
+    datatable.draw()
+})
+
 const datatable = createDatatable('table', {
     handleColumnSearchField: false,
     responsive: false,
     serverSide: true,
     ordering: false,
-    ajax: window.location.href,
+    processing: true,
+    ajax: {
+        url: window.location.href,
+        data: function (data) {
+            data.year = selectYear.value
+
+            return data
+        }
+    },
     fixedColumns: true,
-    lengthMenu: [5, 10, 25, 50],
-    pageLength: 5,
+    lengthChange: false,
+    pageLength: 10,
     drawCallback: function (settings) {
         const api = this.api();
         const columnsToMerge = [0, 1, 2, 3, 4, 5, 6, 7];
@@ -113,7 +136,7 @@ const datatable = createDatatable('table', {
                     return data
                 }
 
-                return `[${row.identification.target.worksheet.sub_unit_code}] ${row.identification.target.worksheet.sub_unit_name}`
+                return `[${row.identification.target.worksheet.personnel_area_code}] ${row.identification.target.worksheet.sub_unit_name}`
             }
         },
         {
@@ -204,19 +227,15 @@ const datatable = createDatatable('table', {
             sortable: false,
             title: 'Level',
             data: 'inherent.risk_level',
-            name: 'inherent.risk_level'
+            name: 'inherent.risk_level',
+            width: '160px',
         },
         {
             sortable: false,
             title: 'Skala Risiko',
             data: 'inherent.risk_scale',
-            name: 'inherent.risk_scale'
+            name: 'inherent.risk_scale',
+            width: '160px',
         },
     ],
-})
-
-
-datatable.on('draw', function () {
-    const thead = document.querySelector('table thead')
-    thead.classList.add('table-dark')
 })

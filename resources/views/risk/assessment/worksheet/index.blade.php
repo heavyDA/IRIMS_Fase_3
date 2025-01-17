@@ -78,14 +78,23 @@
                                             <span><i class="ti ti-arrow-back"></i></span>&nbsp;Kembali
                                         </a>
                                     @endif
-
+                                    <a href="{{ route('risk.assessment.worksheet.export', $worksheet->getEncryptedId()) }}"
+                                        style="min-width: 128px;" class="btn btn-info">
+                                        <span><i class="ti ti-download"></i></span>&nbsp;Download
+                                    </a>
                                     @isset($worksheet)
                                         @if (!str_contains(request()->route()->getName(), 'edit'))
-                                            @if (session()->get('current_role')?->name == 'risk admin' && $worksheet->last_history->status == 'draft')
+                                            @if (
+                                                (session()->get('current_role')?->name == 'risk admin' && $worksheet->last_history->status == 'draft') ||
+                                                    (session()->get('current_role')?->name == 'risk owner' &&
+                                                        in_array($worksheet->last_history->status, ['draft', 'on review'])) ||
+                                                    session()->get('current_role')?->name == 'risk analis')
                                                 <a href="{{ route('risk.assessment.worksheet.edit', $worksheet->getEncryptedId()) }}"
                                                     style="min-width: 128px;" class="btn btn-success">
                                                     <span><i class="ti ti-edit"></i></span>&nbsp;Update
                                                 </a>
+                                            @endif
+                                            @if (session()->get('current_role')?->name == 'risk admin' && $worksheet->last_history->status == 'draft')
                                                 @include('risk.assessment.worksheet.partials._risk_admin')
                                             @elseif (session()->get('current_role')?->name == 'risk owner' && $worksheet->last_history->status == 'on review')
                                                 @include('risk.assessment.worksheet.partials._risk_owner')

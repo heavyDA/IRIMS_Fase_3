@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Risk;
 
 use App\Enums\DocumentStatus;
 use App\Enums\State;
+use App\Exports\Risk\WorksheetExport;
 use App\Http\Controllers\Controller;
 use App\Models\Master\BUMNScale;
 use App\Models\Master\ControlEffectivenessAssessment;
@@ -22,6 +23,7 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Maatwebsite\Excel\Facades\Excel;
 
 class AssessmentWorksheetController extends Controller
 {
@@ -376,6 +378,57 @@ class AssessmentWorksheetController extends Controller
 
         $title = 'Detail Kertas Kerja';
         return view('risk.assessment.worksheet.index', compact('worksheet', 'title'));
+    }
+
+    public function export(string $worksheet)
+    {
+        $worksheet = Worksheet::findByEncryptedIdOrFail($worksheet);
+        $worksheet->load([
+            'target',
+            'target.identification',
+            'target.identification.kbumn_target',
+            'target.identification.risk_category_t2',
+            'target.identification.risk_category_t3',
+            'target.identification.incidents',
+            'target.identification.incidents.kri_unit',
+            'target.identification.incidents.mitigations',
+            'target.identification.incidents.mitigations.risk_treatment_option',
+            'target.identification.incidents.mitigations.risk_treatment_type',
+            'target.identification.incidents.mitigations.rkap_program_type',
+
+            'target.identification.inherent',
+            'target.identification.residuals',
+            'target.identification.residuals.impact_scale',
+            'target.identification.residuals.impact_probability_scale',
+            'target.identification.incidents.mitigations',
+            'target.identification.existing_control_type',
+            'target.identification.control_effectiveness_assessment',
+            'target.strategies',
+            'histories.user',
+            'last_history.user',
+        ]);
+
+        $worksheet->target->identification->residuals = $worksheet->target->identification->residuals->select(
+            'impact_value',
+            'impact_scale',
+            'impact_probability',
+            'impact_probability_scale',
+            'risk_exposure',
+            'risk_scale',
+            'risk_level'
+        )->map(function ($item) {
+            return [
+                $item['impact_value'],
+                $item['impact_scale']['scale'],
+                $item['impact_probability'],
+                $item['impact_probability_scale']['impact_probability'],
+                $item['risk_exposure'],
+                $item['risk_scale'],
+                $item['risk_level'],
+            ];
+        });
+
+        return Excel::download(new WorksheetExport($worksheet), "[{$worksheet->personnel_area_code}] {$worksheet->sub_unit_name} {$worksheet->created_at->format('d m Y')} .xlsx");
     }
 
     public function edit(string $worksheet)
