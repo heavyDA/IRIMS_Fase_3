@@ -42,9 +42,9 @@ class PositionJob
                     $positions[] = $_item;
                 }
 
-                Position::upsert($positions, ['personnel_area_code', 'unit_code', 'unit_name', 'position_name']);
+                Position::upsert($positions, ['personnel_area_code', 'unit_code']);
                 logger('[Position Job] successfully cached data.');
-                Cache::put('master.positions', $positions, now()->addMinutes(5));
+                Cache::put('master.positions', $positions);
             }
         } catch (Exception $e) {
             logger()->error('[Position Job] ' . $e->getMessage());

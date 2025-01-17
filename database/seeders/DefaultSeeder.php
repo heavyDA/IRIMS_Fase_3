@@ -398,6 +398,72 @@ class DefaultSeeder extends Seeder
                 ],
                 ['root', 'risk admin', 'risk owner', 'risk otorisator', 'risk analis'],
             ],
+            [
+                [
+                    'username' =>  'nicolas.prima',
+                    'email' =>  'nicolas.prima@injourneyairports.id',
+                    'employee_name' =>  'NICOLAS PRIMA K. A.',
+                    'employee_id' =>  '20002891',
+                    'organization_code' =>  'ap.50.6.1',
+                    'organization_name' =>  'Governance & Risk Management',
+                    'personnel_area_name' =>  'Kantor Pusat',
+                    'personnel_area_code' =>  'PST',
+                    'position_name' =>  'Governance & Risk Management Group Head',
+                    'unit_name' =>  'Direktorat Manajemen Risiko',
+                    'sub_unit_name' =>  'Governance & Risk Management',
+                    'unit_code' =>  'ap.50.6',
+                    'sub_unit_code' =>  'ap.50.6.1',
+                    'employee_grade_code' => '-',
+                    'employee_grade' => '-',
+                    'image_url' => '',
+                    'is_active' => true,
+                ],
+                ['risk otorisator']
+            ],
+            [
+                [
+                    'username' => 'budi.wijayanto',
+                    'email' => 'budi.wijayanto@injourneyairports.id',
+                    'employee_name' => 'BUDI TRI WIJAYANTO',
+                    'employee_id' => '20241670',
+                    'organization_code' => 'ap.50.6.1.1',
+                    'organization_name' => 'Governance Assurance',
+                    'personnel_area_name' => 'Kantor Pusat',
+                    'personnel_area_code' => 'PST',
+                    'position_name' => 'Governance Assurance Division Head',
+                    'unit_name' => 'Governance & Risk Management',
+                    'sub_unit_name' => 'Governance Assurance',
+                    'unit_code' => 'ap.50.6.1',
+                    'sub_unit_code' => 'ap.50.6.1.1',
+                    'employee_grade_code' => '-',
+                    'employee_grade' => '-',
+                    'image_url' => '',
+                    'is_active' => true,
+                ],
+                ['risk owner']
+            ],
+            [
+                [
+                    'username' => 'agus.haryadi1',
+                    'email' => 'agus.haryadi1@injourneyairports.id',
+                    'employee_name' => 'AGUS HARYADI',
+                    'employee_id' => '20008357',
+                    'organization_code' => 'ap.51',
+                    'organization_name' => 'Kantor Regional I (09 September 2024) - CGK',
+                    'personnel_area_name' => 'Kantor Regional I',
+                    'personnel_area_code' => 'REG I',
+                    'position_name' => 'Regional CEO - Kantor Regional I',
+                    'unit_name' => 'SIDOEL Group',
+                    'sub_unit_name' => 'Kantor Regional I (09 September 2024) - CGK',
+                    'unit_code' => 'ap',
+                    'sub_unit_code' => 'ap.51',
+                    'employee_grade_code' => '-',
+                    'employee_grade' => '-',
+                    'image_url' => '',
+                    'is_active' => true,
+                ],
+                ['risk otorisator']
+            ]
         ];
 
         if (User::count() == 0) {
