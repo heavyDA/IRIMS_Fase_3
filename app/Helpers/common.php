@@ -78,7 +78,7 @@ if (!function_exists('excel_merge_same_values')) {
         \PhpOffice\PhpSpreadsheet\Worksheet\Worksheet $sheet,
         array $columns,
         int $startRow = 3,
-        int $endRow
+        int $endRow = 3
     ): array {
         $mergedRanges = [];
 

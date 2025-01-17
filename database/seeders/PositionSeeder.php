@@ -904,37 +904,37 @@ class PositionSeeder extends Seeder
                 "assigned_roles" => "risk owner"
             ],
             [
-                "personnel_area_code" => "CGK",
+                "personnel_area_code" => "REG I",
                 "unit_code" => "CGR.CEO",
                 "position_name" => "Regional CEO",
                 "assigned_roles" => "risk otorisator"
             ],
             [
-                "personnel_area_code" => "CGK",
+                "personnel_area_code" => "REG I",
                 "unit_code" => "CGR.D.ROS",
                 "position_name" => "Deputy Regional Airport Operation & Services",
                 "assigned_roles" => "risk otorisator"
             ],
             [
-                "personnel_area_code" => "CGK",
+                "personnel_area_code" => "REG I",
                 "unit_code" => "CGR.D.RAC",
                 "position_name" => "Deputy Regional Airport Commercial Development",
                 "assigned_roles" => "risk otorisator"
             ],
             [
-                "personnel_area_code" => "CGK",
+                "personnel_area_code" => "REG I",
                 "unit_code" => "CGR.D.RFT",
                 "position_name" => "Deputy Regional Airport Facility, Equipment, & Technology Readiness",
                 "assigned_roles" => "risk otorisator"
             ],
             [
-                "personnel_area_code" => "CGK",
+                "personnel_area_code" => "REG I",
                 "unit_code" => "CGR.D.RAM",
                 "position_name" => "Deputy Regional Finance, Asset & Risk Management",
                 "assigned_roles" => "risk otorisator"
             ],
             [
-                "personnel_area_code" => "CGK",
+                "personnel_area_code" => "REG I",
                 "unit_code" => "CGR.D.RHB",
                 "position_name" => "Deputy Regional Human Capital Solution & Business Support",
                 "assigned_roles" => "risk otorisator"
@@ -2686,37 +2686,37 @@ class PositionSeeder extends Seeder
                 "assigned_roles" => "risk owner"
             ],
             [
-                "personnel_area_code" => "DPS",
+                "personnel_area_code" => "REG II",
                 "unit_code" => "CEO.DPR",
                 "position_name" => "Regional CEO",
                 "assigned_roles" => "risk otorisator"
             ],
             [
-                "personnel_area_code" => "DPS",
+                "personnel_area_code" => "REG II",
                 "unit_code" => "DPR.D.ROS",
                 "position_name" => "Regional Airport Operation & Services",
                 "assigned_roles" => "risk otorisator"
             ],
             [
-                "personnel_area_code" => "DPS",
+                "personnel_area_code" => "REG II",
                 "unit_code" => "DPR.D.RAC",
                 "position_name" => "Regional Airport Commercial Development",
                 "assigned_roles" => "risk otorisator"
             ],
             [
-                "personnel_area_code" => "DPS",
+                "personnel_area_code" => "REG II",
                 "unit_code" => "DPR.D.RFT",
                 "position_name" => "Regional Airport Facility, Equipment, & Technology Readiness",
                 "assigned_roles" => "risk otorisator"
             ],
             [
-                "personnel_area_code" => "DPS",
+                "personnel_area_code" => "REG II",
                 "unit_code" => "DPR.D.RAM",
                 "position_name" => "Regional Finance, Asset & Risk Management",
                 "assigned_roles" => "risk otorisator"
             ],
             [
-                "personnel_area_code" => "DPS",
+                "personnel_area_code" => "REG II",
                 "unit_code" => "DPR.D.RHB",
                 "position_name" => "Regional Human Capital Solution & Business Support",
                 "assigned_roles" => "risk otorisator"
@@ -3376,61 +3376,61 @@ class PositionSeeder extends Seeder
                 "assigned_roles" => "risk owner"
             ],
             [
-                "personnel_area_code" => "KNO",
+                "personnel_area_code" => "REG III",
                 "unit_code" => "KNR.CEO",
                 "position_name" => "Regional CEO",
                 "assigned_roles" => "risk otorisator"
             ],
             [
-                "personnel_area_code" => "KNO",
+                "personnel_area_code" => "REG III",
                 "unit_code" => "KNR.D.AOS",
                 "position_name" => "Deputy Regional Airport Operation & Services",
                 "assigned_roles" => "risk otorisator"
             ],
             [
-                "personnel_area_code" => "KNO",
+                "personnel_area_code" => "REG III",
                 "unit_code" => "",
                 "position_name" => "Airport Operation & Service Quality Assurance",
                 "assigned_roles" => "risk owner"
             ],
             [
-                "personnel_area_code" => "KNO",
+                "personnel_area_code" => "REG III",
                 "unit_code" => "",
                 "position_name" => "Airport Operation & Service Improvement",
                 "assigned_roles" => "risk owner"
             ],
             [
-                "personnel_area_code" => "KNO",
+                "personnel_area_code" => "REG III",
                 "unit_code" => "KNR.D.ACM",
                 "position_name" => "Deputy Regional Airport Commercial Development",
                 "assigned_roles" => "risk otorisator"
             ],
             [
-                "personnel_area_code" => "KNO",
+                "personnel_area_code" => "REG III",
                 "unit_code" => "",
                 "position_name" => "Airport Connectivity",
                 "assigned_roles" => "risk owner"
             ],
             [
-                "personnel_area_code" => "KNO",
+                "personnel_area_code" => "REG III",
                 "unit_code" => "",
                 "position_name" => "Commercial Assurance",
                 "assigned_roles" => "risk owner"
             ],
             [
-                "personnel_area_code" => "KNO",
+                "personnel_area_code" => "REG III",
                 "unit_code" => "KNR.D.AFT",
                 "position_name" => "Deputy Regional Airport Facility, Equipment, & Technology Readiness",
                 "assigned_roles" => "risk otorisator"
             ],
             [
-                "personnel_area_code" => "KNO",
+                "personnel_area_code" => "REG III",
                 "unit_code" => "KNR.D.FAM",
                 "position_name" => "Deputy Regional Finance, Asset & Risk Management",
                 "assigned_roles" => "risk otorisator"
             ],
             [
-                "personnel_area_code" => "KNO",
+                "personnel_area_code" => "REG III",
                 "unit_code" => "KNR.D.RHB",
                 "position_name" => "Deputy Regional Human Capital Solution & Business Support",
                 "assigned_roles" => "risk otorisator"
@@ -4384,37 +4384,37 @@ class PositionSeeder extends Seeder
                 "assigned_roles" => "risk owner"
             ],
             [
-                "personnel_area_code" => "YIA",
+                "personnel_area_code" => "REG IV",
                 "unit_code" => "YIR.CEO",
                 "position_name" => "Regional CEO",
                 "assigned_roles" => "risk otorisator"
             ],
             [
-                "personnel_area_code" => "YIA",
+                "personnel_area_code" => "REG IV",
                 "unit_code" => "YIR.D.ROS",
                 "position_name" => "Deputy Regional Airport Operation & Services",
                 "assigned_roles" => "risk otorisator"
             ],
             [
-                "personnel_area_code" => "YIA",
+                "personnel_area_code" => "REG IV",
                 "unit_code" => "YIR.D.RAC",
                 "position_name" => "Deputy Regional Airport Commercial Development",
                 "assigned_roles" => "risk otorisator"
             ],
             [
-                "personnel_area_code" => "YIA",
+                "personnel_area_code" => "REG IV",
                 "unit_code" => "YIR.D.RFT",
                 "position_name" => "Deputy Regional Airport Facility, Equipment, & Technology Readiness",
                 "assigned_roles" => "risk otorisator"
             ],
             [
-                "personnel_area_code" => "YIA",
+                "personnel_area_code" => "REG IV",
                 "unit_code" => "YIR.D.RAM",
                 "position_name" => "Deputy Regional Finance, Asset & Risk Management",
                 "assigned_roles" => "risk otorisator"
             ],
             [
-                "personnel_area_code" => "YIA",
+                "personnel_area_code" => "REG IV",
                 "unit_code" => "YIR.D.RHB",
                 "position_name" => "Deputy Regional Human Capital Solution & Business Support",
                 "assigned_roles" => "risk otorisator"
@@ -5194,37 +5194,37 @@ class PositionSeeder extends Seeder
                 "assigned_roles" => "risk admin"
             ],
             [
-                "personnel_area_code" => "UPG",
+                "personnel_area_code" => "REG V",
                 "unit_code" => "UPR.CEO",
                 "position_name" => "Regional CEO",
                 "assigned_roles" => "risk otorisator"
             ],
             [
-                "personnel_area_code" => "UPG",
+                "personnel_area_code" => "REG V",
                 "unit_code" => "UPR.D.ROS",
                 "position_name" => "Deputy Regional Airport Operation & Services",
                 "assigned_roles" => "risk otorisator"
             ],
             [
-                "personnel_area_code" => "UPG",
+                "personnel_area_code" => "REG V",
                 "unit_code" => "UPR.D.RAC",
                 "position_name" => "Deputy Regional Airport Commercial Development",
                 "assigned_roles" => "risk otorisator"
             ],
             [
-                "personnel_area_code" => "UPG",
+                "personnel_area_code" => "REG V",
                 "unit_code" => "UPR.D.RFT",
                 "position_name" => "Deputy Regional Airport Facility, Equipment, & Technology Readiness",
                 "assigned_roles" => "risk otorisator"
             ],
             [
-                "personnel_area_code" => "UPG",
+                "personnel_area_code" => "REG V",
                 "unit_code" => "UPR.D.RAM",
                 "position_name" => "Deputy Regional Finance, Asset & Risk Management",
                 "assigned_roles" => "risk otorisator"
             ],
             [
-                "personnel_area_code" => "UPG",
+                "personnel_area_code" => "REG V",
                 "unit_code" => "UPR.D.RHB",
                 "position_name" => "Deputy Regional Human Capital Solution & Business Support",
                 "assigned_roles" => "risk otorisator"
@@ -5818,43 +5818,43 @@ class PositionSeeder extends Seeder
                 "assigned_roles" => "risk admin"
             ],
             [
-                "personnel_area_code" => "BPN",
+                "personnel_area_code" => "REG VI",
                 "unit_code" => "BPR.CEO",
                 "position_name" => "Regional CEO",
                 "assigned_roles" => "risk otorisator"
             ],
             [
-                "personnel_area_code" => "BPN",
+                "personnel_area_code" => "REG VI",
                 "unit_code" => "BPR.D.ROS",
                 "position_name" => "Deputy Regional Airport Operation & Services",
                 "assigned_roles" => "risk otorisator"
             ],
             [
-                "personnel_area_code" => "BPN",
+                "personnel_area_code" => "REG VI",
                 "unit_code" => "",
                 "position_name" => "Airport Operation & Services Quality Assurance & Improvement",
                 "assigned_roles" => "risk admin"
             ],
             [
-                "personnel_area_code" => "BPN",
+                "personnel_area_code" => "REG VI",
                 "unit_code" => "BPR.D.RAC",
                 "position_name" => "Deputy Regional Airport Commercial Development",
                 "assigned_roles" => "risk otorisator"
             ],
             [
-                "personnel_area_code" => "BPN",
+                "personnel_area_code" => "REG VI",
                 "unit_code" => "BPR.D.RFT",
                 "position_name" => "Deputy Regional Airport Facility, Equipment, & Technology Readiness",
                 "assigned_roles" => "risk otorisator"
             ],
             [
-                "personnel_area_code" => "BPN",
+                "personnel_area_code" => "REG VI",
                 "unit_code" => "BPR.D.RAM",
                 "position_name" => "Deputy Regional Finance, Asset & Risk Management",
                 "assigned_roles" => "risk otorisator"
             ],
             [
-                "personnel_area_code" => "BPN",
+                "personnel_area_code" => "REG VI",
                 "unit_code" => "BPR.D.RHB",
                 "position_name" => "Deputy Regional Human Capital Solution & Business Support",
                 "assigned_roles" => "risk otorisator"
