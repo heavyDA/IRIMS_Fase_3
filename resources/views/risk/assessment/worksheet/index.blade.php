@@ -78,11 +78,11 @@
                                             <span><i class="ti ti-arrow-back"></i></span>&nbsp;Kembali
                                         </a>
                                     @endif
-                                    <a href="{{ route('risk.assessment.worksheet.export', $worksheet->getEncryptedId()) }}"
-                                        style="min-width: 128px;" class="btn btn-info">
-                                        <span><i class="ti ti-download"></i></span>&nbsp;Download
-                                    </a>
                                     @isset($worksheet)
+                                        <a href="{{ route('risk.assessment.worksheet.export', $worksheet->getEncryptedId()) }}"
+                                            style="min-width: 128px;" class="btn btn-info">
+                                            <span><i class="ti ti-download"></i></span>&nbsp;Download
+                                        </a>
                                         @if (!str_contains(request()->route()->getName(), 'edit'))
                                             @if (
                                                 (session()->get('current_role')?->name == 'risk admin' && $worksheet->last_history->status == 'draft') ||
