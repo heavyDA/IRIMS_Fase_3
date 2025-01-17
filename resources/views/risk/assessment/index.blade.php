@@ -29,23 +29,46 @@
 @section('main-content')
     <x-card>
         <x-slot name="body">
-            <div class="w-100" style="overflow-x: auto;">
-                <table class="table table-bordered table-stripped display nowrap" style="width: 100%;">
-                    <thead class="table-dark">
-                        <tr>
-                            <th>No.</th>
-                            <th>Status</th>
-                            <th>Organisasi</th>
-                            <th>Pilihan Sasaran</th>
-                            <th>Peristiwa Risiko</th>
-                            <th>Penyebab Risiko</th>
-                            <th>Dampak</th>
-                            <th>Level</th>
-                            <th>Skala Risiko</th>
-                        </tr>
-                    </thead>
-                </table>
-            </div>
+            <form class="row mb-4" id="worksheet-table-filter">
+                <div class="col-12 col-md-4 col-xl-3">
+                    <div class="d-flex flex-column">
+                        <label class="form-label">Jumlah Data</label>
+                        <select name="length" class="form-select">
+                            <option value="10">10</option>
+                            <option value="20">20</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                        </select>
+
+                    </div>
+                </div>
+                <div class="col-12 col-md-4 col-xl-3">
+                    <div class="d-flex flex-column">
+                        <label class="form-label">Tahun Laporan</label>
+                        <select name="year" class="form-select">
+                            @foreach ($years as $year)
+                                <option value="{{ $year }}">{{ $year }}</option>
+                            @endforeach
+                        </select>
+
+                    </div>
+                </div>
+            </form>
+            <table id="worksheet-table" class="table table-bordered table-stripped display nowrap" style="width: 100%;">
+                <thead class="table-dark">
+                    <tr>
+                        <th>No.</th>
+                        <th>Status</th>
+                        <th>Organisasi</th>
+                        <th>Pilihan Sasaran</th>
+                        <th>Peristiwa Risiko</th>
+                        <th>Penyebab Risiko</th>
+                        <th>Dampak</th>
+                        <th>Level</th>
+                        <th>Skala Risiko</th>
+                    </tr>
+                </thead>
+            </table>
         </x-slot>
     </x-card>
 @endsection

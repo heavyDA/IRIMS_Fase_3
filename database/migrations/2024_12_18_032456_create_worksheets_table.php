@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('ra_worksheets', function (Blueprint $table) {
             $table->id();
             $table->string('worksheet_code');
-            $table->unsignedInteger('worksheet_number');
+            $table->string('worksheet_number', 100);
 
             $table->string('unit_code');
             $table->string('unit_name');

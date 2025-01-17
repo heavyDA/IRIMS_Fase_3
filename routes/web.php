@@ -34,6 +34,7 @@ Route::group(['middleware' => 'auth'], function () {
 
 
             Route::get('{worksheet}', [App\Http\Controllers\Risk\AssessmentWorksheetController::class, 'show'])->name('show');
+            Route::get('{worksheet}/export', [App\Http\Controllers\Risk\AssessmentWorksheetController::class, 'export'])->name('export');
             Route::get('{worksheet}/edit', [App\Http\Controllers\Risk\AssessmentWorksheetController::class, 'edit'])->name('edit');
             Route::put('{worksheet}/edit', [App\Http\Controllers\Risk\AssessmentWorksheetController::class, 'update'])->name('update');
             Route::put('{worksheet}/status', [App\Http\Controllers\Risk\AssessmentWorksheetController::class, 'update_status'])->name('update-status');
