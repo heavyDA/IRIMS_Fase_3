@@ -2,8 +2,7 @@
 
 namespace App\Exports\Risk;
 
-use App\Models\Risk\Assessment\Worksheet;
-use Illuminate\Contracts\View\View;
+use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithStyles;
@@ -26,21 +25,24 @@ class WorksheetStrategyExport implements FromCollection, WithHeadings, WithTitle
     ];
 
     protected int $count = 0;
-    public function __construct(public Worksheet $worksheet) {}
+
+    public function __construct(private Collection $worksheets) {}
 
     public function collection()
     {
-        return collect($this->worksheet->target->strategies)->map(function ($strategy, $index) {
-            $this->count += 1;
-            return [
-                'No.' => $index + 1,
-                'Pilihan Sasaran' => strip_html($this->worksheet->target->body),
-                'Pilihan Strategi' => strip_html($strategy->body),
-                'Hasil yang diharapkan' => strip_html($strategy->expected_feedback),
-                'Nilai Risiko' => strip_html($strategy->risk_value),
-                'Batas Nilai Risiko' => money_format((float) $strategy->risk_value_limit ?? '0'),
-                'Keputusan' => $strategy->decision,
-            ];
+        return $this->worksheets->flatMap(function ($worksheet) {
+            return collect($worksheet->strategies)->map(function ($strategy, $index) use ($worksheet) {
+                $this->count += 1;
+                return [
+                    'No.' => $this->count,
+                    'Pilihan Sasaran' => strip_html($worksheet->target_body),
+                    'Pilihan Strategi' => strip_html($strategy->body),
+                    'Hasil yang diharapkan' => strip_html($strategy->expected_feedback),
+                    'Nilai Risiko' => strip_html($strategy->risk_value),
+                    'Batas Nilai Risiko' => money_format((float) $strategy->risk_value_limit ?? '0'),
+                    'Keputusan' => $strategy->decision,
+                ];
+            });
         });
     }
 
@@ -86,10 +88,15 @@ class WorksheetStrategyExport implements FromCollection, WithHeadings, WithTitle
             [
                 'B',
                 'F'
-            ], // Columns to merge - adjust as needed
+            ], // Columns to merge - adjusted for new column
             3, // Start from row 3 (after headers)
             $this->count + 1
         );
+    }
+
+    public function title(): string
+    {
+        return 'Strategy';
     }
 
     private function getColumnLetter(int $index): string
@@ -100,10 +107,5 @@ class WorksheetStrategyExport implements FromCollection, WithHeadings, WithTitle
     private function getLastColumn(int $columnCount): string
     {
         return $this->getColumnLetter($columnCount);
-    }
-
-    public function title(): string
-    {
-        return 'Pilihan Sasaran&Strategi Bisnis';
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Exports\Risk;
 
 use App\Models\Risk\Assessment\Worksheet;
+use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithStyles;
@@ -44,50 +45,39 @@ class WorksheetContextExport implements FromCollection, WithHeadings, WithStyles
 
     protected int $count = 0;
 
-    public function __construct(public Worksheet $worksheet) {}
+    public function __construct(private Collection $worksheets) {}
 
     public function collection()
     {
-        return collect($this->worksheet->target->identification->incidents)->map(function ($incident, $index) {
-            $this->count += 1;
-
-            $residuals = $this->worksheet->target->identification->residuals;
-            $residualData = [];
-            // Process residual data
-            for ($i = 0; $i < 7; $i++) {
-                for ($j = 0; $j < count($residuals); $j++) {
-                    if ($i == 0 || $i == 4) {
-                        $residualData[] = money_format((float) $residuals[$j][$i]);
-                    } else {
-                        $residualData[] = $residuals[$j][$i];
-                    }
-                }
-            }
-
-            return [
-                'No.' => $index + 1,
-                'Nama Perusahaan' => $this->worksheet->company_name,
-                'Kode Perusahaan' => $this->worksheet->company_code,
-                'Sasaran Perusahaan' => strip_html($this->worksheet->target->body),
-                'Kategori Risiko' => $this->worksheet->target->identification->risk_category_t2->name . ' & ' . $this->worksheet->target->identification->risk_category_t3->name,
-                'No. Risiko' => $this->worksheet->worksheet_number,
-                'Peristiwa Risiko' => strip_html($incident->risk_chronology_body),
-                'Deskripsi Peristiwa Risiko' => strip_html($incident->risk_chronology_description),
-                'No. Penyebab Risiko' => $incident->risk_cause_number,
-                'Kode Penyebab Risiko' => $incident->risk_cause_code,
-                'Penyebab Risiko' => strip_html($incident->risk_cause_body),
-                'Key Risk Indicators' => $incident->kri_body,
-                'Unit Satuan KRI' => $incident->kri_unit?->name,
-                'Aman' => $incident->kri_threshold_safe,
-                'Hati-Hati' => $incident->kri_threshold_caution,
-                'Bahaya' => $incident->kri_threshold_danger,
-                'Jenis Existing Control' => $this->worksheet->target->identification->existing_control_type->name,
-                'Existing Control' => strip_html($this->worksheet->target->identification->existing_control_body),
-                'Penilaian Efektivitas Kontrol' => $this->worksheet->target->identification->control_effectiveness_assessment->name,
-                'Kategori Dampak' => $this->worksheet->target->identification->risk_impact_category,
-                'Deskripsi Dampak' => strip_html($this->worksheet->target->identification->risk_impact_body),
-                'Perkiraan Waktu' => $this->worksheet->target->identification->format_risk_start_date->translatedFormat('M') . '-' . $this->worksheet->target->identification->format_risk_end_date->translatedFormat('M'),
-            ];
+        $currentIndex = 0;
+        return $this->worksheets->map(function ($worksheet) use (&$currentIndex) {
+            return $worksheet->incidents->map(function ($incident) use ($worksheet, &$currentIndex) {
+                $currentIndex += 1;
+                return [
+                    'No.' => $currentIndex,
+                    'Nama Perusahaan' => $worksheet->company_name,
+                    'Kode Perusahaan' => $worksheet->company_code,
+                    'Sasaran Perusahaan' => strip_html($worksheet->target_body),
+                    'Kategori Risiko' => $worksheet->identification->risk_category_t2_name . ' & ' . $worksheet->identification->risk_category_t3_name,
+                    'No. Risiko' => $worksheet->worksheet_number,
+                    'Peristiwa Risiko' => strip_html($incident->risk_chronology_body),
+                    'Deskripsi Peristiwa Risiko' => strip_html($incident->risk_chronology_description),
+                    'No. Penyebab Risiko' => $incident->risk_cause_number,
+                    'Kode Penyebab Risiko' => $incident->risk_cause_code,
+                    'Penyebab Risiko' => strip_html($incident->risk_cause_body),
+                    'Key Risk Indicators' => $incident->kri_body,
+                    'Unit Satuan KRI' => $incident->kri_unit?->name,
+                    'Aman' => $incident->kri_threshold_safe,
+                    'Hati-Hati' => $incident->kri_threshold_caution,
+                    'Bahaya' => $incident->kri_threshold_danger,
+                    'Jenis Existing Control' => $worksheet->identification->existing_control_type_name,
+                    'Existing Control' => strip_html($worksheet->identification->existing_control_body),
+                    'Penilaian Efektivitas Kontrol' => $worksheet->identification->control_effectiveness_assessment_name,
+                    'Kategori Dampak' => $worksheet->identification->risk_impact_category,
+                    'Deskripsi Dampak' => strip_html($worksheet->identification->risk_impact_body),
+                    'Perkiraan Waktu' => format_date($worksheet->identification->risk_impact_start_date)->translatedFormat('M') . '-' . format_date($worksheet->identification->risk_impact_end_date)->translatedFormat('M'),
+                ];
+            });
         });
     }
 

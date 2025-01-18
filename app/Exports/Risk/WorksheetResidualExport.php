@@ -3,6 +3,7 @@
 namespace App\Exports\Risk;
 
 use App\Models\Risk\Assessment\Worksheet;
+use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithStyles;
@@ -43,35 +44,46 @@ class WorksheetResidualExport implements FromCollection, WithHeadings, WithStyle
     protected int $count = 0;
 
 
-    public function __construct(public Worksheet $worksheet) {}
+    public function __construct(private Collection $worksheets, public string $impact_category = 'kuantitatif') {}
 
     public function collection()
     {
-        return collect($this->worksheet->target->identification->incidents)->map(function ($incident, $index) {
-            $residuals = $this->worksheet->target->identification->residuals;
-            $residualData = [];
-            $this->count += 1;
+        return $this->worksheets->filter(fn($worksheet) => $worksheet->identification->risk_impact_category == $this->impact_category)
+            ->map(function ($worksheet) use (&$currentIndex) {
+                return $worksheet->incidents->map(function ($incident) use ($worksheet, &$currentIndex) {
+                    $currentIndex += 1;
+                    $item = [
+                        'No.' => $currentIndex,
+                        'Nama Perusahaan' => $worksheet->company_name,
+                        'Kode Perusahaan' => $worksheet->company_code,
+                        'No. Risiko' => $worksheet->worksheet_number,
+                        'Peristiwa Risiko' => strip_html($incident->risk_chronology_body),
+                    ];
 
-            // Process residual data
-            for ($i = 0; $i < 7; $i++) {
-                for ($j = 0; $j < count($residuals); $j++) {
-                    if ($i == 0 || $i == 4) {
-                        $residualData[] = $residuals[$j][$i] ? money_format((float) $residuals[$j][$i]) : '-';
-                    } else {
-                        $residualData[] = $residuals[$j][$i];
+                    for ($i = 1; $i <= 4; $i++) {
+                        foreach (
+                            [
+                                'impact_value',
+                                'impact_scale',
+                                'impact_probability',
+                                'impact_probability_scale',
+                                'risk_exposure',
+                                'risk_scale',
+                                'risk_level',
+                            ] as $key
+                        ) {
+                            $key = "residual_{$i}_{$key}";
+
+                            if (str_contains($key, 'impact_value') || str_contains($key, 'risk_exposure')) {
+                                $item[$key] = $worksheet->identification->$key ? money_format((float) $worksheet->identification->$key) : '-';
+                            } else {
+                                $item[$key] = $incident->$key;
+                            }
+                        }
                     }
-                }
-            }
-
-            return [
-                'No.' => $index + 1,
-                'Nama Perusahaan' => $this->worksheet->company_name,
-                'Kode Perusahaan' => $this->worksheet->company_code,
-                'No. Risiko' => $this->worksheet->worksheet_number,
-                'Peristiwa Risiko' => strip_html($incident->risk_chronology_body),
-                ...$residualData
-            ];
-        });
+                    return $item;
+                });
+            });
     }
 
     public function headings(): array
@@ -188,6 +200,6 @@ class WorksheetResidualExport implements FromCollection, WithHeadings, WithStyle
 
     public function title(): string
     {
-        return 'Risiko Residual ' . ucwords($this->worksheet->target->identification->risk_impact_category);
+        return 'Risiko Residual ' . ucwords($this->impact_category);
     }
 }

@@ -2,19 +2,19 @@ import Choices from "choices.js";
 import createDatatable from "js/components/datatable";
 import { decodeHtml, defaultConfigFormatNumeral, defaultConfigChoices } from "js/components/helper";
 
-const worksheetTableFilter = document.querySelector('#worksheet-table-filter')
-const selectYear = worksheetTableFilter.querySelector('select[name="year"]')
-const selectLength = worksheetTableFilter.querySelector('select[name="length"]')
+// const worksheetTableFilter = document.querySelector('#worksheet-table-filter')
+// const selectYear = worksheetTableFilter.querySelector('select[name="year"]')
+// const selectLength = worksheetTableFilter.querySelector('select[name="length"]')
 
-new Choices(selectYear, defaultConfigChoices)
-new Choices(selectLength, defaultConfigChoices)
+// new Choices(selectYear, defaultConfigChoices)
+// new Choices(selectLength, defaultConfigChoices)
 
-selectLength.addEventListener('change', e => {
-    datatable.page.len(e.target.value).draw()
-})
-selectYear.addEventListener('change', e => {
-    datatable.draw()
-})
+// selectLength.addEventListener('change', e => {
+//     datatable.page.len(e.value).draw()
+// })
+// selectYear.addEventListener('change', e => {
+//     datatable.draw()
+// })
 
 const datatable = createDatatable('table', {
     handleColumnSearchField: false,
@@ -22,14 +22,8 @@ const datatable = createDatatable('table', {
     serverSide: true,
     ordering: false,
     processing: true,
-    ajax: {
-        url: window.location.href,
-        data: function (data) {
-            data.year = selectYear.value
-
-            return data
-        }
-    },
+    ajax: window.location.href,
+    scrollX: true,
     fixedColumns: true,
     lengthChange: false,
     pageLength: 10,
@@ -50,7 +44,7 @@ const datatable = createDatatable('table', {
         const groups = {};
         api.rows({ page: 'current' }).every(function (rowIdx) {
             const data = this.data();
-            const worksheetNumber = data.identification.target.worksheet.worksheet_number;
+            const worksheetNumber = data.worksheet_number;
             if (!groups[worksheetNumber]) {
                 groups[worksheetNumber] = [];
             }
@@ -113,37 +107,33 @@ const datatable = createDatatable('table', {
     columns: [
         {
             sortable: true,
-            title: 'No.',
-            data: 'identification.target.worksheet.worksheet_number',
-            name: 'identification.target.worksheet.worksheet_number',
+            data: 'worksheet_number',
+            name: 'worksheet_number',
             width: '64px'
         },
         {
             sortable: false,
-            title: 'Status',
             data: 'status',
             name: 'status',
             width: '128px'
         },
         {
             sortable: false,
-            title: 'Organisasi',
-            data: 'identification.target.worksheet.sub_unit_name',
-            name: 'identification.target.worksheet.sub_unit_name',
+            data: 'sub_unit_name',
+            name: 'sub_unit_name',
             width: '256px',
             render: function (data, type, row) {
                 if (type !== 'display') {
                     return data
                 }
 
-                return `[${row.identification.target.worksheet.personnel_area_code}] ${row.identification.target.worksheet.sub_unit_name}`
+                return `[${row.personnel_area_code}] ${row.sub_unit_name}`
             }
         },
         {
             sortable: false,
-            title: 'Pilihan Sasaran',
-            data: 'identification.target.body',
-            name: 'identification.target.body',
+            data: 'target_body',
+            name: 'target_body',
             width: '256px',
             render: function (data, type, row) {
                 if (type !== 'display') {
@@ -162,7 +152,6 @@ const datatable = createDatatable('table', {
         },
         {
             sortable: false,
-            title: 'Peristiwa Risiko',
             data: 'risk_chronology_body',
             name: 'risk_chronology_body',
             width: '256px',
@@ -183,7 +172,6 @@ const datatable = createDatatable('table', {
         },
         {
             sortable: false,
-            title: 'Penyebab Risiko',
             data: 'risk_cause_body',
             name: 'risk_cause_body',
             width: '256px',
@@ -204,9 +192,8 @@ const datatable = createDatatable('table', {
         },
         {
             sortable: false,
-            title: 'Dampak',
-            data: 'identification.risk_impact_body',
-            name: 'identification.risk_impact_body',
+            data: 'risk_impact_body',
+            name: 'risk_impact_body',
             width: '256px',
             render: function (data, type, row) {
                 if (type !== 'display') {
@@ -225,17 +212,63 @@ const datatable = createDatatable('table', {
         },
         {
             sortable: false,
-            title: 'Level',
-            data: 'inherent.risk_level',
-            name: 'inherent.risk_level',
-            width: '160px',
+            data: 'inherent_risk_level',
+            name: 'inherent_risk_level',
+            width: '100px',
         },
         {
             sortable: false,
-            title: 'Skala Risiko',
-            data: 'inherent.risk_scale',
-            name: 'inherent.risk_scale',
-            width: '160px',
+            data: 'inherent_risk_scale',
+            name: 'inherent_risk_scale',
+            width: '100px',
+        },
+        {
+            sortable: false,
+            data: 'residual_1_risk_level',
+            name: 'residual_1_risk_level',
+            width: '100px',
+        },
+        {
+            sortable: false,
+            data: 'residual_2_risk_level',
+            name: 'residual_2_risk_level',
+            width: '100px',
+        },
+        {
+            sortable: false,
+            data: 'residual_3_risk_level',
+            name: 'residual_3_risk_level',
+            width: '100px',
+        },
+        {
+            sortable: false,
+            data: 'residual_4_risk_level',
+            name: 'residual_4_risk_level',
+            width: '100px',
+        },
+        {
+            sortable: false,
+            data: 'residual_1_risk_scale',
+            name: 'residual_1_risk_scale',
+            width: '100px',
+        },
+        {
+            sortable: false,
+            data: 'residual_2_risk_scale',
+            name: 'residual_2_risk_scale',
+            width: '100px',
+        },
+        {
+            sortable: false,
+            data: 'residual_3_risk_scale',
+            name: 'residual_3_risk_scale',
+            width: '100px',
+        },
+        {
+            sortable: false,
+            data: 'residual_4_risk_scale',
+            name: 'residual_4_risk_scale',
+            width: '100px',
         },
     ],
 })

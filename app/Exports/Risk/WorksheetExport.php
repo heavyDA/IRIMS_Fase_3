@@ -2,23 +2,24 @@
 
 namespace App\Exports\Risk;
 
-use App\Models\Risk\Assessment\Worksheet;
+use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\WithMultipleSheets;
 
 class WorksheetExport implements WithMultipleSheets
 {
-    public function __construct(public Worksheet $worksheet) {}
+
+    public function __construct(private Collection $worksheets) {}
 
     public function sheets(): array
     {
-        $sheets = [
-            new WorksheetStrategyExport($this->worksheet),
-            new WorksheetContextExport($this->worksheet),
-            new WorksheetInherentExport($this->worksheet),
-            new WorksheetResidualExport($this->worksheet),
-            new WorksheetTreatmentExport($this->worksheet),
+        return [
+            new WorksheetStrategyExport($this->worksheets),
+            new WorksheetContextExport($this->worksheets),
+            new WorksheetInherentExport($this->worksheets),
+            new WorksheetInherentExport($this->worksheets, 'kualitatif'),
+            new WorksheetResidualExport($this->worksheets),
+            new WorksheetResidualExport($this->worksheets, 'kualitatif'),
+            new WorksheetTreatmentExport($this->worksheets),
         ];
-
-        return $sheets;
     }
 }

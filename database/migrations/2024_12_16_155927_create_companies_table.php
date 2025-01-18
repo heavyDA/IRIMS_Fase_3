@@ -19,8 +19,8 @@ return new class extends Migration
             $table->string('sub_unit_name');
             $table->string('organization_code');
             $table->string('organization_name');
-            $table->string('personal_area_code')->nullable();
-            $table->string('personal_area_name')->nullable();
+            $table->string('personnel_area_code')->nullable();
+            $table->string('personnel_area_name')->nullable();
             $table->timestamps();
         });
     }

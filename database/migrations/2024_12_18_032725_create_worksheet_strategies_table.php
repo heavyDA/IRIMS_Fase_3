@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('ra_worksheet_strategies', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('worksheet_target_id')->constrained('ra_worksheet_targets')->cascadeOnDelete();
+            $table->foreignId('worksheet_id')->constrained('ra_worksheets')->cascadeOnDelete();
             $table->text('body')->nullable();
             $table->text('expected_feedback')->nullable();
             $table->text('risk_value')->nullable();

@@ -11,8 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('ra_worksheet_monitoring_actualizations', function (Blueprint $table) {
-            $table->text('actualization_plan_explanation')->default('');
+        Schema::table('ra_worksheet_identifications', function (Blueprint $table) {
+            $table->string('company_code')->default('');
+            $table->string('company_name')->default('');
         });
     }
 
@@ -21,7 +22,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('ra_worksheet_monitoring_actualizations', function (Blueprint $table) {
+        Schema::table('ra_worksheet_identifications', function (Blueprint $table) {
             //
         });
     }

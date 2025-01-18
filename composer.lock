@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "7473de57f2c0bc53b9cc302d5347a368",
+    "content-hash": "a920d54021676e91906260f96f58d68a",
     "packages": [
         {
             "name": "brick/math",
@@ -4432,6 +4432,69 @@
                 }
             ],
             "time": "2024-03-08T11:35:19+00:00"
+        },
+        {
+            "name": "staudenmeir/laravel-cte",
+            "version": "v1.11.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/staudenmeir/laravel-cte.git",
+                "reference": "81a172596e8e222170e371fd680e153425a9500c"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/staudenmeir/laravel-cte/zipball/81a172596e8e222170e371fd680e153425a9500c",
+                "reference": "81a172596e8e222170e371fd680e153425a9500c",
+                "shasum": ""
+            },
+            "require": {
+                "illuminate/database": "^11.0",
+                "php": "^8.2"
+            },
+            "require-dev": {
+                "harrygulliford/laravel-firebird": "^3.3",
+                "laravel/framework": "^11.0",
+                "orchestra/testbench-core": "^9.5",
+                "phpstan/phpstan": "^2.0",
+                "phpunit/phpunit": "^11.0",
+                "singlestoredb/singlestoredb-laravel": "^1.5.4",
+                "yajra/laravel-oci8": "^11.2.4"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Staudenmeir\\LaravelCte\\DatabaseServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Staudenmeir\\LaravelCte\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Jonas Staudenmeir",
+                    "email": "mail@jonas-staudenmeir.de"
+                }
+            ],
+            "description": "Laravel queries with common table expressions",
+            "support": {
+                "issues": "https://github.com/staudenmeir/laravel-cte/issues",
+                "source": "https://github.com/staudenmeir/laravel-cte/tree/v1.11.2"
+            },
+            "funding": [
+                {
+                    "url": "https://paypal.me/JonasStaudenmeir",
+                    "type": "custom"
+                }
+            ],
+            "time": "2024-11-24T13:36:31+00:00"
         },
         {
             "name": "symfony/clock",

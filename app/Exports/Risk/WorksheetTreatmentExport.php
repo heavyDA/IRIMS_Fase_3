@@ -4,6 +4,7 @@ namespace App\Exports\Risk;
 
 use App\Models\Risk\Assessment\Worksheet;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithStyles;
@@ -37,7 +38,7 @@ class WorksheetTreatmentExport implements FromCollection, WithHeadings, WithStyl
 
     protected int $count = 0;
 
-    public function __construct(public Worksheet $worksheet)
+    public function __construct(public Collection $worksheets)
     {
         $this->nested_columns = [
             'Timeline (Bulan)' =>  range(1, 12)
@@ -47,32 +48,41 @@ class WorksheetTreatmentExport implements FromCollection, WithHeadings, WithStyl
     public function collection()
     {
         $currentIndex = 0;
-        return collect($this->worksheet->target->identification->incidents)->flatMap(function ($incident) use (&$currentIndex) {
-            return collect($incident->mitigations)->map(function ($mitigation) use ($incident, &$currentIndex) {
-                $this->count += 1;
-                $currentIndex += 1;
-                $months = [];
-                foreach (range(1, 12) as $month) {
-                    $months['month_' . $month] = '0';
-                }
-                return [
-                    'No.' => $currentIndex,
-                    'Nama Perusahaan' => $this->worksheet->company_name,
-                    'Kode Perusahaan' => $this->worksheet->company_code,
-                    'No. Risiko' => $this->worksheet->worksheet_number,
-                    'No. Penyebab Risiko' => $incident->risk_cause_number,
-                    'Penyebab Risiko' => strip_html($incident->risk_cause_body),
-                    'Opsi Perlakuan Risiko' => $mitigation->risk_treatment_option?->name ?? '-',
-                    'Jenis Rencana Perlakuan Risiko' => $mitigation->risk_treatment_type?->name ?? '-',
-                    'Rencana Perlakuan Risiko' => strip_html($mitigation->mitigation_plan),
-                    'Output Perlakuan Risiko' => strip_html($mitigation->mitigation_output),
-                    'Biaya Perlakuan Risiko' => money_format((float) $mitigation->mitigation_cost ?? '0'),
-                    'Jenis Program Dalam RKAP' => $mitigation->rkap_program_type?->name ?? '-',
-                    'PIC' => $mitigation->mitigation_pic,
-                    ...$months
-                ];
+        $data = [];
+        $this->worksheets->each(function ($worksheet) use (&$currentIndex, &$data) {
+            $worksheet->incidents->each(function ($incident) use ($worksheet, &$currentIndex, &$data) {
+                $incident->mitigations->each(function ($mitigation) use ($worksheet, $incident, &$currentIndex, &$data) {
+                    $currentIndex += 1;
+                    $item = [
+                        'No.' => $currentIndex,
+                        'Nama Perusahaan' => $worksheet->company_name,
+                        'Kode Perusahaan' => $worksheet->company_code,
+                        'No. Risiko' => $worksheet->worksheet_number,
+                        'No. Penyebab Risiko' => $incident->risk_cause_number,
+                        'Penyebab Risiko' => strip_html($incident->risk_cause_body),
+                        'Opsi Perlakuan Risiko' => $mitigation->risk_treatment_option?->name ?? '-',
+                        'Jenis Rencana Perlakuan Risiko' => $mitigation->risk_treatment_type?->name ?? '-',
+                        'Rencana Perlakuan Risiko' => strip_html($mitigation->mitigation_plan),
+                        'Output Perlakuan Risiko' => strip_html($mitigation->mitigation_output),
+                        'Biaya Perlakuan Risiko' => money_format((float) $mitigation->mitigation_cost ?? '0'),
+                        'Jenis Program Dalam RKAP' => $mitigation->rkap_program_type?->name ?? '-',
+                        'PIC' => $mitigation->mitigation_pic,
+                    ];
+
+                    $months = array_keys(range(1, 12));
+                    $start = format_date($mitigation->mitigation_start_date)->month;
+                    $end = format_date($mitigation->mitigation_end_date)->month;
+
+                    foreach ($months as $key => $value) {
+                        $months[$key] = $start >= $value && $value <= $end ? 1 : 0;
+                    }
+
+                    $data[] = array_merge($item, $months);
+                });
             });
         });
+
+        return collect($data);
     }
 
     public function headings(): array

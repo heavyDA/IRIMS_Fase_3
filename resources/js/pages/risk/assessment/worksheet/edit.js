@@ -58,7 +58,7 @@ const identificationValidate = () => {
         }
     }
     worksheet.identification = formatDataToStructuredObject(identificationData);
-    worksheet.identification.inherent_impact_value = unformatNumeral(identificationInherentImpactValue.value, defaultConfigFormatNumeral);
+    worksheet.identification.inherent_impact_value = identificationInherentImpactValue.value ? unformatNumeral(identificationInherentImpactValue.value, defaultConfigFormatNumeral) : '';
 
     const isQualitative = worksheet.identification.risk_impact_category == 'kualitatif';
     for (let key of Object.keys(worksheet.identification)) {
@@ -76,7 +76,10 @@ const identificationValidate = () => {
                 for (const residual of worksheet.identification[key]) {
                     if (residual) {
                         for (const itemKey of Object.keys(residual)) {
-                            if (itemKey == 'impact_value' && isQualitative) {
+                            if (
+                                (itemKey == 'impact_value' && isQualitative) ||
+                                itemKey == 'id'
+                            ) {
                                 continue
                             }
 
@@ -110,8 +113,8 @@ const contextValidate = () => {
             contextData.append(item.name, item.value);
         }
     }
-
     worksheet.context = Object.fromEntries(contextData);
+    console.log(worksheet.context);
 
     for (let key of Object.keys(worksheet.context)) {
         if (
@@ -1347,7 +1350,6 @@ for (const key of Object.keys(fetchers.data.identification)) {
     }
 
     const input = identificationForm.querySelector(`[name="${key}"]`)
-
     if (input.tagName == 'SELECT') {
         if (key == 'risk_impact_category') {
             identificationRiskImpact.value = fetchers.data.identification[key];

@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('ra_worksheet_identification_incident_mitigations', function (Blueprint $table) {
+        Schema::table('ra_worksheet_mitigations', function (Blueprint $table) {
             $table->string('unit_code')->default('');
             $table->string('unit_name')->default('');
             $table->string('personnel_area_code')->default('');
@@ -25,7 +25,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('ra_worksheet_identification_incident_mitigations', function (Blueprint $table) {
+        Schema::table('ra_worksheet_mitigations', function (Blueprint $table) {
             //
         });
     }

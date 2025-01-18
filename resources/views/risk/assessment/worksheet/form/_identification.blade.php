@@ -273,7 +273,6 @@
                             @for ($quarter = 1; $quarter < 5; $quarter++)
                                 <div class="col-12 col-md-6 col-lg-3">
                                     <label>Q{{ $quarter }}</label>
-                                    <input type="hidden" name="residual[{{ $quarter }}][id]">
                                     <input type="text" class="form-control" disabled
                                         name="residual[{{ $quarter }}][impact_value]">
                                 </div>

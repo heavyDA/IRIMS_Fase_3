@@ -10,6 +10,7 @@ use App\Http\Controllers\Master\{
     PICController
 };
 use App\Http\Controllers\Risk\AssessmentController;
+use App\Http\Controllers\Risk\WorksheetController;
 use Illuminate\Support\Facades\Route;
 
 Route::group(['prefix' => 'login', 'as' => 'auth.'], function () {
@@ -29,15 +30,14 @@ Route::group(['middleware' => 'auth'], function () {
 
     Route::group(['as' => 'risk.', 'prefix' => 'risk'], function () {
         Route::group(['as' => 'assessment.worksheet.', 'prefix' => 'assessment/worksheet'], function () {
-            Route::get('', [App\Http\Controllers\Risk\AssessmentWorksheetController::class, 'index'])->name('index');
-            Route::post('', [App\Http\Controllers\Risk\AssessmentWorksheetController::class, 'store'])->name('store');
+            Route::get('', [WorksheetController::class, 'index'])->name('index');
+            Route::post('', [WorksheetController::class, 'store'])->name('store');
 
 
-            Route::get('{worksheet}', [App\Http\Controllers\Risk\AssessmentWorksheetController::class, 'show'])->name('show');
-            Route::get('{worksheet}/export', [App\Http\Controllers\Risk\AssessmentWorksheetController::class, 'export'])->name('export');
-            Route::get('{worksheet}/edit', [App\Http\Controllers\Risk\AssessmentWorksheetController::class, 'edit'])->name('edit');
-            Route::put('{worksheet}/edit', [App\Http\Controllers\Risk\AssessmentWorksheetController::class, 'update'])->name('update');
-            Route::put('{worksheet}/status', [App\Http\Controllers\Risk\AssessmentWorksheetController::class, 'update_status'])->name('update-status');
+            Route::get('{worksheet}', [WorksheetController::class, 'show'])->name('show');
+            Route::get('{worksheet}/edit', [WorksheetController::class, 'edit'])->name('edit');
+            Route::put('{worksheet}/edit', [WorksheetController::class, 'update'])->name('update');
+            Route::put('{worksheet}/status', [WorksheetController::class, 'update_status'])->name('update-status');
         });
 
         Route::group(['as' => 'process.monitoring.', 'prefix' => 'process/monitoring'], function () {

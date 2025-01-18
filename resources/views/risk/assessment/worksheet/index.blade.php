@@ -79,10 +79,6 @@
                                         </a>
                                     @endif
                                     @isset($worksheet)
-                                        <a href="{{ route('risk.assessment.worksheet.export', $worksheet->getEncryptedId()) }}"
-                                            style="min-width: 128px;" class="btn btn-info">
-                                            <span><i class="ti ti-download"></i></span>&nbsp;Download
-                                        </a>
                                         @if (!str_contains(request()->route()->getName(), 'edit'))
                                             @if (
                                                 (session()->get('current_role')?->name == 'risk admin' && $worksheet->last_history->status == 'draft') ||
@@ -146,7 +142,10 @@
                                                         </div>
                                                     </div>
                                                     <div class="timeline-body pt-4 text-dark">
-                                                        <p>{!! $history->note !!}</p>
+                                                        <p>
+                                                            {!! $history->status_badge !!}
+                                                            {!! $history->note !!}
+                                                        </p>
                                                     </div>
                                                 </div>
                                             </li>

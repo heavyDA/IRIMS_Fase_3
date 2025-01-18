@@ -1,3 +1,2 @@
-<div>
-    <!-- When there is no desire, all things are at peace. - Laozi -->
-</div>
+<span
+    class="badge rounded-pill bg-{{ $color }} {{ $color == 'light' ? 'text-dark' : 'text-white' }}">{{ $label }}</span>

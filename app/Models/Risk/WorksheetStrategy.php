@@ -1,15 +1,18 @@
 <?php
 
-namespace App\Models\Risk\Assessment;
+namespace App\Models\Risk;
 
+use App\Traits\HasEncryptedId;
 use Illuminate\Database\Eloquent\Model;
 
 class WorksheetStrategy extends Model
 {
+    use HasEncryptedId;
+
     protected $table = 'ra_worksheet_strategies';
 
     protected $fillable = [
-        'worksheet_target_id',
+        'worksheet_id',
         'body',
         'expected_feedback',
         'risk_value',
@@ -17,8 +20,8 @@ class WorksheetStrategy extends Model
         'decision',
     ];
 
-    public function target()
+    public function worksheet()
     {
-        return $this->belongsTo(WorksheetTarget::class, 'worksheet_target_id');
+        return $this->belongsTo(Worksheet::class);
     }
 }
