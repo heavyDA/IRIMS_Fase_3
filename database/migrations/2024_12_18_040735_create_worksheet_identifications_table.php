@@ -13,9 +13,8 @@ return new class extends Migration
     {
         Schema::create('ra_worksheet_identifications', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('worksheet_target_id')->constrained('ra_worksheet_targets')->cascadeOnDelete();
-            $table->foreignId('kbumn_target_id')->nullable()->constrained('m_kbumn_targets', 'id', 'identification_kbumn_target_idx')->nullOnDelete();
-            $table->foreignId('risk_category_id')->nullable()->constrained('m_kbumn_risk_categories', 'id', 'identification_risk_category_idx')->nullOnDelete();
+            $table->foreignId('worksheet_id')->constrained('ra_worksheets')->cascadeOnDelete();
+
             $table->foreignId('risk_category_t2_id')->nullable()->constrained('m_kbumn_risk_categories', 'id', 'identification_risk_category_t2_idx')->nullOnDelete();
             $table->foreignId('risk_category_t3_id')->nullable()->constrained('m_kbumn_risk_categories', 'id', 'identification_risk_category_t3_idx')->nullOnDelete();
 
@@ -31,6 +30,47 @@ return new class extends Migration
             $table->text('risk_impact_body');
             $table->date('risk_impact_start_date');
             $table->date('risk_impact_end_date');
+
+            $table->string('inherent_body');
+            $table->string('inherent_impact_value')->default('');
+            $table->unsignedInteger('inherent_impact_scale_id')->nullable();
+            $table->string('inherent_impact_probability');
+            $table->unsignedInteger('inherent_impact_probability_scale_id')->nullable();
+            $table->string('inherent_risk_exposure');
+            $table->string('inherent_risk_level');
+            $table->string('inherent_risk_scale');
+
+            $table->string('residual_1_impact_value')->default('');
+            $table->unsignedInteger('residual_1_impact_scale_id')->nullable();
+            $table->string('residual_1_impact_probability');
+            $table->unsignedInteger('residual_1_impact_probability_scale_id')->nullable();
+            $table->string('residual_1_risk_exposure');
+            $table->string('residual_1_risk_level');
+            $table->string('residual_1_risk_scale');
+
+            $table->string('residual_2_impact_value')->default('');
+            $table->unsignedInteger('residual_2_impact_scale_id')->nullable();
+            $table->string('residual_2_impact_probability');
+            $table->unsignedInteger('residual_2_impact_probability_scale_id')->nullable();
+            $table->string('residual_2_risk_exposure');
+            $table->string('residual_2_risk_level');
+            $table->string('residual_2_risk_scale');
+
+            $table->string('residual_3_impact_value')->default('');
+            $table->unsignedInteger('residual_3_impact_scale_id')->nullable();
+            $table->string('residual_3_impact_probability');
+            $table->unsignedInteger('residual_3_impact_probability_scale_id')->nullable();
+            $table->string('residual_3_risk_exposure');
+            $table->string('residual_3_risk_level');
+            $table->string('residual_3_risk_scale');
+
+            $table->string('residual_4_impact_value')->default('');
+            $table->unsignedInteger('residual_4_impact_scale_id')->nullable();
+            $table->string('residual_4_impact_probability');
+            $table->unsignedInteger('residual_4_impact_probability_scale_id')->nullable();
+            $table->string('residual_4_risk_exposure');
+            $table->string('residual_4_risk_level');
+            $table->string('residual_4_risk_scale');
 
             $table->timestamps();
         });

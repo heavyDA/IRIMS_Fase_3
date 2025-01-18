@@ -1,9 +1,11 @@
 <?php
 
-namespace App\Models\Risk\Assessment;
+namespace App\Models\Risk;
 
+use App\Enums\DocumentStatus;
 use App\Models\RBAC\Role;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 
 class WorksheetHistory extends Model
@@ -19,6 +21,18 @@ class WorksheetHistory extends Model
         'note',
         'status',
     ];
+
+    protected function statusBadge(): Attribute
+    {
+        return Attribute::make(
+            get: function () {
+                $status = DocumentStatus::tryFrom($this->attributes['status']);
+                $label = $status->label();
+                $color = $status->color();
+                return view('components.badge', compact('label', 'color'));
+            }
+        );
+    }
 
     public function user()
     {

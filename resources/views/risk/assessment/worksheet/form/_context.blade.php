@@ -47,7 +47,7 @@
                 </div>
                 <div class="col">
                     <div id="target_body-editor" class="textarea"></div>
-                    <textarea type="text" name="target_body" class="d-none">{!! isset($worksheet) ? html_entity_decode($worksheet->target->body) : '' !!}</textarea>
+                    <textarea type="text" name="target_body" class="d-none">{!! isset($worksheet) ? html_entity_decode($worksheet->target_body) : '' !!}</textarea>
                 </div>
             </div>
         </div>

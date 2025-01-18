@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models\Risk\Assessment;
+namespace App\Models\Risk;
 
 use App\Models\Master\RiskTreatmentOption;
 use App\Models\Master\RiskTreatmentType;
@@ -9,11 +9,11 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 
-class WorksheetIdentificationIncidentMitigation extends Model
+class WorksheetMitigation extends Model
 {
-    protected $table = 'ra_worksheet_identification_incident_mitigations';
+    protected $table = 'ra_worksheet_mitigations';
     protected $fillable = [
-        'worksheet_identification_incident_id',
+        'worksheet_incident_id',
         'risk_treatment_option_id',
         'risk_treatment_type_id',
         'mitigation_plan',
@@ -23,6 +23,11 @@ class WorksheetIdentificationIncidentMitigation extends Model
         'mitigation_cost',
         'mitigation_rkap_program_type_id',
         'mitigation_pic',
+        'unit_code',
+        'unit_name',
+        'personnel_area_code',
+        'personnel_area_name',
+        'position_name',
     ];
 
     public function FormatStartDate(): Attribute
@@ -41,7 +46,7 @@ class WorksheetIdentificationIncidentMitigation extends Model
 
     public function incident()
     {
-        return $this->belongsTo(WorksheetIdentificationIncident::class, 'worksheet_identification_incident_id');
+        return $this->belongsTo(WorksheetIncident::class, 'worksheet_incident_id');
     }
 
     public function risk_treatment_option()

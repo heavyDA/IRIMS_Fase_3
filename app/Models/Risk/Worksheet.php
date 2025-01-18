@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Models\Risk\Assessment;
+namespace App\Models\Risk;
 
+use App\Enums\DocumentStatus;
 use App\Traits\HasEncryptedId;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Crypt;
 
 class Worksheet extends Model
 {
@@ -26,6 +26,7 @@ class Worksheet extends Model
         'personnel_area_name',
         'company_code',
         'company_name',
+        'target_body',
         'status',
         'status_monitoring',
     ];
@@ -45,6 +46,18 @@ class Worksheet extends Model
         }
     }
 
+    protected function statusBadge(): Attribute
+    {
+        return Attribute::make(
+            get: function () {
+                $status = DocumentStatus::tryFrom($this->attributes['status']);
+                $label = $status->label();
+                $color = $status->color();
+                return view('components.badge', compact('label', 'color'));
+            }
+        );
+    }
+
     protected function periodDate(): Attribute
     {
         return Attribute::make(
@@ -59,10 +72,22 @@ class Worksheet extends Model
         );
     }
 
-    public function target()
+    public function strategies()
     {
-        return $this->hasOne(WorksheetTarget::class);
+        return $this->hasMany(WorksheetStrategy::class);
     }
+
+    public function identification()
+    {
+        return $this->hasOne(WorksheetIdentification::class);
+    }
+
+
+    public function incidents()
+    {
+        return $this->hasMany(WorksheetIncident::class);
+    }
+
 
     public function last_history()
     {
@@ -72,10 +97,5 @@ class Worksheet extends Model
     public function histories()
     {
         return $this->hasMany(WorksheetHistory::class)->latest();
-    }
-
-    public function monitorings()
-    {
-        return $this->hasMany(WorksheetMonitoring::class)->oldest('period_date');
     }
 }

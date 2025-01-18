@@ -12,14 +12,14 @@
     </thead>
     <tbody>
         @isset($worksheet)
-            @foreach ($worksheet->target->strategies as $strategy)
+            @foreach ($worksheet->strategies as $strategy)
                 <tr>
-                    <td>{!! html_entity_decode($worksheet->target->body) !!}</td>
-                    <td>{!! $strategy->body !!}</td>
-                    <td>{!! $strategy->expected_feedback !!}</td>
-                    <td>{!! $strategy->risk_value !!}</td>
+                    <td>{!! html_entity_decode($worksheet->target_body) !!}</td>
+                    <td>{!! html_entity_decode($strategy->body) !!}</td>
+                    <td>{!! html_entity_decode($strategy->expected_feedback) !!}</td>
+                    <td>{!! html_entity_decode($strategy->risk_value) !!}</td>
                     <td>Rp.{{ number_format((float) $strategy->risk_value_limit, 2, ',', '.') }}</td>
-                    <td>{{ $strategy->decision }}</td>
+                    <td>{{ ucwords($strategy->decision) }}</td>
                 </tr>
             @endforeach
         @endisset

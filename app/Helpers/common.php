@@ -1,6 +1,14 @@
 <?php
 
 use App\Enums\State;
+use Carbon\Carbon;
+
+if (!function_exists('format_date')) {
+    function format_date(string $date): Carbon
+    {
+        return Carbon::parse($date);
+    }
+}
 
 if (!function_exists('flash_message')) {
     /**

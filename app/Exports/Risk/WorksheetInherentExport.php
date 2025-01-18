@@ -3,6 +3,7 @@
 namespace App\Exports\Risk;
 
 use App\Models\Risk\Assessment\Worksheet;
+use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithStyles;
@@ -40,44 +41,31 @@ class WorksheetInherentExport implements FromCollection, WithHeadings, WithStyle
     protected int $count = 0;
 
 
-    public function __construct(public Worksheet $worksheet) {}
+    public function __construct(public Collection $worksheets, public string $impact_category = 'kuantitatif') {}
 
     public function collection()
     {
-        return collect($this->worksheet->target->identification->incidents)->map(function ($incident, $index) {
-            $residuals = $this->worksheet->target->identification->residuals;
-            $residualData = [];
-            $this->count += 1;
-
-            // Process residual data
-            for ($i = 0; $i < 7; $i++) {
-                for ($j = 0; $j < count($residuals); $j++) {
-                    if ($i == 0 || $i == 4) {
-                        $residualData[] = money_format((float) $residuals[$j][$i]);
-                    } else {
-                        $residualData[] = $residuals[$j][$i];
-                    }
-                }
-            }
-
-            return [
-                'No.' => $index + 1,
-                'Nama Perusahaan' => $this->worksheet->company_name,
-                'Kode Perusahaan' => $this->worksheet->company_code,
-                'No. Risiko' => $this->worksheet->worksheet_number,
-                'Peristiwa Risiko' => strip_html($incident->risk_chronology_body),
-                'Asumsi Perhitungan Dampak' => strip_html($this->worksheet->target->identification->inherent->body),
-                'Nilai Dampak' =>
-                $this->worksheet->target->identification->risk_impact_category == 'kuantitatif' ?
-                    money_format((float) $this->worksheet->target->identification->inherent->impact_value) : '-',
-                'Skala Dampak' => $this->worksheet->target->identification->inherent->impact_scale?->scale,
-                'Nilai Probabilitas' => $this->worksheet->target->identification->inherent->impact_probability,
-                'Skala Probabilitas' => $this->worksheet->target->identification->inherent->impact_probability_scale?->risk_scale,
-                'Eksposur Risiko' => money_format((float) $this->worksheet->target->identification->inherent->risk_exposure ?? '0'),
-                'Skala Risiko' => $this->worksheet->target->identification->inherent->risk_scale,
-                'Level Risiko' => $this->worksheet->target->identification->inherent->risk_level,
-            ];
-        });
+        return $this->worksheets->filter(fn($worksheet) => $worksheet->identification->risk_impact_category == $this->impact_category)
+            ->map(function ($worksheet) use (&$currentIndex) {
+                return $worksheet->incidents->map(function ($incident) use ($worksheet, &$currentIndex) {
+                    $currentIndex += 1;
+                    return [
+                        'No.' => $currentIndex,
+                        'Nama Perusahaan' => $worksheet->company_name,
+                        'Kode Perusahaan' => $worksheet->company_code,
+                        'No. Risiko' => $worksheet->worksheet_number,
+                        'Peristiwa Risiko' => strip_html($incident->risk_chronology_body),
+                        'Asumsi Perhitungan Dampak' => strip_html($worksheet->identification->inherent_body),
+                        'Nilai Dampak' => $worksheet->identification->inherent_impact_value ? money_format((float) $worksheet->identification->inherent_impact_value) : '-',
+                        'Skala Dampak' => $worksheet->identification->inherent_impact_scale,
+                        'Nilai Probabilitas' => $worksheet->identification->inherent_impact_probability,
+                        'Skala Probabilitas' => $worksheet->identification->inherent_impact_probability_scale,
+                        'Eksposur Risiko' => $worksheet->identification->inherent_risk_exposure ? money_format((float) $worksheet->identification->inherent_risk_exposure) : '-',
+                        'Skala Risiko' => $worksheet->identification->inherent_risk_scale,
+                        'Level Risiko' => $worksheet->identification->inherent_risk_level,
+                    ];
+                });
+            });
     }
 
     public function headings(): array
@@ -183,6 +171,6 @@ class WorksheetInherentExport implements FromCollection, WithHeadings, WithStyle
 
     public function title(): string
     {
-        return 'Risiko Inheren ' . ucwords($this->worksheet->target->identification->risk_impact_category);
+        return 'Risiko Inheren ' . ucwords($this->impact_category);
     }
 }

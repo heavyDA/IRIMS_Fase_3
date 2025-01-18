@@ -52,13 +52,12 @@
     </thead>
     <tbody>
         @isset($worksheet)
-
-            @foreach ($worksheet->target->identification->incidents as $incident)
+            @foreach ($worksheet->incidents as $incident)
                 <tr>
                     <td>{{ $worksheet->company_name }}</td>
                     <td>{{ $worksheet->company_code }}</td>
-                    <td>{!! html_entity_decode($worksheet->target->body) !!}</td>
-                    <td>{{ $worksheet->target->identification->risk_category_t2->name . ' & ' . $worksheet->target->identification->risk_category_t3->name }}
+                    <td>{!! html_entity_decode($worksheet->target_body) !!}</td>
+                    <td>{{ $worksheet->identification->risk_category_t2_name . ' & ' . $worksheet->identification->risk_category_t3_name }}
                     </td>
                     <td>{!! html_entity_decode($incident->risk_chronology_body) !!}</td>
                     <td>{!! html_entity_decode($incident->risk_chronology_description) !!}</td>
@@ -70,36 +69,48 @@
                     <td>{{ $incident?->kri_threshold_safe }}</td>
                     <td>{{ $incident?->kri_threshold_caution }}</td>
                     <td>{{ $incident?->kri_threshold_danger }}</td>
-                    <td>{{ $worksheet->target->identification->existing_control_type->name }}</td>
-                    <td>{!! html_entity_decode($worksheet->target->identification->existing_control_body) !!}</td>
-                    <td>{{ $worksheet->target->identification->control_effectiveness_assessment->name }}</td>
-                    <td>{{ $worksheet->target->identification->risk_impact_category }}</td>
-                    <td>{!! html_entity_decode($worksheet->target->identification->risk_impact_body) !!}</td>
-                    <td>{{ $worksheet->target->identification->format_risk_start_date->format('d F Y') . ' s.d. ' . $worksheet->target->identification->format_risk_end_date->format('d F Y') }}
+                    <td>{{ $worksheet->identification->existing_control_type_name }}</td>
+                    <td>{!! html_entity_decode($worksheet->identification->existing_control_body) !!}</td>
+                    <td>{{ $worksheet->identification->control_effectiveness_assessment_name }}</td>
+                    <td>{{ $worksheet->identification->risk_impact_category }}</td>
+                    <td>{!! html_entity_decode($worksheet->identification->risk_impact_body) !!}</td>
+                    <td>{{ format_date($worksheet->identification->risk_impact_start_date)->format('d F Y') . ' s.d. ' . format_date($worksheet->identification->risk_impact_end_date)->format('d F Y') }}
                     </td>
-                    <td>{!! html_entity_decode($worksheet->target->identification->inherent->body) !!}</td>
-                    <td>Rp.{{ number_format((float) $worksheet->target->identification->inherent->impact_value, 2, ',', '.') }}
+                    <td>{!! html_entity_decode($worksheet->identification->inherent_body) !!}</td>
+                    <td>
+                        @if ($worksheet->identification->inherent_impact_value)
+                            Rp.{{ number_format((float) $worksheet->identification->inherent_impact_value, 2, ',', '.') }}
+                        @else
+                            -
+                        @endif
                     </td>
-                    <td>{{ $worksheet->target->identification->inherent->impact_scale->scale }}</td>
-                    <td>{{ $worksheet->target->identification->inherent->impact_probability }}</td>
-                    <td>{{ $worksheet->target->identification->inherent->impact_probability_scale->impact_probability }}
+                    <td>{{ $worksheet->identification->inherent_impact_scale }}</td>
+                    <td>{{ $worksheet->identification->inherent_impact_probability }}</td>
+                    <td>{{ $worksheet->identification->inherent_impact_probability_scale }}
                     </td>
-                    <td>Rp.{{ number_format((float) $worksheet->target->identification->inherent->risk_exposure, 2, ',', '.') }}
+                    <td>Rp.{{ number_format((float) $worksheet->identification->inherent_risk_exposure, 2, ',', '.') }}
                     </td>
-                    <td>{{ $worksheet->target->identification->inherent->impact_probability_scale->risk_scale }}
+                    <td>{{ $worksheet->identification->inherent_risk_scale }}
                     </td>
-                    <td>{{ $worksheet->target->identification->inherent->impact_probability_scale->risk_level }}
+                    <td>{{ $worksheet->identification->inherent_risk_level }}
                     </td>
-                    @for ($i = 0; $i < 7; $i++)
-                        @for ($j = 0; $j < count($worksheet->target->identification->residuals); $j++)
-                            @if ($i == 0 || $i == 4)
-                                <td>Rp.{{ number_format((float) $worksheet->target->identification->residuals[$j][$i], 2, ',', '.') }}
-                                </td>
-                            @else
-                                <td>{{ $worksheet->target->identification->residuals[$j][$i] }}</td>
-                            @endif
-                        @endfor
-                    @endfor
+                    @foreach (['impact_value', 'impact_scale', 'impact_probability', 'impact_probability_scale', 'risk_exposure', 'risk_scale', 'risk_level'] as $key)
+                        @php
+                            for ($i = 1; $i <= 4; $i++) {
+                                $property = "residual_{$i}_{$key}";
+                                $value = $worksheet->identification->$property;
+                                if ($value) {
+                                    if (in_array($key, ['impact_value', 'risk_exposure'])) {
+                                        echo '<td>' . money_format((float) $value) . '</td>';
+                                    } else {
+                                        echo "<td>{$value}</td>";
+                                    }
+                                } else {
+                                    echo '<td>-</td>';
+                                }
+                            }
+                        @endphp
+                    @endforeach
                 </tr>
             @endforeach
         @endisset

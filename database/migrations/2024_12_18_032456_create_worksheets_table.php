@@ -15,7 +15,6 @@ return new class extends Migration
             $table->id();
             $table->string('worksheet_code');
             $table->string('worksheet_number', 100);
-
             $table->string('unit_code');
             $table->string('unit_name');
             $table->string('sub_unit_code');
@@ -24,6 +23,8 @@ return new class extends Migration
             $table->string('organization_name');
             $table->string('personnel_area_code');
             $table->string('personnel_area_name');
+
+            $table->text('target_body')->default('');
             $table->string('status');
 
             $table->string('created_by', 50)->nullable();

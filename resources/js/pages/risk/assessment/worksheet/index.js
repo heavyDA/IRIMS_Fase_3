@@ -58,6 +58,7 @@ const identificationValidate = () => {
         }
     }
     worksheet.identification = formatDataToStructuredObject(identificationData);
+    worksheet.identification.inherent_impact_value = identificationInherentImpactValue.value ? unformatNumeral(identificationInherentImpactValue.value, defaultConfigFormatNumeral) : '';
 
     const isQualitative = worksheet.identification.risk_impact_category == 'kualitatif';
     for (let key of Object.keys(worksheet.identification)) {

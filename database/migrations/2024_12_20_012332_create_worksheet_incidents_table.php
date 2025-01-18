@@ -11,10 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('ra_worksheet_identification_incidents', function (Blueprint $table) {
+        Schema::create('ra_worksheet_incidents', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('worksheet_identification_id')
-                ->constrained('ra_worksheet_identifications', null, 'ra_worksheet_identification_id_idx')
+            $table->foreignId('worksheet_id')
+                ->constrained('ra_worksheets', null, 'worksheet_incident_worksheet_idx')
                 ->cascadeOnDelete();
             $table->string('risk_chronology_body');
             $table->string('risk_chronology_description');
@@ -24,7 +24,7 @@ return new class extends Migration
             $table->string('risk_cause_body');
 
             $table->string('kri_body');
-            $table->foreignId('kri_unit_id')->nullable()->constrained('m_kri_units', null, 'ra_worksheet_identification_kri_unit_idx')->nullOnDelete();
+            $table->foreignId('kri_unit_id')->nullable()->constrained('m_kri_units', null, 'worksheet_incident_kri_unit_idx')->nullOnDelete();
             $table->string('kri_threshold_safe')->default('');
             $table->string('kri_threshold_caution')->default('');
             $table->string('kri_threshold_danger')->default('');
@@ -38,6 +38,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('ra_worksheet_identification_incidents');
+        Schema::dropIfExists('ra_worksheet_incidents');
     }
 };

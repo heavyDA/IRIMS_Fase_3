@@ -17,7 +17,7 @@
                 </thead>
                 <tbody>
                     @isset($worksheet)
-                        @forelse ($worksheet->target->identification->incidents as $incident)
+                        @forelse ($worksheet->incidents as $incident)
                             @foreach ($incident->mitigations as $mitigation)
                                 <tr>
                                     <td>{{ $worksheet->worksheet_number }}</td>
