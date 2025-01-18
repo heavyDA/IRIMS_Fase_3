@@ -13,10 +13,10 @@ return new class extends Migration
     {
         Schema::create('m_companies', function (Blueprint $table) {
             $table->id();
-            $table->string('work_unit_code');
-            $table->string('work_unit_name');
-            $table->string('work_sub_unit_code');
-            $table->string('work_sub_unit_name');
+            $table->string('unit_code');
+            $table->string('unit_name');
+            $table->string('sub_unit_code');
+            $table->string('sub_unit_name');
             $table->string('organization_code');
             $table->string('organization_name');
             $table->string('personal_area_code')->nullable();
