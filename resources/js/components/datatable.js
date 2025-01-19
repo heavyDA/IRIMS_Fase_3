@@ -123,13 +123,6 @@ const createDatatable = (target = 'table', options) => {
             responsive: false,
             processing: false,
             pagingType: 'full_numbers',
-            columnDefs: [
-                {
-                    className: 'dtr-control',
-                    orderable: false,
-                    targets: 0
-                }
-            ],
             language: {
                 info: "Halaman _PAGE_ dari _PAGES_",
                 lengthMenu: "_MENU_ ",

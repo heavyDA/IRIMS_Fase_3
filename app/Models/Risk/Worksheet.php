@@ -98,4 +98,9 @@ class Worksheet extends Model
     {
         return $this->hasMany(WorksheetHistory::class)->latest();
     }
+
+    public function monitorings()
+    {
+        return $this->hasMany(Monitoring::class);
+    }
 }

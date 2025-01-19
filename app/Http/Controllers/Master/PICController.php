@@ -16,7 +16,13 @@ class PICController extends Controller
         $data = Cache::get('master.positions', []);
 
         if (empty($data)) {
-            Cache::put('master.positions', Position::all(), now()->addMinutes(5));
+            Cache::put('master.positions', Position::select(
+                'id',
+                'personnel_area_code',
+                'unit_code',
+                'unit_name',
+                'position_name',
+            )->get());
         }
 
         return response()->json(['data' => $data]);

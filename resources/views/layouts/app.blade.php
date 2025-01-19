@@ -63,6 +63,17 @@
 
     @stack('element')
     @stack('bottom-script')
+
+    @if (session()->has('flash_message'))
+        <script defer>
+            document.addEventListener('DOMContentLoaded', () => {
+                const message = @json(session('flash_message'));
+                if (typeof window.alert_message === 'function') {
+                    window.alert_message(message.type, '', message.message);
+                }
+            });
+        </script>
+    @endif
 </body>
 
 </html>

@@ -10,6 +10,7 @@ use App\Http\Controllers\Master\{
     PICController
 };
 use App\Http\Controllers\Risk\AssessmentController;
+use App\Http\Controllers\Risk\MonitoringController;
 use App\Http\Controllers\Risk\WorksheetController;
 use Illuminate\Support\Facades\Route;
 
@@ -28,8 +29,8 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('profile/unit_head', [AuthController::class, 'get_unit_head'])->name('profile.get_unit_head');
     Route::get('profile/risk_metric', [AuthController::class, 'get_risk_metric'])->name('profile.get_risk_metric');
 
-    Route::group(['as' => 'risk.', 'prefix' => 'risk'], function () {
-        Route::group(['as' => 'assessment.worksheet.', 'prefix' => 'assessment/worksheet'], function () {
+    Route::group(['as' => 'risk.', 'prefix' => 'risk-process'], function () {
+        Route::group(['as' => 'worksheet.', 'prefix' => 'worksheet'], function () {
             Route::get('', [WorksheetController::class, 'index'])->name('index');
             Route::post('', [WorksheetController::class, 'store'])->name('store');
 
@@ -40,15 +41,15 @@ Route::group(['middleware' => 'auth'], function () {
             Route::put('{worksheet}/status', [WorksheetController::class, 'update_status'])->name('update-status');
         });
 
-        Route::group(['as' => 'process.monitoring.', 'prefix' => 'process/monitoring'], function () {
-            Route::get('', [App\Http\Controllers\Risk\ProcessMonitoringController::class, 'index'])->name('index');
-            Route::get('{worksheet}', [App\Http\Controllers\Risk\ProcessMonitoringController::class, 'show'])->name('show');
-            Route::get('{worksheet}/create', [App\Http\Controllers\Risk\ProcessMonitoringController::class, 'create'])->name('create');
-            Route::post('{worksheet}/create', [App\Http\Controllers\Risk\ProcessMonitoringController::class, 'store'])->name('store');
-            Route::get('detail/{monitoringId}', [App\Http\Controllers\Risk\ProcessMonitoringController::class, 'show_monitoring'])->name('show_monitoring');
-            Route::get('edit/{monitoringId}', [App\Http\Controllers\Risk\ProcessMonitoringController::class, 'edit_monitoring'])->name('edit_monitoring');
-            Route::put('edit/{monitoringId}', [App\Http\Controllers\Risk\ProcessMonitoringController::class, 'update_monitoring'])->name('update_monitoring');
-            Route::put('status/{monitoringId}', [App\Http\Controllers\Risk\ProcessMonitoringController::class, 'update_status_monitoring'])->name('update_status_monitoring');
+        Route::group(['as' => 'monitoring.', 'prefix' => 'monitoring'], function () {
+            Route::get('', [MonitoringController::class, 'index'])->name('index');
+            Route::get('{worksheet}', [MonitoringController::class, 'show'])->name('show');
+            Route::get('{worksheet}/create', [MonitoringController::class, 'create'])->name('create');
+            Route::post('{worksheet}/create', [MonitoringController::class, 'store'])->name('store');
+            Route::get('detail/{monitoringId}', [MonitoringController::class, 'show_monitoring'])->name('show_monitoring');
+            Route::get('edit/{monitoringId}', [MonitoringController::class, 'edit_monitoring'])->name('edit_monitoring');
+            Route::put('edit/{monitoringId}', [MonitoringController::class, 'update_monitoring'])->name('update_monitoring');
+            Route::put('status/{monitoringId}', [MonitoringController::class, 'update_status_monitoring'])->name('update_status_monitoring');
         });
 
         Route::resource(

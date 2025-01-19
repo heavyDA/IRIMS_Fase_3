@@ -117,6 +117,11 @@ class WorksheetIncident extends Model
         return $this->hasMany(WorksheetMitigation::class);
     }
 
+    public function monitoring()
+    {
+        return $this->hasOne(Monitoring::class, 'worksheet_id', 'worksheet_id');
+    }
+
     public function kri_unit()
     {
         return $this->belongsTo(KRIUnit::class);

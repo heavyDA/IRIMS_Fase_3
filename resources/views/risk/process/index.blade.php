@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @push('bottom-script')
-    @vite(['resources/js/pages/risk/process/index.js'])
+    @vite(['resources/js/pages/risk/monitoring/index.js'])
 @endpush
 
 @section('header-content')
@@ -22,7 +22,28 @@
 @section('main-content')
     <x-card>
         <x-slot name="body">
-            <table class="table table-bordered table-stripped display nowrap" style="width: 100%;"></table>
+            <table id="worksheet-table" class="table table-bordered table-stripped display nowrap" style="width: 100%;">
+                <thead class="table-dark">
+                    <tr>
+                        <th rowspan="2">No.</th>
+                        <th rowspan="2">Status</th>
+                        <th rowspan="2">Organisasi</th>
+                        <th rowspan="2">Pilihan Sasaran</th>
+                        <th rowspan="2">Peristiwa Risiko</th>
+                        <th rowspan="2">Rencana Pengendalian</th>
+                        <th rowspan="2">Realisasi Rencana Perlakuan</th>
+                        <th colspan="2">Risiko Inheren</th>
+                        <th colspan="3">Risiko Residual</th>
+                    </tr>
+                    <tr>
+                        <th>Level</th>
+                        <th>Skala Risiko</th>
+                        <th>Kuartal</th>
+                        <th>Level</th>
+                        <th>Skala Risiko</th>
+                    </tr>
+                </thead>
+            </table>
         </x-slot>
     </x-card>
 @endsection

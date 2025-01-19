@@ -49,6 +49,11 @@ class WorksheetMitigation extends Model
         return $this->belongsTo(WorksheetIncident::class, 'worksheet_incident_id');
     }
 
+    public function worksheet()
+    {
+        return $this->hasOneThrough(Worksheet::class, WorksheetIncident::class, 'id', 'id', 'worksheet_incident_id', 'worksheet_id');
+    }
+
     public function risk_treatment_option()
     {
         return $this->belongsTo(RiskTreatmentOption::class, 'risk_treatment_option_id');
@@ -62,5 +67,15 @@ class WorksheetMitigation extends Model
     public function rkap_program_type()
     {
         return $this->belongsTo(RKAPProgramType::class, 'mitigation_rkap_program_type_id');
+    }
+
+    public function monitoring_residual()
+    {
+        return $this->hasOne(MonitoringResidual::class, 'worksheet_incident_id', 'worksheet_incident_id');
+    }
+
+    public function monitoring_actualization()
+    {
+        return $this->hasOne(MonitoringActualization::class, 'worksheet_mitigation_id');
     }
 }
