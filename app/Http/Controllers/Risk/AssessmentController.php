@@ -15,13 +15,13 @@ class AssessmentController extends Controller
 {
     public function index()
     {
+        if (Role::hasLookUpUnitHierarchy()) {
+            $unit = request('unit') ? request('unit') . '%' : Role::getDefaultSubUnit();
+        } else {
+            $unit = Role::getDefaultSubUnit();
+        }
+
         if (request()->ajax()) {
-            $role = session()->get('current_role')?->name;
-            if (Role::hasLookUpUnitHierarchy()) {
-                $unit = request('unit') ? request('unit') . '%' : Role::getDefaultSubUnit();
-            } else {
-                $unit = Role::getDefaultSubUnit();
-            }
 
             $incidents = WorksheetIncident::incident_query()
                 ->where('worksheet.sub_unit_code', 'like', $unit);

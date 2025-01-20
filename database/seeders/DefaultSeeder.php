@@ -73,6 +73,12 @@ class DefaultSeeder extends Seeder
                         'icon_name' => 'grid',
                         'position' => 2,
                     ],
+                    [
+                        'name' => 'Risk Profile',
+                        'route' => 'risk.profile.index',
+                        'icon_name' => 'graph',
+                        'position' => 3,
+                    ]
                 ],
             ],
             [

@@ -13,6 +13,7 @@ export default defineConfig({
                 'resources/js/pages/RBAC/users/index.js',
 
                 'resources/js/pages/risk/assessment/index.js',
+                'resources/js/pages/risk/profile/index.js',
                 'resources/js/pages/risk/worksheet/index.js',
                 'resources/js/pages/risk/worksheet/edit.js',
                 'resources/js/pages/risk/worksheet/table_view.js',

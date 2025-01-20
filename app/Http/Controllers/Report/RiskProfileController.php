@@ -6,7 +6,6 @@ use App\Enums\DocumentStatus;
 use App\Exports\Risk\WorksheetExport;
 use App\Http\Controllers\Controller;
 use App\Models\Master\Official;
-use App\Models\Master\Position;
 use App\Models\RBAC\Role;
 use App\Models\Risk\Worksheet;
 use App\Models\Risk\WorksheetIdentification;
@@ -15,7 +14,7 @@ use Illuminate\Support\Facades\Crypt;
 use Yajra\DataTables\Facades\DataTables;
 use Maatwebsite\Excel\Facades\Excel;
 
-class RiskProfieController extends Controller
+class RiskProfileController extends Controller
 {
     public function index()
     {

@@ -9,9 +9,10 @@ use App\Http\Controllers\Master\{
     KRIUnitController,
     PICController
 };
-use App\Http\Controllers\Report\RiskProfieController;
+use App\Http\Controllers\Report\RiskProfileController;
 use App\Http\Controllers\Risk\AssessmentController;
 use App\Http\Controllers\Risk\MonitoringController;
+use App\Http\Controllers\Risk\ProfileController;
 use App\Http\Controllers\Risk\WorksheetController;
 use Illuminate\Support\Facades\Route;
 
@@ -53,6 +54,13 @@ Route::group(['middleware' => 'auth'], function () {
             Route::put('status/{monitoringId}', [MonitoringController::class, 'update_status_monitoring'])->name('update_status_monitoring');
         });
 
+        Route::group(['as' => 'profile.', 'prefix' => 'profile'], function () {
+            Route::get('', [ProfileController::class, 'index'])->name('index');
+            Route::post('top-risk', [ProfileController::class, 'store'])->name('store');
+            Route::delete('top-risk', [ProfileController::class, 'destroy'])->name('destroy');
+        });
+
+
         Route::resource(
             'assessment',
             AssessmentController::class,
@@ -65,8 +73,8 @@ Route::group(['middleware' => 'auth'], function () {
 
     Route::group(['as' => 'risk.report.', 'prefix' => 'risk-report'], function () {
         Route::group(['as' => 'risk_profile.', 'prefix' => 'risk-profile'], function () {
-            Route::get('', [RiskProfieController::class, 'index'])->name('index');
-            Route::get('export', [RiskProfieController::class, 'export'])->name('export');
+            Route::get('', [RiskProfileController::class, 'index'])->name('index');
+            Route::get('export', [RiskProfileController::class, 'export'])->name('export');
         });
     });
 
