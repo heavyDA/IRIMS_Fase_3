@@ -27,21 +27,30 @@
     </style>
     <x-card>
         <x-slot name="body">
-            <div class="row mb-12">
-                <label for="inputEmail3" class="col-sm-2 col-form-label">Tahun Laporan</label>
-                <div class="col-sm-2">
-                    <select class="form-select" aria-label="Default select example">
-                        @for ($i = 3; $i <= 5; $i++)
-                            <option {{ date('Y') == 2020 + $i ? 'selected' : '' }} value="{{ 2020 + $i }}">
-                                {{ 2020 + $i }}</option>
-                        @endfor
-                    </select>
-                </div>
-                <label for="inputEmail3" class="col-sm-1 col-form-label">Unit Kerja</label>
-                <div class="col-sm-4">
-                    <input value="{{ auth()->user()->sub_unit_name }}" disabled class="form-control not-allowed" />
-                </div>
-            </div>
+            <form id="dashboard-filter">
+                <div class="row mb-12">
+                    <div class="row">
+                        <div class="col-12 col-md-3 col-lg-2">
+                            <label for="year" class="form-label">Tahun</label>
+                            <select name="year" class="form-select">
+                                @for ($i = 5; $i >= 3; $i--)
+                                    <option {{ date('Y') == 2020 + $i ? 'selected' : '' }} value="{{ 2020 + $i }}">
+                                        {{ 2020 + $i }}</option>
+                                @endfor
+                            </select>
+                        </div>
+                        <div class="col-12 col-lg-4">
+                            <label for="unit" class="form-label">Unit Kerja</label>
+                            <select name="unit" class="form-select">
+                                <option value="">Pilih</option>
+                                @foreach ($units as $item)
+                                    <option value="{{ $item->sub_unit_code }}">
+                                        [{{ $item->personnel_area_code }}] {{ $item->sub_unit_name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+            </form>
 
         </x-slot>
     </x-card>
@@ -56,7 +65,7 @@
 
                         </div>
                         <div> <span class="avatar avatar-xl bg-primary fw-semibold">
-                                <span>1022</span> </span>
+                                <span>{{ $count_worksheet->draft }}</span> </span>
                         </div>
                     </div>
 
@@ -72,7 +81,7 @@
 
                         </div>
                         <div> <span class="avatar avatar-xl bg-secondary fw-semibold">
-                                <span>1</span> </span>
+                                <span>{{ $count_worksheet->progress }}</span> </span>
                         </div>
                     </div>
 
@@ -88,7 +97,7 @@
 
                         </div>
                         <div> <span class="avatar avatar-xl bg-success fw-semibold">
-                                <span>12</span> </span>
+                                <span>{{ $count_worksheet->approved }}</span> </span>
                         </div>
                     </div>
 
@@ -111,7 +120,7 @@
 
                         </div>
                         <div> <span class="avatar avatar-xl bg-success fw-semibold">
-                                <span>120</span> </span>
+                                <span>{{ $count_mitigation }}</span> </span>
                         </div>
                     </div>
 
@@ -1010,13 +1019,13 @@
                             </thead>
                             <tbody>
                                 <!-- <tr>
-                                   <td>1</td>
-                                   <td>2</td>
-                                   <td>3</td>
-                                   <td>4</td>
-                                   <td>5</td>
-                                   <td>6</td>
-                                 <tr>				 -->
+                                                   <td>1</td>
+                                                   <td>2</td>
+                                                   <td>3</td>
+                                                   <td>4</td>
+                                                   <td>5</td>
+                                                   <td>6</td>
+                                                 <tr>				 -->
 
                             </tbody>
                         </table>
