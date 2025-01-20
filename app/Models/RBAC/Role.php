@@ -29,23 +29,18 @@ class Role extends Model
             $user->personnel_area_code == 'PST' &&
             in_array($role, ['risk analis', 'risk reviewer'])
         ) {
-            return 'ap%';
+            return 'ap.%';
         }
-
         if (
             str_contains($user->personnel_area_code, 'REG ') &&
-            $role == 'risk otorisator'
+            in_array($role, ['risk analis', 'risk otorisator'])
         ) {
-            return $user->unit_code . '%';
+            return $user->sub_unit_code . '%';
         }
 
         if (
-            $role == 'risk otorisator'
+            in_array($role, ['risk otorisator'])
         ) {
-            return $user->unit_code . '%';
-        }
-
-        if ($role == 'risk owner') {
             return $user->sub_unit_code . '%';
         }
 
