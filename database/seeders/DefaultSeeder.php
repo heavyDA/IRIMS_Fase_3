@@ -392,6 +392,29 @@ class DefaultSeeder extends Seeder
             ],
             [
                 [
+                    'username' => 'ahmad.shahab',
+                    'password' => bcrypt('ahmad.shahab#321'),
+                    'email' => 'ahmad.shahab@injourneyairports.id',
+                    'employee_id' => '20240584',
+                    'employee_name' => 'AHMAD SYAUGI SHAHAB',
+                    'organization_code' => 'ap.53.2',
+                    'organization_name' => 'KC Bandara Internasional I Gusti Ngurah Rai',
+                    'personnel_area_name' => 'KC Bandara Ngurah Rai',
+                    'personnel_area_code' => 'DPS',
+                    'position_name' => 'General Manager KC Bandara Internasional I Gusti Ngurah Rai',
+                    'unit_name' => 'Kantor Regional II (09 September 2024) - DPS',
+                    'sub_unit_name' => 'KC Bandara Internasional I Gusti Ngurah Rai',
+                    'unit_code' => 'ap.53',
+                    'sub_unit_code' => 'ap.53.2',
+                    'employee_grade_code' => '-',
+                    'employee_grade' => '-',
+                    'image_url' => '',
+                    'is_active' => true,
+                ],
+                ['risk otorisator']
+            ],
+            [
+                [
                     'username' => 'ibnu.solikin',
                     'password' => bcrypt('ibnu.solikin#321'),
                     'email' => 'ibnu.solikin@injourneyairports.id',
@@ -555,6 +578,7 @@ class DefaultSeeder extends Seeder
 
         foreach ($users as $user) {
             $newUser = User::firstOrCreate(['username' => $user[0]['username']], $user[0]);
+            $newUser->update($user[0]);
             $newUser->syncRoles($user[1]);
         }
     }

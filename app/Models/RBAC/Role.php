@@ -29,7 +29,7 @@ class Role extends Model
             $user->personnel_area_code == 'PST' &&
             in_array($role, ['risk analis', 'risk reviewer'])
         ) {
-            return 'ap.%';
+            return 'ap%';
         }
         if (
             str_contains($user->personnel_area_code, 'REG ') &&
