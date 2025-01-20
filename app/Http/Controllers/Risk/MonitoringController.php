@@ -146,6 +146,7 @@ class MonitoringController extends Controller
         $user = auth()->user();
 
         try {
+            DB::beginTransaction();
             $monitoring = $worksheet->monitorings()->create([
                 'period_date' => $request->residuals[0]['period_date'],
                 'created_by' => $user->employee_id,
@@ -181,7 +182,7 @@ class MonitoringController extends Controller
 
             $alteration = [];
             foreach ($request->alteration as $key => $value) {
-                $alteration[str_replace('alteration_', '', $key)] = $value;
+                $alteration[str_replace('alteration_', '', $key)] = $value ?: '';
             }
             $monitoring->alteration()->create($alteration);
 

@@ -61,6 +61,7 @@ class PositionJob
                 }
                 logger("[Position Job] successfully fetched data number of created: $created, updated: $updated");
                 Cache::put('master.positions', Position::all());
+                Cache::put('master.position_pics', Position::distinct()->select('id', 'personnel_area_code', 'unit_code', 'unit_name', 'position_name')->get());
 
                 Artisan::call('db:seed --class=PositionSeeder');
             }

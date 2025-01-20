@@ -37,7 +37,7 @@
                             <td>{{ $actualization->mitigation->incident->risk_cause_number }}</td>
                             <td>{!! html_entity_decode($actualization->actualization_plan_body) !!}</td>
                             <td>{!! html_entity_decode($actualization->actualization_plan_output) !!}</td>
-                            <td>{{ money_format((int) $actualization->actualization_cost ?? 0) }}</td>
+                            <td>{{ money_format((float) $actualization->actualization_cost ?? 0) }}</td>
                             <td>{{ $actualization->actualization_cost_absorption ? $actualization->actualization_cost_absorption . '%' : '' }}
                             </td>
                             <td>{{ $actualization->mitigation->mitigation_pic }}</td>

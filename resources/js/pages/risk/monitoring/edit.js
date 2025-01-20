@@ -414,7 +414,7 @@ actualizationPICRelatedChoice.setChoices(
     fetchers.pics.reduce((pics, pic) => {
         pics.push({
             value: pic.id.toString(),
-            label: `[${pic.unit_code}] ${pic.position_name}`,
+            label: `[${pic.personnel_area_code}] ${pic.position_name}`,
             customProperties: pic
         })
         return pics;
@@ -478,7 +478,7 @@ const onActualizationSave = (data) => {
     const picRelated = fetchers.pics.find(pic => pic.id.toString() == data.actualization_pic_related)
     let picRelatedLabel = ''
     if (picRelated) {
-        picRelatedLabel = `[${picRelated.unit_code}] ${picRelated.position_name}`
+        picRelatedLabel = `[${picRelated.personnel_area_code}] ${picRelated.position_name}`
     }
     row.innerHTML = `
         <td class="text-center">${data.risk_cause_number}</td>
@@ -515,12 +515,11 @@ monitoring.actualizations.forEach((actualization, index) => {
     editButton.type = 'button'
     editButton.classList.add('btn', 'btn-sm', 'btn-info-light')
     editButton.innerHTML = `<span><i class="ti ti-edit"></i></span>`
-
     const picRelated = fetchers.pics.find(pic => pic.unit_code == actualization.actualization_pic_related)
     let picRelatedLabel = ''
     if (picRelated) {
         monitoring.actualizations[index].actualization_pic_related = picRelated.id
-        picRelatedLabel = `[${picRelated.unit_code}] ${picRelated.position_name}`
+        picRelatedLabel = `[${picRelated.personnel_area_code}] ${picRelated.position_name}`
     }
     row.innerHTML = `
         <td class="text-center">${actualization.risk_cause_number}</td>
@@ -552,19 +551,20 @@ monitoring.actualizations.forEach((actualization, index) => {
 
 const actualizationEdit = (index, data) => {
     for (let key of Object.keys(data)) {
-        const input = actualizationInputs[key]
-
-        if (input) {
-            if (key == 'actualization_cost') {
-                input.value = formatNumeral(data[key].replaceAll('.', ','), defaultConfigFormatNumeral)
-            } else {
-                console.log(input, key, data[key])
-                input.value = data[key]
-            }
-        } else if (key == 'actualization_pic_related') {
+        if (key == 'actualization_pic_related') {
             const pic = fetchers.pics.find(pic => pic.id.toString() == data[key] || pic.unit_code == data[key])
             if (pic) {
                 actualizationPICRelatedChoice.setChoiceByValue(pic.id.toString());
+            }
+            continue;
+        }
+
+        const input = actualizationInputs[key]
+        if (input) {
+            if (key == 'actualization_cost') {
+                input.value = formatNumeral(data[key].replace('.', ','), defaultConfigFormatNumeral)
+            } else {
+                input.value = data[key]
             }
         } else {
             const textarea = actualizationTextareas[key]
@@ -619,7 +619,6 @@ actualizationForm.addEventListener('submit', (e) => {
         current[key] = data[key] ?? current[key]
     }
 
-    console.log(current);
     monitoring.actualizations[data.key] = current
     onActualizationSave(current)
 });
@@ -633,7 +632,7 @@ actualizationModalElement.addEventListener('hidden.bs.modal', (e) => {
         fetchers.pics.reduce((pics, pic) => {
             pics.push({
                 value: pic.id.toString(),
-                label: `[${pic.unit_code}] ${pic.position_name}`,
+                label: `[${pic.personnel_area_code}] ${pic.position_name}`,
                 customProperties: pic
             })
             return pics;

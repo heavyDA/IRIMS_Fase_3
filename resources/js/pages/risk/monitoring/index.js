@@ -103,9 +103,16 @@ const datatable = createDatatable('table', {
         },
         {
             sortable: false,
-            data: 'worksheet.unit_name',
-            name: 'worksheet.unit_name',
-            width: '256px'
+            data: 'worksheet.sub_unit_name',
+            name: 'worksheet.sub_unit_name',
+            width: '256px',
+            render: function (data, type, row) {
+                if (type !== 'display') {
+                    return data
+                }
+
+                return `[${row.worksheet.personnel_area_code}] ${row.worksheet.sub_unit_name}`
+            }
         },
         {
             sortable: false,

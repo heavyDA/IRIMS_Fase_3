@@ -83,7 +83,7 @@ class DefaultSeeder extends Seeder
                 'children' => [
                     [
                         'name' => 'Risk Profile',
-                        'route' => 'risk.report.risk-profile.index',
+                        'route' => 'risk.report.risk_profile.index',
                         'icon_name' => 'graph',
                         'position' => 1,
                     ],
@@ -138,11 +138,11 @@ class DefaultSeeder extends Seeder
         $actions = [
             [
                 'name' => 'risk.worksheet.',
-                'permissions' => ['index', 'show', 'create', 'store', 'edit', 'update', 'destroy'],
+                'permissions' => ['index', 'show', 'create', 'store', 'edit', 'update', 'destroy', 'update_status'],
             ],
             [
                 'name' => 'risk.monitoring.',
-                'permissions' => ['show-monitoring', 'edit-monitoring', 'update-monitoring', 'update-status-monitoring'],
+                'permissions' => ['show_monitoring', 'edit_monitoring', 'update_monitoring', 'update_status_monitoring'],
             ]
         ];
 

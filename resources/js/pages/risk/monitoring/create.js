@@ -417,8 +417,8 @@ const actualizationPICRelatedChoice = new Choices(actualizationPICRelated, defau
 actualizationPICRelatedChoice.setChoices(
     fetchers.pics.reduce((pics, pic) => {
         pics.push({
-            value: pic.unit_code,
-            label: `[${pic.unit_code}] ${pic.position_name}`,
+            value: pic.id.toString(),
+            label: `[${pic.personnel_area_code}] ${pic.position_name}`,
             customProperties: pic
         })
         return pics;
@@ -479,17 +479,17 @@ const onActualizationSave = (data) => {
     editButton.classList.add('btn', 'btn-sm', 'btn-info-light')
     editButton.innerHTML = `<span><i class="ti ti-edit"></i></span>`
 
-    const picRelated = fetchers.pics.find(pic => pic.unit_code == data.actualization_pic_related)
+    const picRelated = fetchers.pics.find(pic => pic.id.toString() == data.actualization_pic_related || pic.unit_code == data.actualization_pic_related)
     let picRelatedLabel = ''
     if (picRelated) {
-        picRelatedLabel = `[${picRelated.unit_code}] ${picRelated.position_name}`
+        picRelatedLabel = `[${picRelated.personnel_area_code}] ${picRelated.position_name}`
     }
     row.innerHTML = `
         <td class="text-center">${data.risk_cause_number}</td>
         <td class="text-center">${data.actualization_mitigation_plan}</td>
         <td class="text-center">${data.actualization_plan_body}</td>
         <td class="text-center">${data.actualization_plan_output}</td>
-        <td class="text-center">${data.actualization_cost ? formatNumeral(data.actualization_cost, defaultConfigFormatNumeral) : ''}</td>
+        <td class="text-center">${data.actualization_cost ? formatNumeral(data.actualization_cost.replaceAll('.', ','), defaultConfigFormatNumeral) : ''}</td>
         <td class="text-center">${data.actualization_cost_absorption ? data.actualization_cost_absorption + '%' : ''}</td>
         <td class="text-center">${data.actualization_pic}</td>
         <td class="text-center">${picRelatedLabel}</td>
@@ -524,12 +524,13 @@ monitoring.actualizations.forEach((actualization, index) => {
     editButton.type = 'button'
     editButton.classList.add('btn', 'btn-sm', 'btn-info-light')
     editButton.innerHTML = `<span><i class="ti ti-edit"></i></span>`
+
     row.innerHTML = `
         <td class="text-center">${actualization.risk_cause_number}</td>
         <td class="text-center">${actualization.actualization_mitigation_plan}</td>
         <td class="text-center">${actualization.actualization_plan_body}</td>
         <td class="text-center">${actualization.actualization_plan_output}</td>
-        <td class="text-center">${actualization.actualization_cost ? formatNumeral(actualization.actualization_cost, defaultConfigFormatNumeral) : ''}</td>
+        <td class="text-center">${actualization.actualization_cost ? formatNumeral(actualization.actualization_cost.replaceAll('.', ','), defaultConfigFormatNumeral) : ''}</td>
         <td class="text-center">${actualization.actualization_cost_absorption ? actualization.actualization_cost_absorption + '%' : ''}</td>
         <td class="text-center">${actualization.actualization_pic}</td>
         <td class="text-center">${actualization.actualization_pic_related}</td>
@@ -554,15 +555,20 @@ monitoring.actualizations.forEach((actualization, index) => {
 const actualizationEdit = (index, data) => {
     for (let key of Object.keys(data)) {
         if (key == 'actualization_pic_related') {
-            actualizationPICRelatedChoice.setChoiceByValue(data[key]);
+            const pic = fetchers.pics.find(pic => pic.id.toString() == data[key] || pic.unit_code == data[key])
+            if (pic) {
+                actualizationPICRelatedChoice.setChoiceByValue(pic.id.toString());
+            }
             continue;
         }
 
         const input = actualizationInputs[key]
         if (input) {
-            input.value = data[key]
-        } else if (key == 'actualization_cost') {
-            input.value = formatNumeral(data[key], defaultConfigFormatNumeral)
+            if (key == 'actualization_cost') {
+                input.value = formatNumeral(data[key].replaceAll('.', ','), defaultConfigFormatNumeral)
+            } else {
+                input.value = data[key]
+            }
         } else {
             const textarea = actualizationTextareas[key]
             if (textarea) {
@@ -581,16 +587,17 @@ actualizationForm.addEventListener('submit', (e) => {
     const data = Object.fromEntries(new FormData(e.target))
     data.actualization_cost = unformatNumeral(data.actualization_cost, defaultConfigFormatNumeral)
 
-    const actualization = monitoring.actualizations[data.key]
-    actualization.actualization_documents = temporaryDocuments
+    const current = monitoring.actualizations[data.key]
+    current.actualization_documents = temporaryDocuments
 
-    for (const key of Object.keys(actualization)) {
-        if (key != 'actualization_documents') {
-            actualization[key] = data[key]?.toString() ?? actualization[key].toString()
-        }
+
+    for (const key of Object.keys(current)) {
+        if (key == 'key' || key == 'id') continue
+        current[key] = data[key] ?? current[key]
     }
 
-    onActualizationSave(actualization)
+    monitoring.actualizations[data.key] = current
+    onActualizationSave(current)
 });
 
 actualizationModalElement.addEventListener('hidden.bs.modal', (e) => {
@@ -601,8 +608,8 @@ actualizationModalElement.addEventListener('hidden.bs.modal', (e) => {
     actualizationPICRelatedChoice.setChoices(
         fetchers.pics.reduce((pics, pic) => {
             pics.push({
-                value: pic.unit_code,
-                label: `[${pic.unit_code}] ${pic.position_name}`,
+                value: pic.id.toString(),
+                label: `[${pic.personnel_area_code}] ${pic.position_name}`,
                 customProperties: pic
             })
             return pics;
@@ -847,8 +854,9 @@ const save = async () => {
         actualization.actualization_plan_progress = actualization[`actualization_plan_progress[${currentQuarter}]`]
         delete actualization[`actualization_plan_progress[${currentQuarter}]`]
 
-        const picRelated = fetchers.pics.find(pic => pic.unit_code == actualization.actualization_pic_related)
+        const picRelated = fetchers.pics.find(pic => pic?.id?.toString() == actualization.actualization_pic_related)
         if (picRelated) {
+            delete picRelated.id
             actualization = { ...actualization, ...picRelated }
         }
 

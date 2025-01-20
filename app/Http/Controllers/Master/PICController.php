@@ -13,16 +13,20 @@ class PICController extends Controller
 {
     public function index()
     {
-        $data = Cache::get('master.positions', []);
+        $data = Cache::get('master.position_pics', []);
 
         if (empty($data)) {
-            Cache::put('master.positions', Position::select(
-                'id',
-                'personnel_area_code',
-                'unit_code',
-                'unit_name',
-                'position_name',
-            )->get());
+            Cache::put(
+                'master.position_pics',
+                Position::distinct()
+                    ->select(
+                        'id',
+                        'personnel_area_code',
+                        'unit_code',
+                        'unit_name',
+                        'position_name',
+                    )->get()
+            );
         }
 
         return response()->json(['data' => $data]);
