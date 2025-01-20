@@ -6425,12 +6425,6 @@ class PositionSeeder extends Seeder
             ]
         ];
 
-
-        if (!cache()->get('master.positions')) {
-            PositionJob::dispatch();
-            sleep(10);
-        }
-
         foreach ($positions as $position) {
             Position::where('personnel_area_code', $position['personnel_area_code'])
                 ->where('unit_code', $position['unit_code'])

@@ -45,7 +45,7 @@ class WorksheetInherentExport implements FromCollection, WithHeadings, WithStyle
 
     public function collection()
     {
-        return $this->worksheets->filter(fn($worksheet) => $worksheet->identification->risk_impact_category == $this->impact_category)
+        $data = $this->worksheets->filter(fn($worksheet) => $worksheet->identification->risk_impact_category == $this->impact_category)
             ->map(function ($worksheet) use (&$currentIndex) {
                 return $worksheet->incidents->map(function ($incident) use ($worksheet, &$currentIndex) {
                     $currentIndex += 1;
@@ -66,6 +66,10 @@ class WorksheetInherentExport implements FromCollection, WithHeadings, WithStyle
                     ];
                 });
             });
+
+        $this->count = $currentIndex + 2;
+
+        return $data;
     }
 
     public function headings(): array
@@ -89,15 +93,6 @@ class WorksheetInherentExport implements FromCollection, WithHeadings, WithStyle
                 'fillType' => Fill::FILL_SOLID,
                 'startColor' => ['rgb' => '1896A4']
             ],
-        ]);
-
-        $sheet->getStyle("A1:{$lastColumn}" . ($this->count + 2))->applyFromArray([
-            'borders' => [
-                'allBorders' => [
-                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
-                    'color' => ['rgb' => '000000']
-                ]
-            ]
         ]);
 
         $colors = ['00B050', 'FFFF00', 'FF0000',];
@@ -137,7 +132,6 @@ class WorksheetInherentExport implements FromCollection, WithHeadings, WithStyle
             // Merge row (row 1)
             $sheet->mergeCells("{$startCol}1:{$startCol}2");
         }
-
         // Merge cells with same values for specific columns
         excel_merge_same_values(
             $sheet,
@@ -145,6 +139,7 @@ class WorksheetInherentExport implements FromCollection, WithHeadings, WithStyle
                 'B',
                 'C',
                 'D',
+                'F',
                 'G',
                 'H',
                 'I',
@@ -155,8 +150,17 @@ class WorksheetInherentExport implements FromCollection, WithHeadings, WithStyle
                 'M'
             ], // Columns to merge - adjust as needed
             3, // Start from row 3 (after headers)
-            $this->count + 2
+            $this->count
         );
+
+        $sheet->getStyle("A1:{$lastColumn}" . ($this->count))->applyFromArray([
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                    'color' => ['rgb' => '000000']
+                ]
+            ]
+        ]);
     }
 
     private function getColumnLetter(int $index): string

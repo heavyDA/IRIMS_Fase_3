@@ -2,17 +2,83 @@ import Choices from "choices.js";
 import createDatatable from "js/components/datatable";
 import { decodeHtml, defaultConfigFormatNumeral, defaultConfigChoices } from "js/components/helper";
 
+const worksheetTableFilter = document.querySelector('#worksheet-table-filter')
+const selectLength = worksheetTableFilter.querySelector('select[name="length"]')
+const selectYear = worksheetTableFilter.querySelector('select[name="year"]')
+const selectUnit = worksheetTableFilter.querySelector('select[name="unit"]')
+const selectDocumentStatus = worksheetTableFilter.querySelector('select[name="document_status"]')
+
+const selectLengthChoices = new Choices(selectLength, defaultConfigChoices)
+const selectYearChoices = new Choices(selectYear, defaultConfigChoices)
+const selectUnitChoices = new Choices(selectUnit, defaultConfigChoices)
+const selectDocumentStatusChoices = new Choices(selectDocumentStatus, defaultConfigChoices)
+
+const exportButton = worksheetTableFilter.querySelector('#worksheet-export')
+
+if (selectUnitChoices._currentState.choices.length == 2) {
+    selectUnitChoices.setChoiceByValue(selectUnitChoices._currentState.choices[1].value)
+    selectUnitChoices.disable()
+}
+
+const query = {
+    year: selectYear.value
+}
+
+selectLength.addEventListener('change', e => {
+    datatable.page.len(e.target.value).draw();
+})
+
+selectUnit.addEventListener('change', e => {
+    query.unit = e.target.value
+    datatable.draw()
+})
+selectYear.addEventListener('change', e => {
+    query.year = e.target.value
+    datatable.draw()
+})
+selectDocumentStatus.addEventListener('change', e => {
+    query.document_status = e.target.value
+    datatable.draw()
+})
+
+exportButton.addEventListener('click', e => {
+    e.preventDefault();
+    const url = new URL(e.target.dataset.url)
+    url.search = new URLSearchParams(query).toString()
+    window.open(url, '_blank')
+})
+
+worksheetTableFilter.addEventListener('reset', e => {
+    selectLengthChoices.destroy()
+    selectLengthChoices.init()
+    selectYearChoices.destroy()
+    selectYearChoices.init()
+    selectUnitChoices.destroy()
+    selectUnitChoices.init()
+    selectDocumentStatusChoices.destroy()
+    selectDocumentStatusChoices.init()
+
+    datatable.draw()
+});
+
 const datatable = createDatatable('table', {
     handleColumnSearchField: false,
     responsive: false,
     serverSide: true,
     ordering: false,
     processing: true,
-    ajax: window.location.href,
+    ajax: {
+        url: window.location.href,
+        data: function (d) {
+            d.year = selectYear.value
+            d.unit = selectUnit.value
+            d.document_status = selectDocumentStatus.value
+        }
+    },
     scrollX: true,
     fixedColumns: true,
     lengthChange: false,
-    pageLength: 10,
+    pageLength: -1,
     drawCallback: function (settings) {
         const api = this.api();
         const columnsToMerge = [0, 1, 2, 3, 4, 5, 6, 7];

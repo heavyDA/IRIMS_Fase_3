@@ -3,6 +3,7 @@
 namespace App\Models\Risk;
 
 use App\Enums\DocumentStatus;
+use App\Models\RBAC\Role;
 use App\Traits\HasEncryptedId;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
@@ -36,14 +37,26 @@ class Worksheet extends Model
         return $query->whereYear('created_at', $year ?? date('Y'));
     }
 
-    public function scopeSubUnit($query, $sub_unit_code)
+    public function scopeSubUnit($query, string $role, string $unit)
     {
-        $role = session()->get('current_role')?->name;
-        if (in_array($role, ['risk admin', 'risk owner'])) {
-            return $query->where('sub_unit_code', $sub_unit_code);
-        } else if (in_array($role, ['risk otorisator', 'risk analis'])) {
-            return $query->where('sub_unit_code', 'like', $sub_unit_code . '%');
+        if (Role::hasLookUpUnitHierarchy($role)) {
+            return $query->where('sub_unit_code', 'like', '%' . $unit);
         }
+
+        return $query->where('sub_unit_code', $unit);
+    }
+
+    public function scopeDocumentStatus($query, ?string $status)
+    {
+        if (!$status) {
+            return $query;
+        }
+
+        if (in_array($status, ['draft', 'approved'])) {
+            return $query->whereStatus($status);
+        }
+
+        return $query->whereNotIn('status', ['draft', 'approved']);
     }
 
     protected function statusBadge(): Attribute

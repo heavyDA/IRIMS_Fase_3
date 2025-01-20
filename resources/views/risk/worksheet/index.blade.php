@@ -25,11 +25,11 @@
 @endpush
 
 @push('bottom-script')
-    @vite(['resources/js/pages/risk/assessment/worksheet/table_view.js'])
+    @vite(['resources/js/pages/risk/worksheet/table_view.js'])
     @if (str_contains(request()->route()->getName(), 'edit'))
-        @vite(['resources/js/pages/risk/assessment/worksheet/edit.js'])
+        @vite(['resources/js/pages/risk/worksheet/edit.js'])
     @else
-        @vite(['resources/js/pages/risk/assessment/worksheet/index.js'])
+        @vite(['resources/js/pages/risk/worksheet/index.js'])
     @endif
 @endpush
 
@@ -64,11 +64,11 @@
                     <div id="riskAssessmentReview" class="accordion-collapse collapse show" aria-labelledby="headingOne"
                         data-bs-parent="#accordionExample">
                         <div class="accordion-body">
-                            @include('risk.assessment.worksheet.table')
+                            @include('risk.worksheet.table')
                             <div class="mt-4">
                                 <div class="d-flex gap-2">
                                     @if (str_contains(request()->route()->getName(), 'edit'))
-                                        <a href="{{ route('risk.assessment.worksheet.show', $worksheet->getEncryptedId()) }}"
+                                        <a href="{{ route('risk.worksheet.show', $worksheet->getEncryptedId()) }}"
                                             style="min-width: 128px;" class="btn btn-light">
                                             <span><i class="ti ti-arrow-back"></i></span>&nbsp;Kembali
                                         </a>
@@ -85,17 +85,17 @@
                                                     (session()->get('current_role')?->name == 'risk owner' &&
                                                         in_array($worksheet->last_history->status, ['draft', 'on review'])) ||
                                                     session()->get('current_role')?->name == 'risk analis')
-                                                <a href="{{ route('risk.assessment.worksheet.edit', $worksheet->getEncryptedId()) }}"
+                                                <a href="{{ route('risk.worksheet.edit', $worksheet->getEncryptedId()) }}"
                                                     style="min-width: 128px;" class="btn btn-success">
                                                     <span><i class="ti ti-edit"></i></span>&nbsp;Update
                                                 </a>
                                             @endif
                                             @if (session()->get('current_role')?->name == 'risk admin' && $worksheet->last_history->status == 'draft')
-                                                @include('risk.assessment.worksheet.partials._risk_admin')
+                                                @include('risk.worksheet.partials._risk_admin')
                                             @elseif (session()->get('current_role')?->name == 'risk owner' && $worksheet->last_history->status == 'on review')
-                                                @include('risk.assessment.worksheet.partials._risk_owner')
+                                                @include('risk.worksheet.partials._risk_owner')
                                             @elseif (session()->get('current_role')?->name == 'risk otorisator' && $worksheet->last_history->status == 'on confirmation')
-                                                @include('risk.assessment.worksheet.partials._risk_otorisator')
+                                                @include('risk.worksheet.partials._risk_otorisator')
                                             @endif
                                         @endif
                                     @endisset
@@ -180,7 +180,7 @@
                                         <table class="table table-bordered display nowrap" style="width: 100%;"></table>
                                     </div>
                                     <div class="tab-pane active show border-0" role="tabpanel" id="worksheet-form">
-                                        @include('risk.assessment.worksheet.form')
+                                        @include('risk.worksheet.form')
                                     </div>
                                 </div>
                             </div>

@@ -21,21 +21,21 @@
         <div class="tab-pane border-0 p-2 show active" id="tableContext" role="tabpanel">
             <div class="row mt-2">
                 <div class="col py-2" style="overflow-x: scroll;">
-                    @include('risk.assessment.worksheet.table._context')
+                    @include('risk.worksheet.table._context')
                 </div>
             </div>
         </div>
         <div class="tab-pane border-0 p-2" id="tableIdentification" role="tabpanel">
             <div class="row mt-2">
                 <div class="col py-2" style="overflow-x: scroll;">
-                    @include('risk.assessment.worksheet.table._identification')
+                    @include('risk.worksheet.table._identification')
                 </div>
             </div>
         </div>
         <div class="tab-pane border-0 p-2" id="tableTreatment" role="tabpanel">
             <div class="row mt-2">
                 <div class="col py-2" style="overflow-x: scroll;">
-                    @include('risk.assessment.worksheet.table._treatment')
+                    @include('risk.worksheet.table._treatment')
                 </div>
             </div>
         </div>

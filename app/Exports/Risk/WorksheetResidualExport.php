@@ -48,7 +48,7 @@ class WorksheetResidualExport implements FromCollection, WithHeadings, WithStyle
 
     public function collection()
     {
-        return $this->worksheets->filter(fn($worksheet) => $worksheet->identification->risk_impact_category == $this->impact_category)
+        $data = $this->worksheets->filter(fn($worksheet) => $worksheet->identification->risk_impact_category == $this->impact_category)
             ->map(function ($worksheet) use (&$currentIndex) {
                 return $worksheet->incidents->map(function ($incident) use ($worksheet, &$currentIndex) {
                     $currentIndex += 1;
@@ -60,30 +60,34 @@ class WorksheetResidualExport implements FromCollection, WithHeadings, WithStyle
                         'Peristiwa Risiko' => strip_html($incident->risk_chronology_body),
                     ];
 
-                    for ($i = 1; $i <= 4; $i++) {
-                        foreach (
-                            [
-                                'impact_value',
-                                'impact_scale',
-                                'impact_probability',
-                                'impact_probability_scale',
-                                'risk_exposure',
-                                'risk_scale',
-                                'risk_level',
-                            ] as $key
-                        ) {
-                            $key = "residual_{$i}_{$key}";
+                    foreach (
+                        [
+                            'impact_value',
+                            'impact_scale',
+                            'impact_probability',
+                            'impact_probability_scale',
+                            'risk_exposure',
+                            'risk_scale',
+                            'risk_level',
+                        ] as $key
+                    ) {
+                        for ($i = 1; $i <= 4; $i++) {
 
-                            if (str_contains($key, 'impact_value') || str_contains($key, 'risk_exposure')) {
-                                $item[$key] = $worksheet->identification->$key ? money_format((float) $worksheet->identification->$key) : '-';
+                            $_key = "residual_{$i}_{$key}";
+                            if (str_contains($_key, 'impact_value') || str_contains($_key, 'risk_exposure')) {
+                                $item[$_key] = $worksheet->identification->$_key ? money_format((float) $worksheet->identification->$_key) : '-';
                             } else {
-                                $item[$key] = $incident->$key;
+                                $item[$_key] = $worksheet->identification->$_key ?? '-';
                             }
                         }
                     }
+
                     return $item;
                 });
             });
+
+        $this->count = $currentIndex + 2;
+        return $data;
     }
 
     public function headings(): array
@@ -107,15 +111,6 @@ class WorksheetResidualExport implements FromCollection, WithHeadings, WithStyle
                 'fillType' => Fill::FILL_SOLID,
                 'startColor' => ['rgb' => '1896A4']
             ],
-        ]);
-
-        $sheet->getStyle("A1:{$lastColumn}" . ($this->count + 2))->applyFromArray([
-            'borders' => [
-                'allBorders' => [
-                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
-                    'color' => ['rgb' => '000000']
-                ]
-            ]
         ]);
 
         $colors = ['00B050', 'FFFF00', 'FF0000',];
@@ -176,16 +171,27 @@ class WorksheetResidualExport implements FromCollection, WithHeadings, WithStyle
             'B',
             'C',
             'D',
-            'F',
-            ...array_slice($alphabets, 5, array_search($lastColumn, $alphabets))
         ];
+
+        if ($this->impact_category == 'kuantitatif') {
+            $merged_rows = array_merge($merged_rows, array_slice($alphabets, 5, array_search($lastColumn, $alphabets)));
+        }
 
         excel_merge_same_values(
             $sheet,
             $merged_rows, // Columns to merge - adjust as needed
             3, // Start from row 3 (after headers)
-            $this->count + 2
+            $this->count
         );
+
+        $sheet->getStyle("A1:{$lastColumn}" . $this->count)->applyFromArray([
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                    'color' => ['rgb' => '000000']
+                ]
+            ]
+        ]);
     }
 
     private function getColumnLetter(int $index): string

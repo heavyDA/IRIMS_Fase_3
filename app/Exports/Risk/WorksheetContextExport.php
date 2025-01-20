@@ -50,7 +50,7 @@ class WorksheetContextExport implements FromCollection, WithHeadings, WithStyles
     public function collection()
     {
         $currentIndex = 0;
-        return $this->worksheets->map(function ($worksheet) use (&$currentIndex) {
+        $data = $this->worksheets->map(function ($worksheet) use (&$currentIndex) {
             return $worksheet->incidents->map(function ($incident) use ($worksheet, &$currentIndex) {
                 $currentIndex += 1;
                 return [
@@ -79,6 +79,8 @@ class WorksheetContextExport implements FromCollection, WithHeadings, WithStyles
                 ];
             });
         });
+        $this->count = $currentIndex + 2;
+        return $data;
     }
 
     public function headings(): array
@@ -102,15 +104,6 @@ class WorksheetContextExport implements FromCollection, WithHeadings, WithStyles
                 'fillType' => Fill::FILL_SOLID,
                 'startColor' => ['rgb' => '1896A4']
             ],
-        ]);
-
-        $sheet->getStyle("A1:{$lastColumn}" . ($this->count + 2))->applyFromArray([
-            'borders' => [
-                'allBorders' => [
-                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
-                    'color' => ['rgb' => '000000']
-                ]
-            ]
         ]);
 
         $colors = ['00B050', 'FFFF00', 'FF0000',];
@@ -176,8 +169,17 @@ class WorksheetContextExport implements FromCollection, WithHeadings, WithStyles
                 'V',
             ], // Columns to merge - adjust as needed
             3, // Start from row 3 (after headers)
-            $this->count + 2
+            $this->count
         );
+
+        $sheet->getStyle("A1:{$lastColumn}" . ($this->count))->applyFromArray([
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                    'color' => ['rgb' => '000000']
+                ]
+            ]
+        ]);
     }
 
     private function getColumnLetter(int $index): string

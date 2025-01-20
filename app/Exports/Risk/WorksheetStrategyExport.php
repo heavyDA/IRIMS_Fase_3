@@ -68,15 +68,6 @@ class WorksheetStrategyExport implements FromCollection, WithHeadings, WithTitle
             ],
         ]);
 
-        $sheet->getStyle("A1:{$lastColumn}" . ($this->count + 1))->applyFromArray([
-            'borders' => [
-                'allBorders' => [
-                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
-                    'color' => ['rgb' => '000000']
-                ]
-            ]
-        ]);
-
         // Auto-size columns
         foreach (range('A', $lastColumn) as $column) {
             $sheet->getColumnDimension($column)->setAutoSize(true);
@@ -89,9 +80,18 @@ class WorksheetStrategyExport implements FromCollection, WithHeadings, WithTitle
                 'B',
                 'F'
             ], // Columns to merge - adjusted for new column
-            3, // Start from row 3 (after headers)
+            2, // Start from row 3 (after headers)
             $this->count + 1
         );
+
+        $sheet->getStyle("A1:{$lastColumn}" . ($this->count + 1))->applyFromArray([
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                    'color' => ['rgb' => '000000']
+                ]
+            ]
+        ]);
     }
 
     public function title(): string

@@ -1,5 +1,6 @@
 <?php
 
+use App\Jobs\OfficialJob;
 use App\Jobs\PositionJob;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
@@ -14,3 +15,7 @@ Schedule::job('App\Jobs\PositionJob')->everyFifteenSeconds();
 Artisan::command('fetch:position', function () {
     PositionJob::dispatch();
 })->purpose('Fetch position from API');
+
+Artisan::command('fetch:official', function () {
+    OfficialJob::dispatch();
+})->purpose('Fetch official from API');

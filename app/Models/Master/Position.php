@@ -22,4 +22,9 @@ class Position extends Model
             ->where('personnel_area_code', $personnel_area_code)
             ->where('position_name', $position_name);
     }
+
+    public function scopeUnitOnly($query)
+    {
+        return $query->distinct()->select('personnel_area_code', 'unit_name');
+    }
 }

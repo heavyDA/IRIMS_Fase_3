@@ -37,7 +37,7 @@ class WorksheetController extends Controller
         $risk_treatment_types = RiskTreatmentType::all();
         $risk_treatment_options = RiskTreatmentOption::all();
 
-        return view('risk.assessment.worksheet.index', compact(
+        return view('risk.worksheet.index', compact(
             'title',
             'kbumn_risk_categories',
             'existing_control_types',
@@ -52,7 +52,7 @@ class WorksheetController extends Controller
 
     public function create()
     {
-        return view('risk.assessment.worksheet.index');
+        return view('risk.worksheet.index');
     }
 
     public function store(Request $request)
@@ -174,7 +174,7 @@ class WorksheetController extends Controller
 
             DB::commit();
             return response()->json(['data' => [
-                'redirect' => route('risk.assessment.worksheet.show', $worksheet->getEncryptedId()),
+                'redirect' => route('risk.worksheet.show', $worksheet->getEncryptedId()),
                 'message' => 'Kertas kerja berhasil dibuat'
             ]]);
         } catch (Exception $e) {
@@ -187,7 +187,7 @@ class WorksheetController extends Controller
     {
         $worksheet = Worksheet::findByEncryptedIdOrFail($worksheet);
         $worksheet->identification = WorksheetIdentification::identification_query()->whereWorksheetId($worksheet->id)->firstOrFail();
-        $worksheet->load('incidents.mitigations');
+        $worksheet->load('strategies', 'incidents.mitigations');
 
         if (request()->ajax()) {
             $identification = (array) $worksheet->identification;
@@ -323,7 +323,7 @@ class WorksheetController extends Controller
         }
 
         $title = 'Detail Kertas Kerja';
-        return view('risk.assessment.worksheet.index', compact('worksheet', 'title'));
+        return view('risk.worksheet.index', compact('worksheet', 'title'));
     }
 
     public function edit(string $worksheet)
@@ -342,7 +342,7 @@ class WorksheetController extends Controller
         $risk_treatment_options = RiskTreatmentOption::all();
 
         $title = 'Form Edit Kertas Kerja';
-        return view('risk.assessment.worksheet.index', compact(
+        return view('risk.worksheet.index', compact(
             'title',
             'kbumn_risk_categories',
             'existing_control_types',
@@ -517,7 +517,7 @@ class WorksheetController extends Controller
             DB::commit();
             return response()->json(['data' => [
                 'message' => 'Kertas kerja berhasil diperbarui',
-                'redirect' => route('risk.assessment.worksheet.show', $worksheet->getEncryptedId())
+                'redirect' => route('risk.worksheet.show', $worksheet->getEncryptedId())
             ]]);
         } catch (Exception $e) {
             DB::rollBack();
@@ -539,11 +539,11 @@ class WorksheetController extends Controller
             DB::commit();
 
             flash_message('flash_message', 'Status berhasil diperbarui', State::SUCCESS);
-            return redirect()->route('risk.assessment.worksheet.show', $worksheetId);
+            return redirect()->route('risk.worksheet.show', $worksheetId);
         } catch (Exception $e) {
             DB::rollBack();
             flash_message('flash_message', $e->getMessage(), State::ERROR);
-            return redirect()->route('risk.assessment.worksheet.show', $worksheetId);
+            return redirect()->route('risk.worksheet.show', $worksheetId);
         }
     }
 

@@ -74,7 +74,7 @@ class WorksheetTreatmentExport implements FromCollection, WithHeadings, WithStyl
                     $end = format_date($mitigation->mitigation_end_date)->month;
 
                     foreach ($months as $key => $value) {
-                        $months[$key] = $start >= $value && $value <= $end ? 1 : 0;
+                        $months[$key] = $start >= $value && $value <= $end ? 1 : '0';
                     }
 
                     $data[] = array_merge($item, $months);
@@ -82,6 +82,7 @@ class WorksheetTreatmentExport implements FromCollection, WithHeadings, WithStyl
             });
         });
 
+        $this->count = $currentIndex + 2;
         return collect($data);
     }
 
@@ -106,15 +107,6 @@ class WorksheetTreatmentExport implements FromCollection, WithHeadings, WithStyl
                 'fillType' => Fill::FILL_SOLID,
                 'startColor' => ['rgb' => '1896A4']
             ],
-        ]);
-
-        $sheet->getStyle("A1:{$lastColumn}" . ($this->count + 2))->applyFromArray([
-            'borders' => [
-                'allBorders' => [
-                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
-                    'color' => ['rgb' => '000000']
-                ]
-            ]
         ]);
 
         // Auto-size columns
@@ -166,8 +158,17 @@ class WorksheetTreatmentExport implements FromCollection, WithHeadings, WithStyl
                 'M',
             ], // Columns to merge - adjust as needed
             3, // Start from row 3 (after headers)
-            $this->count + 2
+            $this->count
         );
+
+        $sheet->getStyle("A1:{$lastColumn}" . ($this->count))->applyFromArray([
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                    'color' => ['rgb' => '000000']
+                ]
+            ]
+        ]);
     }
 
     private function getColumnLetter(int $index): string

@@ -6,7 +6,6 @@ use App\Models\RBAC\Menu;
 use App\Models\RBAC\Permission;
 use App\Models\RBAC\Role;
 use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class DefaultSeeder extends Seeder
@@ -21,6 +20,7 @@ class DefaultSeeder extends Seeder
                 'name' => 'Dashboard',
                 'route' => 'dashboard',
                 'icon_name' => 'layout-dashboard',
+                'position' => 1,
                 'children' => [
                     [
                         'name' => 'Dashboard',
@@ -59,7 +59,7 @@ class DefaultSeeder extends Seeder
                 'name' => 'Risk Process',
                 'route' => 'risk',
                 'icon_name' => 'presentation',
-                'position' => 4,
+                'position' => 2,
                 'children' => [
                     [
                         'name' => 'Risk Assessment',
@@ -69,199 +69,23 @@ class DefaultSeeder extends Seeder
                     ],
                     [
                         'name' => 'Risk Monitoring',
-                        'route' => 'risk.process.monitoring.index',
+                        'route' => 'risk.monitoring.index',
                         'icon_name' => 'grid',
-                        'position' => 3,
+                        'position' => 2,
                     ],
                 ],
             ],
             [
                 'name' => 'Risk Report',
-                'route' => 'risk_report',
+                'route' => 'risk.report',
                 'icon_name' => 'clipboard-text',
                 'position' => 3,
                 'children' => [
                     [
-                        'name' => 'Risk Register Card',
-                        'route' => 'risk_report.assessment_report.register_card.index',
+                        'name' => 'Risk Profile',
+                        'route' => 'risk.report.risk-profile.index',
                         'icon_name' => 'graph',
                         'position' => 1,
-                    ],
-                    [
-                        'name' => 'Risk Progress',
-                        'route' => 'risk_report.assessment_report.index',
-                        'icon_name' => 'graph',
-                        'position' => 2,
-                    ],
-                    [
-                        'name' => 'Risk Progress Head',
-                        'route' => 'risk_report.assessment_report.head.index',
-                        'icon_name' => 'graph',
-                        'position' => 3,
-                    ],
-                    [
-                        'name' => 'Risk Progress Owner',
-                        'route' => 'risk_report.assessment_report.owner.index',
-                        'icon_name' => 'graph',
-                        'position' => 4,
-                    ],
-                    [
-                        'name' => 'Risk Progress GM',
-                        'route' => 'risk_report.assessment_report.gm.index',
-                        'icon_name' => 'graph',
-                        'position' => 5,
-                    ],
-                    [
-                        'name' => 'Risk Progress Officer',
-                        'route' => 'risk_report.assessment_report.officer.index',
-                        'icon_name' => 'graph',
-                        'position' => 6,
-                    ],
-                    [
-                        'name' => 'Risk Progress Branch',
-                        'route' => 'risk_report.assessment_report.branch.index',
-                        'icon_name' => 'graph',
-                        'position' => 7,
-                    ],
-                    [
-                        'name' => 'Risk Monitoring Map',
-                        'route' => 'risk_report.map.index',
-                        'icon_name' => 'graph',
-                        'position' => 8,
-                    ],
-                    [
-                        'name' => 'Risk Mitigation Map',
-                        'route' => 'risk_report.risk_map.index_mitigated.index',
-                        'icon_name' => 'graph',
-                        'position' => 9,
-                    ],
-                    [
-                        'name' => 'Report Risk Baru',
-                        'route' => 'risk_report.report_risk_new.index',
-                        'icon_name' => 'graph',
-                        'position' => 10,
-                    ],
-                ],
-            ],
-            // KRI section
-            [
-                'name' => 'Key Risk Indicator (KRI)',
-                'route' => 'key_risk_indicator.index',
-                'icon_name' => 'chart-bar-popular',
-                'position' => 6,
-                'children' => [],
-            ],
-            // Risk Document section
-            [
-                'name' => 'Risk Document',
-                'route' => 'risk-document',
-                'icon_name' => 'folder',
-                'position' => 7,
-                'children' => [
-                    [
-                        'name' => 'E-Library',
-                        'route' => 'elibrary.elibrary.index',
-                        'icon_name' => 'grid',
-                        'position' => 1,
-                    ],
-                ],
-            ],
-            // Additional Master items
-            [
-                'name' => 'Master',
-                'route' => 'master',
-                'icon_name' => 'settings',
-                'position' => 8,
-                'children' => [
-                    [
-                        'name' => 'Risk Impact',
-                        'route' => 'master.risk_impact.index',
-                        'icon_name' => 'list',
-                        'position' => 6,
-                    ],
-                    [
-                        'name' => 'Risk Impact Category',
-                        'route' => 'master.risk_impact_category.index',
-                        'icon_name' => 'list',
-                        'position' => 7,
-                    ],
-                    [
-                        'name' => 'Risk Impact Indicator',
-                        'route' => 'master.risk_impact_indicator.index',
-                        'icon_name' => 'list',
-                        'position' => 8,
-                    ],
-                    [
-                        'name' => 'Risk Directorate',
-                        'route' => 'master.risk_directorate.index',
-                        'icon_name' => 'list',
-                        'position' => 9,
-                    ],
-                    [
-                        'name' => 'Risk PIC',
-                        'route' => 'master.risk_pic.index',
-                        'icon_name' => 'list',
-                        'position' => 10,
-                    ],
-                    [
-                        'name' => 'Status Dokumen',
-                        'route' => 'master.status_dokumen.index',
-                        'icon_name' => 'list',
-                        'position' => 11,
-                    ],
-                    [
-                        'name' => 'Cabang',
-                        'route' => 'master.branch.index',
-                        'icon_name' => 'list',
-                        'position' => 12,
-                    ],
-                    [
-                        'name' => 'Risk Target',
-                        'route' => 'master.risk_target.index',
-                        'icon_name' => 'list',
-                        'position' => 13,
-                    ],
-                    [
-                        'name' => 'Risk Factor',
-                        'route' => 'master.risk_factor.index',
-                        'icon_name' => 'list',
-                        'position' => 14,
-                    ],
-                    [
-                        'name' => 'Risk KPI',
-                        'route' => 'master.risk_kpi.index',
-                        'icon_name' => 'list',
-                        'position' => 15,
-                    ],
-                    [
-                        'name' => 'Kategori Risiko T3',
-                        'route' => 'master.kategori_risiko_t3.index',
-                        'icon_name' => 'grid',
-                        'position' => 16,
-                    ],
-                    [
-                        'name' => 'Kategori Risiko T2',
-                        'route' => 'master.kategori_risiko_t2.index',
-                        'icon_name' => 'grid',
-                        'position' => 17,
-                    ],
-                    [
-                        'name' => 'Master Data Satuan',
-                        'route' => 'master.unit.index',
-                        'icon_name' => 'grid',
-                        'position' => 18,
-                    ],
-                    [
-                        'name' => 'Information Detail',
-                        'route' => 'master.control_information.index',
-                        'icon_name' => 'grid',
-                        'position' => 7,
-                    ],
-                    [
-                        'name' => 'Metrix Strategi Risiko',
-                        'route' => 'master.metrik_strategi_risiko.index',
-                        'icon_name' => 'grid',
-                        'position' => 8,
                     ],
                 ],
             ],
@@ -269,6 +93,7 @@ class DefaultSeeder extends Seeder
                 'name' => 'Akses',
                 'route' => 'access',
                 'icon_name' => 'shield-lock',
+                'position' => 10,
                 'children' => [
                     [
                         'name' => 'Pengguna',
@@ -290,18 +115,6 @@ class DefaultSeeder extends Seeder
                         'route' => 'rbac.permission.index',
                         'position' => 3,
                     ],
-                    [
-                        'name' => 'Grup Pengguna PLH/PLT',
-                        'route' => 'rbac.role.pjs.index',
-                        'icon_name' => 'grid',
-                        'position' => 9,
-                    ],
-                    [
-                        'name' => 'Risk Unit Assignment',
-                        'route' => 'rbac.role.risk.index',
-                        'icon_name' => 'grid',
-                        'position' => 10,
-                    ],
                 ],
             ],
         ];
@@ -322,21 +135,33 @@ class DefaultSeeder extends Seeder
          * Generate default permissions
          */
         $menus = Menu::all();
-        $actions = ['index', 'show', 'create', 'store', 'edit', 'update', 'destroy'];
-        $permissions = [];
+        $actions = [
+            [
+                'name' => 'risk.worksheet.',
+                'permissions' => ['index', 'show', 'create', 'store', 'edit', 'update', 'destroy'],
+            ],
+            [
+                'name' => 'risk.monitoring.',
+                'permissions' => ['show-monitoring', 'edit-monitoring', 'update-monitoring', 'update-status-monitoring'],
+            ]
+        ];
 
+        $permissions = [];
         foreach ($actions as $action) {
-            $permissions[] = [
-                'name' => 'risk.assessment.worksheet.' . $action,
-                'guard_name' => 'web',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ];
+            foreach ($action['permissions'] as $permission) {
+                $permissions[] = [
+                    'name' => $action['name'] . $permission,
+                    'guard_name' => 'web',
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ];
+            }
         }
 
+        $defaultActions = ['index', 'show', 'create', 'store', 'edit', 'update', 'destroy'];
         foreach ($menus as $menu) {
             if (str_contains($menu->route, 'index')) {
-                foreach ($actions as $action) {
+                foreach ($defaultActions as $action) {
                     $permissions[] = [
                         'name' => str_replace('index', $action, $menu->route),
                         'guard_name' => 'web',
@@ -375,6 +200,29 @@ class DefaultSeeder extends Seeder
         }
 
         $users = $users = [
+            [
+                [
+                    'username' => 'root',
+                    'password' => bcrypt('root#321'),
+                    'email' => 'root@injourneyairports.id',
+                    'employee_name' => 'Administrator',
+                    'employee_id' => '9999999',
+                    'organization_code' => 'ap.50',
+                    'organization_name' => '',
+                    'personnel_area_name' => 'Kantor Regional I',
+                    'personnel_area_code' => 'REG I',
+                    'position_name' => 'Administrator',
+                    'unit_name' => '',
+                    'sub_unit_name' => '',
+                    'unit_code' => 'ap',
+                    'sub_unit_code' => 'ap.50',
+                    'employee_grade_code' => '-',
+                    'employee_grade' => '-',
+                    'image_url' => '',
+                    'is_active' => true,
+                ],
+                ['root', 'risk admin', 'risk analis', 'risk owner', 'risk otorisator']
+            ],
             [
                 [
                     'username' => 'agus.haryadi1',
@@ -538,6 +386,29 @@ class DefaultSeeder extends Seeder
             ],
             [
                 [
+                    'username' => 'nicolas.prima',
+                    'password'  => bcrypt('nicolas.prima#321'),
+                    'email' => 'nicolas.prima@injourneyairports.id',
+                    'employee_name' => 'NICOLAS PRIMA K. A.',
+                    'employee_id' => '20002891',
+                    'organization_code' => 'ap.50.6.1',
+                    'organization_name' => 'Governance & Risk Management',
+                    'personnel_area_name' => 'Kantor Pusat',
+                    'personnel_area_code' => 'PST',
+                    'position_name' => 'Governance & Risk Management Group Head',
+                    'unit_name' => 'Direktorat Manajemen Risiko',
+                    'sub_unit_name' => 'Governance & Risk Management',
+                    'unit_code' => 'ap.50.6',
+                    'sub_unit_code' => 'ap.50.6.1',
+                    'employee_grade_code' => '-',
+                    'employee_grade' => '-',
+                    'image_url' => '',
+                    'is_active' => true,
+                ],
+                ['risk otorisator']
+            ],
+            [
+                [
                     'username' => 'gede.krisna',
                     'password' => bcrypt('gede.krisna#321'),
                     'email' => 'gede.krisna@injourneyairports.id',
@@ -607,11 +478,9 @@ class DefaultSeeder extends Seeder
             ]
         ];
 
-        if (User::count() == 0) {
-            foreach ($users as $user) {
-                $newUser = User::create($user[0]);
-                $newUser->assignRole($user[1]);
-            }
+        foreach ($users as $user) {
+            $newUser = User::firstOrCreate(['username' => $user[0]['username']], $user[0]);
+            $newUser->syncRoles($user[1]);
         }
     }
 }

@@ -9,6 +9,7 @@ use App\Http\Controllers\Master\{
     KRIUnitController,
     PICController
 };
+use App\Http\Controllers\Report\RiskProfieController;
 use App\Http\Controllers\Risk\AssessmentController;
 use App\Http\Controllers\Risk\MonitoringController;
 use App\Http\Controllers\Risk\WorksheetController;
@@ -46,10 +47,10 @@ Route::group(['middleware' => 'auth'], function () {
             Route::get('{worksheet}', [MonitoringController::class, 'show'])->name('show');
             Route::get('{worksheet}/create', [MonitoringController::class, 'create'])->name('create');
             Route::post('{worksheet}/create', [MonitoringController::class, 'store'])->name('store');
-            Route::get('detail/{monitoringId}', [MonitoringController::class, 'show_monitoring'])->name('show_monitoring');
-            Route::get('edit/{monitoringId}', [MonitoringController::class, 'edit_monitoring'])->name('edit_monitoring');
-            Route::put('edit/{monitoringId}', [MonitoringController::class, 'update_monitoring'])->name('update_monitoring');
-            Route::put('status/{monitoringId}', [MonitoringController::class, 'update_status_monitoring'])->name('update_status_monitoring');
+            Route::get('detail/{monitoringId}', [MonitoringController::class, 'show_monitoring'])->name('show-monitoring');
+            Route::get('edit/{monitoringId}', [MonitoringController::class, 'edit_monitoring'])->name('edit-monitoring');
+            Route::put('edit/{monitoringId}', [MonitoringController::class, 'update_monitoring'])->name('update-monitoring');
+            Route::put('status/{monitoringId}', [MonitoringController::class, 'update_status_monitoring'])->name('update-status-monitoring');
         });
 
         Route::resource(
@@ -60,6 +61,13 @@ Route::group(['middleware' => 'auth'], function () {
                 'parameters' => ['assessment' => 'assessment']
             ]
         );
+    });
+
+    Route::group(['as' => 'risk.report.', 'prefix' => 'risk-report'], function () {
+        Route::group(['as' => 'risk-profile.', 'prefix' => 'risk-profile'], function () {
+            Route::get('', [RiskProfieController::class, 'index'])->name('index');
+            Route::get('export', [RiskProfieController::class, 'export'])->name('export');
+        });
     });
 
     Route::group(['as' => 'master.', 'prefix' => 'master'], function () {
