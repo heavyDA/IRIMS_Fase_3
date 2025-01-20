@@ -27,7 +27,7 @@
     </style>
     <x-card>
         <x-slot name="body">
-            <form id="dashboard-filter">
+            <form id="dashboard-filter" action="" method="GET">
                 <div class="row mb-12">
                     <div class="row">
                         <div class="col-12 col-md-3 col-lg-2">
@@ -44,7 +44,8 @@
                             <select name="unit" class="form-select">
                                 <option value="">Pilih</option>
                                 @foreach ($units as $item)
-                                    <option value="{{ $item->sub_unit_code }}">
+                                    <option {{ request('unit') == $item->sub_unit_code ? 'selected' : null }}
+                                        value="{{ $item->sub_unit_code }}">
                                         [{{ $item->personnel_area_code }}] {{ $item->sub_unit_name }}</option>
                                 @endforeach
                             </select>
@@ -1019,13 +1020,13 @@
                             </thead>
                             <tbody>
                                 <!-- <tr>
-                                                   <td>1</td>
-                                                   <td>2</td>
-                                                   <td>3</td>
-                                                   <td>4</td>
-                                                   <td>5</td>
-                                                   <td>6</td>
-                                                 <tr>				 -->
+                                                       <td>1</td>
+                                                       <td>2</td>
+                                                       <td>3</td>
+                                                       <td>4</td>
+                                                       <td>5</td>
+                                                       <td>6</td>
+                                                     <tr>				 -->
 
                             </tbody>
                         </table>

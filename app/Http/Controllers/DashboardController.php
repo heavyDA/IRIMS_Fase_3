@@ -30,11 +30,13 @@ class DashboardController extends Controller
                 COALESCE(COUNT(IF(ra_worksheets.status = 'approved', 1, NULL))) as approved
             ")
             ->where('ra_worksheets.sub_unit_code', 'like', $unit)
+            ->whereYear('ra_worksheets.created_at', request('year', date('Y')))
             ->first();
 
         $count_mitigation = WorksheetMitigation::whereHas(
             'worksheet',
             fn($q) => $q->where('ra_worksheets.sub_unit_code', 'like', $unit)
+                ->whereYear('ra_worksheets.created_at', request('year', date('Y')))
         )
             ->count();
 
