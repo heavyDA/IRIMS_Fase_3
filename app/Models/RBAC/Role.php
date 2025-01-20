@@ -39,7 +39,7 @@ class Role extends Model
         }
 
         if (
-            in_array($role, ['risk otorisator'])
+            in_array($role, ['risk otorisator', 'risk owner'])
         ) {
             return $user->sub_unit_code . '%';
         }
