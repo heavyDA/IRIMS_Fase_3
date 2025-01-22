@@ -11,6 +11,7 @@ use App\Http\Controllers\Master\{
     PICController
 };
 use App\Http\Controllers\Report\RiskProfileController;
+use App\Http\Controllers\Report\RiskMonitoringController;
 use App\Http\Controllers\Risk\AssessmentController;
 use App\Http\Controllers\Risk\MonitoringController;
 use App\Http\Controllers\Risk\ProfileController;
@@ -78,6 +79,11 @@ Route::group(['middleware' => 'auth'], function () {
         Route::group(['as' => 'risk_profile.', 'prefix' => 'risk-profile'], function () {
             Route::get('', [RiskProfileController::class, 'index'])->name('index');
             Route::get('export', [RiskProfileController::class, 'export'])->name('export');
+        });
+
+        Route::group(['as' => 'risk_report.', 'prefix' => 'risk-monitoring'], function () {
+            Route::get('', [RiskMonitoringController::class, 'index'])->name('index');
+            Route::get('export', [RiskMonitoringController::class, 'export'])->name('export');
         });
     });
 

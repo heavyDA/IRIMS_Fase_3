@@ -19,6 +19,7 @@ export default defineConfig({
                 'resources/js/pages/risk/worksheet/table_view.js',
 
                 'resources/js/pages/report/risk_profile/index.js',
+                'resources/js/pages/report/risk_monitoring/index.js',
 
                 'resources/js/pages/risk/monitoring/index.js',
                 'resources/js/pages/risk/monitoring/create.js',
