@@ -116,4 +116,21 @@ class Worksheet extends Model
     {
         return $this->hasMany(Monitoring::class);
     }
+
+    public function last_top_risk()
+    {
+        return $this->hasOne(WorksheetTopRisk::class)->latest('id');
+    }
+
+    public function monitoring_residuals()
+    {
+        return $this->hasManyThrough(
+            MonitoringResidual::class,
+            Monitoring::class,
+            'worksheet_id',
+            'worksheet_monitoring_id',
+            'id',
+            'id'
+        );
+    }
 }

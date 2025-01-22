@@ -204,47 +204,47 @@
                                         <text x="36" y="30" font-family="arial" font-size="5" fill="black"
                                             font-weight="bold">5</text>
                                     </g>
-                                    <g onclick="gotoheatmap(7)" style="cursor: pointer;">
+                                    <g style="cursor: pointer;">
                                         <rect x="61" y="1" width="40" height="40" fill="#92D050" stroke="white">
                                         </rect>
                                         <text x="70" y="20" font-family="arial" font-size="10" fill="black"
-                                            font-weight="bold" id="val07"></text>
+                                            font-weight="bold" id="inherent-7"></text>
                                         <text x="64" y="30" font-family="arial" font-size="5" fill="black"
                                             font-weight="bold">Low to</text>
                                         <text x="64" y="36" font-family="arial" font-size="5" fill="black"
                                             font-weight="bold">Moderate (7)</text>
                                     </g>
-                                    <g onclick="gotoheatmap(12)" style="cursor: pointer;">
+                                    <g style="cursor: pointer;">
                                         <rect x="101" y="1" width="40" height="40" fill="#FFFF00" stroke="white">
                                         </rect>
                                         <text x="110" y="20" font-family="arial" font-size="10" fill="black"
-                                            font-weight="bold" id="val12"></text>
+                                            font-weight="bold" id="inherent-12"></text>
                                         <text x="104" y="36" font-family="arial" font-size="5" fill="black"
                                             font-weight="bold">Moderate (12)</text>
                                     </g>
-                                    <g onclick="gotoheatmap(17)" style="cursor: pointer;">
+                                    <g style="cursor: pointer;">
                                         <rect x="141" y="1" width="40" height="40" fill="#FFC000" stroke="white">
                                         </rect>
                                         <text x="151" y="20" font-family="arial" font-size="10" fill="black"
-                                            font-weight="bold" id="val17"></text>
+                                            font-weight="bold" id="inherent-17"></text>
                                         <text x="144" y="30" font-family="arial" font-size="5" fill="black"
                                             font-weight="bold">Moderate to</text>
                                         <text x="144" y="36" font-family="arial" font-size="5" fill="black"
                                             font-weight="bold">High (17)</text>
                                     </g>
-                                    <g onclick="gotoheatmap(22)" style="cursor: pointer;">
+                                    <g style="cursor: pointer;">
                                         <rect x="181" y="1" width="40" height="40" fill="#FE0000" stroke="white">
                                         </rect>
                                         <text x="190" y="20" font-family="arial" font-size="10" fill="black"
-                                            font-weight="bold" id="val22"></text>
+                                            font-weight="bold" id="inherent-22"></text>
                                         <text x="184" y="36" font-family="arial" font-size="5" fill="black"
                                             font-weight="bold">High (22)</text>
                                     </g>
-                                    <g onclick="gotoheatmap(25)" style="cursor: pointer;">
+                                    <g style="cursor: pointer;">
                                         <rect x="221" y="1" width="40" height="40" fill="#FE0000" stroke="white">
                                         </rect>
                                         <text x="230" y="20" font-family="arial" font-size="10" fill="black"
-                                            font-weight="bold" id="val25"></text>
+                                            font-weight="bold" id="inherent-25"></text>
                                         <text x="224" y="36" font-family="arial" font-size="5" fill="black"
                                             font-weight="bold">High (25)</text>
                                     </g>
@@ -266,47 +266,47 @@
                                             font-weight="bold">4</text>
                                     </g>
 
-                                    <g onclick="gotoheatmap(4)" style="cursor: pointer;">
+                                    <g style="cursor: pointer;">
                                         <rect x="61" y="41" width="40" height="40" fill="#00B050" stroke="white">
                                         </rect>
                                         <text x="70" y="62" font-family="arial" font-size="10" fill="black"
-                                            font-weight="bold" id="val04"></text>
+                                            font-weight="bold" id="inherent-4"></text>
                                         <text x="64" y="76" font-family="arial" font-size="5" fill="black"
                                             font-weight="bold">Low (4)</text>
                                     </g>
-                                    <g onclick="gotoheatmap(9)" style="cursor: pointer;">
+                                    <g style="cursor: pointer;">
                                         <rect x="101" y="41" width="40" height="40" fill="#92D050"
                                             stroke="white"></rect>
                                         <text x="110" y="62" font-family="arial" font-size="10" fill="black"
-                                            font-weight="bold" id="val09"></text>
+                                            font-weight="bold" id="inherent-9"></text>
                                         <text x="104" y="71" font-family="arial" font-size="5" fill="black"
                                             font-weight="bold">Low to</text>
                                         <text x="104" y="77" font-family="arial" font-size="5" fill="black"
                                             font-weight="bold">Moderate (9)</text>
                                     </g>
-                                    <g onclick="gotoheatmap(14)" style="cursor: pointer;">
+                                    <g style="cursor: pointer;">
                                         <rect x="141" y="41" width="40" height="40" fill="#FFFF00"
                                             stroke="white"></rect>
                                         <text x="151" y="62" font-family="arial" font-size="10" fill="black"
-                                            font-weight="bold" id="val14"></text>
+                                            font-weight="bold" id="inherent-14"></text>
                                         <text x="144" y="76" font-family="arial" font-size="5" fill="black"
                                             font-weight="bold">Moderate (14)</text>
                                     </g>
-                                    <g onclick="gotoheatmap(19)" style="cursor: pointer;">
+                                    <g style="cursor: pointer;">
                                         <rect x="181" y="41" width="40" height="40" fill="#FFC000"
                                             stroke="white"></rect>
                                         <text x="190" y="62" font-family="arial" font-size="10" fill="black"
-                                            font-weight="bold" id="val19"></text>
+                                            font-weight="bold" id="inherent-19"></text>
                                         <text x="184" y="71" font-family="arial" font-size="5" fill="black"
                                             font-weight="bold">Moderate to</text>
                                         <text x="184" y="77" font-family="arial" font-size="5" fill="black"
                                             font-weight="bold">High (19)</text>
                                     </g>
-                                    <g onclick="gotoheatmap(24)" style="cursor: pointer;">
+                                    <g style="cursor: pointer;">
                                         <rect x="221" y="41" width="40" height="40" fill="#FE0000"
                                             stroke="white"></rect>
                                         <text x="230" y="62" font-family="arial" font-size="10" fill="black"
-                                            font-weight="bold" id="val24"></text>
+                                            font-weight="bold" id="inherent-24"></text>
                                         <text x="224" y="76" font-family="arial" font-size="5" fill="black"
                                             font-weight="bold">High (24)</text>
                                     </g>
@@ -324,47 +324,47 @@
                                         <text x="36" y="108" font-family="arial" font-size="5" fill="black"
                                             font-weight="bold">3</text>
                                     </g>
-                                    <g onclick="gotoheatmap(3)" style="cursor: pointer;">
+                                    <g style="cursor: pointer;">
                                         <rect x="61" y="81" width="40" height="40" fill="#00B050" stroke="white">
                                         </rect>
                                         <text x="70" y="102" font-family="arial" font-size="10" fill="black"
-                                            font-weight="bold" id="val03"></text>
+                                            font-weight="bold" id="inherent-3"></text>
                                         <text x="64" y="115" font-family="arial" font-size="5" fill="black"
                                             font-weight="bold">Low (3)</text>
                                     </g>
-                                    <g onclick="gotoheatmap(8)" style="cursor: pointer;">
+                                    <g style="cursor: pointer;">
                                         <rect x="101" y="81" width="40" height="40" fill="#92D050"
                                             stroke="white"></rect>
                                         <text x="110" y="102" font-family="arial" font-size="10" fill="black"
-                                            font-weight="bold" id="val08"></text>
+                                            font-weight="bold" id="inherent-8"></text>
                                         <text x="104" y="111" font-family="arial" font-size="5" fill="black"
                                             font-weight="bold">Low to</text>
                                         <text x="104" y="117" font-family="arial" font-size="5" fill="black"
                                             font-weight="bold">Moderate (8)</text>
                                     </g>
-                                    <g onclick="gotoheatmap(13)" style="cursor: pointer;">
+                                    <g style="cursor: pointer;">
                                         <rect x="141" y="81" width="40" height="40" fill="#FFFF00"
                                             stroke="white"></rect>
                                         <text x="151" y="102" font-family="arial" font-size="10" fill="black"
-                                            font-weight="bold" id="val13"></text>
+                                            font-weight="bold" id="inherent-13"></text>
                                         <text x="144" y="117" font-family="arial" font-size="5" fill="black"
                                             font-weight="bold">Moderate (13)</text>
                                     </g>
-                                    <g onclick="gotoheatmap(18)" style="cursor: pointer;">
+                                    <g style="cursor: pointer;">
                                         <rect x="181" y="81" width="40" height="40" fill="#FFC000"
                                             stroke="white"></rect>
                                         <text x="190" y="102" font-family="arial" font-size="10" fill="black"
-                                            font-weight="bold" id="val18"></text>
+                                            font-weight="bold" id="inherent-18"></text>
                                         <text x="184" y="111" font-family="arial" font-size="5" fill="black"
                                             font-weight="bold">Moderate to</text>
                                         <text x="184" y="117" font-family="arial" font-size="5" fill="black"
                                             font-weight="bold">High (18)</text>
                                     </g>
-                                    <g onclick="gotoheatmap(23)" style="cursor: pointer;">
+                                    <g style="cursor: pointer;">
                                         <rect x="221" y="81" width="40" height="40" fill="#FE0000"
                                             stroke="white"></rect>
                                         <text x="230" y="102" font-family="arial" font-size="10" fill="black"
-                                            font-weight="bold" id="val23"></text>
+                                            font-weight="bold" id="inherent-23"></text>
                                         <text x="224" y="117" font-family="arial" font-size="5" fill="black"
                                             font-weight="bold">High (23)</text>
                                     </g>
@@ -383,50 +383,50 @@
                                         <text x="36" y="152" font-family="arial" font-size="5" fill="black"
                                             font-weight="bold">2</text>
                                     </g>
-                                    <g onclick="gotoheatmap(2)" style="cursor: pointer;">
+                                    <g style="cursor: pointer;">
                                         <rect x="61" y="121" width="40" height="40" fill="#00B050"
                                             stroke="white"></rect>
                                         <text x="70" y="142" font-family="arial" font-size="10" fill="black"
-                                            font-weight="bold" id="val02"></text>
+                                            font-weight="bold" id="inherent-2"></text>
                                         <text x="64" y="155" font-family="arial" font-size="5" fill="black"
                                             font-weight="bold">Low (2)</text>
                                     </g>
-                                    <g onclick="gotoheatmap(6)" style="cursor: pointer;">
+                                    <g style="cursor: pointer;">
                                         <rect x="101" y="121" width="40" height="40" fill="#92D050"
                                             stroke="white"></rect>
                                         <text x="110" y="142" font-family="arial" font-size="10" fill="black"
-                                            font-weight="bold" id="val06"></text>
+                                            font-weight="bold" id="inherent-6"></text>
                                         <text x="104" y="150" font-family="arial" font-size="5" fill="black"
                                             font-weight="bold">Low to</text>
                                         <text x="104" y="156" font-family="arial" font-size="5" fill="black"
                                             font-weight="bold">Moderate (6)</text>
                                     </g>
-                                    <g onclick="gotoheatmap(11)" style="cursor: pointer;">
+                                    <g style="cursor: pointer;">
                                         <rect x="141" y="121" width="40" height="40" fill="#92D050"
                                             stroke="white"></rect>
                                         <text x="151" y="142" font-family="arial" font-size="10" fill="black"
-                                            font-weight="bold" id="val11"></text>
+                                            font-weight="bold" id="inherent-11"></text>
                                         <text x="144" y="150" font-family="arial" font-size="5" fill="black"
                                             font-weight="bold">Low to</text>
                                         <text x="144" y="156" font-family="arial" font-size="5" fill="black"
                                             font-weight="bold">Moderate (11)</text>
 
                                     </g>
-                                    <g onclick="gotoheatmap(16)" style="cursor: pointer;">
+                                    <g style="cursor: pointer;">
                                         <rect x="181" y="121" width="40" height="40" fill="#FFC000"
                                             stroke="white"></rect>
                                         <text x="190" y="142" font-family="arial" font-size="10" fill="black"
-                                            font-weight="bold" id="val16"></text>
+                                            font-weight="bold" id="inherent-16"></text>
                                         <text x="184" y="150" font-family="arial" font-size="5" fill="black"
                                             font-weight="bold">Moderate to</text>
                                         <text x="184" y="156" font-family="arial" font-size="5" fill="black"
                                             font-weight="bold">High (16)</text>
                                     </g>
-                                    <g onclick="gotoheatmap(21)" style="cursor: pointer;">
+                                    <g style="cursor: pointer;">
                                         <rect x="221" y="121" width="40" height="40" fill="#FE0000"
                                             stroke="white"></rect>
                                         <text x="230" y="142" font-family="arial" font-size="10" fill="black"
-                                            font-weight="bold" id="val21"></text>
+                                            font-weight="bold" id="inherent-21"></text>
                                         <text x="224" y="156" font-family="arial" font-size="5" fill="black"
                                             font-weight="bold">High (21)</text>
                                     </g>
@@ -448,46 +448,46 @@
                                         <text x="36" y="195" font-family="arial" font-size="5" fill="black"
                                             font-weight="bold">1</text>
                                     </g>
-                                    <g onclick="gotoheatmap(1)" style="cursor: pointer;">
+                                    <g style="cursor: pointer;">
                                         <rect x="61" y="161" width="40" height="40" fill="#00B050"
                                             stroke="white"></rect>
-                                        <text x="70" y="181" font-family="arial" font-size="10" fill="black"
-                                            font-weight="bold" id="val01"></text>
+                                        <text x="74" y="180" font-family="arial" font-size="10" fill="black"
+                                            font-weight="bold" id="inherent-1"></text>
                                         <text x="64" y="194" font-family="arial" font-size="5" fill="black"
                                             font-weight="bold">Low (1)</text>
                                     </g>
-                                    <g onclick="gotoheatmap(5)" style="cursor: pointer;">
+                                    <g style="cursor: pointer;">
                                         <rect x="101" y="161" width="40" height="40" fill="#00B050"
                                             stroke="white"></rect>
                                         <text x="110" y="181" font-family="arial" font-size="10" fill="black"
-                                            font-weight="bold" id="val05"></text>
+                                            font-weight="bold" id="inherent-5"></text>
                                         <text x="104" y="194" font-family="arial" font-size="5" fill="black"
                                             font-weight="bold">Low (5)</text>
                                     </g>
-                                    <g onclick="gotoheatmap(10)" style="cursor: pointer;">
+                                    <g style="cursor: pointer;">
                                         <rect x="141" y="161" width="40" height="40" fill="#92D050"
                                             stroke="white"></rect>
                                         <text x="151" y="181" font-family="arial" font-size="10" fill="black"
-                                            font-weight="bold" id="val10"></text>
+                                            font-weight="bold" id="inherent-10"></text>
                                         <text x="144" y="190" font-family="arial" font-size="5" fill="black"
                                             font-weight="bold">Low to</text>
                                         <text x="144" y="196" font-family="arial" font-size="5" fill="black"
                                             font-weight="bold">Moderate (10)</text>
 
                                     </g>
-                                    <g onclick="gotoheatmap(15)" style="cursor: pointer;">
+                                    <g style="cursor: pointer;">
                                         <rect x="181" y="161" width="40" height="40" fill="#FFFF00"
                                             stroke="white"></rect>
                                         <text x="190" y="181" font-family="arial" font-size="10" fill="black"
-                                            font-weight="bold" id="val15"></text>
+                                            font-weight="bold" id="inherent-15"></text>
                                         <text x="184" y="196" font-family="arial" font-size="5" fill="black"
                                             font-weight="bold">Moderate (15)</text>
                                     </g>
-                                    <g onclick="gotoheatmap(20)" style="cursor: pointer;">
+                                    <g style="cursor: pointer;">
                                         <rect x="221" y="161" width="40" height="40" fill="#FE0000"
                                             stroke="white"></rect>
                                         <text x="230" y="181" font-family="arial" font-size="10" fill="black"
-                                            font-weight="bold" id="val20"></text>
+                                            font-weight="bold" id="inherent-20"></text>
                                         <text x="224" y="196" font-family="arial" font-size="5" fill="black"
                                             font-weight="bold">High (20)</text>
                                     </g>
@@ -605,47 +605,47 @@
                                         <text x="36" y="30" font-family="arial" font-size="5" fill="black"
                                             font-weight="bold">5</text>
                                     </g>
-                                    <g onclick="gotoheatmapResidual()" style="cursor: pointer;">
+                                    <g style="cursor: pointer;">
                                         <rect x="61" y="1" width="40" height="40" fill="#92D050" stroke="white">
                                         </rect>
                                         <text x="70" y="20" font-family="arial" font-size="10" fill="black"
-                                            font-weight="bold" id="actval07"></text>
+                                            font-weight="bold" id="residual-7"></text>
                                         <text x="64" y="30" font-family="arial" font-size="5" fill="black"
                                             font-weight="bold">Low to</text>
                                         <text x="64" y="36" font-family="arial" font-size="5" fill="black"
                                             font-weight="bold">Moderate (7)</text>
                                     </g>
-                                    <g onclick="gotoheatmapResidual()" style="cursor: pointer;">
+                                    <g style="cursor: pointer;">
                                         <rect x="101" y="1" width="40" height="40" fill="#FFFF00" stroke="white">
                                         </rect>
                                         <text x="110" y="20" font-family="arial" font-size="10" fill="black"
-                                            font-weight="bold" id="actval12"></text>
+                                            font-weight="bold" id="residual-12"></text>
                                         <text x="104" y="36" font-family="arial" font-size="5" fill="black"
                                             font-weight="bold">Moderate (12)</text>
                                     </g>
-                                    <g onclick="gotoheatmapResidual()" style="cursor: pointer;">
+                                    <g style="cursor: pointer;">
                                         <rect x="141" y="1" width="40" height="40" fill="#FFC000" stroke="white">
                                         </rect>
                                         <text x="151" y="20" font-family="arial" font-size="10" fill="black"
-                                            font-weight="bold" id="actval17"></text>
+                                            font-weight="bold" id="residual-17"></text>
                                         <text x="144" y="30" font-family="arial" font-size="5" fill="black"
                                             font-weight="bold">Moderate to</text>
                                         <text x="144" y="36" font-family="arial" font-size="5" fill="black"
                                             font-weight="bold">High (17)</text>
                                     </g>
-                                    <g onclick="gotoheatmapResidual()" style="cursor: pointer;">
+                                    <g style="cursor: pointer;">
                                         <rect x="181" y="1" width="40" height="40" fill="#FE0000" stroke="white">
                                         </rect>
                                         <text x="190" y="20" font-family="arial" font-size="10" fill="black"
-                                            font-weight="bold" id="actval22"></text>
+                                            font-weight="bold" id="residual-22"></text>
                                         <text x="184" y="36" font-family="arial" font-size="5" fill="black"
                                             font-weight="bold">High (22)</text>
                                     </g>
-                                    <g onclick="gotoheatmapResidual()" style="cursor: pointer;">
+                                    <g style="cursor: pointer;">
                                         <rect x="221" y="1" width="40" height="40" fill="#FE0000" stroke="white">
                                         </rect>
                                         <text x="230" y="20" font-family="arial" font-size="10" fill="black"
-                                            font-weight="bold" id="actval25"></text>
+                                            font-weight="bold" id="residual-25"></text>
                                         <text x="224" y="36" font-family="arial" font-size="5" fill="black"
                                             font-weight="bold">High (25)</text>
                                     </g>
@@ -667,47 +667,47 @@
                                             font-weight="bold">4</text>
                                     </g>
 
-                                    <g onclick="gotoheatmapResidual()" style="cursor: pointer;">
+                                    <g style="cursor: pointer;">
                                         <rect x="61" y="41" width="40" height="40" fill="#00B050" stroke="white">
                                         </rect>
                                         <text x="70" y="62" font-family="arial" font-size="10" fill="black"
-                                            font-weight="bold" id="actval04"></text>
+                                            font-weight="bold" id="residual-4"></text>
                                         <text x="64" y="76" font-family="arial" font-size="5" fill="black"
                                             font-weight="bold">Low (4)</text>
                                     </g>
-                                    <g onclick="gotoheatmapResidual()" style="cursor: pointer;">
+                                    <g style="cursor: pointer;">
                                         <rect x="101" y="41" width="40" height="40" fill="#92D050"
                                             stroke="white"></rect>
                                         <text x="110" y="62" font-family="arial" font-size="10" fill="black"
-                                            font-weight="bold" id="actval09"></text>
+                                            font-weight="bold" id="residual-9"></text>
                                         <text x="104" y="71" font-family="arial" font-size="5" fill="black"
                                             font-weight="bold">Low to</text>
                                         <text x="104" y="77" font-family="arial" font-size="5" fill="black"
                                             font-weight="bold">Moderate (9)</text>
                                     </g>
-                                    <g onclick="gotoheatmapResidual()" style="cursor: pointer;">
+                                    <g style="cursor: pointer;">
                                         <rect x="141" y="41" width="40" height="40" fill="#FFFF00"
                                             stroke="white"></rect>
                                         <text x="151" y="62" font-family="arial" font-size="10" fill="black"
-                                            font-weight="bold" id="actval14"></text>
+                                            font-weight="bold" id="residual-14"></text>
                                         <text x="144" y="76" font-family="arial" font-size="5" fill="black"
                                             font-weight="bold">Moderate (14)</text>
                                     </g>
-                                    <g onclick="gotoheatmapResidual()" style="cursor: pointer;">
+                                    <g style="cursor: pointer;">
                                         <rect x="181" y="41" width="40" height="40" fill="#FFC000"
                                             stroke="white"></rect>
                                         <text x="190" y="62" font-family="arial" font-size="10" fill="black"
-                                            font-weight="bold" id="actval19"></text>
+                                            font-weight="bold" id="residual-19"></text>
                                         <text x="184" y="71" font-family="arial" font-size="5" fill="black"
                                             font-weight="bold">Moderate to</text>
                                         <text x="184" y="77" font-family="arial" font-size="5" fill="black"
                                             font-weight="bold">High (19)</text>
                                     </g>
-                                    <g onclick="gotoheatmapResidual()" style="cursor: pointer;">
+                                    <g style="cursor: pointer;">
                                         <rect x="221" y="41" width="40" height="40" fill="#FE0000"
                                             stroke="white"></rect>
                                         <text x="230" y="62" font-family="arial" font-size="10" fill="black"
-                                            font-weight="bold" id="actval24"></text>
+                                            font-weight="bold" id="residual-24"></text>
                                         <text x="224" y="76" font-family="arial" font-size="5" fill="black"
                                             font-weight="bold">High (24)</text>
                                     </g>
@@ -725,47 +725,47 @@
                                         <text x="36" y="108" font-family="arial" font-size="5" fill="black"
                                             font-weight="bold">3</text>
                                     </g>
-                                    <g onclick="gotoheatmapResidual()" style="cursor: pointer;">
+                                    <g style="cursor: pointer;">
                                         <rect x="61" y="81" width="40" height="40" fill="#00B050" stroke="white">
                                         </rect>
                                         <text x="70" y="102" font-family="arial" font-size="10" fill="black"
-                                            font-weight="bold" id="actval03"></text>
+                                            font-weight="bold" id="residual-3"></text>
                                         <text x="64" y="115" font-family="arial" font-size="5" fill="black"
                                             font-weight="bold">Low (3)</text>
                                     </g>
-                                    <g onclick="gotoheatmapResidual()" style="cursor: pointer;">
+                                    <g style="cursor: pointer;">
                                         <rect x="101" y="81" width="40" height="40" fill="#92D050"
                                             stroke="white"></rect>
                                         <text x="110" y="102" font-family="arial" font-size="10" fill="black"
-                                            font-weight="bold" id="actval08"></text>
+                                            font-weight="bold" id="residual-8"></text>
                                         <text x="104" y="111" font-family="arial" font-size="5" fill="black"
                                             font-weight="bold">Low to</text>
                                         <text x="104" y="117" font-family="arial" font-size="5" fill="black"
                                             font-weight="bold">Moderate (8)</text>
                                     </g>
-                                    <g onclick="gotoheatmapResidual()" style="cursor: pointer;">
+                                    <g style="cursor: pointer;">
                                         <rect x="141" y="81" width="40" height="40" fill="#FFFF00"
                                             stroke="white"></rect>
                                         <text x="151" y="102" font-family="arial" font-size="10" fill="black"
-                                            font-weight="bold" id="actval13"></text>
+                                            font-weight="bold" id="residual-13"></text>
                                         <text x="144" y="117" font-family="arial" font-size="5" fill="black"
                                             font-weight="bold">Moderate (13)</text>
                                     </g>
-                                    <g onclick="gotoheatmapResidual()" style="cursor: pointer;">
+                                    <g style="cursor: pointer;">
                                         <rect x="181" y="81" width="40" height="40" fill="#FFC000"
                                             stroke="white"></rect>
                                         <text x="190" y="102" font-family="arial" font-size="10" fill="black"
-                                            font-weight="bold" id="actval18"></text>
+                                            font-weight="bold" id="residual-18"></text>
                                         <text x="184" y="111" font-family="arial" font-size="5" fill="black"
                                             font-weight="bold">Moderate to</text>
                                         <text x="184" y="117" font-family="arial" font-size="5" fill="black"
                                             font-weight="bold">High (18)</text>
                                     </g>
-                                    <g onclick="gotoheatmapResidual()" style="cursor: pointer;">
+                                    <g style="cursor: pointer;">
                                         <rect x="221" y="81" width="40" height="40" fill="#FE0000"
                                             stroke="white"></rect>
                                         <text x="230" y="102" font-family="arial" font-size="10" fill="black"
-                                            font-weight="bold" id="actval23"></text>
+                                            font-weight="bold" id="residual-23"></text>
                                         <text x="224" y="117" font-family="arial" font-size="5" fill="black"
                                             font-weight="bold">High (23)</text>
                                     </g>
@@ -784,50 +784,50 @@
                                         <text x="36" y="152" font-family="arial" font-size="5" fill="black"
                                             font-weight="bold">2</text>
                                     </g>
-                                    <g onclick="gotoheatmapResidual()" style="cursor: pointer;">
+                                    <g style="cursor: pointer;">
                                         <rect x="61" y="121" width="40" height="40" fill="#00B050"
                                             stroke="white"></rect>
                                         <text x="70" y="142" font-family="arial" font-size="10" fill="black"
-                                            font-weight="bold" id="actval02"></text>
+                                            font-weight="bold" id="residual-2"></text>
                                         <text x="64" y="155" font-family="arial" font-size="5" fill="black"
                                             font-weight="bold">Low (2)</text>
                                     </g>
-                                    <g onclick="gotoheatmapResidual()" style="cursor: pointer;">
+                                    <g style="cursor: pointer;">
                                         <rect x="101" y="121" width="40" height="40" fill="#92D050"
                                             stroke="white"></rect>
                                         <text x="110" y="142" font-family="arial" font-size="10" fill="black"
-                                            font-weight="bold" id="actval06"></text>
+                                            font-weight="bold" id="residual-6"></text>
                                         <text x="104" y="150" font-family="arial" font-size="5" fill="black"
                                             font-weight="bold">Low to</text>
                                         <text x="104" y="156" font-family="arial" font-size="5" fill="black"
                                             font-weight="bold">Moderate (6)</text>
                                     </g>
-                                    <g onclick="gotoheatmapResidual()" style="cursor: pointer;">
+                                    <g style="cursor: pointer;">
                                         <rect x="141" y="121" width="40" height="40" fill="#92D050"
                                             stroke="white"></rect>
                                         <text x="151" y="142" font-family="arial" font-size="10" fill="black"
-                                            font-weight="bold" id="actval11"></text>
+                                            font-weight="bold" id="residual-11"></text>
                                         <text x="144" y="150" font-family="arial" font-size="5" fill="black"
                                             font-weight="bold">Low to</text>
                                         <text x="144" y="156" font-family="arial" font-size="5" fill="black"
                                             font-weight="bold">Moderate (11)</text>
 
                                     </g>
-                                    <g onclick="gotoheatmapResidual()" style="cursor: pointer;">
+                                    <g style="cursor: pointer;">
                                         <rect x="181" y="121" width="40" height="40" fill="#FFC000"
                                             stroke="white"></rect>
                                         <text x="190" y="142" font-family="arial" font-size="10" fill="black"
-                                            font-weight="bold" id="actval16"></text>
+                                            font-weight="bold" id="residual-16"></text>
                                         <text x="184" y="150" font-family="arial" font-size="5" fill="black"
                                             font-weight="bold">Moderate to</text>
                                         <text x="184" y="156" font-family="arial" font-size="5" fill="black"
                                             font-weight="bold">High (16)</text>
                                     </g>
-                                    <g onclick="gotoheatmapResidual()" style="cursor: pointer;">
+                                    <g style="cursor: pointer;">
                                         <rect x="221" y="121" width="40" height="40" fill="#FE0000"
                                             stroke="white"></rect>
                                         <text x="230" y="142" font-family="arial" font-size="10" fill="black"
-                                            font-weight="bold" id="actval21"></text>
+                                            font-weight="bold" id="residual-21"></text>
                                         <text x="224" y="156" font-family="arial" font-size="5" fill="black"
                                             font-weight="bold">High (21)</text>
                                     </g>
@@ -849,46 +849,46 @@
                                         <text x="36" y="195" font-family="arial" font-size="5" fill="black"
                                             font-weight="bold">1</text>
                                     </g>
-                                    <g onclick="gotoheatmapResidual()" style="cursor: pointer;">
+                                    <g style="cursor: pointer;">
                                         <rect x="61" y="161" width="40" height="40" fill="#00B050"
                                             stroke="white"></rect>
                                         <text x="70" y="181" font-family="arial" font-size="10" fill="black"
-                                            font-weight="bold" id="actval01"></text>
+                                            font-weight="bold" id="residual-1"></text>
                                         <text x="64" y="194" font-family="arial" font-size="5" fill="black"
                                             font-weight="bold">Low (1)</text>
                                     </g>
-                                    <g onclick="gotoheatmapResidual()" style="cursor: pointer;">
+                                    <g style="cursor: pointer;">
                                         <rect x="101" y="161" width="40" height="40" fill="#00B050"
                                             stroke="white"></rect>
                                         <text x="110" y="181" font-family="arial" font-size="10" fill="black"
-                                            font-weight="bold" id="actval05"></text>
+                                            font-weight="bold" id="residual-5"></text>
                                         <text x="104" y="194" font-family="arial" font-size="5" fill="black"
                                             font-weight="bold">Low (5)</text>
                                     </g>
-                                    <g onclick="gotoheatmapResidual()" style="cursor: pointer;">
+                                    <g style="cursor: pointer;">
                                         <rect x="141" y="161" width="40" height="40" fill="#92D050"
                                             stroke="white"></rect>
                                         <text x="151" y="181" font-family="arial" font-size="10" fill="black"
-                                            font-weight="bold" id="actval10"></text>
+                                            font-weight="bold" id="residual-10"></text>
                                         <text x="144" y="190" font-family="arial" font-size="5" fill="black"
                                             font-weight="bold">Low to</text>
                                         <text x="144" y="196" font-family="arial" font-size="5" fill="black"
                                             font-weight="bold">Moderate (10)</text>
 
                                     </g>
-                                    <g onclick="gotoheatmapResidual()" style="cursor: pointer;">
+                                    <g style="cursor: pointer;">
                                         <rect x="181" y="161" width="40" height="40" fill="#FFFF00"
                                             stroke="white"></rect>
                                         <text x="190" y="181" font-family="arial" font-size="10" fill="black"
-                                            font-weight="bold" id="actval15"></text>
+                                            font-weight="bold" id="residual-15"></text>
                                         <text x="184" y="196" font-family="arial" font-size="5" fill="black"
                                             font-weight="bold">Moderate (15)</text>
                                     </g>
-                                    <g onclick="gotoheatmapResidual()" style="cursor: pointer;">
+                                    <g style="cursor: pointer;">
                                         <rect x="221" y="161" width="40" height="40" fill="#FE0000"
                                             stroke="white"></rect>
                                         <text x="230" y="181" font-family="arial" font-size="10" fill="black"
-                                            font-weight="bold" id="actval20"></text>
+                                            font-weight="bold" id="residual-20"></text>
                                         <text x="224" y="196" font-family="arial" font-size="5" fill="black"
                                             font-weight="bold">High (20)</text>
                                     </g>
@@ -1020,13 +1020,13 @@
                             </thead>
                             <tbody>
                                 <!-- <tr>
-                                                       <td>1</td>
-                                                       <td>2</td>
-                                                       <td>3</td>
-                                                       <td>4</td>
-                                                       <td>5</td>
-                                                       <td>6</td>
-                                                     <tr>				 -->
+                                                                                                                                                                       <td>1</td>
+                                                                                                                                                                       <td>2</td>
+                                                                                                                                                                       <td>3</td>
+                                                                                                                                                                       <td>4</td>
+                                                                                                                                                                       <td>5</td>
+                                                                                                                                                                       <td>6</td>
+                                                                                                                                                                     <tr>				 -->
 
                             </tbody>
                         </table>
@@ -1039,3 +1039,42 @@
         </div>
     </div>
 @endsection
+
+@push('element')
+    <div class="modal fade" id="risk-map-inherent-modal" data-bs-backdrop="static" data-bs-keyboard="false"
+        tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog" style="max-width: 100% !important;">
+            <div class="modal-content mx-auto" style="width: 80vw !important">
+                <div class="modal-header">
+                    <h6 class="modal-title" id="staticBackdropLabel">Risk Map Inheren</h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="risk-map-inherent-table-wrapper">
+                        <table id="risk-map-inherent-table" class="table table-bordered table-stripped display nowrap"
+                            style="width: 100%;">
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="risk-map-residual-modal" data-bs-backdrop="static" data-bs-keyboard="false"
+        tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog" style="max-width: 100% !important;">
+            <div class="modal-content mx-auto" style="width: 80vw !important">
+                <div class="modal-header">
+                    <h6 class="modal-title" id="staticBackdropLabel">Risk Map Residual</h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="risk-map-residual-table-wrapper">
+                        <table id="risk-map-residual-table" class="table table-bordered table-stripped display nowrap"
+                            style="width: 100%;">
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+@endpush

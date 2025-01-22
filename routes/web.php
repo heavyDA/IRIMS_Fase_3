@@ -27,12 +27,16 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('', [AuthController::class, 'change_role'])->name('change-role');
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard.index');
 
+    Route::get('dashboard/worksheet-by-inherent-risk-scale/{riskScale}', [DashboardController::class, 'worksheet_by_inherent_risk_scale'])
+        ->name('dashboard.worksheet_by_inherent_risk_scale');
+
     Route::get('profile/unit_head', [AuthController::class, 'get_unit_head'])->name('profile.get_unit_head');
     Route::get('profile/risk_metric', [AuthController::class, 'get_risk_metric'])->name('profile.get_risk_metric');
 
     Route::group(['as' => 'risk.', 'prefix' => 'risk-process'], function () {
         Route::group(['as' => 'worksheet.', 'prefix' => 'worksheet'], function () {
             Route::get('', [WorksheetController::class, 'index'])->name('index');
+            Route::get('get-by-inherent-risk-scale/{inherentScale}', [WorksheetController::class, 'get_by_inherent_risk_scale'])->name('get_by_inherent_risk_scale');
             Route::post('', [WorksheetController::class, 'store'])->name('store');
 
 

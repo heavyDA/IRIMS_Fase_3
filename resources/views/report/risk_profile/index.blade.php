@@ -68,7 +68,7 @@
                         <button style="width: 120px;" id="worksheet-reset" form="worksheet-table-filter" type="reset"
                             class="btn btn-block btn-light">Reset</button>
                         <button style="width: 120px;" id="worksheet-export"
-                            data-url="{{ route('risk.report.risk-profile.export') }}"
+                            data-url="{{ route('risk.report.risk_profile.export') }}"
                             class="btn btn-block btn-success mx-2"><i class="ti ti-file-export"></i> Export Excel</button>
                     </div>
                 </div>

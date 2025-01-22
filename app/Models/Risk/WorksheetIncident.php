@@ -2,6 +2,7 @@
 
 namespace App\Models\Risk;
 
+use App\Enums\DocumentStatus;
 use App\Models\Master\KRIUnit;
 use App\Traits\HasEncryptedId;
 use Illuminate\Database\Eloquent\Model;
@@ -14,8 +15,6 @@ class WorksheetIncident extends Model
     protected $table = 'ra_worksheet_incidents';
     protected $fillable = [
         'worksheet_id',
-        'risk_chronology_body',
-        'risk_chronology_description',
 
         'risk_cause_number',
         'risk_cause_code',
@@ -36,6 +35,8 @@ class WorksheetIncident extends Model
                 'worksheet.*',
                 'existing_control_body',
 
+                'identification.risk_chronology_body',
+                'identification.risk_chronology_description',
                 'identification.risk_impact_category',
                 'identification.risk_impact_body',
                 'identification.risk_impact_start_date',
@@ -106,14 +107,37 @@ class WorksheetIncident extends Model
             ->leftJoin('heatmaps as h_r3', 'h_r3.id', '=', 'identification.residual_3_impact_probability_scale_id')
             ->leftJoin('heatmaps as h_r4', 'h_r4.id', '=', 'identification.residual_4_impact_probability_scale_id');
     }
-    public static function incident_query_top_risk(?string $unit)
+    public static function incident_query_top_risk(?string $unit = null)
     {
         return DB::table('ra_worksheet_incidents as incident')
             ->select(
-                'incident.*',
-                'worksheet.*',
+                'incident.worksheet_id',
+                'incident.risk_cause_number',
+                'incident.risk_cause_code',
+                'incident.risk_cause_body',
+                'incident.kri_body',
+                'incident.kri_unit_id',
+                'incident.kri_threshold_safe',
+                'incident.kri_threshold_caution',
+                'incident.kri_threshold_danger',
+                'worksheet.worksheet_number',
+                'worksheet.unit_code',
+                'worksheet.unit_name',
+                'worksheet.sub_unit_code',
+                'worksheet.sub_unit_name',
+                'worksheet.organization_code',
+                'worksheet.organization_name',
+                'worksheet.personnel_area_code',
+                'worksheet.personnel_area_name',
+                'worksheet.target_body',
+                'worksheet.status',
                 'existing_control_body',
-                'top_risks.id as top_risk',
+                'tr.id as top_risk_id',
+                'tr.sub_unit_code as top_risk_sub_unit_code',
+                'tr.source_sub_unit_code as top_risk_source_sub_unit_code',
+
+                'identification.risk_chronology_body',
+                'identification.risk_chronology_description',
 
                 'identification.risk_impact_category',
                 'identification.risk_impact_body',
@@ -164,18 +188,27 @@ class WorksheetIncident extends Model
                 'h_r3.risk_scale as residual_3_impact_probability_scale',
                 'h_r4.risk_scale as residual_4_impact_probability_scale',
             )
-            ->when($unit, function ($query) use ($unit) {
-                $query->withExpression(
-                    'top_risks',
-                    DB::table('ra_worksheet_top_risks')
-                        ->where('sub_unit_code', $unit)
-                );
-            })
+            ->withExpression(
+                'top_risks',
+                DB::table('ra_worksheet_top_risks')
+                    ->whereIn(
+                        'worksheet_id',
+                        DB::table('ra_worksheets')
+                            ->whereLike('sub_unit_code', $unit . '%')
+                            ->where('status', DocumentStatus::APPROVED->value)
+                            ->pluck('id')
+                            ->toArray()
+                    )
+            )
+            ->withExpression(
+                'filter_top_risks',
+                DB::table('ra_worksheet_top_risks')
+            )
             ->withExpression('scales', DB::table('m_bumn_scales'))
             ->withExpression('heatmaps', DB::table('m_heatmaps'))
             ->withExpression('risk_categories', DB::table('m_kbumn_risk_categories'))
             ->leftJoin('ra_worksheets as worksheet', 'worksheet.id', '=', 'incident.worksheet_id')
-            ->leftJoin('top_risks', 'top_risks.worksheet_id', '=', 'incident.worksheet_id')
+            ->leftJoin('filter_top_risks as tr', 'tr.worksheet_id', '=', 'incident.worksheet_id')
             ->leftJoin('ra_worksheet_identifications as identification', 'identification.worksheet_id', '=', 'worksheet.id')
             ->leftJoin('m_kri_units as kri_unit', 'kri_unit.id', '=', 'incident.kri_unit_id')
             ->leftJoin('m_existing_control_types', 'm_existing_control_types.id', '=', 'identification.existing_control_type_id')

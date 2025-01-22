@@ -198,9 +198,29 @@ class DefaultSeeder extends Seeder
                 if ($role->name == 'root') {
                     $role->syncPermissions($permissions->pluck('name'));
                     $role->menus()->sync($menus->pluck('id'));
+                } else if ($role->name == 'risk otorisator') {
+                    $role->syncPermissions($permissions->pluck('name'));
+                    $role->menus()->sync(
+                        $menus->filter(
+                            function ($menu) {
+                                return str_contains($menu->route, 'risk.') ||
+                                    $menu->route == 'risk' ||
+                                    str_contains($menu->route, 'dashboard');
+                            }
+                        )->pluck('id')
+                    );
                 } else {
                     $role->syncPermissions($permissions->pluck('name'));
-                    $role->menus()->sync($menus->filter(fn($menu) => str_contains($menu->route, 'risk.') || $menu->route == 'risk' || str_contains($menu->route, 'dashboard'))->pluck('id'));
+                    $role->menus()->sync(
+                        $menus->filter(
+                            function ($menu) {
+                                return str_contains($menu->route, 'risk.') ||
+                                    str_contains($menu->route, 'risk.profile') ||
+                                    $menu->route == 'risk' ||
+                                    str_contains($menu->route, 'dashboard');
+                            }
+                        )->pluck('id')
+                    );
                 }
             }
         }

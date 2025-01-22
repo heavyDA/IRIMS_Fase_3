@@ -267,19 +267,22 @@ const datatable = createDatatable('#worksheet-table', {
         },
         {
             sortable: true,
-            data: 'worksheet_id',
-            name: 'worksheet_id',
+            data: 'top_risk_action',
+            name: 'top_risk_action',
             width: '96px',
             render: function (data, type, row) {
                 if (type !== 'display') {
                     return data
                 }
 
-                if (row.top_risk) {
-                    return `<button type="button" data-id="${row.top_risk}" class="worksheet-deletes btn btn-sm btn-danger"><i style="font-size: 12px;" class="ti ti-x"></i></button>`
+                if (!data) {
+                    return ''
                 }
 
-                return `<input ${row.top_risk == null ? '' : 'checked'} type="checkbox" name="worksheets[${row.worksheet_id}]" value="${data}" class="worksheet-selects">`
+                const decodeData = decodeHtml(decodeHtml(data))
+                const parsedData = new DOMParser().parseFromString(decodeData, 'text/html')
+
+                return parsedData.body ? parsedData.body.innerHTML : ''
             }
         },
     ],

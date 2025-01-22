@@ -24,6 +24,9 @@ class WorksheetIdentification extends Model
         'company_code',
         'risk_category_t2_id',
         'risk_category_t3_id',
+        'risk_chronology_body',
+        'risk_chronology_description',
+
         'existing_control_type_id',
         'existing_control_body',
         'control_effectiveness_assessment_id',

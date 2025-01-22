@@ -13,6 +13,7 @@ use App\Models\Master\KRIUnit;
 use App\Models\Master\RiskTreatmentOption;
 use App\Models\Master\RiskTreatmentType;
 use App\Models\Master\RKAPProgramType;
+use App\Models\RBAC\Role;
 use App\Models\Risk\Worksheet;
 use App\Models\Risk\WorksheetHistory;
 use App\Models\Risk\WorksheetIdentification;
@@ -280,8 +281,6 @@ class WorksheetController extends Controller
                 'incidents' => $worksheet->incidents->select([
                     'id',
                     'risk_number',
-                    'risk_chronology_body',
-                    'risk_chronology_description',
                     'risk_cause_body',
                     'kri_body',
                     'kri_unit',
@@ -609,6 +608,28 @@ class WorksheetController extends Controller
             'receiver_role' => 'risk admin',
             'status' => DocumentStatus::APPROVED->value,
             'note' => $note
+        ]);
+    }
+
+    public function get_by_inherent_risk_scale(int $riskScale)
+    {
+        if (Role::hasLookUpUnitHierarchy()) {
+            $unit = request('unit') ? request('unit') . '%' : Role::getDefaultSubUnit();
+        } else {
+            $unit = Role::getDefaultSubUnit();
+        }
+
+        $worksheets = Worksheet::with([
+            'identification' => fn($q) => $q->with('risk_category_t2', 'risk_category_t3')
+        ])
+            ->where('sub_unit_code', 'like', $unit)
+            ->whereHas('identification', fn($q) => $q->where('inherent_risk_scale', $riskScale))
+            ->whereYear('created_at', request('year', date('Y')))
+            ->get();
+
+        return response()->json([
+            'data' => $worksheets,
+            'message' => 'success',
         ]);
     }
 }

@@ -19,16 +19,19 @@ class ProfileController extends Controller
 {
     public function index()
     {
+        if (Role::hasLookUpUnitHierarchy()) {
+            $unit = request('unit') ? request('unit') . '%' : Role::getDefaultSubUnit();
+        } else {
+            $unit = Role::getDefaultSubUnit();
+        }
         if (request()->ajax()) {
-            if (Role::hasLookUpUnitHierarchy()) {
-                $unit = request('unit') ? request('unit') . '%' : Role::getDefaultSubUnit();
-            } else {
-                $unit = Role::getDefaultSubUnit();
-            }
-
+            $level = Role::getLevel();
             $incidents = WorksheetIncident::incident_query_top_risk(str_replace('%', '', $unit))
-                ->where('worksheet.status', 'approved')
-                ->where('worksheet.sub_unit_code', 'like', $unit)
+                // ->where('top_risks.source_sub_unit_code', 'like', $unit)
+                ->when(
+                    $level < 3,
+                    fn($q) => $q->where('tr.sub_unit_code', str_replace('%', '', $unit))
+                )
                 ->where('worksheet.status', 'approved');
 
 
@@ -41,6 +44,15 @@ class ProfileController extends Controller
 
                     return view('risk.profile._table_status', compact('status', 'class', 'worksheet_number', 'route'))->render();
                 })
+                ->editColumn('top_risk_action', function ($incident) use ($unit) {
+                    if (
+                        $incident->top_risk_source_sub_unit_code == str_replace('%', '', $unit)
+                    ) {
+                        return '<button type="button" data-id="' . $incident->top_risk_id . '" class="worksheet-deletes btn btn-sm btn-danger"><i style="font-size: 12px;" class="ti ti-x"></i></button>';
+                    }
+
+                    return '<input class="worksheet-selects" type="checkbox" name="worksheets[' . $incident->worksheet_id . ']" value="' . $incident->worksheet_id . '">';
+                })
                 ->rawColumns(['status'])
                 ->make(true);
         }
@@ -52,23 +64,18 @@ class ProfileController extends Controller
 
     public function store(Request $request)
     {
-        if (Role::hasLookUpUnitHierarchy()) {
-            $unit = request('unit') ? request('unit') . '%' : Role::getDefaultSubUnit();
-        } else {
-            $unit = Role::getDefaultSubUnit();
-        }
-
         try {
             $worksheets = Worksheet::whereIn('id', $request->worksheets)->get();
-            $unit = str_replace('%', '', $unit);
 
             DB::beginTransaction();
             WorksheetTopRisk::upsert(
-                $worksheets->map(function ($worksheet) use ($unit) {
+                $worksheets->map(function ($worksheet) {
+                    $user = auth()->user();
+
                     return [
                         'worksheet_id' => $worksheet->id,
-                        'sub_unit_code' => $unit,
-                        'source_sub_unit_code' => $worksheet->sub_unit_code,
+                        'sub_unit_code' => $user->unit_code,
+                        'source_sub_unit_code' => $user->sub_unit_code,
                         'created_at' => now(),
                         'updated_at' => now(),
                     ];

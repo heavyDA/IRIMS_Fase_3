@@ -47,6 +47,14 @@ class Role extends Model
         return $user->sub_unit_code;
     }
 
+    public static function getLevel()
+    {
+        $unit = str_replace('%', '', static::getDefaultSubUnit());
+        $count = preg_match_all('/\./', $unit, $matches);
+
+        return $count;
+    }
+
     public function menus()
     {
         return $this->belongsToMany(Menu::class);

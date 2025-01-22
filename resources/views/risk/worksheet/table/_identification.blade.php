@@ -59,8 +59,8 @@
                     <td>{!! html_entity_decode($worksheet->target_body) !!}</td>
                     <td>{{ $worksheet->identification->risk_category_t2_name . ' & ' . $worksheet->identification->risk_category_t3_name }}
                     </td>
-                    <td>{!! html_entity_decode($incident->risk_chronology_body) !!}</td>
-                    <td>{!! html_entity_decode($incident->risk_chronology_description) !!}</td>
+                    <td>{!! html_entity_decode($worksheet->identification->risk_chronology_body) !!}</td>
+                    <td>{!! html_entity_decode($worksheet->identification->risk_chronology_description) !!}</td>
                     <td>{{ $incident->risk_cause_number }}</td>
                     <td>{{ $incident->risk_cause_code }}</td>
                     <td>{!! html_entity_decode($incident->risk_cause_body) !!}</td>

@@ -50,40 +50,38 @@ class WorksheetResidualExport implements FromCollection, WithHeadings, WithStyle
     {
         $data = $this->worksheets->filter(fn($worksheet) => $worksheet->identification->risk_impact_category == $this->impact_category)
             ->map(function ($worksheet) use (&$currentIndex) {
-                return $worksheet->incidents->map(function ($incident) use ($worksheet, &$currentIndex) {
-                    $currentIndex += 1;
-                    $item = [
-                        'No.' => $currentIndex,
-                        'Nama Perusahaan' => $worksheet->company_name,
-                        'Kode Perusahaan' => $worksheet->company_code,
-                        'No. Risiko' => $worksheet->worksheet_number,
-                        'Peristiwa Risiko' => strip_html($incident->risk_chronology_body),
-                    ];
+                $currentIndex += 1;
+                $item = [
+                    'No.' => $currentIndex,
+                    'Nama Perusahaan' => $worksheet->company_name,
+                    'Kode Perusahaan' => $worksheet->company_code,
+                    'No. Risiko' => $worksheet->worksheet_number,
+                    'Peristiwa Risiko' => strip_html($worksheet->identification->risk_chronology_body),
+                ];
 
-                    foreach (
-                        [
-                            'impact_value',
-                            'impact_scale',
-                            'impact_probability',
-                            'impact_probability_scale',
-                            'risk_exposure',
-                            'risk_scale',
-                            'risk_level',
-                        ] as $key
-                    ) {
-                        for ($i = 1; $i <= 4; $i++) {
+                foreach (
+                    [
+                        'impact_value',
+                        'impact_scale',
+                        'impact_probability',
+                        'impact_probability_scale',
+                        'risk_exposure',
+                        'risk_scale',
+                        'risk_level',
+                    ] as $key
+                ) {
+                    for ($i = 1; $i <= 4; $i++) {
 
-                            $_key = "residual_{$i}_{$key}";
-                            if (str_contains($_key, 'impact_value') || str_contains($_key, 'risk_exposure')) {
-                                $item[$_key] = $worksheet->identification->$_key ? money_format((float) $worksheet->identification->$_key) : '-';
-                            } else {
-                                $item[$_key] = $worksheet->identification->$_key ?? '-';
-                            }
+                        $_key = "residual_{$i}_{$key}";
+                        if (str_contains($_key, 'impact_value') || str_contains($_key, 'risk_exposure')) {
+                            $item[$_key] = $worksheet->identification->$_key ? money_format((float) $worksheet->identification->$_key) : '-';
+                        } else {
+                            $item[$_key] = $worksheet->identification->$_key ?? '-';
                         }
                     }
+                }
 
-                    return $item;
-                });
+                return $item;
             });
 
         $this->count = $currentIndex + 2;
@@ -170,7 +168,6 @@ class WorksheetResidualExport implements FromCollection, WithHeadings, WithStyle
         $merged_rows = [
             'B',
             'C',
-            'D',
         ];
 
         if ($this->impact_category == 'kuantitatif') {

@@ -56,6 +56,24 @@
                 </div>
             </div>
             <div class="row mb-3">
+                <div class="col-3">Peristiwa Risiko<span class="text-danger">*</span></div>
+                <div class="col">
+                    <div class="mb-2">
+                        <div id="risk_chronology_body-editor" class="textarea"></div>
+                        <textarea class="d-none form-control" name="risk_chronology_body" rows="4"></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-3">Deskripsi Peristiwa Risiko<span class="text-danger">*</span></div>
+                <div class="col">
+                    <div class="mb-2">
+                        <div id="risk_chronology_description-editor" class="textarea"></div>
+                        <textarea class="d-none form-control" name="risk_chronology_description" rows="4"></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="row mb-3">
                 <div class="col-3">Jenis Existing Control<span class="text-danger">*</span>
                     <a tabindex="0"
                         class="link-secondary link-offset-2 link-underline-opacity-0 link-underline-opacity-50-hover text-decoration-underline mx-1"
@@ -380,8 +398,6 @@
                 <thead class="table-dark">
                     <tr style="vertical-align: bottom;">
                         <th rowspan="2">Aksi</th>
-                        <th style="width: 220px !important;" rowspan="2">Peristiwa Risiko</th>
-                        <th style="width: 220px !important;" rowspan="2">Deskripsi Peristiwa Risiko</th>
                         <th style="" rowspan="2">No. Penyebab Risiko</th>
                         <th style="" rowspan="2">Kode Penyebab risiko</th>
                         <th style="width: 220px !important;" rowspan="2">Penyebab risiko</th>
@@ -425,24 +441,6 @@
                             <div class="col-3">No. Risiko</div>
                             <div class="col">
                                 <input type="text" class="form-control" name="risk_number" readonly>
-                            </div>
-                        </div>
-                        <div class="row mb-3">
-                            <div class="col-3">Peristiwa Risiko<span class="text-danger">*</span></div>
-                            <div class="col">
-                                <div class="mb-2">
-                                    <div id="risk_chronology_body-editor" class="textarea"></div>
-                                    <textarea class="d-none form-control" name="risk_chronology_body" rows="4"></textarea>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row mb-3">
-                            <div class="col-3">Deskripsi Peristiwa Risiko<span class="text-danger">*</span></div>
-                            <div class="col">
-                                <div class="mb-2">
-                                    <div id="risk_chronology_description-editor" class="textarea"></div>
-                                    <textarea class="d-none form-control" name="risk_chronology_description" rows="4"></textarea>
-                                </div>
                             </div>
                         </div>
                         <div class="row mb-3">

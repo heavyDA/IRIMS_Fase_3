@@ -22,7 +22,7 @@
                                 <tr>
                                     <td>{{ $worksheet->worksheet_number }}</td>
                                     <td>{{ $incident->risk_cause_number }}</td>
-                                    <td>{!! $incident->risk_chronology_body !!}</td>
+                                    <td>{!! html_entity_decode($worksheet->identification->risk_chronology_body) !!}</td>
                                     <td>{{ $mitigation?->risk_treatment_option?->name }}</td>
                                     <td>{{ $mitigation?->risk_treatment_type?->name }}</td>
                                     <td>{!! $mitigation->mitigation_plan !!}</td>

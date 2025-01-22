@@ -1044,8 +1044,6 @@ const addIncidentRow = (data) => {
 
     row.id = `incident-${data.key}`;
     row.innerHTML = `
-        <td>${data.risk_chronology_body}</td>
-        <td>${data.risk_chronology_description}</td>
         <td>${data.risk_cause_number}</td>
         <td>${data.risk_cause_code}</td>
         <td>${data.risk_cause_body}</td>
@@ -1062,8 +1060,6 @@ const addIncidentRow = (data) => {
 
 const updateIncidentRow = (data) => {
     const row = tables.incidents.querySelector('#incident-' + data.key);
-    row.querySelector('td:nth-child(2)').innerHTML = data.risk_chronology_body
-    row.querySelector('td:nth-child(3)').innerHTML = data.risk_chronology_description
     row.querySelector('td:nth-child(4)').textContent = data.risk_cause_number
     row.querySelector('td:nth-child(5)').textContent = data.risk_cause_code
     row.querySelector('td:nth-child(6)').innerHTML = data.risk_cause_body

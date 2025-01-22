@@ -47,24 +47,22 @@ class WorksheetInherentExport implements FromCollection, WithHeadings, WithStyle
     {
         $data = $this->worksheets->filter(fn($worksheet) => $worksheet->identification->risk_impact_category == $this->impact_category)
             ->map(function ($worksheet) use (&$currentIndex) {
-                return $worksheet->incidents->map(function ($incident) use ($worksheet, &$currentIndex) {
-                    $currentIndex += 1;
-                    return [
-                        'No.' => $currentIndex,
-                        'Nama Perusahaan' => $worksheet->company_name,
-                        'Kode Perusahaan' => $worksheet->company_code,
-                        'No. Risiko' => $worksheet->worksheet_number,
-                        'Peristiwa Risiko' => strip_html($incident->risk_chronology_body),
-                        'Asumsi Perhitungan Dampak' => strip_html($worksheet->identification->inherent_body),
-                        'Nilai Dampak' => $worksheet->identification->inherent_impact_value ? money_format((float) $worksheet->identification->inherent_impact_value) : '-',
-                        'Skala Dampak' => $worksheet->identification->inherent_impact_scale,
-                        'Nilai Probabilitas' => $worksheet->identification->inherent_impact_probability,
-                        'Skala Probabilitas' => $worksheet->identification->inherent_impact_probability_scale,
-                        'Eksposur Risiko' => $worksheet->identification->inherent_risk_exposure ? money_format((float) $worksheet->identification->inherent_risk_exposure) : '-',
-                        'Skala Risiko' => $worksheet->identification->inherent_risk_scale,
-                        'Level Risiko' => $worksheet->identification->inherent_risk_level,
-                    ];
-                });
+                $currentIndex += 1;
+                return [
+                    'No.' => $currentIndex,
+                    'Nama Perusahaan' => $worksheet->company_name,
+                    'Kode Perusahaan' => $worksheet->company_code,
+                    'No. Risiko' => $worksheet->worksheet_number,
+                    'Peristiwa Risiko' => strip_html($worksheet->identification->risk_chronology_body),
+                    'Asumsi Perhitungan Dampak' => strip_html($worksheet->identification->inherent_body),
+                    'Nilai Dampak' => $worksheet->identification->inherent_impact_value ? money_format((float) $worksheet->identification->inherent_impact_value) : '-',
+                    'Skala Dampak' => $worksheet->identification->inherent_impact_scale,
+                    'Nilai Probabilitas' => $worksheet->identification->inherent_impact_probability,
+                    'Skala Probabilitas' => $worksheet->identification->inherent_impact_probability_scale,
+                    'Eksposur Risiko' => $worksheet->identification->inherent_risk_exposure ? money_format((float) $worksheet->identification->inherent_risk_exposure) : '-',
+                    'Skala Risiko' => $worksheet->identification->inherent_risk_scale,
+                    'Level Risiko' => $worksheet->identification->inherent_risk_level,
+                ];
             });
 
         $this->count = $currentIndex + 2;
@@ -138,16 +136,6 @@ class WorksheetInherentExport implements FromCollection, WithHeadings, WithStyle
             [
                 'B',
                 'C',
-                'D',
-                'F',
-                'G',
-                'H',
-                'I',
-                'J',
-                'J',
-                'K',
-                'L',
-                'M'
             ], // Columns to merge - adjust as needed
             3, // Start from row 3 (after headers)
             $this->count
