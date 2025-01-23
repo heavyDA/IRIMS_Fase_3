@@ -79,6 +79,16 @@
                                         </a>
                                     @endif
                                     @isset($worksheet)
+                                        @if (in_array($worksheet->status, ['draft', 'on review']))
+                                            <form action="{{ route('risk.worksheet.destroy', $worksheet->getEncryptedId()) }}"
+                                                method="POST">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button style="min-width: 128px;" type="submit" class="btn btn-danger">
+                                                    <span><i class="ti ti-x"></i></span>&nbsp;Hapus
+                                                </button>
+                                            </form>
+                                        @endif
                                         @if (!str_contains(request()->route()->getName(), 'edit'))
                                             @if (
                                                 (session()->get('current_role')?->name == 'risk admin' && $worksheet->last_history->status == 'draft') ||
