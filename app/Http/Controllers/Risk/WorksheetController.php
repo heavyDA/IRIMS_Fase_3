@@ -531,6 +531,32 @@ class WorksheetController extends Controller
         }
     }
 
+    public function destroy(string $worksheetId)
+    {
+        try {
+            $worksheet = Worksheet::findByEncryptedIdOrFail($worksheetId);
+            if (!in_array($worksheet->status, [DocumentStatus::DRAFT->value, DocumentStatus::ON_REVIEW->value])) {
+                throw_if(
+                    !$worksheet->delete(),
+                    new Exception("Failed to delete worksheet with ID {$worksheet->id}, document is on progress")
+                );
+            }
+
+            DB::beginTransaction();
+            throw_if(!$worksheet->delete(), new Exception("Failed to delete worksheet with ID {$worksheet->id}"));
+            DB::commit();
+
+            flash_message('flash_message', 'Kertas kerja berhasil dihapus', State::SUCCESS);
+            return redirect()->route('risk.assessment.index');
+        } catch (Exception $e) {
+            DB::rollBack();
+            logger()->error('[Worksheet] ' . $e->getMessage());
+
+            flash_message('flash_message', 'Gagal menghapus kertas kerja', State::ERROR);
+            return redirect()->back();
+        }
+    }
+
     public function update_status(string $worksheetId, Request $request)
     {
         $worksheet = Worksheet::findByEncryptedIdOrFail($worksheetId);

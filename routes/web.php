@@ -45,6 +45,7 @@ Route::group(['middleware' => 'auth'], function () {
             Route::get('{worksheet}/edit', [WorksheetController::class, 'edit'])->name('edit');
             Route::put('{worksheet}/edit', [WorksheetController::class, 'update'])->name('update');
             Route::put('{worksheet}/status', [WorksheetController::class, 'update_status'])->name('update_status');
+            Route::delete('{worksheet}', [WorksheetController::class, 'destroy'])->name('destroy');
         });
 
         Route::group(['as' => 'monitoring.', 'prefix' => 'monitoring'], function () {
