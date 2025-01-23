@@ -37,6 +37,14 @@ if (!function_exists('strip_html')) {
     }
 }
 
+if (!function_exists('get_unit_level')) {
+    function get_unit_level(string $unit)
+    {
+        $count = preg_match_all('/\./', $unit, $matches);
+        return $count;
+    }
+}
+
 if (!function_exists('excel_build_nested_headers')) {
     function excel_build_nested_headers(array $columns = [], array $nested_columns = []): array
     {

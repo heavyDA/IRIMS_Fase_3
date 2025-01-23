@@ -24,21 +24,15 @@ class ProfileController extends Controller
         } else {
             $unit = Role::getDefaultSubUnit();
         }
+
         if (request()->ajax()) {
             $level = Role::getLevel();
-            $incidents = WorksheetIncident::incident_query_top_risk(str_replace('%', '', $unit))
-                // ->where('top_risks.source_sub_unit_code', 'like', $unit)
-                ->when(
-                    $level < 3,
-                    fn($q) => $q->where('tr.sub_unit_code', str_replace('%', '', $unit))
-                )
-                ->where('worksheet.status', 'approved');
-
+            $incidents = WorksheetIncident::incident_query_top_risk(str_replace('%', '', $unit));
 
             return DataTables::query($incidents)
                 ->editColumn('status', function ($incident) {
                     $status = DocumentStatus::tryFrom($incident->status);
-                    $class = $status->color();
+                    $class = $status?->color() ?? 'info';
                     $worksheet_number = $incident->worksheet_number;
                     $route = route('risk.worksheet.show', Crypt::encryptString($incident->worksheet_id));
 

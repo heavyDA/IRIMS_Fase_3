@@ -367,6 +367,7 @@ class WorksheetController extends Controller
             ]);
 
             $strategies = [];
+            $strategyIds = [];
             foreach ($request->strategies as $index => $items) {
                 $strategy = [];
                 foreach ($items as $key => $value) {
@@ -375,6 +376,7 @@ class WorksheetController extends Controller
                 }
 
                 if ($items['id']) {
+                    $strategyIds[] = $items['id'];
                     unset($strategy['id']);
                     throw_if(
                         !$worksheet->strategies()->where('id', $items['id'])->update($strategy),
@@ -384,6 +386,8 @@ class WorksheetController extends Controller
                     $strategies[] = $strategy;
                 }
             }
+
+            $worksheet->strategies()->whereNotIn('id', $strategyIds)->delete();
             $strategies = $worksheet->strategies()->createMany($strategies);
 
             $identification = [];
@@ -432,6 +436,7 @@ class WorksheetController extends Controller
 
 
             $incidents = [];
+            $incidentsIds = [];
             $new_incidents = [];
             foreach ($request->incidents as $index => $item) {
                 $incident = [];
@@ -443,6 +448,7 @@ class WorksheetController extends Controller
                 }
 
                 if ($incident['id']) {
+                    $incidentsIds[] = $incident['id'];
                     throw_if(
                         !$worksheet->incidents()->where('id', $incident['id'])->update($incident),
                         "Failed to update incident data with ID {$worksheet->id}: {$incident['id']}"
@@ -453,7 +459,7 @@ class WorksheetController extends Controller
                 }
             }
 
-
+            $worksheet->incidents()->whereNotIn('id', $incidentsIds)->delete();
             if ($new_incidents) {
                 $new_incidents = $worksheet->incidents()->createMany($new_incidents)->toArray();
                 throw_if(

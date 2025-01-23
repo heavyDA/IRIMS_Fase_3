@@ -2,13 +2,31 @@ import Choices from "choices.js";
 import createDatatable from "js/components/datatable";
 import { decodeHtml, defaultConfigFormatNumeral, defaultConfigChoices } from "js/components/helper";
 
+const worksheetTableFilter = document.querySelector('#worksheet-table-filter')
+const selectLength = worksheetTableFilter.querySelector('select[name="length"]')
+const selectYear = worksheetTableFilter.querySelector('select[name="year"]')
+const selectUnit = worksheetTableFilter.querySelector('select[name="unit"]')
+const selectDocumentStatus = worksheetTableFilter.querySelector('select[name="document_status"]')
+
+const selectLengthChoices = new Choices(selectLength, defaultConfigChoices)
+const selectYearChoices = new Choices(selectYear, defaultConfigChoices)
+const selectUnitChoices = new Choices(selectUnit, defaultConfigChoices)
+const selectDocumentStatusChoices = new Choices(selectDocumentStatus, defaultConfigChoices)
+
 const datatable = createDatatable('table', {
     handleColumnSearchField: false,
     responsive: false,
     serverSide: true,
     ordering: false,
     processing: true,
-    ajax: window.location.href,
+    ajax: {
+        url: window.location.href,
+        data: function (d) {
+            d.year = selectYear.value
+            d.unit = selectUnit.value
+            d.document_status = selectDocumentStatus.value
+        }
+    },
     scrollX: true,
     fixedColumns: true,
     lengthChange: false,
@@ -257,4 +275,18 @@ const datatable = createDatatable('table', {
             width: '100px',
         },
     ],
+})
+
+selectLength.addEventListener('change', e => {
+    datatable.page.len(e.target.value).draw();
+})
+
+selectUnit.addEventListener('change', e => {
+    datatable.draw()
+})
+selectYear.addEventListener('change', e => {
+    datatable.draw()
+})
+selectDocumentStatus.addEventListener('change', e => {
+    datatable.draw()
 })

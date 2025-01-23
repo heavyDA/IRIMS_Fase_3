@@ -46,7 +46,7 @@
                     <div class="col-12 col-lg-4">
                         <label for="unit" class="form-label">Unit Kerja</label>
                         <select name="unit" class="form-select">
-                            <option value="">Pilih</option>
+                            <option value="">Semua</option>
                             @foreach ($units as $item)
                                 <option value="{{ $item->sub_unit_code }}">
                                     [{{ $item->personnel_area_code }}] {{ $item->sub_unit_name }}</option>
@@ -56,7 +56,7 @@
                     <div class="col-12 col-lg-3">
                         <label for="document_status" class="form-label">Status Dokumen</label>
                         <select name="document_status" class="form-select">
-                            <option value="">Pilih</option>
+                            <option value="">Semua</option>
                             <option value="draft">Draft</option>
                             <option value="on progress">On Progress</option>
                             <option value="approved">Profil Risiko</option>

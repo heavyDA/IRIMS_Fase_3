@@ -29,7 +29,7 @@ class Role extends Model
             $user->personnel_area_code == 'PST' &&
             in_array($role, ['risk analis', 'risk reviewer'])
         ) {
-            return 'ap%';
+            return 'ap.5%';
         }
         if (
             str_contains($user->personnel_area_code, 'REG ') &&
@@ -49,10 +49,7 @@ class Role extends Model
 
     public static function getLevel()
     {
-        $unit = str_replace('%', '', static::getDefaultSubUnit());
-        $count = preg_match_all('/\./', $unit, $matches);
-
-        return $count;
+        return preg_match_all('/\./', str_replace('%', '', static::getDefaultSubUnit()), $matches);
     }
 
     public function menus()
