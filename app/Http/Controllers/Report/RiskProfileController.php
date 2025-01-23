@@ -18,11 +18,6 @@ class RiskProfileController extends Controller
 {
     public function index()
     {
-        $units = Official::getSubUnitOnly()
-            ->filterByRole(session()->get('current_role')?->name)
-            ->get();
-        $statuses = DocumentStatus::values();
-
         if (request()->ajax()) {
             if (Role::hasLookUpUnitHierarchy()) {
                 $unit = request('unit') ? request('unit') . '%' : Role::getDefaultSubUnit();
@@ -57,9 +52,13 @@ class RiskProfileController extends Controller
                 ->make(true);
         }
 
+        $units = Official::getSubUnitOnly()
+            ->filterByRole(session()->get('current_role')?->name)
+            ->latest('sub_unit_code')
+            ->get();
         $title = 'Risk Profile';
 
-        return view('report.risk_profile.index', compact('title', 'units', 'statuses'));
+        return view('report.risk_profile.index', compact('title', 'units'));
     }
 
     public function export()

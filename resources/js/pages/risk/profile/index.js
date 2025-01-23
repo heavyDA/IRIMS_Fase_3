@@ -319,7 +319,7 @@ datatable.on('draw.dt', () => {
         }
 
         button.addEventListener('click', async e => {
-            const response = await axios.post(window.location.href + '/top-risk', {
+            const response = await axios.post('/risk-process/profile/top-risk', {
                 id: button.dataset.id,
                 "_method": 'DELETE'
             })
@@ -344,7 +344,7 @@ worksheetSubmitButton.addEventListener('click', async e => {
 
     worksheets = new Set(worksheets)
 
-    const response = await axios.post(window.location.href + '/top-risk', { worksheets: [...worksheets] })
+    const response = await axios.post('/risk-process/profile/top-risk', { worksheets: [...worksheets] })
     Swal.fire({
         icon: response.status == 200 ? 'success' : 'error',
         title: response.status == 200 ? 'Berhasil' : 'Gagal',
