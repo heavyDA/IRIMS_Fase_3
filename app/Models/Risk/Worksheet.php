@@ -7,6 +7,7 @@ use App\Models\RBAC\Role;
 use App\Traits\HasEncryptedId;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 class Worksheet extends Model
 {
@@ -117,6 +118,11 @@ class Worksheet extends Model
         return $this->hasMany(Monitoring::class);
     }
 
+    public function latest_monitoring()
+    {
+        return $this->hasOne(Monitoring::class)->latest('period_date');
+    }
+
     public function last_top_risk()
     {
         return $this->hasOne(WorksheetTopRisk::class)->latest('id');
@@ -132,5 +138,85 @@ class Worksheet extends Model
             'id',
             'id'
         );
+    }
+
+    public static function latest_monitoring_with_mitigation_query()
+    {
+        return DB::table('worksheets as w')
+            ->withExpression(
+                'worksheets',
+                Worksheet::from('ra_worksheets as w')->select(
+                    'w.id',
+                    'w.worksheet_number',
+                    'w.target_body',
+                    'wi.risk_chronology_body',
+                    'wi.inherent_risk_level',
+                    'wi.inherent_risk_scale',
+
+                    'w.personnel_area_code',
+                    'w.personnel_area_name',
+                    'w.unit_code',
+                    'w.unit_name',
+                    'w.sub_unit_code',
+                    'w.sub_unit_name',
+
+                    'status',
+                    'status_monitoring',
+                    DB::raw('YEAR(w.created_at) as worksheet_year')
+                )
+                    ->leftJoin('ra_worksheet_identifications as wi', 'wi.worksheet_id', '=', 'w.id')
+                    ->whereStatus(DocumentStatus::APPROVED->value)
+            )
+            ->withExpression(
+                'latest_monitoring',
+                DB::table('ra_monitorings as m')
+                    ->select('m.*')
+                    ->joinSub(
+                        DB::table('ra_monitorings')
+                            ->select('worksheet_id', DB::raw('MAX(period_date) as period_date'))
+                            ->groupBy('worksheet_id'),
+                        'latest',
+                        function ($join) {
+                            $join->on('m.worksheet_id', '=', 'latest.worksheet_id');
+                            $join->on('m.period_date', '=', 'latest.period_date');
+                        }
+                    )
+            )
+            ->select(
+                'lm.id as latest_monitoring_id',
+                'w.id as worksheet_id',
+                'w.worksheet_number',
+                'w.target_body',
+                'w.risk_chronology_body',
+
+                'ma.quarter',
+                'wmit.mitigation_plan',
+                'ma.actualization_plan_output',
+
+                'w.inherent_risk_level',
+                'w.inherent_risk_scale',
+                'mr.risk_level as residual_risk_level',
+                'mr.risk_scale as residual_risk_scale',
+                'w.personnel_area_code',
+                'w.personnel_area_name',
+                'w.unit_code',
+                'w.unit_name',
+                'w.sub_unit_code',
+                'w.sub_unit_name',
+
+                'w.status',
+                'w.status_monitoring'
+            )
+            ->leftJoin('latest_monitoring as lm', 'lm.worksheet_id', '=', 'w.id')
+            ->leftJoin('ra_monitoring_actualizations as ma', 'ma.monitoring_id', '=', 'lm.id')
+            ->leftJoin('ra_worksheet_mitigations as wmit', 'wmit.id', '=', 'ma.worksheet_mitigation_id')
+            ->leftJoin('ra_worksheet_incidents as winc', 'winc.id', '=', 'wmit.worksheet_incident_id')
+            ->leftJoin(
+                'ra_monitoring_residuals as mr',
+                function ($join) {
+                    $join->on('mr.monitoring_id', '=', 'lm.id')
+                        ->whereRaw('mr.worksheet_incident_id = winc.id');
+                }
+            );
     }
 }

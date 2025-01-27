@@ -7,13 +7,15 @@ enum DocumentStatus: string
     case DRAFT = 'draft';
     case SUBMIT = 'submit';
     case ON_REVIEW = 'on review';
-    case ON_MONITORING = 'on monitoring';
-    case ON_PROGRESS_MONITORING = 'on progress monitoring';
     case ON_CONFIRMATION = 'on confirmation';
     case APPROVAL = 'approval';
     case APPROVED = 'approved';
-    case REVISED = 'revised';
-    case DELETED = 'deleted';
+
+    case REVISED = 'revisi';
+
+    case ON_MONITORING = 'on monitoring';
+    case ON_PROGRESS_MONITORING = 'on progress monitoring';
+    case FINISHED = 'finished';
 
     public static function values(): array
     {
@@ -31,7 +33,6 @@ enum DocumentStatus: string
             self::APPROVAL => 'Approval',
             self::APPROVED => 'Approved',
             self::REVISED => 'Revised',
-            self::DELETED => 'Deleted',
         };
     }
 
@@ -46,7 +47,26 @@ enum DocumentStatus: string
             self::APPROVAL => 'primary',
             self::APPROVED => 'success',
             self::REVISED => 'warning',
-            self::DELETED => 'danger',
+        };
+    }
+
+    public function worksheet_position(): int
+    {
+        return match ($this) {
+            self::DRAFT => 0,
+            self::ON_REVIEW => 1,
+            self::ON_CONFIRMATION => 2,
+            self::APPROVAL => 3,
+            self::APPROVED => 4,
+        };
+    }
+
+    public function monitoring_position(): int
+    {
+        return match ($this) {
+            self::ON_REVIEW => 0,
+            self::ON_CONFIRMATION => 1,
+            self::FINISHED => 2,
         };
     }
 }

@@ -82,7 +82,7 @@ Route::group(['middleware' => 'auth'], function () {
             Route::get('export', [RiskProfileController::class, 'export'])->name('export');
         });
 
-        Route::group(['as' => 'risk_report.', 'prefix' => 'risk-monitoring'], function () {
+        Route::group(['as' => 'risk_monitoring.', 'prefix' => 'risk-monitoring'], function () {
             Route::get('', [RiskMonitoringController::class, 'index'])->name('index');
             Route::get('export', [RiskMonitoringController::class, 'export'])->name('export');
         });

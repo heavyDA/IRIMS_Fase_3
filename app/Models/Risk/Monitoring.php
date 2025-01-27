@@ -7,6 +7,7 @@ use App\Traits\HasEncryptedId;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 class Monitoring extends Model
 {
@@ -52,6 +53,22 @@ class Monitoring extends Model
         return Attribute::make(
             get: fn($value) =>  Carbon::parse($this->attributes['period_date']),
         );
+    }
+
+    public static function latest_monitoring_query()
+    {
+        return DB::table('ra_monitorings as m')
+            ->selectRaw('m.*')
+            ->joinSub(
+                DB::table('ra_monitorings')
+                    ->select('worksheet_id', DB::raw('MAX(period_date) as period_date'))
+                    ->groupBy('worksheet_id'),
+                'latest',
+                function ($join) {
+                    $join->on('m.worksheet_id', '=', 'latest.worksheet_id');
+                    $join->on('m.period_date', '=', 'latest.period_date');
+                }
+            );
     }
 
     public function worksheet()

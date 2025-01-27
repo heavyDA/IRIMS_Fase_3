@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Master\IncidentCategory;
 use App\Models\Master\IncidentFrequency;
 use App\Models\Master\KBUMNRiskCategory;
+use App\Models\RBAC\Role;
 use App\Models\Risk\Worksheet;
 use App\Models\Risk\Monitoring;
 use App\Models\Risk\MonitoringHistory;
@@ -30,26 +31,65 @@ class MonitoringController extends Controller
         $title = 'Risk Monitoring';
 
         if (request()->ajax()) {
-            $mitigations = WorksheetMitigation::with([
-                'incident',
-                'worksheet.identification',
-                'monitoring_actualization',
-                'monitoring_residual',
-            ])
-                ->whereHas('worksheet', fn($q) => $q->where('status', DocumentStatus::APPROVED->value));
+            $unit = Role::getDefaultSubUnit();
+            $worksheets = Worksheet::latest_monitoring_with_mitigation_query()
+            ->whereLike('w.sub_unit_code', request('unit', $unit))
+            ->when(request('document_status'), fn($q) => $q->where('w.status_monitoring', request('document_status')))
+            ->where('worksheet_year', request('year', date('Y')));
 
-            return DataTables::eloquent($mitigations)
-                ->editColumn('status_monitoring', function ($mitigation) {
-                    $status = DocumentStatus::tryFrom($mitigation->worksheet->status_monitoring);
+            return DataTables::query($worksheets)
+                ->filter(function ($q) {
+                    $value = request('search.value');
+
+                    if ($value) {
+                        $q->where(
+                            fn($q) => $q->orWhereLike('w.worksheet_number', '%' . $value . '%')
+                                ->orWhereLike('w.status_monitoring', '%' . $value . '%')
+                                ->orWhereLike('w.sub_unit_name', '%' . $value . '%')
+                                ->orWhereLike('w.target_body', '%' . $value . '%')
+                                ->orWhereLike('w.risk_chronology_body', '%' . $value . '%')
+                                ->orWhereLike('wmit.mitigation_plan', '%' . $value . '%')
+                                ->orWhereLike('ma.actualization_plan_output', '%' . $value . '%')
+                                ->orWhereLike('w.inherent_risk_level', '%' . $value . '%')
+                                ->orWhereLike('w.inherent_risk_scale', '%' . $value . '%')
+                                ->orWhereLike('ma.quarter', '%' . $value . '%')
+                                ->orWhereLike('mr.risk_level', '%' . $value . '%')
+                                ->orWhereLike('mr.risk_scale', '%' . $value . '%')
+                        );
+                    }
+                })
+                ->editColumn('status_monitoring', function ($worksheet) {
+                    $key = $worksheet->worksheet_id;
+                    $status = DocumentStatus::tryFrom($worksheet->status_monitoring);
                     $class = $status->color();
-                    $worksheet_number = $mitigation->worksheet->worksheet_number;
-                    $route = route('risk.monitoring.show', $mitigation->worksheet->getEncryptedId());
-                    $key = $mitigation->worksheet->id;
+                    $worksheet_number = $worksheet->worksheet_number;
+                    $route = route('risk.monitoring.show', Crypt::encryptString($key));
 
                     return view('risk.monitoring._table_status', compact('status', 'class', 'key', 'worksheet_number', 'route'))->render();
                 })
                 ->rawColumns(['status_monitoring'])
                 ->make(true);
+
+            // $mitigations = WorksheetMitigation::with([
+            //     'incident',
+            //     'worksheet.identification',
+            //     'monitoring_actualization',
+            //     'monitoring_residual',
+            // ])
+            //     ->whereHas('worksheet', fn($q) => $q->where('status', DocumentStatus::APPROVED->value));
+
+            // return DataTables::eloquent($mitigations)
+            //     ->editColumn('status_monitoring', function ($mitigation) {
+            //         $status = DocumentStatus::tryFrom($mitigation->worksheet->status_monitoring);
+            //         $class = $status->color();
+            //         $worksheet_number = $mitigation->worksheet->worksheet_number;
+            //         $route = route('risk.monitoring.show', $mitigation->worksheet->getEncryptedId());
+            //         $key = $mitigation->worksheet->id;
+
+            //         return view('risk.monitoring._table_status', compact('status', 'class', 'key', 'worksheet_number', 'route'))->render();
+            //     })
+            //     ->rawColumns(['status_monitoring'])
+            //     ->make(true);
         }
         return view('risk.process.index', compact('title'));
     }

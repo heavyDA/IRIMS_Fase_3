@@ -151,6 +151,11 @@ const residualForm = document.querySelector('#residualForm');
 const residualFormButton = residualForm.querySelector('#residualFormButton');
 residualFormButton.addEventListener('click', e => {
     residualFormSubmit(currentResidual)
+    Swal.fire({
+        icon: 'success',
+        title: 'Berhasil',
+        text: 'Realisasi Risiko Residual berhasil disimpan',
+    })
 });
 const residualRiskImpactCategory = residualForm.querySelector('[name="risk_impact_category"]');
 const residualTextareas = {};

@@ -4,19 +4,21 @@ namespace App\Exports\Risk;
 
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\FromCollection;
+use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use Maatwebsite\Excel\Concerns\WithTitle;
+use Maatwebsite\Excel\Events\AfterSheet;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet as WorksheetExcel;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Color;
 
-class MonitoringActualizationExport implements FromCollection, WithHeadings, WithStyles, WithTitle
+class MonitoringActualizationExport implements FromCollection, WithHeadings, WithStyles, WithTitle, WithEvents
 {
     protected array $headers = [
-        'No. Risiko',
+        'Data Item',
         'Peristiwa Risiko',
         'Tanggal',
         'Realisasi Rencana Perlakuan Risiko',
@@ -53,7 +55,7 @@ class MonitoringActualizationExport implements FromCollection, WithHeadings, Wit
         $currentIndex = 0;
         $data = [];
         $this->worksheets->map(function ($worksheet) use (&$currentIndex, &$data) {
-            $timeline = array_fill(0, 12, 0);
+            $timeline = array_fill(0, 12, '0');
             foreach ($worksheet->monitorings as $monitoring) {
                 $month = format_date($monitoring->period_date)->month - 1;
                 if (array_key_exists($month, $timeline)) {
@@ -213,6 +215,70 @@ class MonitoringActualizationExport implements FromCollection, WithHeadings, Wit
                 ]
             ]
         ]);
+
+        $sheet->getStyle('A3:A' . $this->count)->applyFromArray([
+            'font' => [
+                'bold' => true,
+                'color' => ['rgb' => 'FFFFFF'],
+            ],
+            'fill' => [
+                'fillType' => Fill::FILL_SOLID,
+                'startColor' => ['rgb' => '00B050']
+            ],
+        ]);
+    }
+
+    public function registerEvents(): array
+    {
+        return [
+            AfterSheet::class => function (AfterSheet $event) {
+                for ($row = 3; $row < $this->count + 1; $row++) {
+
+                    $timeline = [];
+                    $timelineStart = '';
+                    $timelineEnd = '';
+
+                    $previousCellValue = '';
+                    foreach (range('J', 'U') as $key => $alphabet) {
+                        $cellValue = $event->sheet->getCell($alphabet . $row)->getValue();
+
+                        if ($timelineStart == '' && $cellValue == '1') {
+                            $timelineStart = $alphabet . $row;
+                            $timelineEnd = $timelineStart;
+                        }
+
+                        if ($cellValue == '1') {
+                            if ($previousCellValue != $cellValue) {
+                                $timeline[] = "{$timelineStart}:{$timelineEnd}";
+
+                                $timelineStart = $alphabet . $row;
+                                $timelineEnd = $timelineStart;
+                            }
+                        }
+
+                        if ($cellValue == '1') {
+                            $timelineEnd = $alphabet . $row;
+                        }
+
+                        if ($alphabet == 'U') {
+                            $timeline[] = "{$timelineStart}:{$timelineEnd}";
+                        }
+
+                        $previousCellValue = $cellValue;
+                    }
+
+                    foreach (array_unique($timeline) as $cellRange) {
+                        $event->sheet->getStyle($cellRange)
+                            ->applyFromArray([
+                                'fill' => [
+                                    'fillType' => Fill::FILL_SOLID,
+                                    'startColor' => ['rgb' => '92F18B']
+                                ]
+                            ]);
+                    }
+                }
+            }
+        ];
     }
 
     private function getColumnLetter(int $index): string
@@ -227,6 +293,6 @@ class MonitoringActualizationExport implements FromCollection, WithHeadings, Wit
 
     public function title(): string
     {
-        return 'Profil Risiko';
+        return 'Realisasi Perlakuan Risiko';
     }
 }

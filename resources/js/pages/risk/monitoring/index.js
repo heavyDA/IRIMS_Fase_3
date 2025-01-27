@@ -1,15 +1,83 @@
-import { formatNumeral } from "cleave-zen";
+import { Offcanvas } from "bootstrap";
+import Choices from "choices.js";
 import createDatatable from "js/components/datatable";
-import { decodeHtml, defaultConfigFormatNumeral } from "js/components/helper";
+import { decodeHtml, defaultConfigChoices } from "js/components/helper";
+import debounce from "js/utils/debounce";
+
+const inputSearch = document.querySelector('input[name="search"]')
+
+const worksheetTable = document.querySelector('#worksheet-table')
+const worksheetOffcanvas = document.querySelector('#worksheet-table-offcanvas')
+const worksheetOffcanvasInstance = new Offcanvas(worksheetOffcanvas)
+const worksheetTableFilter = worksheetOffcanvas.querySelector('#worksheet-table-filter')
+
+const selectLength = worksheetTableFilter.querySelector('select[name="length"]')
+const selectYear = worksheetTableFilter.querySelector('select[name="year"]')
+const selectUnit = worksheetTableFilter.querySelector('select[name="unit"]')
+const selectDocumentStatus = worksheetTableFilter.querySelector('select[name="document_status"]')
+
+const selectLengthChoices = new Choices(selectLength, defaultConfigChoices)
+const selectYearChoices = new Choices(selectYear, defaultConfigChoices)
+const selectUnitChoices = new Choices(selectUnit, defaultConfigChoices)
+const selectDocumentStatusChoices = new Choices(selectDocumentStatus, defaultConfigChoices)
+
+worksheetTableFilter.addEventListener('reset', e => {
+    inputSearch.value = '';
+    selectLengthChoices.destroy()
+    selectLengthChoices.init()
+    selectYearChoices.destroy()
+    selectYearChoices.init()
+    selectUnitChoices.destroy()
+    selectUnitChoices.init()
+    selectDocumentStatusChoices.destroy()
+    selectDocumentStatusChoices.init()
+
+    datatable.search('').draw()
+})
+
+worksheetTableFilter.addEventListener('submit', e => {
+    e.preventDefault();
+    datatable.page.len(selectLength.value).draw();
+
+    setTimeout(() => {
+        worksheetOffcanvasInstance.hide()
+    }, 315);
+})
+
+inputSearch.addEventListener('input', debounce(
+    e => datatable.search(e.target.value).draw(),
+    875
+))
+
+// selectLength.addEventListener('change', e => {
+//     datatable.page.len(e.target.value).draw();
+// })
+
+// selectUnit.addEventListener('change', e => {
+//     datatable.draw()
+// })
+// selectYear.addEventListener('change', e => {
+//     datatable.draw()
+// })
+// selectDocumentStatus.addEventListener('change', e => {
+//     datatable.draw()
+// })
+
 const datatable = createDatatable('table', {
     handleColumnSearchField: false,
     responsive: false,
     serverSide: true,
-    ajax: window.location.href,
+    ajax: {
+        url: window.location.href,
+        data: function (d) {
+            d.year = selectYear.value
+            d.unit = selectUnit.value
+            d.document_status = selectDocumentStatus.value
+        }
+    },
     fixedColumns: true,
-    lengthMenu: [10, 25, 50, 100],
+    lengthChange: false,
     pageLength: 10,
-    sorting: false,
     processing: true,
     drawCallback: function (settings) {
         const api = this.api();
@@ -28,7 +96,7 @@ const datatable = createDatatable('table', {
         const groups = {};
         api.rows({ page: 'current' }).every(function (rowIdx) {
             const data = this.data();
-            const worksheetNumber = data.worksheet.worksheet_number;
+            const worksheetNumber = data.worksheet_number;
             if (!groups[worksheetNumber]) {
                 groups[worksheetNumber] = [];
             }
@@ -88,56 +156,37 @@ const datatable = createDatatable('table', {
         });
     },
     scrollX: true,
+    scrollY: '48vh',
     columns: [
         {
             sortable: true,
-            data: 'worksheet.worksheet_number',
-            name: 'worksheet.worksheet_number',
+            data: 'worksheet_number',
+            name: 'worksheet_number',
             width: '64px'
         },
         {
-            sortable: false,
+            sortable: true,
             data: 'status_monitoring',
             name: 'status_monitoring',
             width: '128px'
         },
         {
-            sortable: false,
-            data: 'worksheet.sub_unit_name',
-            name: 'worksheet.sub_unit_name',
+            sortable: true,
+            data: 'sub_unit_name',
+            name: 'sub_unit_name',
             width: '256px',
             render: function (data, type, row) {
                 if (type !== 'display') {
                     return data
                 }
 
-                return `[${row.worksheet.personnel_area_code}] ${row.worksheet.sub_unit_name}`
+                return `[${row.personnel_area_code}] ${row.sub_unit_name}`
             }
         },
         {
-            sortable: false,
-            data: 'worksheet.target_body',
-            name: 'worksheet.target_body',
-            width: '256px',
-            render: function (data, type, row) {
-                if (type !== 'display') {
-                    return data
-                }
-
-                if (!data) {
-                    return '';
-                }
-
-                const decodeData = decodeHtml(decodeHtml(data))
-                const parsedData = new DOMParser().parseFromString(decodeData, 'text/html');
-
-                return parsedData.body ? parsedData.body.innerHTML : '';
-            }
-        },
-        {
-            sortable: false,
-            data: 'worksheet.identification.risk_chronology_body',
-            name: 'worksheet.identification.risk_chronology_body',
+            sortable: true,
+            data: 'target_body',
+            name: 'target_body',
             width: '256px',
             render: function (data, type, row) {
                 if (type !== 'display') {
@@ -155,7 +204,27 @@ const datatable = createDatatable('table', {
             }
         },
         {
-            sortable: false,
+            sortable: true,
+            data: 'risk_chronology_body',
+            name: 'risk_chronology_body',
+            width: '256px',
+            render: function (data, type, row) {
+                if (type !== 'display') {
+                    return data
+                }
+
+                if (!data) {
+                    return '';
+                }
+
+                const decodeData = decodeHtml(decodeHtml(data))
+                const parsedData = new DOMParser().parseFromString(decodeData, 'text/html');
+
+                return parsedData.body ? parsedData.body.innerHTML : '';
+            }
+        },
+        {
+            sortable: true,
             data: 'mitigation_plan',
             name: 'mitigation_plan',
             width: '256px',
@@ -175,9 +244,9 @@ const datatable = createDatatable('table', {
             }
         },
         {
-            sortable: false,
-            data: 'monitoring_actualization.actualization_mitigation_plan',
-            name: 'monitoring_actualization.actualization_mitigation_plan',
+            sortable: true,
+            data: 'actualization_plan_output',
+            name: 'actualization_plan_output',
             width: '256px',
             render: function (data, type, row) {
                 if (type !== 'display') {
@@ -195,9 +264,9 @@ const datatable = createDatatable('table', {
             }
         },
         {
-            sortable: false,
-            data: 'worksheet.identification.inherent_risk_level',
-            name: 'worksheet.identification.inherent_risk_level',
+            sortable: true,
+            data: 'inherent_risk_level',
+            name: 'inherent_risk_level',
             width: '160px',
             render: function (data, type, row) {
                 if (type !== 'display') return data;
@@ -206,9 +275,9 @@ const datatable = createDatatable('table', {
             }
         },
         {
-            sortable: false,
-            data: 'worksheet.identification.inherent_risk_scale',
-            name: 'worksheet.identification.inherent_risk_scale',
+            sortable: true,
+            data: 'inherent_risk_scale',
+            name: 'inherent_risk_scale',
             width: '160px',
             render: function (data, type, row) {
                 if (type !== 'display') return data;
@@ -217,20 +286,9 @@ const datatable = createDatatable('table', {
             }
         },
         {
-            sortable: false,
-            data: 'monitoring_residual.quarter',
-            name: 'monitoring_residual.quarter',
-            width: '160px',
-            render: function (data, type, row) {
-                if (type !== 'display') return data;
-
-                return data ? 'Q' + data : '-';
-            }
-        },
-        {
-            sortable: false,
-            data: 'monitoring_residual.risk_level',
-            name: 'monitoring_residual.risk_level',
+            sortable: true,
+            data: 'residual_risk_level',
+            name: 'residual_risk_level',
             width: '160px',
             render: function (data, type, row) {
                 if (type !== 'display') return data;
@@ -239,9 +297,9 @@ const datatable = createDatatable('table', {
             }
         },
         {
-            sortable: false,
-            data: 'monitoring_residual.risk_scale',
-            name: 'monitoring_residual.risk_scale',
+            sortable: true,
+            data: 'residual_risk_scale',
+            name: 'residual_risk_scale',
             width: '160px',
             render: function (data, type, row) {
                 if (type !== 'display') return data;
@@ -251,6 +309,7 @@ const datatable = createDatatable('table', {
         }
     ],
 })
+
 
 
 datatable.on('draw', function () {
