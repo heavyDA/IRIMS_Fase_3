@@ -2,6 +2,8 @@
 
 namespace Database\Seeders;
 
+use App\Models\Master\Official;
+use App\Models\Master\Position;
 use App\Models\RBAC\Menu;
 use App\Models\RBAC\Permission;
 use App\Models\RBAC\Role;
@@ -75,7 +77,7 @@ class DefaultSeeder extends Seeder
                     ],
                     [
                         'name' => 'Top Risk',
-                        'route' => 'risk.profile.index',
+                        'route' => 'risk.top_risk.index',
                         'icon_name' => 'graph',
                         'position' => 3,
                     ]
@@ -92,6 +94,12 @@ class DefaultSeeder extends Seeder
                         'route' => 'risk.report.risk_profile.index',
                         'icon_name' => 'graph',
                         'position' => 1,
+                    ],
+                    [
+                        'name' => 'Risk Monitoring',
+                        'route' => 'risk.report.risk_monitoring.index',
+                        'icon_name' => 'graph',
+                        'position' => 2,
                     ],
                 ],
             ],
@@ -229,19 +237,19 @@ class DefaultSeeder extends Seeder
             [
                 [
                     'username' => 'root',
-                    'password' => bcrypt('root#321'),
+                    'password' => bcrypt('rahasia#321'),
                     'email' => 'root@injourneyairports.id',
                     'employee_name' => 'Administrator',
                     'employee_id' => '9999999',
-                    'organization_code' => 'ap.50',
+                    'organization_code' => 'ap',
                     'organization_name' => '',
-                    'personnel_area_name' => 'Kantor Regional I',
-                    'personnel_area_code' => 'REG I',
+                    'personnel_area_name' => 'Kantor Pusat',
+                    'personnel_area_code' => 'PST',
                     'position_name' => 'Administrator',
                     'unit_name' => '',
                     'sub_unit_name' => '',
                     'unit_code' => 'ap',
-                    'sub_unit_code' => 'ap.50',
+                    'sub_unit_code' => 'ap',
                     'employee_grade_code' => '-',
                     'employee_grade' => '-',
                     'image_url' => '',
@@ -251,9 +259,9 @@ class DefaultSeeder extends Seeder
             ],
             [
                 [
-                    'username' => 'root_analis_pusat',
-                    'password' => bcrypt('root#321'),
-                    'email' => 'root_analis_pusat@injourneyairports.id',
+                    'username' => 'user_analis_pusat',
+                    'password' => bcrypt('rahasia_pusat#321'),
+                    'email' => 'user_analis_pusat@injourneyairports.id',
                     'employee_name' => 'Administrator',
                     'employee_id' => '9999999',
                     'organization_code' => 'ap',
@@ -274,16 +282,16 @@ class DefaultSeeder extends Seeder
             ],
             [
                 [
-                    'username' => 'root_analis_reg_1',
-                    'password' => bcrypt('root_analis_reg_1#321'),
-                    'email' => 'root_analis_reg_1@injourneyairports.id',
+                    'username' => 'user_analis_reg_1',
+                    'password' => bcrypt('rahasia_reg_1#321'),
+                    'email' => 'user_analis_reg_1@injourneyairports.id',
                     'employee_name' => 'ANALIS REG 1',
-                    'employee_id' => '20008357',
+                    'employee_id' => '9999991',
                     'organization_code' => 'ap.51',
                     'organization_name' => 'Kantor Regional I (09 September 2024) - CGK',
                     'personnel_area_name' => 'Kantor Regional I',
                     'personnel_area_code' => 'REG I',
-                    'position_name' => 'Regional CEO - Kantor Regional I',
+                    'position_name' => 'Risk Analis - Kantor Regional I',
                     'unit_name' => 'SIDOEL Group',
                     'sub_unit_name' => 'Kantor Regional I (09 September 2024) - CGK',
                     'unit_code' => 'ap',
@@ -297,62 +305,16 @@ class DefaultSeeder extends Seeder
             ],
             [
                 [
-                    'username' => 'root_analis_reg_3',
-                    'password' => bcrypt('root_analis_reg_3#321'),
-                    'email' => 'root_analis_reg_3@injourneyairports.id',
-                    'employee_name' => 'ANALIS REG 2',
-                    'employee_id' => '20008357',
-                    'organization_code' => 'ap.52',
-                    'organization_name' => 'Kantor Regional III(09 September 2024) - CGK',
-                    'personnel_area_name' => 'Kantor Regional III',
-                    'personnel_area_code' => 'REG III',
-                    'position_name' => 'Regional CEO - Kantor Regional III',
-                    'unit_name' => 'SIDOEL Group',
-                    'sub_unit_name' => 'Kantor Regional III (09 September 2024) - CGK',
-                    'unit_code' => 'ap',
-                    'sub_unit_code' => 'ap.52',
-                    'employee_grade_code' => '-',
-                    'employee_grade' => '-',
-                    'image_url' => '',
-                    'is_active' => true,
-                ],
-                ['risk analis']
-            ],
-            [
-                [
-                    'username' => 'agus.haryadi1',
-                    'password' => bcrypt('agus.haryadi1#321'),
-                    'email' => 'agus.haryadi1@injourneyairports.id',
-                    'employee_name' => 'AGUS HARYADI',
-                    'employee_id' => '20008357',
-                    'organization_code' => 'ap.51',
-                    'organization_name' => 'Kantor Regional I (09 September 2024) - CGK',
-                    'personnel_area_name' => 'Kantor Regional I',
-                    'personnel_area_code' => 'REG I',
-                    'position_name' => 'Regional CEO - Kantor Regional I',
-                    'unit_name' => 'SIDOEL Group',
-                    'sub_unit_name' => 'Kantor Regional I (09 September 2024) - CGK',
-                    'unit_code' => 'ap',
-                    'sub_unit_code' => 'ap.51',
-                    'employee_grade_code' => '-',
-                    'employee_grade' => '-',
-                    'image_url' => '',
-                    'is_active' => true,
-                ],
-                ['risk otorisator']
-            ],
-            [
-                [
-                    'username' => 'dani.irawan',
-                    'password' => bcrypt('dani.irawan#321'),
-                    'email' => 'dani.irawan@injourneyairports.id',
-                    'employee_name' => 'DANI INDRA IRIAWAN',
-                    'employee_id' => '20240083',
+                    'username' => 'user_analis_reg_3',
+                    'password' => bcrypt('rahasia_reg_3#321'),
+                    'email' => 'user_analis_reg_3@injourneyairports.id',
+                    'employee_name' => 'ANALIS REG 3',
+                    'employee_id' => '9999993',
                     'organization_code' => 'ap.52',
                     'organization_name' => 'Kantor Regional III (09 September 2024) - KNO',
                     'personnel_area_name' => 'Kantor Regional III',
                     'personnel_area_code' => 'REG III',
-                    'position_name' => 'Regional CEO - Kantor Regional III',
+                    'position_name' => 'Risk Analis - Kantor Regional III',
                     'unit_name' => 'SIDOEL Group',
                     'sub_unit_name' => 'Kantor Regional III (09 September 2024) - KNO',
                     'unit_code' => 'ap',
@@ -362,43 +324,20 @@ class DefaultSeeder extends Seeder
                     'image_url' => '',
                     'is_active' => true,
                 ],
-                ['risk otorisator']
+                ['risk analis']
             ],
             [
                 [
-                    'username' => 'dwi.ananda',
-                    'password' => bcrypt('dwi.ananda#321'),
-                    'email' => 'dwi.ananda@injourneyairports.id',
-                    'employee_name' => 'DWI ANANDA WICAKSANA',
-                    'employee_id' => '20001986',
-                    'organization_code' => 'ap.51.6',
-                    'organization_name' => 'KC Bandara Internasional Soekarno-Hatta',
-                    'personnel_area_name' => 'KC Bandara Soekarno-Hatta',
-                    'personnel_area_code' => 'CGK',
-                    'position_name' => 'General Manager KC Bandara Internasional Soekarno-Hatta',
-                    'unit_name' => 'Kantor Regional I (09 September 2024) - CGK',
-                    'sub_unit_name' => 'KC Bandara Internasional Soekarno-Hatta',
-                    'unit_code' => 'ap.51',
-                    'sub_unit_code' => 'ap.51.6',
-                    'employee_grade_code' => '-',
-                    'employee_grade' => '-',
-                    'image_url' => '',
-                    'is_active' => true,
-                ],
-                ['risk otorisator']
-            ],
-            [
-                [
-                    'username' => 'wahyudi',
-                    'password' => bcrypt('wahyudi#321'),
-                    'email' => 'wahyudi@injourneyairports.id',
-                    'employee_name' => 'WAHYUDI',
-                    'employee_id' => '20247953',
+                    'username' => 'user_analis_reg_3',
+                    'password' => bcrypt('rahasia_reg_3#321'),
+                    'email' => 'user_analis_reg_3@injourneyairports.id',
+                    'employee_name' => 'ANALIS REG 3',
+                    'employee_id' => '20008357',
                     'organization_code' => 'ap.53',
                     'organization_name' => 'Kantor Regional II (09 September 2024) - DPS',
                     'personnel_area_name' => 'Kantor Regional II',
                     'personnel_area_code' => 'REG II',
-                    'position_name' => 'Regional CEO - Kantor Regional II',
+                    'position_name' => 'Risk Analis - Kantor Regional II',
                     'unit_name' => 'SIDOEL Group',
                     'sub_unit_name' => 'Kantor Regional II (09 September 2024) - DPS',
                     'unit_code' => 'ap',
@@ -408,198 +347,75 @@ class DefaultSeeder extends Seeder
                     'image_url' => '',
                     'is_active' => true,
                 ],
-                ['risk otorisator']
+                ['risk analis']
             ],
-            [
-                [
-                    'username' => 'ahmad.shahab',
-                    'password' => bcrypt('ahmad.shahab#321'),
-                    'email' => 'ahmad.shahab@injourneyairports.id',
-                    'employee_id' => '20240584',
-                    'employee_name' => 'AHMAD SYAUGI SHAHAB',
-                    'organization_code' => 'ap.53.2',
-                    'organization_name' => 'KC Bandara Internasional I Gusti Ngurah Rai',
-                    'personnel_area_name' => 'KC Bandara Ngurah Rai',
-                    'personnel_area_code' => 'DPS',
-                    'position_name' => 'General Manager KC Bandara Internasional I Gusti Ngurah Rai',
-                    'unit_name' => 'Kantor Regional II (09 September 2024) - DPS',
-                    'sub_unit_name' => 'KC Bandara Internasional I Gusti Ngurah Rai',
-                    'unit_code' => 'ap.53',
-                    'sub_unit_code' => 'ap.53.2',
-                    'employee_grade_code' => '-',
-                    'employee_grade' => '-',
-                    'image_url' => '',
-                    'is_active' => true,
-                ],
-                ['risk otorisator']
-            ],
-            [
-                [
-                    'username' => 'ibnu.solikin',
-                    'password' => bcrypt('ibnu.solikin#321'),
-                    'email' => 'ibnu.solikin@injourneyairports.id',
-                    'employee_name' => 'Ibnu Solikin',
-                    'employee_id' => '20240501',
-                    'organization_code' => 'ap.53.2.1',
-                    'organization_name' => 'Airport Operation & Security Services',
-                    'personnel_area_name' => 'KC Bandara Ngurah Rai',
-                    'personnel_area_code' => 'DPS',
-                    'position_name' => 'Deputy General Manager Airport Operation & Security Services',
-                    'unit_name' => 'KC Bandara Internasional I Gusti Ngurah Rai',
-                    'sub_unit_name' => 'Airport Operation & Security Services',
-                    'unit_code' => 'ap.53.2',
-                    'sub_unit_code' => 'ap.53.2.1',
-                    'employee_grade_code' => '-',
-                    'employee_grade' => '-',
-                    'image_url' => '',
-                    'is_active' => true,
-                ],
-                ['risk otorisator']
-            ],
-            [
-                [
-                    'username' => 'randy.wake',
-                    'password' => bcrypt('randy.wake#321'),
-                    'email' => 'randy.wake@injourneyairports.id',
-                    'employee_name' => 'Randy Michael Hirewake',
-                    'employee_id' => '20242043',
-                    'organization_code' => 'ap.53.2.1.3',
-                    'organization_name' => 'Landside Services Support',
-                    'personnel_area_name' => 'KC Bandara Ngurah Rai',
-                    'personnel_area_code' => 'DPS',
-                    'position_name' => 'Landside Services Support Division Head',
-                    'unit_name' => 'Airport Operation & Security Services',
-                    'sub_unit_name' => 'Landside Services Support',
-                    'unit_code' => 'ap.53.2.1',
-                    'sub_unit_code' => 'ap.53.2.1.3',
-                    'employee_grade_code' => '-',
-                    'employee_grade' => '-',
-                    'image_url' => '',
-                    'is_active' => true,
-                ],
-                ['risk owner']
-            ],
-            [
-                [
-                    'username' => 'budi.santosa',
-                    'password' => bcrypt('budi.santosa#321'),
-                    'email' => 'budi.santosa@injourneyairports.id',
-                    'employee_name' => 'Budi Santosa',
-                    'employee_id' => '20240602',
-                    'organization_code' => 'ap.53.2.1.1',
-                    'organization_name' => 'Airport Airside & ARFF Operation Services',
-                    'personnel_area_name' => 'KC Bandara Ngurah Rai',
-                    'personnel_area_code' => 'DPS',
-                    'position_name' => 'Airport Airside & ARFF Operation Services Division Head',
-                    'unit_name' => 'Airport Operation & Security Services',
-                    'sub_unit_name' => 'Airport Airside & ARFF Operation Services',
-                    'unit_code' => 'ap.53.2.1',
-                    'sub_unit_code' => 'ap.53.2.1.1',
-                    'employee_grade_code' => '-',
-                    'employee_grade' => '-',
-                    'image_url' => '',
-                    'is_active' => true,
-                ],
-                ['risk owner']
-            ],
-            [
-                [
-                    'username' => 'nicolas.prima',
-                    'password'  => bcrypt('nicolas.prima#321'),
-                    'email' => 'nicolas.prima@injourneyairports.id',
-                    'employee_name' => 'NICOLAS PRIMA K. A.',
-                    'employee_id' => '20002891',
-                    'organization_code' => 'ap.50.6.1',
-                    'organization_name' => 'Governance & Risk Management',
-                    'personnel_area_name' => 'Kantor Pusat',
-                    'personnel_area_code' => 'PST',
-                    'position_name' => 'Governance & Risk Management Group Head',
-                    'unit_name' => 'Direktorat Manajemen Risiko',
-                    'sub_unit_name' => 'Governance & Risk Management',
-                    'unit_code' => 'ap.50.6',
-                    'sub_unit_code' => 'ap.50.6.1',
-                    'employee_grade_code' => '-',
-                    'employee_grade' => '-',
-                    'image_url' => '',
-                    'is_active' => true,
-                ],
-                ['risk otorisator']
-            ],
-            [
-                [
-                    'username' => 'gede.krisna',
-                    'password' => bcrypt('gede.krisna#321'),
-                    'email' => 'gede.krisna@injourneyairports.id',
-                    'employee_name' => 'Gede Adicahya Krisna',
-                    'employee_id' => '20240760',
-                    'organization_code' => 'ap.53.2.1.1.1',
-                    'organization_name' => 'Airside Operation Services',
-                    'personnel_area_name' => 'KC Bandara Ngurah Rai',
-                    'personnel_area_code' => 'DPS',
-                    'position_name' => 'Airside Operation Services Department Head',
-                    'unit_name' => 'Airport Airside & ARFF Operation Services',
-                    'sub_unit_name' => 'Airside Operation Services',
-                    'unit_code' => 'ap.53.2.1.1',
-                    'sub_unit_code' => 'ap.53.2.1.1.1',
-                    'employee_grade_code' => '-',
-                    'employee_grade' => '-',
-                    'image_url' => '',
-                    'is_active' => true,
-                ],
-                ['risk admin']
-            ],
-            [
-                [
-                    'username' => 'sulistiyanto.sulis',
-                    'password' => bcrypt('sulistiyanto.sulis#321'),
-                    'email' => 'sulistiyanto.sulis@injourneyairports.id',
-                    'employee_name' => 'Sulistiyanto',
-                    'employee_id' => '20241323',
-                    'organization_code' => 'ap.53.2.1.1.2',
-                    'organization_name' => 'Airport Rescue & Fire Fighting',
-                    'personnel_area_name' => 'KC Bandara Ngurah Rai',
-                    'personnel_area_code' => 'DPS',
-                    'position_name' => 'Airport Rescue & Fire Fighting Department Head',
-                    'unit_name' => 'Airport Airside & ARFF Operation Services',
-                    'sub_unit_name' => 'Airport Rescue & Fire Fighting',
-                    'unit_code' => 'ap.53.2.1.1',
-                    'sub_unit_code' => 'ap.53.2.1.1.2',
-                    'employee_grade_code' => '-',
-                    'employee_grade' => '-',
-                    'image_url' => '',
-                    'is_active' => true,
-                ],
-                ['risk admin']
-            ],
-            [
-                [
-                    'username' => 'btj.asrp',
-                    'password' => bcrypt('btj.asrp#321'),
-                    'email' => 'btj.asrp@injourneyairports.id',
-                    'employee_name' => 'BTJ ASRP STAFF',
-                    'employee_id' => '20242114',
-                    'organization_code' => 'ap.52.9.6',
-                    'organization_name' => 'Airport Safety, Risk and Performance Management',
-                    'personnel_area_name' => 'KC Bandara Sultan Iskandar Muda',
-                    'personnel_area_code' => 'BTJ',
-                    'position_name' => 'Airport Safety, Risk and Performance Management Department Staff',
-                    'unit_name' => 'KC Bandara Internasional Sultan Iskandar Muda',
-                    'sub_unit_name' => 'Airport Safety, Risk and Performance Management',
-                    'unit_code' => 'ap.52.9',
-                    'sub_unit_code' => 'ap.52.9.6',
-                    'employee_grade_code' => '-',
-                    'employee_grade' => '-',
-                    'image_url' => '',
-                    'is_active' => true,
-                ],
-                ['risk admin']
-            ]
         ];
 
         foreach ($users as $user) {
             $newUser = User::firstOrCreate(['username' => $user[0]['username']], $user[0]);
             $newUser->update($user[0]);
             $newUser->syncRoles($user[1]);
+        }
+
+        $officials_to_users = [
+            ['personnel_area_code' => 'PST', 'position_name' => 'Corporate Secretary Group Head'],
+            ['personnel_area_code' => 'PST', 'position_name' => 'Corporate Communication Division Head'],
+            ['personnel_area_code' => 'PST', 'position_name' => 'Corporate Branding Division Head'],
+            ['personnel_area_code' => 'PST', 'position_name' => 'Corporate BOD Office Support Division Head'],
+            ['personnel_area_code' => 'PST', 'position_name' => 'Head of Airport Construction Area B'],
+            ['personnel_area_code' => 'PST', 'position_name' => 'Project Construction Division Head'],
+            ['personnel_area_code' => 'CGK', 'position_name' => 'General Manager KC Bandara Internasional Soekarno-Hatta'],
+            ['personnel_area_code' => 'CGK', 'position_name' => 'Deputy General Manager Airport Commercial Services'],
+            ['personnel_area_code' => 'CGK', 'position_name' => 'Assistant Deputy Aero Business'],
+            ['personnel_area_code' => 'CGK', 'position_name' => 'International Aero Commercial Division Head'],
+            ['personnel_area_code' => 'CGK', 'position_name' => 'International Airlines Support Department Head'],
+            ['personnel_area_code' => 'CGK', 'position_name' => 'Deputy General Manager Airport Facility, Equipment & Technology Services'],
+            ['personnel_area_code' => 'CGK', 'position_name' => 'Assistant Deputy Airport Electrical Services'],
+            ['personnel_area_code' => 'CGK', 'position_name' => 'Energy & Power Supply Services Division Head'],
+            ['personnel_area_code' => 'CGK', 'position_name' => 'High & Medium Voltage Department Head'],
+            ['personnel_area_code' => 'BDO', 'position_name' => 'General Manager KC Bandara Husein Sastranegara'],
+            ['personnel_area_code' => 'BDO', 'position_name' => 'Airport Operation, Services & Security Division Head'],
+            ['personnel_area_code' => 'BDO', 'position_name' => 'Airport Rescue & Fire Fighting Department Head'],
+            ['personnel_area_code' => 'DPS', 'position_name' => 'General Manager KC Bandara Internasional I Gusti Ngurah Rai'],
+            ['personnel_area_code' => 'DPS', 'position_name' => 'Deputy General Manager Airport Operation & Security Services'],
+            ['personnel_area_code' => 'DPS', 'position_name' => 'Airport Airside & ARFF Operation Services Division Head'],
+            ['personnel_area_code' => 'DPS', 'position_name' => 'Airside Operation Services Department Head'],
+            ['personnel_area_code' => 'DPS', 'position_name' => 'Deputy General Manager Airport Facility & Equipment Readiness'],
+            ['personnel_area_code' => 'DPS', 'position_name' => 'Airport Equipment Division Head'],
+            ['personnel_area_code' => 'DPS', 'position_name' => 'Mechanical Services Department Head'],
+            ['personnel_area_code' => 'LOP', 'position_name' => 'General Manager KC Bandara Internasional Zainuddin Abdul Madjid'],
+            ['personnel_area_code' => 'LOP', 'position_name' => 'Airport Safety, Risk and Performance Management Division Head'],
+            ['personnel_area_code' => 'LOP', 'position_name' => 'Safety Management System & Ohs Department Head'],
+            ['personnel_area_code' => 'BTJ', 'position_name' => 'General Manager KC Bandara Internasional Sultan Iskandar Muda'],
+            ['personnel_area_code' => 'BTJ', 'position_name' => 'Airport Safety, Risk and Performance Management Department Head'],
+        ];
+
+        foreach ($officials_to_users as $area) {
+            $official = Official::where('personnel_area_code', $area['personnel_area_code'])
+                ->where('position_name', $area['position_name'])
+                ->first();
+
+            if (!$official) {
+                continue;
+            }
+
+            $user = User::create(
+                $official->toArray() +
+                    [
+                        'password' => bcrypt($official->username . '#321'),
+                        'image_url' => '',
+                        'is_active' => true,
+                    ]
+            );
+
+            $position = Position::whereLike('position_name', '%' . $official->position_name . '%')->first();
+            if (!$position) {
+                logger()->error('[DefaultSeeder] Position not found: ' . $official->position_name);
+                $user->syncRoles('risk admin');
+                continue;
+            }
+
+            $user->syncRoles($position->assigned_roles);
         }
     }
 }

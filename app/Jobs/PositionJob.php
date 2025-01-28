@@ -42,7 +42,7 @@ class PositionJob
                     }
 
                     foreach (array_keys($item) as $key) {
-                        $_item[strtolower($key)] = $item[$key];
+                        $_item[strtolower($key)] = trim($item[$key]);
                     }
 
                     $position = Position::updateOrCreate(

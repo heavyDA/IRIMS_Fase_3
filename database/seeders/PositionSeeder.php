@@ -2472,7 +2472,7 @@ class PositionSeeder extends Seeder
             [
                 "personnel_area_code" => "BDO",
                 "unit_code" => "BDO.GM",
-                "position_name" => "General Manager",
+                "position_name" => "General Manager KC Bandara Husein Sastranegara",
                 "assigned_roles" => "risk otorisator"
             ],
             [
@@ -2724,7 +2724,7 @@ class PositionSeeder extends Seeder
             [
                 "personnel_area_code" => "DPS",
                 "unit_code" => "DPS.GM",
-                "position_name" => "General Manager",
+                "position_name" => "General Manager KC Bandara Internasional I Gusti Ngurah Rai",
                 "assigned_roles" => "risk otorisator"
             ],
             [
@@ -3102,7 +3102,7 @@ class PositionSeeder extends Seeder
             [
                 "personnel_area_code" => "LOP",
                 "unit_code" => "LOP.GM",
-                "position_name" => "General Manager",
+                "position_name" => "General Manager KC Bandara Internasional Zainuddin Abdul Madjid",
                 "assigned_roles" => "risk otorisator"
             ],
             [
@@ -3132,7 +3132,7 @@ class PositionSeeder extends Seeder
             [
                 "personnel_area_code" => "LOP",
                 "unit_code" => "LOP.V.AF",
-                "position_name" => "Airport Safety, Risk & Performance Management Division Head",
+                "position_name" => "Airport Safety, Risk and Performance Management Division Head",
                 "assigned_roles" => "risk owner"
             ],
             [
@@ -3438,7 +3438,7 @@ class PositionSeeder extends Seeder
             [
                 "personnel_area_code" => "BTJ",
                 "unit_code" => "BTJ.GM",
-                "position_name" => "General Manager",
+                "position_name" => "General Manager KC Bandara Internasional Sultan Iskandar Muda",
                 "assigned_roles" => "risk otorisator"
             ],
             [
@@ -3450,7 +3450,7 @@ class PositionSeeder extends Seeder
             [
                 "personnel_area_code" => "BTJ",
                 "unit_code" => "BTJ.P.AF",
-                "position_name" => "Airport Safety, Risk & Performance Management Department Head",
+                "position_name" => "Airport Safety, Risk and Performance Management Department Head",
                 "assigned_roles" => "risk owner"
             ],
             [
