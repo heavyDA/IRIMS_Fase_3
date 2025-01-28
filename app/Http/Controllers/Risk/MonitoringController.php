@@ -133,6 +133,10 @@ class MonitoringController extends Controller
 
             return response()->json([
                 'data' => [
+                    'inherent' => [
+                        'risk_level' => $worksheet->identification->inherent_risk_level,
+                        'risk_scale' => $worksheet->identification->inherent_risk_scale,
+                    ],
                     'residuals' => $residuals,
                     'actualizations' => $actualizations
                 ]
@@ -437,6 +441,10 @@ class MonitoringController extends Controller
 
             return response()->json([
                 'data' => [
+                    'inherent' => [
+                        'risk_level' => $worksheet->identification->inherent_risk_level,
+                        'risk_scale' => $worksheet->identification->inherent_risk_scale,
+                    ],
                     'residuals' => $residuals,
                     'actualizations' => $actualizations,
                     'alteration' => $alteration,

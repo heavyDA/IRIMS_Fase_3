@@ -23,6 +23,8 @@ const monitoring = {
     incident: {},
 }
 
+let inherent = {};
+
 const monitoringTab = document.querySelector('#monitoringTab');
 const monitoringTabList = monitoringTab.querySelectorAll('li');
 const monitoringTabNavs = monitoringTab.querySelectorAll('a');
@@ -55,7 +57,9 @@ monitoringTabSubmitButton.addEventListener('click', async e => save())
 monitoringTabNextButton.addEventListener('click', e => {
     currentStep += 1;
 
-    if (currentStep == 4) {
+    if (currentStep == 1) {
+        residualBlockOnMap()
+    } else if (currentStep == 4) {
         alterationFormSubmit()
     } else if (currentStep == 5) {
         incidentFormSubmit()
@@ -134,7 +138,7 @@ const fetchData = async () => {
             const response = res[4].value
             if (response.status == 200) {
                 const data = response.data.data
-
+                inherent = data.inherent
                 monitoring.residuals = data.residuals
                 monitoring.actualizations = data.actualizations
             }
@@ -143,6 +147,30 @@ const fetchData = async () => {
 }
 
 await fetchData()
+
+const inherentBlock = document.querySelector(`#inherent-${inherent.risk_scale}`)
+inherentBlock.parentNode.insertAdjacentHTML(`beforeend`, `<circle id="inherent-risk-scale" fill="#5A9AEB" r="6" cx="${inherentBlock.x.baseVal[0].value + 6}" cy="${inherentBlock.y.baseVal[0].value}"></circle>`);
+
+const residualBlockOnMap = () => {
+    const chart = document.querySelector('#risk-chart')
+    for (let [index, circle] of chart.querySelectorAll('circle').entries()) {
+        if (circle.id == 'inherent-risk-scale') continue
+
+        circle.remove()
+    }
+
+    monitoring.residuals.forEach((item, index) => {
+        const residual = item.residual[currentQuarter]
+        if (!residual) return
+
+        const block = document.querySelector(`#inherent-${residual.risk_scale}`)
+        if (block) {
+            block.parentNode.insertAdjacentHTML(`beforeend`, `<circle fill="#9A9B9D" r="6" cx="${block.x.baseVal[0].value + 6}" cy="${block.y.baseVal[0].value - 4}"></circle>`);
+        }
+    })
+
+}
+
 let currentQuarter = 1;
 const residualForm = document.querySelector('#residualForm');
 const residualFormButton = residualForm.querySelector('#residualFormButton');
