@@ -98,13 +98,21 @@
                                 class="avatar avatar-sm avatar-rounded">
                         </div>
                         <div class="d-xl-block d-none lh-1">
-                            <span class="fw-medium lh-1">{{ auth()->user()->employee_name }}</span>
+                            <span class="fw-medium lh-1">{{ auth()->user()->employee_name }}</span><br>
+                            <span
+                                class="fs-12 text-muted text-capitalize">{{ session()->get('current_role')?->name ?? '' }}</span>
                         </div>
                     </div>
                 </a>
                 <!-- End::header-link|dropdown-toggle -->
                 <ul class="main-header-dropdown dropdown-menu pt-0 overflow-hidden header-profile-dropdown dropdown-menu-end"
-                    aria-labelledby="mainHeaderProfile">
+                    style="min-width: 240px !important;" aria-labelledby="mainHeaderProfile">
+                    <li>
+                        <div class="py-2 px-3">
+                            <span class="d-block fs-12 text-muted">[{{ auth()->user()->personnel_area_code }}]
+                                {{ auth()->user()->position_name }}</span>
+                        </div>
+                    </li>
                     <li><a href="javascript:void(0);" onclick="document.querySelector('#signoutForm').submit()"
                             class="dropdown-item d-flex align-items-center"><i class="ti ti-logout me-2 fs-16"></i>Log
                             out</a>

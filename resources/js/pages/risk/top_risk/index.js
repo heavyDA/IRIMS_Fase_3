@@ -21,12 +21,10 @@ const worksheetTableFilter = worksheetOffcanvas.querySelector('#worksheet-table-
 const selectLength = worksheetTableFilter.querySelector('select[name="length"]')
 const selectYear = worksheetTableFilter.querySelector('select[name="year"]')
 const selectUnit = worksheetTableFilter.querySelector('select[name="unit"]')
-const selectDocumentStatus = worksheetTableFilter.querySelector('select[name="document_status"]')
 
 const selectLengthChoices = new Choices(selectLength, defaultConfigChoices)
 const selectYearChoices = new Choices(selectYear, defaultConfigChoices)
 const selectUnitChoices = new Choices(selectUnit, defaultConfigChoices)
-const selectDocumentStatusChoices = new Choices(selectDocumentStatus, defaultConfigChoices)
 
 const datatable = createDatatable('#worksheet-table', {
     handleColumnSearchField: false,
@@ -34,7 +32,13 @@ const datatable = createDatatable('#worksheet-table', {
     serverSide: true,
     ordering: false,
     processing: true,
-    ajax: window.location.href,
+    ajax: {
+        url: window.location.href,
+        data: function (d) {
+            d.year = selectYear.value
+            d.unit = selectUnit.value
+        }
+    },
     scrollX: true,
     fixedColumns: true,
     lengthChange: false,
@@ -115,7 +119,7 @@ const datatable = createDatatable('#worksheet-table', {
             })
         })
     },
-    scrollX: true,
+    scrollY: '48vh',
     columns: [
         {
             sortable: true,
@@ -301,8 +305,6 @@ const datatable = createDatatable('#worksheet-table', {
 
 worksheetTableFilter.addEventListener('submit', e => {
     e.preventDefault()
-
-
     datatable.page.len(selectLength.value).draw();
 
     setTimeout(() => {
@@ -326,8 +328,6 @@ worksheetTableFilter.addEventListener('reset', e => {
     selectYearChoices.init()
     selectUnitChoices.destroy()
     selectUnitChoices.init()
-    selectDocumentStatusChoices.destroy()
-    selectDocumentStatusChoices.init()
 
     datatable.page.len(selectLength.value).search('').draw();
 })

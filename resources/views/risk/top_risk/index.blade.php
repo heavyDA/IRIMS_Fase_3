@@ -22,33 +22,29 @@
 @section('main-content')
     <x-card>
         <x-slot name="body">
-            <form id="worksheet-table-filter" class="mb-1">
-                <div class="row mb-4 justify-content-end">
-                    <div class="col-12 col-xl-7">
-                        <div class="d-flex gap-2">
-                            <div class="input-group">
-                                <span class="input-group-text" id="inputGroup-sizing-default"><i
-                                        class="ti ti-search"></i></span>
-                                <input type="text" name="search" class="form-control" placeholder="Pencarian">
-                            </div>
-                            <button style="min-width: 32px;" class="btn btn-light" type="reset"
-                                form="worksheet-table-filter" data-bs-toggle="tooltip" title="Reset">
-                                <span><i class="me-1 ti ti-refresh"></i></span>
-                            </button>
-                            <button style="min-width: 32px;" class="btn btn-primary" type="button"
-                                id="worksheet-filter-button" aria-controls="worksheet-table-offcanvas"
-                                data-bs-toggle="tooltip" title="Filter">
-                                <span><i class="me-1 ti ti-filter"></i></span>
-                            </button>
-                            <button style="min-width: 128px;" class="btn btn-success align-items-center" disabled
-                                type="button" id="worksheet-submit-button" data-bs-toggle="tooltip"
-                                title="Submit Top Risk">
-                                <span><i class="me-1 ti ti-send-2"></i>Top Risk</span>
-                            </button>
+            <div class="row mb-4 justify-content-end">
+                <div class="col-12 col-xl-7">
+                    <div class="d-flex gap-2">
+                        <div class="input-group">
+                            <span class="input-group-text" id="inputGroup-sizing-default"><i
+                                    class="ti ti-search"></i></span>
+                            <input type="text" name="search" class="form-control" placeholder="Pencarian">
                         </div>
+                        <button style="min-width: 32px;" class="btn btn-light" type="reset" form="worksheet-table-filter"
+                            data-bs-toggle="tooltip" title="Reset">
+                            <span><i class="me-1 ti ti-refresh"></i></span>
+                        </button>
+                        <button style="min-width: 32px;" class="btn btn-primary" type="button" id="worksheet-filter-button"
+                            aria-controls="worksheet-table-offcanvas" data-bs-toggle="tooltip" title="Filter">
+                            <span><i class="me-1 ti ti-filter"></i></span>
+                        </button>
+                        <button style="min-width: 128px;" class="btn btn-success align-items-center" disabled type="button"
+                            id="worksheet-submit-button" data-bs-toggle="tooltip" title="Submit Top Risk">
+                            <span><i class="me-1 ti ti-send-2"></i>Top Risk</span>
+                        </button>
                     </div>
                 </div>
-            </form>
+            </div>
             <table id="worksheet-table" class="table table-bordered table-stripped display nowrap" style="width: 100%;">
                 <thead class="table-dark">
                     <tr>
@@ -125,15 +121,6 @@
                                 <option value="{{ $unit->sub_unit_code }}">
                                     [{{ $unit->personnel_area_code }}] {{ $unit->sub_unit_name }}</option>
                             @endforeach
-                        </select>
-                    </div>
-                    <div class="col-12 d-flex flex-column">
-                        <label for="document_status" class="form-label">Status Dokumen</label>
-                        <select name="document_status" class="form-select">
-                            <option value="">Semua</option>
-                            <option value="draft">Draft</option>
-                            <option value="on progress">On Progress</option>
-                            <option value="approved">Approved</option>
                         </select>
                     </div>
                     <div class="col-12 d-grid">

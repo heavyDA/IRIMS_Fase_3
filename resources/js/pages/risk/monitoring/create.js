@@ -9,7 +9,7 @@ import debounce from "js/utils/debounce";
 import axios from "axios";
 import dayjs from "dayjs";
 import 'dayjs/locale/id';
-import { convertFileSize, defaultConfigChoices, defaultConfigFormatNumeral, defaultConfigQuill, defaultLocaleFlatpickr, formatDataToStructuredObject, jsonToFormData } from "js/components/helper";
+import { convertFileSize, decodeHtml, defaultConfigChoices, defaultConfigFormatNumeral, defaultConfigQuill, defaultLocaleFlatpickr, formatDataToStructuredObject, jsonToFormData } from "js/components/helper";
 import Swal from "sweetalert2";
 
 dayjs.locale('id');
@@ -147,9 +147,12 @@ const fetchData = async () => {
 }
 
 await fetchData()
+let currentQuarter = 1;
 
 const inherentBlock = document.querySelector(`#inherent-${inherent.risk_scale}`)
-inherentBlock.parentNode.insertAdjacentHTML(`beforeend`, `<circle id="inherent-risk-scale" fill="#5A9AEB" r="6" cx="${inherentBlock.x.baseVal[0].value + 6}" cy="${inherentBlock.y.baseVal[0].value}"></circle>`);
+if (inherentBlock) {
+    inherentBlock.parentNode.insertAdjacentHTML(`beforeend`, `<circle id="inherent-risk-scale" fill="#5A9AEB" r="6" cx="${inherentBlock.x.baseVal[0].value + 6}" cy="${inherentBlock.y.baseVal[0].value}"></circle>`);
+}
 
 const residualBlockOnMap = () => {
     const chart = document.querySelector('#risk-chart')
@@ -171,7 +174,6 @@ const residualBlockOnMap = () => {
 
 }
 
-let currentQuarter = 1;
 const residualForm = document.querySelector('#residualForm');
 const residualFormButton = residualForm.querySelector('#residualFormButton');
 residualFormButton.addEventListener('click', e => {
@@ -237,7 +239,10 @@ residualRiskCauseNumber.addEventListener('change', (e) => {
     residualRiskImpactCategory.value = item.risk_impact_category
 
     residualTextareas['risk_chronology_body'].value = item.risk_chronology_body
-    residualQuills['risk_chronology_body'].root.innerHTML = item.risk_chronology_body
+    const decodeData = decodeHtml(decodeHtml(item.risk_chronology_body))
+    const parsedData = new DOMParser().parseFromString(decodeData, 'text/html')
+
+    residualQuills['risk_chronology_body'].root.innerHTML = parsedData.body ? parsedData.body.innerHTML : ''
     residualQuills['risk_chronology_body'].emitter.emit('text-change')
 
     let current = monitoring.residuals[currentResidual]

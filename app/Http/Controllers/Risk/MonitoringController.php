@@ -275,21 +275,30 @@ class MonitoringController extends Controller
                     if ($files) {
                         foreach ($files as $file) {
                             if ($file) {
+                                $id = Str::uuid();
+
+                                $file->storeAs($directory, $id . '.' . $file->getClientOriginalExtension());
+                                $path = $directory . '/' . $id . '.' . $file->getClientOriginalExtension();
+
                                 $documents[] = [
+                                    'id' => $id,
                                     'name' => $file->getClientOriginalName(),
                                     'size' => $file->getSize(),
                                     'type' => $file->getClientOriginalExtension(),
-                                    'path' => $directory . '/' . $file->getClientOriginalName(),
+                                    'url' => Crypt::encryptString(
+                                        json_encode([
+                                            'path' => $path,
+                                            'filename' => $file->getClientOriginalName()
+                                        ])
+                                    )
                                 ];
-
-                                $file->storeAs($directory, $file->getClientOriginalName());
                             }
                         }
                     }
                 }
 
                 if ($documents) {
-                    $actualizations[$key]->update(['documents' => json_encode($documents)]);
+                    $actualizations[$key]->update(['documents' => $documents]);
                 }
             }
 
@@ -584,14 +593,22 @@ class MonitoringController extends Controller
                             if (is_array($file)) {
                                 $documents[] = $file;
                             } else if ($file) {
+                                $id = Str::uuid();
+
+                                $file->storeAs($directory, $id . '.' . $file->getClientOriginalExtension());
+                                $path = $directory . '/' . $id . '.' . $file->getClientOriginalExtension();
                                 $documents[] = [
+                                    'id' => $id,
                                     'name' => $file->getClientOriginalName(),
                                     'size' => $file->getSize(),
                                     'type' => $file->getClientOriginalExtension(),
-                                    'path' => $directory . '/' . $file->getClientOriginalName(),
+                                    'url' => Crypt::encryptString(
+                                        json_encode([
+                                            'path' => $path,
+                                            'filename' => $file->getClientOriginalName()
+                                        ])
+                                    )
                                 ];
-
-                                $file->storeAs($directory, $file->getClientOriginalName());
                             }
                         }
                     }
@@ -601,7 +618,7 @@ class MonitoringController extends Controller
                         $monitoring
                             ->actualizations()
                             ->where('id', $actualizations_new[$key]['id'])
-                            ->update(['documents' => json_encode($documents)]);
+                            ->update(['documents' => $documents]);
                         continue;
                     }
 
@@ -609,7 +626,7 @@ class MonitoringController extends Controller
                     $monitoring
                         ->actualizations()
                         ->where('id', $actualizations[$index]['id'])
-                        ->update(['documents' => json_encode($documents)]);
+                        ->update(['documents' => $documents]);
                 }
             }
 
@@ -633,6 +650,24 @@ class MonitoringController extends Controller
             DB::rollBack();
             logger()->error('[Worksheet Monitoring] Update Monitoring with ID ' . $monitoring->id . ' ' . $e->getMessage());
             return response()->json(['message' => 'Gagal memperbarui laporan monitoring'], Response::HTTP_BAD_REQUEST);
+        }
+    }
+
+    public function destroy_monitoring(string $monitoring_id)
+    {
+        $monitoring = Monitoring::findByEncryptedIdOrFail($monitoring_id);
+        $monitoring->load('worksheet');
+        try {
+            DB::beginTransaction();
+            throw_if(!$monitoring->delete(), new Exception("Failed to delete monitoring report with ID {$monitoring->id}"));
+            DB::commit();
+            flash_message('flash_message', 'Laporan monitoring berhasil dihapus', State::SUCCESS);
+            return redirect()->route('risk.monitoring.show', $monitoring->worksheet->getEncryptedId());
+        } catch (Exception $e) {
+            DB::rollBack();
+            logger()->error('[Worksheet Monitoring] Failed to destroy Monitoring Report with ID ' . $monitoring->id . ' ' . $e->getMessage());
+            flash_message('flash_message', 'Laporan monitoring gagal dihapus', State::ERROR);
+            return redirect()->back();
         }
     }
 

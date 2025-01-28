@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\FileController;
 use App\Http\Controllers\Master\{
     BUMNScaleController,
     ExistingControlTypeController,
@@ -57,6 +58,7 @@ Route::group(['middleware' => 'auth'], function () {
             Route::get('edit/{monitoringId}', [MonitoringController::class, 'edit_monitoring'])->name('edit_monitoring');
             Route::put('edit/{monitoringId}', [MonitoringController::class, 'update_monitoring'])->name('update_monitoring');
             Route::put('status/{monitoringId}', [MonitoringController::class, 'update_status_monitoring'])->name('update_status_monitoring');
+            Route::delete('delete/{monitoringId}', [MonitoringController::class, 'destroy_monitoring'])->name('destroy_monitoring');
         });
 
         Route::group(['as' => 'top_risk.', 'prefix' => 'top-risk'], function () {
@@ -149,4 +151,6 @@ Route::group(['middleware' => 'auth'], function () {
             ]
         );
     });
+
+    Route::get('file/{key}', [FileController::class, 'serve'])->name('file.serve');
 });

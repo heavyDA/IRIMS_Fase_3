@@ -26,11 +26,15 @@ class Role extends Model
         $role = session()->get('current_role')?->name;
 
         if (
-            $user->personnel_area_code == 'PST' &&
-            in_array($role, ['risk analis', 'risk reviewer'])
+            (
+                $user->personnel_area_code == 'PST' &&
+                in_array($role, ['risk analis', 'risk reviewer'])
+            ) ||
+            $user->sub_unit_code == 'ap'
         ) {
             return 'ap%';
         }
+
         if (
             str_contains($user->personnel_area_code, 'REG ') &&
             in_array($role, ['risk analis', 'risk otorisator'])

@@ -59,7 +59,7 @@ class DefaultSeeder extends Seeder
             // Risk Process BUMN section
             [
                 'name' => 'Risk Process',
-                'route' => 'risk',
+                'route' => 'risk.process',
                 'icon_name' => 'presentation',
                 'position' => 2,
                 'children' => [
@@ -156,7 +156,7 @@ class DefaultSeeder extends Seeder
             ],
             [
                 'name' => 'risk.monitoring.',
-                'permissions' => ['show_monitoring', 'edit_monitoring', 'update_monitoring', 'update_status_monitoring'],
+                'permissions' => ['show_monitoring', 'edit_monitoring', 'update_monitoring', 'update_status_monitoring', 'destroy_monitoring'],
             ]
         ];
 
@@ -195,43 +195,138 @@ class DefaultSeeder extends Seeder
 
         if (Permission::count() == 0) {
             $permissions = Permission::insert($permissions);
-            $roles = [['name' => 'root'], ['name' => 'risk admin'], ['name' => 'risk owner'], ['name' => 'risk otorisator'], ['name' => 'risk analis']];
         }
-        $permissions = Permission::where('name', 'not like', '%access%')->get();
+        $roles = [['name' => 'root'], ['name' => 'risk admin'], ['name' => 'risk owner'], ['name' => 'risk otorisator'], ['name' => 'risk analis'], ['name' => 'risk reviewer']];
 
-        if (Role::count() == 0) {
-            foreach ($roles as $role) {
-                $role = Role::create($role);
+        // if (Role::count() == 0) {
+        foreach ($roles as $role) {
+            $role = Role::firstOrCreate($role);
 
-                if ($role->name == 'root') {
-                    $role->syncPermissions($permissions->pluck('name'));
-                    $role->menus()->sync($menus->pluck('id'));
-                } else if ($role->name == 'risk otorisator') {
-                    $role->syncPermissions($permissions->pluck('name'));
-                    $role->menus()->sync(
-                        $menus->filter(
-                            function ($menu) {
-                                return str_contains($menu->route, 'risk.') ||
-                                    $menu->route == 'risk' ||
-                                    str_contains($menu->route, 'dashboard');
-                            }
-                        )->pluck('id')
-                    );
-                } else {
-                    $role->syncPermissions($permissions->pluck('name'));
-                    $role->menus()->sync(
-                        $menus->filter(
-                            function ($menu) {
-                                return str_contains($menu->route, 'risk.') ||
-                                    str_contains($menu->route, 'risk.profile') ||
-                                    $menu->route == 'risk' ||
-                                    str_contains($menu->route, 'dashboard');
-                            }
-                        )->pluck('id')
-                    );
-                }
+            if ($role->name == 'root') {
+                $permissions = Permission::all();
+
+                $role->syncPermissions($permissions->pluck('name'));
+                $role->menus()->sync($menus->pluck('id'));
+            } else if ($role->name == 'risk reviewer') {
+                $permissions = Permission::where('name', 'not like', '%access%')
+                    ->where(
+                        fn($q) => $q
+                            ->whereNotIn(
+                                'name',
+                                [
+                                    'risk.worksheet.create',
+                                    'risk.worksheet.store',
+                                    'risk.worksheet.edit',
+                                    'risk.worksheet.update',
+                                    'risk.worksheet.destroy',
+                                    'risk.monitoring.create',
+                                    'risk.monitoring.store',
+                                    'risk.monitoring.edit',
+                                    'risk.monitoring.update',
+                                    'risk.monitoring.destroy',
+                                    'risk.monitoring.edit_monitoring',
+                                    'risk.monitoring.update_monitoring',
+                                    'riks.top_risk.store',
+                                ]
+                            )
+                    )
+                    ->get();
+                $role->syncPermissions($permissions->pluck('name'));
+                $role->menus()->sync(
+                    $menus->filter(
+                        function ($menu) {
+                            return str_contains($menu->route, 'risk') ||
+                                str_contains($menu->route, 'dashboard');
+                        }
+                    )->pluck('id')
+                );
+            } else if ($role->name == 'risk analis') {
+                $permissions = Permission::where('name', 'not like', '%access%')->get();
+                $role->syncPermissions($permissions->pluck('name'));
+                $role->menus()->sync(
+                    $menus->filter(
+                        function ($menu) {
+                            return str_contains($menu->route, 'risk') ||
+                                str_contains($menu->route, 'dashboard');
+                        }
+                    )->pluck('id')
+                );
+            } else if ($role->name == 'risk otorisator') {
+                $permissions = Permission::whereNotLike('name', '%access%')
+                    ->where(
+                        fn($q) => $q->whereNotIn(
+                            'name',
+                            [
+                                'risk.worksheet.create',
+                                'risk.worksheet.store',
+                                'risk.worksheet.edit',
+                                'risk.worksheet.update',
+                                'risk.worksheet.destroy',
+                                'risk.monitoring.create',
+                                'risk.monitoring.store',
+                                'risk.monitoring.edit',
+                                'risk.monitoring.update',
+                                'risk.monitoring.destroy',
+                                'risk.monitoring.edit_monitoring',
+                                'risk.monitoring.update_monitoring',
+                            ]
+                        )
+                    )
+
+                    ->get();
+                $role->syncPermissions($permissions->pluck('name'));
+                $role->menus()->sync(
+                    $menus->filter(
+                        function ($menu) {
+                            return
+                                str_contains($menu->route, 'risk') ||
+                                str_contains($menu->route, 'dashboard');
+                        }
+                    )->pluck('id')
+                );
+            } else if ($role->name == 'risk owner') {
+                $permissions = Permission::where('name', 'not like', '%access%')
+                    ->orWhereNotLike('name', 'risk.top_risk%')
+                    ->get();
+
+                $role->syncPermissions($permissions->pluck('name'));
+                $role->menus()->sync(
+                    $menus->filter(
+                        function ($menu) {
+                            return
+                                str_contains($menu->route, 'risk.assessment') ||
+                                str_contains($menu->route, 'risk.worksheet') ||
+                                str_contains($menu->route, 'risk.monitoring') ||
+                                str_contains($menu->route, 'risk.process') ||
+                                str_contains($menu->route, 'risk.report') ||
+                                str_contains($menu->route, 'dashboard');
+                        }
+                    )->pluck('id')
+                );
+            } else if ($role->name == 'risk admin') {
+                $permissions = Permission::where('name', 'not like', '%access%')
+                    ->where(
+                        fn($q) => $q->orWhereNotLike('name', 'risk.report%')
+                            ->orWhereNotLike('name', 'risk.top_risk%')
+                    )
+                    ->get();
+
+                $role->syncPermissions($permissions->pluck('name'));
+                $role->menus()->sync(
+                    $menus->filter(
+                        function ($menu) {
+                            return
+                                str_contains($menu->route, 'risk.assessment') ||
+                                str_contains($menu->route, 'risk.worksheet') ||
+                                str_contains($menu->route, 'risk.monitoring') ||
+                                str_contains($menu->route, 'risk.process') ||
+                                str_contains($menu->route, 'dashboard');
+                        }
+                    )->pluck('id')
+                );
             }
         }
+        // }
 
         $users = [
             [
@@ -256,6 +351,29 @@ class DefaultSeeder extends Seeder
                     'is_active' => true,
                 ],
                 ['root', 'risk admin', 'risk analis', 'risk owner', 'risk otorisator']
+            ],
+            [
+                [
+                    'username' => 'reviewer',
+                    'password' => bcrypt('reviewer#321'),
+                    'email' => 'reviewer@injourneyairports.id',
+                    'employee_name' => 'Administrator',
+                    'employee_id' => '9999998',
+                    'organization_code' => 'ap',
+                    'organization_name' => '',
+                    'personnel_area_name' => 'Sidoel Group',
+                    'personnel_area_code' => '',
+                    'position_name' => 'Reviewer',
+                    'unit_name' => '',
+                    'sub_unit_name' => '',
+                    'unit_code' => 'ap',
+                    'sub_unit_code' => 'ap',
+                    'employee_grade_code' => '-',
+                    'employee_grade' => '-',
+                    'image_url' => '',
+                    'is_active' => true,
+                ],
+                ['risk reviewer']
             ],
             [
                 [
@@ -422,7 +540,8 @@ class DefaultSeeder extends Seeder
                 continue;
             }
 
-            $user = User::create(
+            $user = User::updateOrCreate(
+                ['employee_id' => $official->employee_id],
                 $official->toArray() +
                     [
                         'password' => bcrypt($official->username . '#321'),

@@ -110,7 +110,7 @@ class TopRiskController extends Controller
 
                     return [
                         'worksheet_id' => $worksheet->id,
-                        'sub_unit_code' => $user->unit_code,
+                        'sub_unit_code' => $user->unit_code == 'ap' ? '' : $user->unit_code,
                         'source_sub_unit_code' => $user->sub_unit_code,
                         'created_at' => now(),
                         'updated_at' => now(),

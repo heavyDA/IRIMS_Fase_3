@@ -27,6 +27,7 @@ const selectDocumentStatusChoices = new Choices(selectDocumentStatus, defaultCon
 
 worksheetTableFilter.addEventListener('reset', e => {
     inputSearch.value = '';
+
     selectLengthChoices.destroy()
     selectLengthChoices.init()
     selectYearChoices.destroy()
@@ -36,7 +37,7 @@ worksheetTableFilter.addEventListener('reset', e => {
     selectDocumentStatusChoices.destroy()
     selectDocumentStatusChoices.init()
 
-    datatable.search('').draw()
+    datatable.page.len(selectLength.value).search('').draw();
 })
 
 worksheetTableFilter.addEventListener('submit', e => {

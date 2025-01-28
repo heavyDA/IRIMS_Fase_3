@@ -79,7 +79,11 @@
                                         </a>
                                     @endif
                                     @isset($worksheet)
-                                        @if (in_array($worksheet->status, ['draft', 'on review']))
+                                        @if (
+                                            ($worksheet->status == 'draft' &&
+                                                in_array(session()->get('current_role')?->name, ['risk admin', 'risk owner', 'risk analis'])) ||
+                                                ($worksheet->status == 'on review' &&
+                                                    in_array(session()->get('current_role')?->name, ['risk owner', 'risk analis'])))
                                             <form action="{{ route('risk.worksheet.destroy', $worksheet->getEncryptedId()) }}"
                                                 method="POST">
                                                 @csrf

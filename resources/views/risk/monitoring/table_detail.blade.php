@@ -69,6 +69,21 @@
                                 @endif
 
                                 @isset($monitoring)
+                                    @if (
+                                        ($monitoring->status == 'draft' &&
+                                            in_array(session()->get('current_role')?->name, ['risk admin', 'risk owner', 'risk analis'])) ||
+                                            ($monitoring->status == 'on review' &&
+                                                in_array(session()->get('current_role')?->name, ['risk owner', 'risk analis'])))
+                                        <form
+                                            action="{{ route('risk.monitoring.destroy_monitoring', $monitoring->getEncryptedId()) }}"
+                                            method="POST">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button style="min-width: 128px;" type="submit" class="btn btn-danger">
+                                                <span><i class="ti ti-x"></i></span>&nbsp;Hapus
+                                            </button>
+                                        </form>
+                                    @endif
                                     @if (!str_contains(request()->route()->getName(), 'edit'))
                                         @if (
                                             (session()->get('current_role')?->name == 'risk admin' && $monitoring->last_history->status == 'draft') ||

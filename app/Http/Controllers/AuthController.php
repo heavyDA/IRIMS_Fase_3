@@ -26,7 +26,7 @@ class AuthController extends Controller
     {
         try {
             $response = Http::withHeader('Authorization', env('EOFFICE_TOKEN'))
-                ->timeout(10)
+                ->timeout(5)
                 ->asForm()
                 ->post(env('EOFFICE_URL') . '/login_user', $request->only('username', 'password'));
 
