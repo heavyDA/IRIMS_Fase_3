@@ -9,6 +9,10 @@ const inputSearch = document.querySelector('input[name="search"]')
 const worksheetTable = document.querySelector('#worksheet-table')
 const worksheetOffcanvas = document.querySelector('#worksheet-table-offcanvas')
 const worksheetOffcanvasInstance = new Offcanvas(worksheetOffcanvas)
+const worksheetFilterButton = document.querySelector('#worksheet-filter-button')
+worksheetFilterButton.addEventListener('click', () => {
+    worksheetOffcanvasInstance.show()
+})
 const worksheetTableFilter = worksheetOffcanvas.querySelector('#worksheet-table-filter')
 
 const selectLength = worksheetTableFilter.querySelector('select[name="length"]')

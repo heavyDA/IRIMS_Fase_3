@@ -93,7 +93,7 @@ class TopRiskController extends Controller
                 ->make(true);
         }
 
-        $title = 'Risk Profile';
+        $title = 'Top Risk';
 
         return view('risk.top_risk.index', compact('title'));
     }

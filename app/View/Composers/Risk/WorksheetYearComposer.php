@@ -19,7 +19,7 @@ class WorksheetYearComposer
         );
 
         if ($worksheet_years->isEmpty()) {
-            $worksheet_years = collect([['year' => date('Y')]]);
+            $worksheet_years = collect([(object) ['year' => date('Y')]]);
         }
 
         $view->with('worksheet_years', $worksheet_years);

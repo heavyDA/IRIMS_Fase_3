@@ -28,14 +28,12 @@ class MonitoringController extends Controller
 {
     public function index()
     {
-        $title = 'Risk Monitoring';
-
         if (request()->ajax()) {
             $unit = Role::getDefaultSubUnit();
             $worksheets = Worksheet::latest_monitoring_with_mitigation_query()
-            ->whereLike('w.sub_unit_code', request('unit', $unit))
-            ->when(request('document_status'), fn($q) => $q->where('w.status_monitoring', request('document_status')))
-            ->where('worksheet_year', request('year', date('Y')));
+                ->whereLike('w.sub_unit_code', request('unit', $unit))
+                ->when(request('document_status'), fn($q) => $q->where('w.status_monitoring', request('document_status')))
+                ->where('worksheet_year', request('year', date('Y')));
 
             return DataTables::query($worksheets)
                 ->filter(function ($q) {
@@ -69,28 +67,9 @@ class MonitoringController extends Controller
                 })
                 ->rawColumns(['status_monitoring'])
                 ->make(true);
-
-            // $mitigations = WorksheetMitigation::with([
-            //     'incident',
-            //     'worksheet.identification',
-            //     'monitoring_actualization',
-            //     'monitoring_residual',
-            // ])
-            //     ->whereHas('worksheet', fn($q) => $q->where('status', DocumentStatus::APPROVED->value));
-
-            // return DataTables::eloquent($mitigations)
-            //     ->editColumn('status_monitoring', function ($mitigation) {
-            //         $status = DocumentStatus::tryFrom($mitigation->worksheet->status_monitoring);
-            //         $class = $status->color();
-            //         $worksheet_number = $mitigation->worksheet->worksheet_number;
-            //         $route = route('risk.monitoring.show', $mitigation->worksheet->getEncryptedId());
-            //         $key = $mitigation->worksheet->id;
-
-            //         return view('risk.monitoring._table_status', compact('status', 'class', 'key', 'worksheet_number', 'route'))->render();
-            //     })
-            //     ->rawColumns(['status_monitoring'])
-            //     ->make(true);
         }
+
+        $title = 'Risk Monitoring';
         return view('risk.process.index', compact('title'));
     }
 
@@ -99,7 +78,7 @@ class MonitoringController extends Controller
         $worksheet = Worksheet::findByEncryptedIdOrFail($worksheetId);
         $worksheet->identification = WorksheetIdentification::identification_query()->whereWorksheetId($worksheet->id)->firstOrFail();
         $worksheet->load('strategies', 'incidents.mitigations', 'monitorings');
-        $title = 'Risk Monitoring';
+        $title = 'Laporan Risk Monitoring';
         return view('risk.monitoring.index', compact('title', 'worksheet'));
     }
 
