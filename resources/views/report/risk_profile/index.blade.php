@@ -30,17 +30,18 @@
                                     class="ti ti-search"></i></span>
                             <input type="text" name="search" class="form-control" placeholder="Pencarian">
                         </div>
-                        <button style="min-width: 128px;" class="btn btn-light" type="reset"
-                            form="worksheet-table-filter">
-                            <span><i class="me-1 ti ti-refresh"></i>Reset</span>
+                        <button style="min-width: 32px;" class="btn btn-light" type="reset" form="worksheet-table-filter"
+                            data-bs-toggle="tooltip" title="Reset">
+                            <span><i class="me-1 ti ti-refresh"></i></span>
                         </button>
-                        <button style="min-width: 128px;" class="btn btn-primary" type="button" data-bs-toggle="offcanvas"
-                            data-bs-target="#worksheet-table-offcanvas" aria-controls="worksheet-table-offcanvas">
-                            <span><i class="me-1 ti ti-filter"></i>Filter</span>
+                        <button style="min-width: 32px;" class="btn btn-primary" type="button" id="worksheet-filter-button"
+                            data-bs-toggle="tooltip" title="Filter" aria-controls="worksheet-table-offcanvas">
+                            <span><i class="me-1 ti ti-filter"></i></span>
                         </button>
                         <button style="min-width: 120px;" id="worksheet-export"
-                            data-url="{{ route('risk.report.risk_profile.export') }}" class="btn btn-block btn-success"><i
-                                class="ti ti-file-export"></i> Export Excel</button>
+                            data-url="{{ route('risk.report.risk_profile.export') }}" data-bs-toggle="tooltip"
+                            title="Export To Excel" class="btn btn-block btn-success"><i data-bs-toggle="tooltip"
+                                title="Filter"class="ti ti-file-export"></i> Export Excel</button>
                     </div>
                 </div>
             </div>

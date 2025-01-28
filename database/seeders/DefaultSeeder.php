@@ -233,10 +233,10 @@ class DefaultSeeder extends Seeder
             }
         }
 
-        $users = $users = [
+        $users = [
             [
                 [
-                    'username' => 'root',
+                    'username' => 'rahasia',
                     'password' => bcrypt('rahasia#321'),
                     'email' => 'root@injourneyairports.id',
                     'employee_name' => 'Administrator',
@@ -259,15 +259,15 @@ class DefaultSeeder extends Seeder
             ],
             [
                 [
-                    'username' => 'user_analis_pusat',
-                    'password' => bcrypt('rahasia_pusat#321'),
-                    'email' => 'user_analis_pusat@injourneyairports.id',
+                    'username' => 'user_analis_all',
+                    'password' => bcrypt('user_analis_all#321'),
+                    'email' => 'user_analis_all@injourneyairports.id',
                     'employee_name' => 'Administrator',
                     'employee_id' => '9999999',
                     'organization_code' => 'ap',
                     'organization_name' => '',
-                    'personnel_area_name' => 'Kantor PUSAT',
-                    'personnel_area_code' => 'PST',
+                    'personnel_area_name' => 'Sidoel Group',
+                    'personnel_area_code' => '',
                     'position_name' => 'Administrator',
                     'unit_name' => '',
                     'sub_unit_name' => '',
@@ -282,8 +282,31 @@ class DefaultSeeder extends Seeder
             ],
             [
                 [
+                    'username' => 'user_analis_pusat',
+                    'password' => bcrypt('user_analis_pusat#321'),
+                    'email' => 'user_analis_pusat@injourneyairports.id',
+                    'employee_name' => 'Administrator',
+                    'employee_id' => '9999999',
+                    'organization_code' => 'ap.50',
+                    'organization_name' => '',
+                    'personnel_area_name' => 'Kantor PUSAT',
+                    'personnel_area_code' => 'PST',
+                    'position_name' => 'Administrator',
+                    'unit_name' => '',
+                    'sub_unit_name' => '',
+                    'unit_code' => 'ap',
+                    'sub_unit_code' => 'ap.50',
+                    'employee_grade_code' => '-',
+                    'employee_grade' => '-',
+                    'image_url' => '',
+                    'is_active' => true,
+                ],
+                ['risk analis']
+            ],
+            [
+                [
                     'username' => 'user_analis_reg_1',
-                    'password' => bcrypt('rahasia_reg_1#321'),
+                    'password' => bcrypt('user_analis_reg_1#321'),
                     'email' => 'user_analis_reg_1@injourneyairports.id',
                     'employee_name' => 'ANALIS REG 1',
                     'employee_id' => '9999991',
@@ -306,7 +329,7 @@ class DefaultSeeder extends Seeder
             [
                 [
                     'username' => 'user_analis_reg_3',
-                    'password' => bcrypt('rahasia_reg_3#321'),
+                    'password' => bcrypt('user_analis_reg_3#321'),
                     'email' => 'user_analis_reg_3@injourneyairports.id',
                     'employee_name' => 'ANALIS REG 3',
                     'employee_id' => '9999993',
@@ -328,11 +351,11 @@ class DefaultSeeder extends Seeder
             ],
             [
                 [
-                    'username' => 'user_analis_reg_3',
-                    'password' => bcrypt('rahasia_reg_3#321'),
-                    'email' => 'user_analis_reg_3@injourneyairports.id',
-                    'employee_name' => 'ANALIS REG 3',
-                    'employee_id' => '20008357',
+                    'username' => 'user_analis_reg_2',
+                    'password' => bcrypt('user_analis_reg_2#321'),
+                    'email' => 'user_analis_reg_2@injourneyairports.id',
+                    'employee_name' => 'ANALIS REG 2',
+                    'employee_id' => '9999992',
                     'organization_code' => 'ap.53',
                     'organization_name' => 'Kantor Regional II (09 September 2024) - DPS',
                     'personnel_area_name' => 'Kantor Regional II',
