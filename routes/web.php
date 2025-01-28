@@ -14,7 +14,7 @@ use App\Http\Controllers\Report\RiskProfileController;
 use App\Http\Controllers\Report\RiskMonitoringController;
 use App\Http\Controllers\Risk\AssessmentController;
 use App\Http\Controllers\Risk\MonitoringController;
-use App\Http\Controllers\Risk\ProfileController;
+use App\Http\Controllers\Risk\TopRiskController;
 use App\Http\Controllers\Risk\WorksheetController;
 use Illuminate\Support\Facades\Route;
 
@@ -59,10 +59,9 @@ Route::group(['middleware' => 'auth'], function () {
             Route::put('status/{monitoringId}', [MonitoringController::class, 'update_status_monitoring'])->name('update_status_monitoring');
         });
 
-        Route::group(['as' => 'profile.', 'prefix' => 'profile'], function () {
-            Route::get('', [ProfileController::class, 'index'])->name('index');
-            Route::post('top-risk', [ProfileController::class, 'store'])->name('store');
-            Route::delete('top-risk', [ProfileController::class, 'destroy'])->name('destroy');
+        Route::group(['as' => 'top_risk.', 'prefix' => 'top-risk'], function () {
+            Route::get('', [TopRiskController::class, 'index'])->name('index');
+            Route::post('', [TopRiskController::class, 'store'])->name('store');
         });
 
 

@@ -1,15 +1,27 @@
+import { Offcanvas } from "bootstrap"
 import Choices from "choices.js"
 import createDatatable from "js/components/datatable"
 import { decodeHtml, defaultConfigFormatNumeral, defaultConfigChoices } from "js/components/helper"
 import Swal from "sweetalert2"
+import debounce from "js/utils/debounce";
 
+
+const inputSearch = document.querySelector('input[name="search"]')
+
+const worksheetOffcanvas = document.querySelector('#worksheet-table-offcanvas')
+const worksheetOffcanvasInstance = new Offcanvas(worksheetOffcanvas)
 const worksheetTable = document.querySelector('#worksheet-table')
-const worksheetTableFilter = document.querySelector('#worksheet-table-filter')
+const worksheetTableFilter = worksheetOffcanvas.querySelector('#worksheet-table-filter')
+
 const selectLength = worksheetTableFilter.querySelector('select[name="length"]')
+const selectYear = worksheetTableFilter.querySelector('select[name="year"]')
+const selectUnit = worksheetTableFilter.querySelector('select[name="unit"]')
+const selectDocumentStatus = worksheetTableFilter.querySelector('select[name="document_status"]')
+
 const selectLengthChoices = new Choices(selectLength, defaultConfigChoices)
-selectLength.addEventListener('change', e => {
-    datatable.page.len(e.target.value).draw()
-})
+const selectYearChoices = new Choices(selectYear, defaultConfigChoices)
+const selectUnitChoices = new Choices(selectUnit, defaultConfigChoices)
+const selectDocumentStatusChoices = new Choices(selectDocumentStatus, defaultConfigChoices)
 
 const datatable = createDatatable('#worksheet-table', {
     handleColumnSearchField: false,
@@ -24,7 +36,7 @@ const datatable = createDatatable('#worksheet-table', {
     pageLength: -1,
     drawCallback: function (settings) {
         const api = this.api()
-        const columnsToMerge = [0, 1, 2, 3, 6, 17]
+        const columnsToMerge = [0, 1, 2, 3, 6, 16]
 
         // Reset all cells visibility first
         api.cells().every(function () {
@@ -107,13 +119,7 @@ const datatable = createDatatable('#worksheet-table', {
             width: '64px'
         },
         {
-            sortable: false,
-            data: 'status',
-            name: 'status',
-            width: '128px'
-        },
-        {
-            sortable: false,
+            sortable: true,
             data: 'sub_unit_name',
             name: 'sub_unit_name',
             width: '256px',
@@ -126,7 +132,7 @@ const datatable = createDatatable('#worksheet-table', {
             }
         },
         {
-            sortable: false,
+            sortable: true,
             data: 'target_body',
             name: 'target_body',
             width: '256px',
@@ -146,7 +152,7 @@ const datatable = createDatatable('#worksheet-table', {
             }
         },
         {
-            sortable: false,
+            sortable: true,
             data: 'risk_chronology_body',
             name: 'risk_chronology_body',
             width: '256px',
@@ -166,7 +172,7 @@ const datatable = createDatatable('#worksheet-table', {
             }
         },
         {
-            sortable: false,
+            sortable: true,
             data: 'risk_cause_body',
             name: 'risk_cause_body',
             width: '256px',
@@ -186,7 +192,7 @@ const datatable = createDatatable('#worksheet-table', {
             }
         },
         {
-            sortable: false,
+            sortable: true,
             data: 'risk_impact_body',
             name: 'risk_impact_body',
             width: '256px',
@@ -206,61 +212,61 @@ const datatable = createDatatable('#worksheet-table', {
             }
         },
         {
-            sortable: false,
+            sortable: true,
             data: 'inherent_risk_level',
             name: 'inherent_risk_level',
             width: '100px',
         },
         {
-            sortable: false,
+            sortable: true,
             data: 'inherent_risk_scale',
             name: 'inherent_risk_scale',
             width: '100px',
         },
         {
-            sortable: false,
+            sortable: true,
             data: 'residual_1_risk_level',
             name: 'residual_1_risk_level',
             width: '100px',
         },
         {
-            sortable: false,
+            sortable: true,
             data: 'residual_2_risk_level',
             name: 'residual_2_risk_level',
             width: '100px',
         },
         {
-            sortable: false,
+            sortable: true,
             data: 'residual_3_risk_level',
             name: 'residual_3_risk_level',
             width: '100px',
         },
         {
-            sortable: false,
+            sortable: true,
             data: 'residual_4_risk_level',
             name: 'residual_4_risk_level',
             width: '100px',
         },
         {
-            sortable: false,
+            sortable: true,
             data: 'residual_1_risk_scale',
             name: 'residual_1_risk_scale',
             width: '100px',
         },
         {
-            sortable: false,
+            sortable: true,
             data: 'residual_2_risk_scale',
             name: 'residual_2_risk_scale',
             width: '100px',
         },
         {
-            sortable: false,
+            sortable: true,
             data: 'residual_3_risk_scale',
             name: 'residual_3_risk_scale',
             width: '100px',
         },
         {
-            sortable: false,
+            sortable: true,
             data: 'residual_4_risk_scale',
             name: 'residual_4_risk_scale',
             width: '100px',
@@ -288,13 +294,59 @@ const datatable = createDatatable('#worksheet-table', {
     ],
 })
 
+worksheetTableFilter.addEventListener('submit', e => {
+    e.preventDefault()
+
+
+    datatable.page.len(selectLength.value).draw();
+
+    setTimeout(() => {
+        worksheetOffcanvasInstance.hide()
+    }, 315);
+})
+
+inputSearch.addEventListener('input', debounce(
+    e => {
+        datatable.search(e.target.value).draw()
+    },
+    815
+))
+
+worksheetTableFilter.addEventListener('reset', e => {
+    inputSearch.value = '';
+
+    selectLengthChoices.destroy()
+    selectLengthChoices.init()
+    selectYearChoices.destroy()
+    selectYearChoices.init()
+    selectUnitChoices.destroy()
+    selectUnitChoices.init()
+    selectDocumentStatusChoices.destroy()
+    selectDocumentStatusChoices.init()
+
+    datatable.page.len(selectLength.value).search('').draw();
+})
 
 let worksheetChecks = []
 let worksheetChecksCount = 0;
-let worksheetDeletes = document.querySelector('.worksheet-deletes')
+let worksheetChecksLength = 0
 datatable.on('draw.dt', () => {
+    let checkboxes = document.querySelectorAll('.worksheet-selects');
+
+    worksheetChecksLength = checkboxes.length
     worksheetChecksCount = 0
-    worksheetChecks = document.querySelectorAll('.worksheet-selects')
+
+    for (let [index, item] of [...checkboxes].entries()) {
+        if (index == 0) {
+            worksheetChecks.push(item)
+            continue;
+        }
+
+        if (checkboxes[index - 1].value != item.value)
+            worksheetChecks.push(item)
+
+    }
+
     worksheetChecks.forEach(checkbox => {
         checkbox.addEventListener('change', e => {
             if (e.target.checked) {
@@ -303,31 +355,10 @@ datatable.on('draw.dt', () => {
                 worksheetChecksCount -= 1
             }
 
+            inputCheckAll.checked = worksheetChecksLength == worksheetChecksCount
             worksheetSubmitButton.disabled = worksheetChecksCount == 0;
-        })
-    })
 
-    worksheetDeletes = document.querySelectorAll('.worksheet-deletes')
-    let worksheetDeletesLength = worksheetDeletes.length
-
-    worksheetDeletes.forEach((button, index) => {
-        if (index != 0 && worksheetDeletesLength > 1) {
-            if (worksheetDeletes[index - 1].dataset.id == button.dataset.id) {
-                button.remove()
-                return
-            }
-        }
-
-        button.addEventListener('click', async e => {
-            const response = await axios.post('/risk-process/profile/top-risk', {
-                id: button.dataset.id,
-                "_method": 'DELETE'
-            })
-            Swal.fire({
-                icon: response.status == 200 ? 'success' : 'error',
-                title: response.status == 200 ? 'Berhasil' : 'Gagal',
-                text: response.data?.message,
-            }).then(() => datatable.draw())
+            console.log(worksheetChecksCount)
         })
     })
 })
@@ -335,32 +366,53 @@ datatable.on('draw.dt', () => {
 const worksheetSubmitButton = document.querySelector('#worksheet-submit-button')
 worksheetSubmitButton.addEventListener('click', async e => {
     e.preventDefault()
-    let worksheets = []
-    worksheetChecks.forEach(checkbox => {
-        if (checkbox.checked) {
-            worksheets.push(checkbox.value)
-        }
-    })
 
-    worksheets = new Set(worksheets)
-
-    const response = await axios.post('/risk-process/profile/top-risk', { worksheets: [...worksheets] })
     Swal.fire({
-        icon: response.status == 200 ? 'success' : 'error',
-        title: response.status == 200 ? 'Berhasil' : 'Gagal',
-        text: response.data?.message,
-    }).then(() => datatable.draw())
+        icon: 'info',
+        title: 'Peringatan',
+        text: 'Apakah Anda yakin ingin mengirim profil risiko pilihan sebagai top risk?',
+        showCancelButton: true,
+        confirmButtonText: 'Ya',
+        cancelButtonText: 'Tidak',
+        showLoaderOnConfirm: true,
+        allowOutsideClick: () => !Swal.isLoading(),
+        preConfirm: async () => {
+            let worksheets = []
+            worksheetChecks.forEach(checkbox => {
+                if (checkbox.checked) {
+                    worksheets.push(checkbox.value)
+                }
+            })
+
+            worksheets = new Set(worksheets)
+            const response = await axios.post('/risk-process/top-risk', { worksheets: [...worksheets] })
+            const data = await response.data;
+
+            if (response.status != 200) {
+                return Swal.showValidationMessage(data.message)
+            }
+
+            return data
+        }
+    }).then(async (result) => {
+        if (result.isConfirmed) {
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil',
+                text: result.value.message,
+            }).then(() => datatable.draw())
+        }
+    });
 });
+
 const inputCheckAll = document.querySelector('#worksheet-check-all')
 inputCheckAll.addEventListener('change', e => {
+    worksheetChecksCount = 0;
+
     worksheetChecks.forEach(checkbox => {
         checkbox.checked = e.target.checked
 
-        if (e.target.checked) {
-            worksheetChecksCount += 1
-        } else {
-            worksheetChecksCount -= 1
-        }
+        worksheetChecksCount += e.target.checked
     })
 
     worksheetSubmitButton.disabled = worksheetChecksCount == 0;

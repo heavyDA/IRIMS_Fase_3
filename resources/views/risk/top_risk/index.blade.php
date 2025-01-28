@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @push('top-script')
-    @vite(['resources/js/pages/risk/assessment/index.js'])
+    @vite(['resources/js/pages/risk/top_risk/index.js'])
 @endpush
 
 @section('header-content')
@@ -16,66 +16,67 @@
             </nav>
         </div>
     </div>
-    <div class="btn-list">
-        @if (auth()->user()->can('risk.worksheet.index') && auth()->user()->can('risk.worksheet.store'))
-            <a href="{{ route('risk.worksheet.index') }}"
-                class="btn btn-primary-light btn-wave me-2 waves-effect waves-light">
-                <i class="ti ti-plus align-middle"></i> Tambah Kertas Kerja
-            </a>
-        @endif
-    </div>
 @endsection
 
 @section('main-content')
     <x-card>
         <x-slot name="body">
-            <div class="row mb-4 justify-content-end">
-                <div class="col-12 col-xl-7">
-                    <div class="d-flex gap-2">
-                        <div class="input-group">
-                            <span class="input-group-text" id="inputGroup-sizing-default"><i
-                                    class="ti ti-search"></i></span>
-                            <input type="text" name="search" class="form-control" placeholder="Pencarian">
+            <form id="worksheet-table-filter" class="mb-1">
+                <div class="row mb-4 justify-content-end">
+                    <div class="col-12 col-xl-10">
+                        <div class="d-flex gap-2">
+                            <div class="input-group">
+                                <span class="input-group-text" id="inputGroup-sizing-default"><i
+                                        class="ti ti-search"></i></span>
+                                <input type="text" name="search" class="form-control" placeholder="Pencarian">
+                            </div>
+                            <button style="min-width: 128px;" class="btn btn-light" type="reset"
+                                form="worksheet-table-filter">
+                                <span><i class="me-1 ti ti-refresh"></i>Reset</span>
+                            </button>
+                            <button style="min-width: 128px;" class="btn btn-primary" type="button"
+                                data-bs-toggle="offcanvas" data-bs-target="#worksheet-table-offcanvas"
+                                aria-controls="worksheet-table-offcanvas">
+                                <span><i class="me-1 ti ti-filter"></i>Filter</span>
+                            </button>
+                            <button style="min-width: 128px;" class="btn btn-success align-items-center" disabled
+                                type="button" id="worksheet-submit-button">
+                                <span><i class="me-1 ti ti-send-2"></i>Submit Top Risk</span>
+                            </button>
                         </div>
-                        <button style="min-width: 128px;" class="btn btn-light" type="reset"
-                            form="worksheet-table-filter">
-                            <span><i class="me-1 ti ti-refresh"></i>Reset</span>
-                        </button>
-                        <button style="min-width: 128px;" class="btn btn-primary" type="button" data-bs-toggle="offcanvas"
-                            data-bs-target="#worksheet-table-offcanvas" aria-controls="worksheet-table-offcanvas">
-                            <span><i class="me-1 ti ti-filter"></i>Filter</span>
-                        </button>
                     </div>
                 </div>
-            </div>
+            </form>
             <table id="worksheet-table" class="table table-bordered table-stripped display nowrap" style="width: 100%;">
                 <thead class="table-dark">
                     <tr>
-                        <th class="text-center" rowspan="3">No.</th>
-                        <th class="text-center" rowspan="3">Status</th>
-                        <th class="text-center" rowspan="3">Organisasi</th>
-                        <th class="text-center" rowspan="3">Pilihan Sasaran</th>
-                        <th class="text-center" rowspan="3">Peristiwa Risiko</th>
-                        <th class="text-center" rowspan="3">Penyebab Risiko</th>
-                        <th class="text-center" rowspan="3">Dampak</th>
-                        <th class="text-center" colspan="2">Risiko Inheren</th>
-                        <th class="text-center" colspan="8">Risiko Residual</th>
+                        <th rowspan="3">No.</th>
+                        <th rowspan="3">Organisasi</th>
+                        <th rowspan="3">Pilihan Sasaran</th>
+                        <th rowspan="3">Peristiwa Risiko</th>
+                        <th rowspan="3">Penyebab Risiko</th>
+                        <th rowspan="3">Dampak</th>
+                        <th colspan="2">Risiko Inheren</th>
+                        <th colspan="8">Risiko Residual</th>
+                        <th rowspan="3">
+                            <input type="checkbox" id="worksheet-check-all">
+                        </th>
                     </tr>
                     <tr>
-                        <th class="text-center" rowspan="2">Level</th>
-                        <th class="text-center" rowspan="2">Skala Risiko</th>
-                        <th class="text-center" colspan="4">Level</th>
-                        <th class="text-center" colspan="4">Skala Risiko</th>
+                        <th rowspan="2">Level</th>
+                        <th rowspan="2">Skala Risiko</th>
+                        <th colspan="4">Level</th>
+                        <th colspan="4">Skala Risiko</th>
                     </tr>
                     <tr>
-                        <th class="text-center">Q1</th>
-                        <th class="text-center">Q2</th>
-                        <th class="text-center">Q3</th>
-                        <th class="text-center">Q4</th>
-                        <th class="text-center">Q1</th>
-                        <th class="text-center">Q2</th>
-                        <th class="text-center">Q3</th>
-                        <th class="text-center">Q4</th>
+                        <td>Q1</td>
+                        <td>Q2</td>
+                        <td>Q3</td>
+                        <td>Q4</td>
+                        <td>Q1</td>
+                        <td>Q2</td>
+                        <td>Q3</td>
+                        <td>Q4</td>
                     </tr>
                 </thead>
             </table>

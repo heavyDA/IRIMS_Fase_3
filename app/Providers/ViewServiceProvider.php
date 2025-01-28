@@ -27,11 +27,17 @@ class ViewServiceProvider extends ServiceProvider
 
         View::composer([
             'risk.process.index',
+            'risk.assessment.index',
+            'risk.top_risk.index',
             'report.risk_monitoring.index',
+            'report.risk_profile.index',
         ], WorksheetYearComposer::class);
         View::composer([
             'risk.process.index',
+            'risk.assessment.index',
+            'risk.top_risk.index',
             'report.risk_monitoring.index',
+            'report.risk_profile.index',
         ], UnitComposer::class);
     }
 }

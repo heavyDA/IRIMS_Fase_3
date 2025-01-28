@@ -31,8 +31,33 @@ class WorksheetIncident extends Model
     {
         return DB::table('ra_worksheet_incidents as incident')
             ->select(
-                'incident.*',
-                'worksheet.*',
+                'incident.id',
+                'incident.worksheet_id',
+                'incident.risk_cause_number',
+                'incident.risk_cause_code',
+                'incident.risk_cause_body',
+                'incident.kri_body',
+                'incident.kri_unit_id',
+                'incident.kri_threshold_safe',
+                'incident.kri_threshold_caution',
+                'incident.kri_threshold_danger',
+
+                'worksheet.worksheet_code',
+                'worksheet.worksheet_number',
+                'worksheet.unit_code',
+                'worksheet.unit_name',
+                'worksheet.sub_unit_code',
+                'worksheet.sub_unit_name',
+                'worksheet.organization_code',
+                'worksheet.organization_name',
+                'worksheet.personnel_area_code',
+                'worksheet.personnel_area_name',
+                'worksheet.company_code',
+                'worksheet.company_name',
+                'worksheet.target_body',
+                'worksheet.status',
+                'worksheet.status_monitoring',
+
                 'existing_control_body',
 
                 'identification.risk_chronology_body',
@@ -109,7 +134,6 @@ class WorksheetIncident extends Model
     }
     public static function incident_query_top_risk(?string $unit = null)
     {
-        $unitLevel = get_unit_level($unit);
         return DB::table('ra_worksheet_incidents as incident')
             ->select([
                 'incident.worksheet_id',
@@ -193,7 +217,7 @@ class WorksheetIncident extends Model
             ->withExpression(
                 'worksheets',
                 DB::table('ra_worksheets')
-                    ->whereLike('sub_unit_code', $unit . '%')
+                    ->whereLike('sub_unit_code', $unit)
                     ->where('status', DocumentStatus::APPROVED->value)
             )
             ->withExpression(
@@ -201,23 +225,15 @@ class WorksheetIncident extends Model
                 DB::table('ra_worksheet_top_risks')
                     ->whereRaw('worksheet_id IN (select id from worksheets)')
                     ->where(function ($query) use ($unit) {
-                        return $query->whereLike('source_sub_unit_code', $unit . '%')
-                            ->orWhereLike('sub_unit_code', $unit . '%');
+                        return $query->whereLike('source_sub_unit_code', $unit)
+                            ->orWhereLike('sub_unit_code', $unit);
                     })
             )
             ->withExpression('scales', DB::table('m_bumn_scales'))
             ->withExpression('heatmaps', DB::table('m_heatmaps'))
             ->withExpression('risk_categories', DB::table('m_kbumn_risk_categories'))
             ->rightJoin('worksheets as worksheet', 'worksheet.id', '=', 'incident.worksheet_id')
-            ->leftJoin(
-                'top_risks as tr',
-                fn($q) => $q
-                    ->on('tr.worksheet_id', '=', 'incident.worksheet_id')
-                    ->when(
-                        $unitLevel < 3,
-                        fn($query) => $query->where('tr.source_sub_unit_code', $unit)
-                    )
-            )
+            ->leftJoin('top_risks as tr', 'tr.worksheet_id', '=', 'incident.worksheet_id')
             ->leftJoin('ra_worksheet_identifications as identification', 'identification.worksheet_id', '=', 'worksheet.id')
             ->leftJoin('m_kri_units as kri_unit', 'kri_unit.id', '=', 'incident.kri_unit_id')
             ->leftJoin('m_existing_control_types', 'm_existing_control_types.id', '=', 'identification.existing_control_type_id')

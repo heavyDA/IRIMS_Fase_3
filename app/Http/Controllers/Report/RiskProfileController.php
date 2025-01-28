@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Report;
 use App\Enums\DocumentStatus;
 use App\Exports\Risk\WorksheetExport;
 use App\Http\Controllers\Controller;
-use App\Models\Master\Official;
 use App\Models\RBAC\Role;
 use App\Models\Risk\Worksheet;
 use App\Models\Risk\WorksheetIdentification;
@@ -19,20 +18,20 @@ class RiskProfileController extends Controller
     public function index()
     {
         if (request()->ajax()) {
+            $unit = Role::getDefaultSubUnit();
+
             if (Role::hasLookUpUnitHierarchy()) {
-                $unit = request('unit') ? request('unit') . '%' : Role::getDefaultSubUnit();
-            } else {
-                $unit = Role::getDefaultSubUnit();
+                $unit = request('unit') ? request('unit') . '%' : $unit;
             }
 
             $incidents = WorksheetIncident::incident_query()
                 ->where('worksheet.sub_unit_code', 'like', $unit)
-                ->when(request()->year, fn($q) => $q->whereYear('worksheet.created_at', request()->year))
+                ->when(request('year'), fn($q) => $q->whereYear('worksheet.created_at', request('year')))
                 ->when(
-                    request()->document_status,
+                    request('document_status'),
                     function ($q) {
-                        if (in_array(request()->document_status, ['draft', 'approved'])) {
-                            return $q->whereStatus(request()->document_status);
+                        if (in_array(request('document_status'), ['draft', 'approved'])) {
+                            return $q->whereStatus(request('document_status'));
                         }
 
                         return $q->whereNotIn('status', ['draft', 'approved']);
@@ -40,6 +39,31 @@ class RiskProfileController extends Controller
                 );
 
             return DataTables::query($incidents)
+                ->filter(function ($q) {
+                    $value = request('search.value');
+
+                    if ($value) {
+                        $q->where(
+                            fn($q) => $q->orWhereLike('worksheet.worksheet_number', '%' . $value . '%')
+                                ->orWhereLike('worksheet.status', '%' . $value . '%')
+                                ->orWhereLike('worksheet.sub_unit_name', '%' . $value . '%')
+                                ->orWhereLike('worksheet.target_body', '%' . $value . '%')
+                                ->orWhereLike('identification.risk_chronology_body', '%' . $value . '%')
+                                ->orWhereLike('incident.risk_cause_body', '%' . $value . '%')
+                                ->orWhereLike('identification.risk_impact_body', '%' . $value . '%')
+                                ->orWhereLike('identification.inherent_risk_level', '%' . $value . '%')
+                                ->orWhereLike('identification.inherent_risk_scale', '%' . $value . '%')
+                                ->orWhereLike('identification.residual_1_risk_level', '%' . $value . '%')
+                                ->orWhereLike('identification.residual_2_risk_level', '%' . $value . '%')
+                                ->orWhereLike('identification.residual_3_risk_level', '%' . $value . '%')
+                                ->orWhereLike('identification.residual_4_risk_level', '%' . $value . '%')
+                                ->orWhereLike('identification.residual_1_risk_scale', '%' . $value . '%')
+                                ->orWhereLike('identification.residual_2_risk_scale', '%' . $value . '%')
+                                ->orWhereLike('identification.residual_3_risk_scale', '%' . $value . '%')
+                                ->orWhereLike('identification.residual_4_risk_scale', '%' . $value . '%')
+                        );
+                    }
+                })
                 ->editColumn('status', function ($incident) {
                     $status = DocumentStatus::tryFrom($incident->status);
                     $class = $status->color();
@@ -52,13 +76,8 @@ class RiskProfileController extends Controller
                 ->make(true);
         }
 
-        $units = Official::getSubUnitOnly()
-            ->filterByRole(session()->get('current_role')?->name)
-            ->latest('sub_unit_code')
-            ->get();
         $title = 'Risk Profile';
-
-        return view('report.risk_profile.index', compact('title', 'units'));
+        return view('report.risk_profile.index', compact('title'));
     }
 
     public function export()
@@ -69,6 +88,44 @@ class RiskProfileController extends Controller
             $unit = Role::getDefaultSubUnit();
         }
 
+        $incidents = WorksheetIncident::incident_query()
+            ->where('worksheet.sub_unit_code', 'like', $unit)
+            ->when(request('year'), fn($q) => $q->whereYear('worksheet.created_at', request('year')))
+            ->when(
+                request('document_status'),
+                function ($q) {
+                    if (in_array(request('document_status'), ['draft', 'approved'])) {
+                        return $q->whereStatus(request('document_status'));
+                    }
+
+                    return $q->whereNotIn('status', ['draft', 'approved']);
+                }
+            )
+            ->when(
+                request('search'),
+                fn($q) => $q->where(
+                    fn($q) => $q
+                        ->orWhereLike('worksheet.worksheet_number', '%' . request('search') . '%')
+                        ->orWhereLike('worksheet.status', '%' . request('search') . '%')
+                        ->orWhereLike('worksheet.sub_unit_name', '%' . request('search') . '%')
+                        ->orWhereLike('worksheet.target_body', '%' . request('search') . '%')
+                        ->orWhereLike('identification.risk_chronology_body', '%' . request('search') . '%')
+                        ->orWhereLike('incident.risk_cause_body', '%' . request('search') . '%')
+                        ->orWhereLike('identification.risk_impact_body', '%' . request('search') . '%')
+                        ->orWhereLike('identification.inherent_risk_level', '%' . request('search') . '%')
+                        ->orWhereLike('identification.inherent_risk_scale', '%' . request('search') . '%')
+                        ->orWhereLike('identification.residual_1_risk_level', '%' . request('search') . '%')
+                        ->orWhereLike('identification.residual_2_risk_level', '%' . request('search') . '%')
+                        ->orWhereLike('identification.residual_3_risk_level', '%' . request('search') . '%')
+                        ->orWhereLike('identification.residual_4_risk_level', '%' . request('search') . '%')
+                        ->orWhereLike('identification.residual_1_risk_scale', '%' . request('search') . '%')
+                        ->orWhereLike('identification.residual_2_risk_scale', '%' . request('search') . '%')
+                        ->orWhereLike('identification.residual_3_risk_scale', '%' . request('search') . '%')
+                        ->orWhereLike('identification.residual_4_risk_scale', '%' . request('search') . '%')
+                )
+            )
+            ->get();
+
         $worksheets = Worksheet::with([
             'strategies',
             'incidents.kri_unit',
@@ -77,12 +134,10 @@ class RiskProfileController extends Controller
             'incidents.mitigations.risk_treatment_type',
             'incidents.mitigations.rkap_program_type',
         ])
-            ->where('sub_unit_code', 'like', $unit)
-            ->when(request()->year, fn($q) => $q->whereYear('created_at', request()->year))
-            ->documentStatus(request()->document_status)
-            ->when(request('length') > 0, fn($q) => $q->limit(request('length')))
-            ->get();
+            ->whereIn('id', $incidents->pluck('worksheet_id'))
+            ->simplePaginate(request('per_page', 10));
 
+        $worksheets = collect($worksheets->items());
         $identifications = WorksheetIdentification::identification_query()->whereIn('worksheet_id', $worksheets->pluck('id'))->get();
         $worksheets = $worksheets->map(function ($worksheet) use ($identifications) {
             $worksheet->identification = $identifications->firstWhere('worksheet_id', $worksheet->id);
