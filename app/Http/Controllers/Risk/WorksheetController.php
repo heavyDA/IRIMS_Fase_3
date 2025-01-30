@@ -492,7 +492,11 @@ class WorksheetController extends Controller
                         $key == 'mitigation_rkap_program_type'
                         ? $key . '_id' : $key;
 
-                    $mitigation[$key] = $value == 'Pilih' || !$value ? null : $value;
+                    if ($value == 'Pilih') {
+                        $mitigation[$key] = null;
+                    } else {
+                        $mitigation[$key] = $value ?: '';
+                    }
                 }
 
                 if ($mitigation['id']) {
