@@ -23,7 +23,16 @@
                 </div>
             </div>
             <div class="row mb-1">
-                <div class="col-3">No. Risiko</div>
+                <div class="col-3">
+                    <span>No. Risiko</span>
+                    <a tabindex="0"
+                        class="link-secondary link-offset-2 link-underline-opacity-0 link-underline-opacity-50-hover text-decoration-underline mx-1"
+                        role="button" data-bs-toggle="popover" data-bs-trigger="focus" data-bs-placement="right"
+                        title="Information" data-bs-html="true"
+                        data-bs-content="<p>No. Risiko adalah nomor unik untuk setiap risiko yang diidentifikasikan.</p><p>Ditulis sebagai berikut AREA-SUB_UNIT-NO_URUT</p><p>Contoh: PST-OPP-1</p>">
+                        <i class="ti ti-info-circle h5 text-secondary"></i>
+                    </a>
+                </div>
                 <div class="col">
                     <input type="text" class="form-control" name="risk_number" value=""
                         placeholder="AREA-SUB_UNIT-NO_URUT">

@@ -56,7 +56,20 @@
                 </div>
             </div>
             <div class="row mb-3">
-                <div class="col-3">Peristiwa Risiko<span class="text-danger">*</span></div>
+                <div class="col-3">
+                    <span>Peristiwa Risiko<span class="text-danger">*</span></span>
+                    <a tabindex="0"
+                        class="link-secondary link-offset-2 link-underline-opacity-0 link-underline-opacity-50-hover text-decoration-underline mx-1"
+                        role="button" data-bs-toggle="popover" data-bs-trigger="focus" data-bs-placement="right"
+                        title="Information" data-bs-html="true"
+                        data-bs-content='
+                        <div class="col-md-12" style="padding:20px;">
+                        <p>Diisi dengan peristiwa risiko yang relevan serta peristiwa risko harus diidentifikasi secara tepat <strong>(bukan negasi sasaran, negasi dampak)</strong></p>
+                    </div>
+                    '><i
+                            class="ti ti-info-circle h5 text-secondary"></i>
+                    </a>
+                </div>
                 <div class="col">
                     <div class="mb-2">
                         <div id="risk_chronology_body-editor" class="textarea"></div>
@@ -65,7 +78,20 @@
                 </div>
             </div>
             <div class="row mb-3">
-                <div class="col-3">Deskripsi Peristiwa Risiko<span class="text-danger">*</span></div>
+                <div class="col-3">
+                    <span>Deskripsi Peristiwa Risiko<span class="text-danger">*</span></span>
+                    <a tabindex="0"
+                        class="link-secondary link-offset-2 link-underline-opacity-0 link-underline-opacity-50-hover text-decoration-underline mx-1"
+                        role="button" data-bs-toggle="popover" data-bs-trigger="focus" data-bs-placement="right"
+                        title="Information" data-bs-html="true"
+                        data-bs-content='
+                        <div class="col-md-12" style="padding:20px;">
+                        <p>Di isi dengan <strong>Penjelasan /narasi atas peristiwa risiko</strong></p>
+                    </div>
+                    '><i
+                            class="ti ti-info-circle h5 text-secondary"></i>
+                    </a>
+                </div>
                 <div class="col">
                     <div class="mb-2">
                         <div id="risk_chronology_description-editor" class="textarea"></div>
@@ -437,12 +463,12 @@
                         </div>
                         <input type="hidden" name="key">
                         <input type="hidden" name="id" value>
-                        <div class="row mb-3">
+                        {{-- <div class="row mb-3">
                             <div class="col-3">No. Risiko</div>
                             <div class="col">
                                 <input type="text" class="form-control" name="risk_number" readonly>
                             </div>
-                        </div>
+                        </div> --}}
                         <div class="row mb-3">
                             <div class="col-3">No. Penyebab Risiko</div>
                             <div class="col">
@@ -457,7 +483,20 @@
                             </div>
                         </div>
                         <div class="row mb-3">
-                            <div class="col-3">Penyebab Risiko<span class="text-danger">*</span></div>
+                            <div class="col-3">
+                                <span>Penyebab Risiko<span class="text-danger">*</span></span>
+                                <a tabindex="0"
+                                    class="link-secondary link-offset-2 link-underline-opacity-0 link-underline-opacity-50-hover text-decoration-underline mx-1"
+                                    role="button" data-bs-toggle="popover" data-bs-trigger="focus"
+                                    data-bs-placement="right" title="Information" data-bs-html="true"
+                                    data-bs-content='
+                            <div style="padding:20px;">
+                            <ol><li>Penyebab Risiko yang diidentifikasi adalah akar penyebab/root cause dari terjadinya Risiko.</li><li>Penyebab Risiko dapat bersumber dari sisi manusia, proses, jaringan, sistem, atau sumber lain yang berpotensi memicu terjadinya Risiko.</li><li>Apabila terdapat lebih dari satu penyebab Risiko dalam satu sumber Risiko harus dipastikan bahwa penyebab tersebut satu level kedalaman sebagai root cause. Apabila berbeda level kedalaman, maka dapat terjadi tumpang-tindih penyebab yang akan merancukan program perlakuan Risiko.</li><li>Penyebab Risiko merupakan kondisi yang terjadi saat dilakukan identifikasi Risike. ldentifikasi penyebab Risiko dapat mengacu pada Diagram 2 Fault Tree&nbsp;Analysis.</li></ol>
+                        </div>
+                        '>
+                                    <i class="ti ti-info-circle h5 text-secondary"></i>
+                                </a>
+                            </div>
                             <div class="col">
                                 <div class="mb-2">
                                     <div id="risk_cause_body-editor" class="textarea"></div>
@@ -466,13 +505,41 @@
                             </div>
                         </div>
                         <div class="row mb-3">
-                            <div class="col-3">Key Risk Indicators<span class="text-danger">*</span></div>
+                            <div class="col-3">
+                                <span>Key Risk Indicators<span class="text-danger">*</span>
+                                </span>
+                                <a tabindex="0"
+                                    class="link-secondary link-offset-2 link-underline-opacity-0 link-underline-opacity-50-hover text-decoration-underline mx-1"
+                                    role="button" data-bs-toggle="popover" data-bs-trigger="focus"
+                                    data-bs-placement="right" title="Information" data-bs-html="true"
+                                    data-bs-content='
+                            <div style="padding:20px;">
+                                ldentifikasi KRI:<br><ol><li>Setiap peristiwa Risiko harus memiliki KRI yang menjadi early warning signal sebelum terjadinya suatu peristiwa Risiko.</li><li>ldentifikasi KRI dapat menggunakan Fault Tree Analysis sebagaimana Diagram 2 di alas.</li><li>KRI harus leading indicator dan hindari menetapkan KRI lagging indicator.&nbsp;</li><li>KRI harus dilengkapi dengan batasanlthreshold sebagai alat monitor yang terdiri dari 3 (tiga) threshold yaitu batas bahaya, batas hati-hati, dan batas aman.</li><li>Nilai threshold dapat ditetapkan berdasarkan pertimbangan data historis, benchmarking, dan kebijakan strategi Risiko.</li></ol><div><u></u></div>
+                            </div>
+                        '>
+                                    <i class="ti ti-info-circle h5 text-secondary"></i>
+                                </a>
+                            </div>
                             <div class="col">
                                 <input type="text" class="form-control" name="kri_body">
                             </div>
                         </div>
                         <div class="row mb-3">
-                            <div class="col-3">Unit Satuan KRI<span class="text-danger">*</span></div>
+                            <div class="col-3">
+                                <span>Unit Satuan KRI<span class="text-danger">*</span></span>
+                                <a tabindex="0"
+                                    class="link-secondary link-offset-2 link-underline-opacity-0 link-underline-opacity-50-hover text-decoration-underline mx-1"
+                                    role="button" data-bs-toggle="popover" data-bs-trigger="focus"
+                                    data-bs-placement="right" title="Information" data-bs-html="true"
+                                    data-bs-content='
+                            <div style="padding:20px;">
+                                Unit satuan KRI bisa berbentuk amount/percentage/range/kualitatif
+                            </div>
+                        '>
+                                    <i class="ti ti-info-circle h5 text-secondary"></i>
+                                </a>
+                            </div>
+
                             <div class="col">
                                 <select name="kri_unit" class="form-select">
                                     <option>Pilih</option>

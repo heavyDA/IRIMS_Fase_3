@@ -311,7 +311,6 @@ const tables = {
 const contextForm = document.querySelector('#contextForm');
 const currentRiskNumber = contextForm.querySelector('[name="risk_number"]');
 currentRiskNumber.addEventListener('input', e => {
-    incidentRiskNumber.value = e.target.value
     incidentRiskCauseCode.value = e.target.value + '.' + incidentRiskCauseNumber.value
     treatmentRiskNumber.value = e.target.value
 })
@@ -914,7 +913,6 @@ const incidentForm = document.querySelector('#incidentForm');
 const incidentModalElement = document.querySelector('#incidentModal');
 const incidentModal = new Modal(incidentModalElement);
 
-const incidentRiskNumber = incidentForm.querySelector('[name="risk_number"]');
 const incidentRiskCauseNumber = incidentForm.querySelector('[name="risk_cause_number"]');
 const incidentRiskCauseCode = incidentForm.querySelector('[name="risk_cause_code"]');
 
@@ -952,7 +950,6 @@ incidentForm.addEventListener('reset', async () => {
 incidentModalElement.addEventListener('hide.bs.modal', async () => {
     incidentForm.reset();
     incidentForm.querySelector('[name="key"]').value = '';
-    incidentRiskNumber.value = currentRiskNumber.value;
     incidentRiskCauseNumber.value = risk_numbers[worksheet.incidents.length];
     incidentRiskCauseCode.value = currentRiskNumber.value + '.' + risk_numbers[worksheet.incidents.length];
 
