@@ -44,7 +44,7 @@ class DashboardController extends Controller
             ->leftJoin('worksheets as w', 'w.inherent_impact_probability_scale_id', '=', 'h.id')
             ->where('h.risk_scale', '>=', 12)
             ->groupBy('h.risk_level')
-            ->orderBy('h.risk_level_number', 'desc')
+            ->orderBy('h.impact_scale', 'desc')
             ->get();
 
         $count_worksheet_priortiy = 0;
