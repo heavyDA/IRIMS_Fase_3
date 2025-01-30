@@ -26,6 +26,7 @@ class ViewServiceProvider extends ServiceProvider
         View::composer('layouts.partials.sidebar', MenuComposer::class);
 
         View::composer([
+            'dashboard.index',
             'risk.process.index',
             'risk.assessment.index',
             'risk.top_risk.index',

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\DocumentStatus;
 use App\Models\Master\Official;
 use App\Models\RBAC\Role;
 use App\Models\Risk\Worksheet;
@@ -14,11 +15,6 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        $units = Official::getSubUnitOnly()
-            ->filterByRole(session()->get('current_role')?->name)
-            ->get();
-
-
         if (Role::hasLookUpUnitHierarchy()) {
             $unit = request('unit') ? request('unit') . '%' : Role::getDefaultSubUnit();
         } else {
@@ -27,13 +23,34 @@ class DashboardController extends Controller
 
         $count_worksheet = DB::table('ra_worksheets')
             ->selectRaw("
-                COALESCE(COUNT(IF(ra_worksheets.status = 'draft', 1, NULL))) as draft,
-                COALESCE(COUNT(IF(ra_worksheets.status != 'draft' && ra_worksheets.status != 'approved', 1, NULL))) as progress,
+                COALESCE(COUNT(IF(ra_worksheets.status != 'approved', 1, NULL))) as progress,
                 COALESCE(COUNT(IF(ra_worksheets.status = 'approved', 1, NULL))) as approved
             ")
             ->where('ra_worksheets.sub_unit_code', 'like', $unit)
             ->whereYear('ra_worksheets.created_at', request('year', date('Y')))
             ->first();
+
+        $data_worksheet_priority = DB::table('m_heatmaps as h')
+            ->selectRaw('h.risk_level, COALESCE(COUNT(w.inherent_impact_probability_scale_id), 0) as count')
+            ->withExpression(
+                'worksheets',
+                DB::table('ra_worksheets as w')
+                    ->select('wi.inherent_impact_probability_scale_id')
+                    ->leftJoin('ra_worksheet_identifications as wi', 'wi.worksheet_id', '=', 'w.id')
+                    ->where('w.sub_unit_code', 'like', $unit)
+                    ->whereStatus(DocumentStatus::APPROVED->value)
+                    ->whereYear('w.created_at', request('year', date('Y')))
+            )
+            ->leftJoin('worksheets as w', 'w.inherent_impact_probability_scale_id', '=', 'h.id')
+            ->where('h.risk_scale', '>=', 12)
+            ->groupBy('h.risk_level')
+            ->orderBy('h.risk_level_number', 'desc')
+            ->get();
+
+        $count_worksheet_priortiy = 0;
+        foreach ($data_worksheet_priority as $item) {
+            $count_worksheet_priortiy += $item->count;
+        }
 
         $count_mitigation = WorksheetMitigation::whereHas(
             'worksheet',
@@ -41,6 +58,28 @@ class DashboardController extends Controller
                 ->whereYear('ra_worksheets.created_at', request('year', date('Y')))
         )
             ->count();
+
+        $count_mitigation_monitoring = DB::table('ra_monitorings as m')
+            ->selectRaw('
+                COUNT(IF(ma.actualization_plan_status <> "discontinue", 1, NULL)) as progress,
+                COUNT(IF(ma.actualization_plan_status = "discontinue", 1, NULL)) as finished
+            ')
+            ->joinSub(
+                DB::table('ra_monitorings')
+                    ->select('worksheet_id', DB::raw('MAX(period_date) as period_date'))
+                    ->groupBy('worksheet_id'),
+                'latest',
+                function ($join) {
+                    $join->on('m.worksheet_id', '=', 'latest.worksheet_id');
+                    $join->on('m.period_date', '=', 'latest.period_date');
+                }
+            )
+            ->leftJoin('ra_worksheets as w', 'w.id', '=', 'm.worksheet_id')
+            ->leftJoin('ra_monitoring_actualizations as ma', 'ma.monitoring_id', '=', 'm.id')
+            ->where('w.sub_unit_code', 'like', $unit)
+            ->whereYear('w.created_at', request('year', date('Y')))
+            ->groupBy('m.id')
+            ->first();
 
         if (request()->ajax()) {
             $inherent_scales = DB::table('m_heatmaps')
@@ -112,7 +151,13 @@ class DashboardController extends Controller
             ]);
         }
 
+        $level = Role::getLevel();
+        $units = Official::getSubUnitOnly()
+            ->filterByRole(session()->get('current_role')?->name)
+            ->whereRaw('LENGTH(sub_unit_code) - LENGTH(REPLACE(sub_unit_code, ".", "")) = ?', ($level + 1))
+            ->latest('sub_unit_code')
+            ->get();
 
-        return view('dashboard.index', compact('units', 'count_worksheet', 'count_mitigation'));
+        return view('dashboard.index', compact('units', 'count_worksheet', 'count_worksheet_priortiy', 'count_mitigation', 'count_mitigation_monitoring'));
     }
 }

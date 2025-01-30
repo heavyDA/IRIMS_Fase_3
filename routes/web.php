@@ -64,6 +64,8 @@ Route::group(['middleware' => 'auth'], function () {
         Route::group(['as' => 'top_risk.', 'prefix' => 'top-risk'], function () {
             Route::get('', [TopRiskController::class, 'index'])->name('index');
             Route::post('', [TopRiskController::class, 'store'])->name('store');
+
+            Route::get('get-for-dashboard', [TopRiskController::class, 'get_for_dashboard'])->name('get_for_dashboard');
         });
 
 
