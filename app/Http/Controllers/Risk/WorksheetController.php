@@ -161,7 +161,7 @@ class WorksheetController extends Controller
                     if ($value == 'Pilih') {
                         $mitigation[$key] = null;
                     } else {
-                        $mitigation[$key] = $value;
+                        $mitigation[$key] = $key == 'mitigation_cost' ? ($value ?: '0') : $value;
                     }
                 }
 
@@ -495,7 +495,7 @@ class WorksheetController extends Controller
                     if ($value == 'Pilih') {
                         $mitigation[$key] = null;
                     } else {
-                        $mitigation[$key] = $value ?: '';
+                        $mitigation[$key] = $key == 'mitigation_cost' ? ($value ?: '0') : $value;
                     }
                 }
 
