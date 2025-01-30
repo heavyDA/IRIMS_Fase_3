@@ -32844,3 +32844,11 @@ ul.timeline > li > .timeline-panel:after {
 table.dataTable tbody td {
   vertical-align: top;
 }
+
+.ql-editor[contenteditable=false] {
+  background-color: rgb(247, 248, 250);
+}
+
+.choices[aria-disabled="true"] > .choices__inner{
+  background-color: rgb(247, 248, 250) !important;
+}

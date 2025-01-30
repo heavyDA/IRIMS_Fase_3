@@ -4,18 +4,22 @@ namespace App\Exports\Risk;
 
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\FromCollection;
+use Maatwebsite\Excel\Concerns\WithColumnFormatting;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use Maatwebsite\Excel\Concerns\WithTitle;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
+use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
+use Soundasleep\Html2Text;
 
-class MonitorinResidualExport implements FromCollection, WithTitle, WithHeadings, WithStyles
+class MonitoringResidualExport implements FromCollection, WithTitle, WithHeadings, WithStyles, WithColumnFormatting
 {
     protected array $headers = [
         'Data Item',
         'Peristiwa Risiko',
+        'Penyebab Risiko',
         'Asumsi Perhitungan Dampak',
         'Nilai Dampak',
         'Skala Dampak',
@@ -42,21 +46,21 @@ class MonitorinResidualExport implements FromCollection, WithTitle, WithHeadings
     protected int $count = 0;
 
     public function __construct(private Collection $worksheets) {}
+
     public function collection()
     {
         $data = [];
         $residuals = [];
         foreach ($this->worksheets as $worksheet) {
-            $residual = [];
             foreach ($worksheet->monitorings as $monitoring) {
                 $residualDefault = [
-                    'impact_value' => array_fill(1, 4, 0),
-                    'impact_scale' => array_fill(1, 4, 0),
-                    'impact_probability_value' => array_fill(1, 4, 0),
-                    'impact_probability_scale' => array_fill(1, 4, 0),
-                    'risk_exposure' => array_fill(1, 4, 0),
-                    'risk_scale' => array_fill(1, 4, 0),
-                    'risk_level' => array_fill(1, 4, 0),
+                    'impact_value' => array_fill(1, 4, '-'),
+                    'impact_scale' => array_fill(1, 4, '-'),
+                    'impact_probability_value' => array_fill(1, 4, '-'),
+                    'impact_probability_scale' => array_fill(1, 4, '-'),
+                    'risk_exposure' => array_fill(1, 4, '-'),
+                    'risk_scale' => array_fill(1, 4, '-'),
+                    'risk_level' => array_fill(1, 4, '-'),
                 ];
 
                 foreach ($monitoring->residuals->sortBy('quarter') as $residual) {
@@ -66,7 +70,12 @@ class MonitorinResidualExport implements FromCollection, WithTitle, WithHeadings
                     }
 
                     $item = $residuals[$residualKey];
-
+                    $item = array_merge([
+                        'worksheet_number' => $worksheet->worksheet_number,
+                        'risk_chronology_body' => str_replace('\n', '\r\n', Html2Text::convert(html_entity_decode($worksheet->identification->risk_chronology_body))),
+                        'risk_cause_body' => str_replace('\n', '\r\n', Html2Text::convert(html_entity_decode($residual->incident->risk_cause_body))),
+                        'inherent_body' => str_replace('\n', '\r\n', Html2Text::convert(html_entity_decode($worksheet->identification->inherent_body))),
+                    ], $item);
                     $item['impact_value'][$residual->quarter] = $residual->impact_value ? money_format($residual->impact_value) : '-';
                     $item['impact_scale'][$residual->quarter] = $residual->impact_scale?->scale;
                     $item['impact_probability_value'][$residual->quarter] = $residual->impact_probability ?? '-';
@@ -74,10 +83,27 @@ class MonitorinResidualExport implements FromCollection, WithTitle, WithHeadings
                     $item['risk_exposure'][$residual->quarter] = $residual->risk_exposure ? money_format($residual->risk_exposure) : '-';
                     $item['risk_scale'][$residual->quarter] = $residual->risk_scale ?? '-';
                     $item['risk_level'][$residual->quarter] = $residual->risk_level ?? '-';
-
+                    $item['risk_mitigation_effectiveness'] = $residual->risk_mitigation_effectiveness == null ? '-' : ($residual->risk_mitigation_effectiveness ? 'Ya' : 'Tidak');
                     $residuals[$residualKey] = $item;
                 }
             }
+        }
+
+        foreach ($residuals as $residual) {
+            $data[] = [
+                'worksheet_number' => $residual['worksheet_number'],
+                'risk_chronology_body' => $residual['risk_chronology_body'],
+                'risk_cause_body' => $residual['risk_cause_body'],
+                'inherent_body' => $residual['inherent_body'],
+                ...array_values($residual['impact_value']),
+                ...array_values($residual['impact_scale']),
+                ...array_values($residual['impact_probability_value']),
+                ...array_values($residual['impact_probability_scale']),
+                ...array_values($residual['risk_exposure']),
+                ...array_values($residual['risk_scale']),
+                ...array_values($residual['risk_level']),
+                'risk_mitigation_effectiveness' => $residual['risk_mitigation_effectiveness'],
+            ];
         }
 
         return collect($data);
@@ -87,6 +113,15 @@ class MonitorinResidualExport implements FromCollection, WithTitle, WithHeadings
     {
         [$this->headers, $this->merged_cells] = excel_build_nested_headers($this->headers, $this->nested_columns);
         return $this->headers;
+    }
+
+    public function columnFormats(): array
+    {
+        return [
+            'B' => NumberFormat::FORMAT_TEXT,
+            'C' => NumberFormat::FORMAT_TEXT,
+            'D' => NumberFormat::FORMAT_TEXT,
+        ];
     }
 
     public function styles(Worksheet $sheet)
@@ -174,6 +209,10 @@ class MonitorinResidualExport implements FromCollection, WithTitle, WithHeadings
             $this->count
         );
 
+        for ($i = 3; $i <= $this->count + 2; $i++) {
+            $sheet->getRowDimension($i)->setRowHeight(-1);
+        }
+
         $sheet->getStyle("A1:{$lastColumn}" . $this->count + 2)->applyFromArray([
             'borders' => [
                 'allBorders' => [
@@ -182,6 +221,12 @@ class MonitorinResidualExport implements FromCollection, WithTitle, WithHeadings
                 ]
             ]
         ]);
+
+        $sheet->getStyle('B3:D' . ($this->count + 2))
+            ->getAlignment()
+            ->setWrapText(true);
+        $sheet->getStyle("A3:{$lastColumn}" . $this->count + 2)
+            ->getAlignment()->setVertical(Alignment::VERTICAL_TOP);
     }
 
     private function getColumnLetter(int $index): string

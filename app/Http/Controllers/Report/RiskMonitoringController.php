@@ -100,6 +100,7 @@ class RiskMonitoringController extends Controller
                 'actualizations',
                 'actualizations.mitigation.incident',
                 'incident',
+                'residuals.incident',
                 'residuals.impact_scale',
                 'residuals.impact_probability_scale',
             )->oldest('period_date'),

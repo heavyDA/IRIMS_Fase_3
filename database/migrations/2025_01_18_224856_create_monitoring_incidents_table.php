@@ -37,7 +37,7 @@ return new class extends Migration
             $table->text('loss_description')->default('');
             $table->string('loss_value')->default('');
 
-            $table->boolean('incident_repetitive')->default(false);
+            $table->boolean('incident_repetitive')->nullable();
             $table->foreignId('incident_frequency_id')
                 ->nullable()
                 ->constrained('m_incident_frequencies', null, 'monitoring_incidents_frequency_idx')
@@ -48,7 +48,7 @@ return new class extends Migration
             $table->text('follow_up_plan')->default('');
             $table->text('related_party')->default('');
 
-            $table->boolean('insurance_status')->default(false);
+            $table->boolean('insurance_status')->nullable();
             $table->string('insurance_permit')->default('');
             $table->string('insurance_claim')->default('');
 

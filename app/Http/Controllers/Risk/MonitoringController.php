@@ -214,7 +214,7 @@ class MonitoringController extends Controller
                 if (str_contains($key, 'category') || $key == 'incident_frequency') {
                     $incident[$key . '_id'] = $value == 'Pilih' ? null : $value;
                 } else if ($key == 'incident_repetitive' || $key == 'insurance_status') {
-                    $incident[$key] = $value == 'Pilih' || $value == '0' ? false : $value;
+                    $incident[$key] = $value == 'Pilih' ? null : $value != '0';
                 } else {
                     $incident[$key] = $value ?: '';
                 }

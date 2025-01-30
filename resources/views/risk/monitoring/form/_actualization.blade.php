@@ -84,7 +84,19 @@
                         <input type="hidden" name="actualization_mitigation_id">
                         <div class="row mb-2">
                             <div class="col-3">
-                                No. Penyeybab Risiko
+                                <span>No. Penyebab Risiko</span>
+                                <a tabindex="0"
+                                    class="link-secondary link-offset-2 link-underline-opacity-0 link-underline-opacity-50-hover text-decoration-underline mx-1"
+                                    role="button" data-bs-toggle="popover" data-bs-trigger="focus"
+                                    data-bs-placement="right" data-bs-html="true"
+                                    data-bs-content="
+                            <div style=&quot;padding:20px;&quot;>
+                            <ol><li>Penyebab Risiko yang diidentifikasi adalah akar penyebab/root cause dari terjadinya Risiko.</li><li>Penyebab Risiko dapat bersumber dari sisi manusia, proses, jaringan, sistem, atau sumber lain yang berpotensi memicu terjadinya Risiko.</li><li>Apabila terdapat lebih dari satu penyebab Risiko dalam satu sumber Risiko harus dipastikan bahwa penyebab tersebut satu level kedalaman sebagai root cause. Apabila berbeda level kedalaman, maka dapat terjadi tumpang-tindih penyebab yang akan merancukan program perlakuan Risiko.</li><li>Penyebab Risiko merupakan kondisi yang terjadi saat dilakukan identifikasi Risike. ldentifikasi penyebab Risiko dapat mengacu pada Diagram 2 Fault Tree&nbsp;Analysis.</li></ol>
+                        </div>
+                        "
+                                    aria-label="Information" data-bs-original-title="Information">
+                                    <i class="ti ti-info-circle h5 text-secondary"></i>
+                                </a>
                             </div>
                             <div class="col">
                                 <input type="text" disabled class="not-allowed form-control" name="risk_cause_number">
@@ -162,7 +174,19 @@
                         </div>
                         <div class="row mb-2">
                             <div class="col-3">
-                                Key Risk Indicators<span class="text-danger">*</span>
+                                <span>Key Risk Indicators <span class="text-danger">*</span></span>
+                                <a tabindex="0"
+                                    class="link-secondary link-offset-2 link-underline-opacity-0 link-underline-opacity-50-hover text-decoration-underline mx-1"
+                                    role="button" data-bs-toggle="popover" data-bs-trigger="focus"
+                                    data-bs-placement="right" data-bs-html="true"
+                                    data-bs-content="
+                            <div style=&quot;padding:20px;&quot;>
+                                ldentifikasi KRI:<br><ol><li>Setiap peristiwa Risiko harus memiliki KRI yang menjadi early warning signal sebelum terjadinya suatu peristiwa Risiko.</li><li>ldentifikasi KRI dapat menggunakan Fault Tree Analysis sebagaimana Diagram 2 di alas.</li><li>KRI harus leading indicator dan hindari menetapkan KRI lagging indicator.&nbsp;</li><li>KRI harus dilengkapi dengan batasanlthreshold sebagai alat monitor yang terdiri dari 3 (tiga) threshold yaitu batas bahaya, batas hati-hati, dan batas aman.</li><li>Nilai threshold dapat ditetapkan berdasarkan pertimbangan data historis, benchmarking, dan kebijakan strategi Risiko.</li></ol><div><u></u></div>
+                            </div>
+                        "
+                                    aria-label="Information" data-bs-original-title="Information">
+                                    <i class="ti ti-info-circle h5 text-secondary"></i>
+                                </a>
                             </div>
                             <div class="col">
                                 <input type="text" class="form-control not-allowed" disabled name="actualization_kri">
@@ -177,9 +201,9 @@
                                     <label class="badge bg-success">Threshold</label>
                                     <select name="actualization_kri_threshold" class="form-select">
                                         <option>Pilih</option>
-                                        <option value="hijau">hijau</option>
-                                        <option value="kuning">kuning</option>
-                                        <option value="merah">merah</option>
+                                        <option value="hijau">Hijau</option>
+                                        <option value="kuning">Kuning</option>
+                                        <option value="merah">Merah</option>
                                     </select>
                                 </div>
                                 <div class="col">

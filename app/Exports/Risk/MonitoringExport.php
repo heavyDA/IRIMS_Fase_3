@@ -12,10 +12,10 @@ class MonitoringExport implements WithMultipleSheets
     public function sheets(): array
     {
         return [
+            new MonitoringResidualExport($this->worksheets),
             new MonitoringActualizationExport($this->worksheets),
             new MonitoringAlterationExport($this->worksheets),
             new MonitoringIncidentExport($this->worksheets),
-            new MonitorinResidualExport($this->worksheets),
         ];
     }
 }

@@ -5,7 +5,7 @@
                 <div class="col-3">Unit Kerja</div>
                 <div class="col">
                     <input disabled type="text" name="unit_name" class="form-control not-allowed"
-                        value="{{ $worksheet->unit_name }}">
+                        value="[{{ $worksheet->personnel_area_code }}] {{ $worksheet->sub_unit_name }}">
                 </div>
             </div>
             <div class="row mb-1">
@@ -24,7 +24,17 @@
                 </div>
             </div>
             <div class="row mb-1">
-                <div class="col-3">No. Risiko</div>
+                <div class="col-3">
+                    <span>No. Risiko</span>
+                    <a tabindex="0"
+                        class="link-secondary link-offset-2 link-underline-opacity-0 link-underline-opacity-50-hover text-decoration-underline mx-1"
+                        role="button" data-bs-toggle="popover" data-bs-trigger="focus" data-bs-placement="right"
+                        data-bs-html="true"
+                        data-bs-content="<p>No. Risiko adalah nomor unik untuk setiap risiko yang diidentifikasikan.</p><p>Ditulis sebagai berikut AREA-SUB_UNIT-NO_URUT</p><p>Contoh: PST-OPP-1</p>"
+                        aria-label="Information" data-bs-original-title="Information">
+                        <i class="ti ti-info-circle h5 text-secondary"></i>
+                    </a>
+                </div>
                 <div class="col">
                     <input type="text" value="{{ $worksheet->worksheet_number }}" name="risk_number" disabled
                         class="not-allowed form-control" value="{{ $worksheet->worksheet_number }}">
@@ -39,7 +49,19 @@
             </div>
             <div class="row mb-1">
                 <div class="col-3">
-                    Peristiwa Risiko
+                    <span>Peristiwa Risiko</span>
+                    <a tabindex="0"
+                        class="link-secondary link-offset-2 link-underline-opacity-0 link-underline-opacity-50-hover text-decoration-underline mx-1"
+                        role="button" data-bs-toggle="popover" data-bs-trigger="focus" data-bs-placement="right"
+                        data-bs-html="true"
+                        data-bs-content="
+                        <div class=&quot;col-md-12&quot; style=&quot;padding:20px;&quot;>
+                        <p>Diisi dengan peristiwa risiko yang relevan serta peristiwa risko harus diidentifikasi secara tepat <strong>(bukan negasi sasaran, negasi dampak)</strong></p>
+                    </div>
+                    "
+                        aria-label="Information" data-bs-original-title="Information"><i
+                            class="ti ti-info-circle h5 text-secondary"></i>
+                    </a>
                 </div>
                 <div class="col">
                     <div id="risk_chronology_body-editor" class="textarea not-allowed"></div>
@@ -60,7 +82,15 @@
         <div class="col">
             <div class="row mb-1">
                 <div class="col-3">
-                    {{ $isQuantitative ? 'Asumsi Perhitungan Dampak Kuantitatif' : 'Penjelasan Dampak Kualitatif' }}
+                    <span>{{ $isQuantitative ? 'Asumsi Perhitungan Dampak Kuantitatif' : 'Penjelasan Dampak Kualitatif' }}</span>
+                    <a tabindex="0"
+                        class="link-secondary link-offset-2 link-underline-opacity-0 link-underline-opacity-50-hover text-decoration-underline mx-1"
+                        role="button" data-bs-toggle="popover" data-bs-trigger="focus" data-bs-placement="right"
+                        data-bs-html="true"
+                        data-bs-content="<p>Diisi penjelasan atas asumsi/pendekatan yang dipakai untuk menghitung nilai dampak.</p>"
+                        aria-label="Information" data-bs-original-title="Information"
+                        aria-describedby="popover858117"><i class="ti ti-info-circle h5 text-secondary"></i>
+                    </a>
                 </div>
                 <div class="col">
                     <div id="inherent_body-editor" class="textarea not-allowed"></div>
@@ -81,7 +111,18 @@
                 </div>
             </div>
             <div class="row mb-3">
-                <div class="col-3">Skala Dampak Residual {{ $isQuantitative ? 'Kuantitatif' : 'Kualitatif' }}
+                <div class="col-3">
+                    <span>Skala Dampak Residual {{ $isQuantitative ? 'Kuantitatif' : 'Kualitatif' }} <i
+                            class="text-danger">*</i></span>
+                    <a tabindex="0"
+                        class="link-secondary link-offset-2 link-underline-opacity-0 link-underline-opacity-50-hover text-decoration-underline mx-1"
+                        role="button" data-bs-toggle="popover" data-bs-trigger="focus" data-bs-placement="right"
+                        data-bs-html="true"
+                        data-bs-content="<p>Diisi dengan penilaian dampak Risiko Inheren dengan skala 1 s.d. 5
+                        <br><strong>Reference to Table Skala KBUMN</strong></p>"
+                        aria-label="Information" data-bs-original-title="Information"><i
+                            class="ti ti-info-circle h5 text-secondary"></i>
+                    </a>
                 </div>
                 <div class="col row">
                     @for ($quarter = 1; $quarter < 5; $quarter++)
@@ -96,7 +137,9 @@
                 </div>
             </div>
             <div class="row mb-3">
-                <div class="col-3">Nilai Probabilitas Residual {{ $isQuantitative ? 'Kuantitatif' : 'Kualitatif' }}
+                <div class="col-3">
+                    <span>Nilai Probabilitas Residual {{ $isQuantitative ? 'Kuantitatif' : 'Kualitatif' }} <i
+                            class="text-danger">*</i></span>
                 </div>
                 <div class="col row">
                     @for ($quarter = 1; $quarter < 5; $quarter++)
@@ -162,7 +205,7 @@
                 </div>
             </div>
             <div class="row mb-3">
-                <div class="col-3">Efektifitas Perlakuan Risiko</div>
+                <div class="col-3"><span>Efektifitas Perlakuan Risiko <i class="text-danger">*</i></span></div>
                 <div class="col">
                     <select class="form-select w-100" name="risk_mitigation_effectiveness">
                         <option value="">Pilih</option>

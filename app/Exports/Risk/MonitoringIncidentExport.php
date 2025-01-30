@@ -10,6 +10,7 @@ use Maatwebsite\Excel\Concerns\WithTitle;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
+use Soundasleep\Html2Text;
 
 class MonitoringIncidentExport implements FromCollection, WithTitle, WithStyles, WithHeadings
 {
@@ -60,22 +61,22 @@ class MonitoringIncidentExport implements FromCollection, WithTitle, WithStyles,
 
                 $data[] = [
                     'Data Item' => $worksheet->worksheet_number,
-                    'Nama Kejadian' => $monitoring->incident?->incident_body ?? '',
-                    'Identifikasi Kejadian ' => $monitoring->incident?->incident_identification ?? '',
+                    'Nama Kejadian' => str_replace('\n', '\r\n', Html2Text::convert(html_entity_decode($monitoring->incident?->incident_body ?? ''))),
+                    'Identifikasi Kejadian ' => str_replace('\n', '\r\n', Html2Text::convert(html_entity_decode($monitoring->incident?->incident_identification ?? ''))),
                     'Kategori Kejadian' => $monitoring->incident?->incident_category?->name ?? '',
-                    'Sumber Penyebab Kejadian' => $monitoring->incident?->incident_source ?? '',
-                    'Penyebab Kejadian' => $monitoring->incident?->incident_cause ?? '',
-                    'Penanganan saat Kejadian' => $monitoring->incident?->incident_handling ?? '',
-                    'Deskripsi Kejadian - Risk Event' => $monitoring->incident?->incident_description ?? '',
+                    'Sumber Penyebab Kejadian' => str_replace('\n', '\r\n', Html2Text::convert(html_entity_decode($monitoring->incident?->incident_source ?? ''))),
+                    'Penyebab Kejadian' => str_replace('\n', '\r\n', Html2Text::convert(html_entity_decode($monitoring->incident?->incident_cause ?? ''))),
+                    'Penanganan saat Kejadian' => str_replace('\n', '\r\n', Html2Text::convert(html_entity_decode($monitoring->incident?->incident_handling ?? ''))),
+                    'Deskripsi Kejadian - Risk Event' => str_replace('\n', '\r\n', Html2Text::convert(html_entity_decode($monitoring->incident?->incident_description ?? ''))),
                     'Kategori Risiko Perusahaan' => $riskCategory,
-                    'Penjelasan Kerugian' => $monitoring->incident?->loss_description ?? '',
+                    'Penjelasan Kerugian' => str_replace('\n', '\r\n', Html2Text::convert(html_entity_decode($monitoring->incident?->loss_description ?? ''))),
                     'Nilai Kerugian' => $monitoring->incident?->loss_value ?? '',
                     'Kejadian Berulang' => $answers[$monitoring->incident?->incident_repetitive ?? null],
                     'Frekuensi Kejadian' => $monitoring->incident?->incident_frequency?->name ?? '',
-                    'Mitigasi yang Direncanakan' => $monitoring->incident?->mitigation_plan ?? '',
-                    'Realisasi Mitigasi' => $monitoring->incident?->actualization_plan ?? '',
-                    'Perbaikan Mendatang' => $monitoring->incident?->follow_up_plan ?? '',
-                    'Pihak terkait' => $monitoring->incident?->related_party ?? '',
+                    'Mitigasi yang Direncanakan' => str_replace('\n', '\r\n', Html2Text::convert(html_entity_decode($monitoring->incident?->mitigation_plan ?? ''))),
+                    'Realisasi Mitigasi' => str_replace('\n', '\r\n', Html2Text::convert(html_entity_decode($monitoring->incident?->actualization_plan ?? ''))),
+                    'Perbaikan Mendatang' => str_replace('\n', '\r\n', Html2Text::convert(html_entity_decode($monitoring->incident?->follow_up_plan ?? ''))),
+                    'Pihak terkait' => str_replace('\n', '\r\n', Html2Text::convert(html_entity_decode($monitoring->incident?->related_party ?? ''))),
                     'Status Asuransi' => $answers[$monitoring->incident?->insurance_status ?? null],
                     'Nilai Premi' => $monitoring->incident?->insurance_premi ? money_format($monitoring->incident->insurance_premi) : '',
                     'Nilai Klaim' => $monitoring->incident?->insurance_claim ? money_format($monitoring->incident->insurance_claim) : '',
