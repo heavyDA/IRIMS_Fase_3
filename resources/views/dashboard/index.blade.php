@@ -52,7 +52,7 @@
                                 </div>
                                 <div class="flex-fill">
                                     <span class="d-block mb-1">Kertas Kerja</span>
-                                    <h3 class="fw-semibold mb-0 lh-1">{{ $count_worksheet->progress }}</h3>
+                                    <h3 class="fw-semibold mb-0 lh-1">{{ $count_worksheet?->progress ?? 0 }}</h3>
                                 </div>
                             </div>
                         </div>
@@ -69,7 +69,7 @@
                                 </div>
                                 <div class="flex-fill">
                                     <span class="d-block mb-1">Profil Risiko</span>
-                                    <h3 class="fw-semibold mb-0 lh-1">{{ $count_worksheet->approved }}</h3>
+                                    <h3 class="fw-semibold mb-0 lh-1">{{ $count_worksheet?->approved ?? 0 }}</h3>
                                 </div>
                             </div>
                         </div>
@@ -120,7 +120,7 @@
                                 </div>
                                 <div class="flex-fill">
                                     <span class="d-block mb-1">Progress Mitigasi</span>
-                                    <h3 class="fw-semibold mb-0 lh-1">{{ $count_mitigation_monitoring->progress }}</h3>
+                                    <h3 class="fw-semibold mb-0 lh-1">{{ $count_mitigation_monitoring?->progress ?? 0 }}</h3>
                                 </div>
                             </div>
                         </div>
@@ -137,7 +137,7 @@
                                 </div>
                                 <div class="flex-fill">
                                     <span class="d-block mb-1">Penyelesaian Mitigasi</span>
-                                    <h3 class="fw-semibold mb-0 lh-1">{{ $count_mitigation_monitoring->finished }}</h3>
+                                    <h3 class="fw-semibold mb-0 lh-1">{{ $count_mitigation_monitoring?->finished ?? 0 }}</h3>
                                 </div>
                             </div>
                         </div>
