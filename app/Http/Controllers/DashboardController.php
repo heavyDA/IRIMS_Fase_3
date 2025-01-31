@@ -23,7 +23,8 @@ class DashboardController extends Controller
 
         $count_worksheet = DB::table('ra_worksheets')
             ->selectRaw("
-                COALESCE(COUNT(IF(ra_worksheets.status != 'approved', 1, NULL))) as progress,
+                COALESCE(COUNT(IF(ra_worksheets.status = 'draft', 1, NULL))) as draft,
+                COALESCE(COUNT(IF(ra_worksheets.status != 'draft' and ra_worksheets.status != 'approved', 1, NULL))) as progress,
                 COALESCE(COUNT(IF(ra_worksheets.status = 'approved', 1, NULL))) as approved
             ")
             ->where('ra_worksheets.sub_unit_code', 'like', $unit)

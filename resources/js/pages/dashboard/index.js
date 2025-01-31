@@ -373,7 +373,7 @@ if (document.querySelector('#top-risk-table')) {
         pageLength: -1,
         drawCallback: function (settings) {
             const api = this.api()
-            const columnsToMerge = [0, 1, 2, 3, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+            const columnsToMerge = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17]
 
             // Reset all cells visibility first
             api.cells().every(function () {
@@ -590,14 +590,14 @@ if (document.querySelector('#top-risk-table')) {
             },
             {
                 sortable: true,
-                data: 'residual_4_risk_scale',
-                name: 'residual_4_risk_scale',
+                data: 'residual_risk_scale',
+                name: 'residual_risk_scale',
                 width: '100px',
             },
             {
                 sortable: true,
-                data: 'residual_4_risk_scale',
-                name: 'residual_4_risk_scale',
+                data: 'residual_risk_level',
+                name: 'residual_risk_level',
                 width: '100px',
             },
         ],

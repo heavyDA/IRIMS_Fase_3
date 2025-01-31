@@ -415,7 +415,7 @@
     </div>
 
     <button type="button" class="btn btn-secondary-light" data-bs-toggle="modal" data-bs-target="#incidentModal">
-        <i class="ti ti-plus"></i>Tambah Peristiwa Risiko
+        <i class="ti ti-plus"></i>Tambah Penyebab Risiko
     </button>
 
     <div class="row mt-2">
