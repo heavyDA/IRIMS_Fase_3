@@ -481,6 +481,7 @@ strategyForm.addEventListener('submit', (e) => {
 strategyModalElement.addEventListener('hidden.bs.modal', () => {
     strategyForm.reset();
     strategyForm.querySelector('[name="key"]').value = '';
+    strategyForm.querySelector('[name="id"]').value = '';
 
     strategyRiskValueLimit.value = fetchers.risk_metric.limit ? formatNumeral(fetchers.risk_metric.limit, defaultConfigFormatNumeral) : '';
     strategyDecisionChoices.destroy();

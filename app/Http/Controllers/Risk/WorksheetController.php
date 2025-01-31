@@ -391,7 +391,9 @@ class WorksheetController extends Controller
                 }
             }
 
-            $worksheet->strategies()->whereNotIn('id', $strategyIds)->delete();
+            if ($strategyIds) {
+                $worksheet->strategies()->whereNotIn('id', array_unique($strategyIds))->delete();
+            }
             $strategies = $worksheet->strategies()->createMany($strategies);
 
             $identification = [];
