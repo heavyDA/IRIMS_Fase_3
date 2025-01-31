@@ -17,6 +17,7 @@
                     <th rowspan="2" style="width: 100px;">Status Rencana Perlakuan Risiko</th>
                     <th rowspan="2">Penjelasan Status Rencana Perlakuan Risiko</th>
                     <th colspan="4">Progress Pelaksanaan Rencana Perlakuan Risiko</th>
+                    <th colspan="4">Dokumen Pendukung</th>
                 </tr>
                 <tr>
                     @for ($i = 1; $i <= 12; $i++)
@@ -67,6 +68,18 @@
                                     <td>-</td>
                                 @endif
                             @endfor
+
+                            @if ($actualization->documents)
+                                <td>
+                                    <div class="d-flex flex-column gap-2">
+                                        @foreach ($actualization->documents as $document)
+                                            <a class="badge bg-success-transparent" target="_blank"
+                                                href="{{ route('file.serve', $document['url']) }}"
+                                                target="_blank">{{ $document['name'] }}</a>
+                                        @endforeach
+                                    </div>
+                                </td>
+                            @endif
                         </tr>
                     @endforeach
                 @endisset
