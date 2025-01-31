@@ -23,6 +23,7 @@ class OfficialJob
     {
         try {
             $http = Http::withHeader('Authorization', env('EOFFICE_TOKEN'))
+                ->withoutVerifying()
                 ->asForm()
                 ->post(env('EOFFICE_URL') . '/pejabat_get', ['effective_date' => '2025-01-06']);
 

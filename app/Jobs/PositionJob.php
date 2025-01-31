@@ -29,6 +29,7 @@ class PositionJob
     {
         try {
             $http = Http::withHeader('Authorization', env('EOFFICE_TOKEN'))
+                ->withoutVerifying()
                 ->asForm()
                 ->post(env('EOFFICE_URL') . '/roles_get', ['effective_date' => '2025-01-06']);
 

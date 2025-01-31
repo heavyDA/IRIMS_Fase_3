@@ -26,6 +26,7 @@ class AuthController extends Controller
     {
         try {
             $response = Http::withHeader('Authorization', env('EOFFICE_TOKEN'))
+                ->withoutVerifying()
                 ->timeout(5)
                 ->asForm()
                 ->post(env('EOFFICE_URL') . '/login_user', $request->only('username', 'password'));
@@ -99,6 +100,7 @@ class AuthController extends Controller
         try {
             $subUnit = auth()->user()->sub_unit_code;
             $response = Http::withHeader('Authorization', env('EOFFICE_TOKEN'))
+                ->withoutVerifying()
                 ->timeout(10)
                 ->asForm()
                 ->post(env('EOFFICE_URL') . '/pejabat_get', [
