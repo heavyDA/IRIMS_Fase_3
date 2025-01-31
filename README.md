@@ -8,8 +8,8 @@ This guide covers the setup of a Laravel application using **Swoole** as the PHP
 
 Ensure that your server has the following installed:
 
-- Ubuntu 22.04 LTS
-- Access to a **root** or **sudo** user
+-   Ubuntu 22.04 LTS
+-   Access to a **root** or **sudo** user
 
 ---
 
@@ -34,7 +34,7 @@ sudo apt update
 Install **PHP 8.3** and required extensions (CLI and others needed for Laravel and Swoole):
 
 ```bash
-sudo apt install -y php8.3-cli php8.3-dev php8.3-mysql php8.3-xml php8.3-curl php8.3-mbstring php8.3-bcmath php8.3-zip php8.3-pcntl php8.3-gd php8.3-intl
+sudo apt install -y php8.3-cli php8.3-dev php8.3-mysql php8.3-xml php8.3-curl php8.3-mbstring php8.3-bcmath php8.3-zip php8.3-gd php8.3-intl libcurl4-openssl-dev
 ```
 
 ### Step 3: Install Swoole PHP Extension
@@ -42,19 +42,19 @@ sudo apt install -y php8.3-cli php8.3-dev php8.3-mysql php8.3-xml php8.3-curl ph
 Install the **Swoole** extension via **PECL**:
 
 ```bash
-sudo pecl install swoole
+pecl install -D 'enable-sockets="no" enable-openssl="yes" enable-http2="yes" enable-mysqlnd="yes" enable-hook-curl="yes" enable-cares="yes" with-postgres="yes"' openswoole
 ```
 
 Enable the Swoole extension:
 
 ```bash
-echo "extension=swoole" | sudo tee /etc/php/8.3/cli/conf.d/20-swoole.ini
+sudo bash -c "echo 'extension=openswoole' >> $(php -i | grep /.+/php.ini -oE)"
 ```
 
 Verify the installation:
 
 ```bash
-php -m | grep swoole
+php -m | grep openswoole
 ```
 
 ---
@@ -62,6 +62,7 @@ php -m | grep swoole
 ## 2. **MariaDB 11.4 Database Server Setup**
 
 ### **2.1 Add MariaDB 11.4 Repository**
+
 ```bash
 sudo apt install -y software-properties-common
 sudo add-apt-repository 'deb [arch=amd64,arm64,ppc64el] https://mirrors.gigenet.com/mariadb/repo/11.4/ubuntu jammy main'
@@ -69,48 +70,93 @@ sudo apt update
 ```
 
 ### **2.2 Install MariaDB**
+
 ```bash
 sudo apt install -y mariadb-server mariadb-client
 ```
 
 ### **2.3 Secure MariaDB Installation**
+
 Run the secure installation script:
+
 ```bash
 sudo mysql_secure_installation
 ```
-- Set a root password.
-- Remove anonymous users.
-- Disallow remote root login.
-- Remove the test database.
-- Reload privileges.
+
+-   Set a root password.
+-   Remove anonymous users.
+-   Disallow remote root login.
+-   Remove the test database.
+-   Reload privileges.
 
 ### **2.4 Configure MariaDB**
+
 Edit the configuration file:
+
 ```bash
-sudo nano /etc/mysql/mariadb.conf.d/50-server.cnf
+sudo nano /etc/my.cnf
 ```
+
 Recommended settings:
+
 ```ini
 [mysqld]
-max_connections         = 500
-innodb_buffer_pool_size = 1G
-innodb_log_file_size    = 256M
-innodb_file_per_table   = 1
-innodb_flush_log_at_trx_commit = 2
-query_cache_size        = 64M
-query_cache_type        = 1
+# Basic Settings
+bind-address = 0.0.0.0  # Allow remote access (change if needed)
+max_connections = 150   # Adjust based on workload
+skip-name-resolve       # Speed up connections by skipping DNS lookups
+
+# InnoDB Optimizations
+innodb_buffer_pool_size = 2G  # 50% of total RAM
+innodb_log_file_size = 512M   # Large redo logs for better write performance
+innodb_log_buffer_size = 16M
+innodb_flush_method = O_DIRECT
+innodb_flush_log_at_trx_commit = 2  # Reduces I/O overhead
+innodb_thread_concurrency = 4  # Equal to 2x CPU cores
+
+# Table Cache & Index Optimization
+table_open_cache = 4000
+open_files_limit = 8000
+thread_cache_size = 64
+query_cache_type = 0  # Query cache is deprecated, best to disable it
+query_cache_size = 0
+
+# Sorting & Joins
+tmp_table_size = 64M
+max_heap_table_size = 64M
+sort_buffer_size = 2M
+read_rnd_buffer_size = 4M
+join_buffer_size = 4M
+
+# Logging (Adjust as needed)
+slow_query_log = 1
+slow_query_log_file = /var/log/mysql-slow.log
+long_query_time = 2  # Log queries that take longer than 2 seconds
+log_error = /var/log/mysql/error.log
+
+# Binary Logging (Enable if you need replication or point-in-time recovery)
+server-id = 1
+log_bin = /var/log/mysql-bin.log
+expire_logs_days = 7
+binlog_format = ROW
 ```
+
 Restart MariaDB:
+
 ```bash
 sudo systemctl restart mariadb
 ```
 
 ### **2.5 Create Database and User**
+
 Log in to the MariaDB shell:
+
 ```bash
 sudo mysql -u root -p
 ```
+
 Run the following commands:
+
 ```sql
 CREATE DATABASE laravel_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 CREATE USER 'laravel_user'@'%' IDENTIFIED BY 'your_password';
@@ -120,22 +166,23 @@ EXIT;
 ```
 
 ### **2.6 Enable Remote Access (Optional)**
+
 1. Edit the configuration:
-   ```bash
-   sudo nano /etc/mysql/mariadb.conf.d/50-server.cnf
-   ```
-   Update `bind-address`:
-   ```ini
-   bind-address = 0.0.0.0
-   ```
+    ```bash
+    sudo nano /etc/mysql/mariadb.conf.d/50-server.cnf
+    ```
+    Update `bind-address`:
+    ```ini
+    bind-address = 0.0.0.0
+    ```
 2. Restart MariaDB:
-   ```bash
-   sudo systemctl restart mariadb
-   ```
+    ```bash
+    sudo systemctl restart mariadb
+    ```
 3. Allow MariaDB through the firewall:
-   ```bash
-   sudo ufw allow 3306
-   ```
+    ```bash
+    sudo ufw allow 3306
+    ```
 
 ---
 
@@ -351,7 +398,7 @@ RestartSec=3
 WantedBy=multi-user.target
 ```
 
-- Make sure to replace `/var/www/laravel` with the path to your Laravel application directory.
+-   Make sure to replace `/var/www/laravel` with the path to your Laravel application directory.
 
 #### Step 2: **Systemd Service for Laravel Queue**
 
