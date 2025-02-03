@@ -34,6 +34,7 @@
                         <option {{ $year->year == date('Y') ? 'selected' : '' }} value={{ $year->year }}>
                             {{ $year->year }}</option>
                     @endforeach
+                    <option>2024</option>
                 </select>
             </div>
         </form>

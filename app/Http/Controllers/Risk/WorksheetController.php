@@ -192,6 +192,14 @@ class WorksheetController extends Controller
     public function show(string $worksheet)
     {
         $worksheet = Worksheet::findByEncryptedIdOrFail($worksheet);
+
+        if (
+            session()->get('current_role')?->name == 'risk admin' &&
+            $worksheet->created_by != auth()->user()->employee_id
+        ) {
+            abort(404, 'Data tidak ditemukan');
+        }
+
         $worksheet->identification = WorksheetIdentification::identification_query()->whereWorksheetId($worksheet->id)->firstOrFail();
         $worksheet->load('strategies', 'incidents.mitigations');
 
@@ -333,6 +341,12 @@ class WorksheetController extends Controller
     public function edit(string $worksheet)
     {
         $worksheet = Worksheet::findByEncryptedIdOrFail($worksheet);
+        if (
+            session()->get('current_role')?->name == 'risk admin' &&
+            $worksheet->created_by != auth()->user()->employee_id
+        ) {
+            abort(404, 'Data tidak ditemukan');
+        }
         $worksheet->identification = WorksheetIdentification::identification_query()->first();
         $worksheet->load('incidents.mitigations');
 
@@ -363,6 +377,12 @@ class WorksheetController extends Controller
     public function update(string $worksheetId, Request $request)
     {
         $worksheet = Worksheet::findByEncryptedIdOrFail($worksheetId);
+        if (
+            session()->get('current_role')?->name == 'risk admin' &&
+            $worksheet->created_by != auth()->user()->employee_id
+        ) {
+            abort(404, 'Data tidak ditemukan');
+        }
         try {
             DB::beginTransaction();
             $user = auth()->user();
@@ -546,6 +566,13 @@ class WorksheetController extends Controller
     {
         try {
             $worksheet = Worksheet::findByEncryptedIdOrFail($worksheetId);
+            if (
+                session()->get('current_role')?->name == 'risk admin' &&
+                $worksheet->created_by != auth()->user()->employee_id
+            ) {
+                abort(404, 'Data tidak ditemukan');
+            }
+
             if (!in_array($worksheet->status, [DocumentStatus::DRAFT->value, DocumentStatus::ON_REVIEW->value])) {
                 throw_if(
                     !$worksheet->delete(),
@@ -572,6 +599,13 @@ class WorksheetController extends Controller
     {
         $worksheet = Worksheet::findByEncryptedIdOrFail($worksheetId);
         $currentRole = session()->get('current_role');
+
+        if (
+            $currentRole?->name == 'risk admin' &&
+            $worksheet->created_by != auth()->user()->employee_id
+        ) {
+            abort(404, 'Data tidak ditemukan');
+        }
 
         $rule = Str::snake($currentRole->name) . '_rule';
 
@@ -667,6 +701,7 @@ class WorksheetController extends Controller
         ])
             ->where('sub_unit_code', 'like', $unit)
             ->whereHas('identification', fn($q) => $q->where('inherent_risk_scale', $riskScale))
+            ->when(session()->get('current_role')->name == 'risk admin', fn($q) => $q->where('created_by', auth()->user()->employee_id))
             ->whereYear('created_at', request('year', date('Y')))
             ->get();
 
@@ -692,6 +727,7 @@ class WorksheetController extends Controller
             ->whereHas(
                 'monitoring.worksheet',
                 fn($q) => $q->where('sub_unit_code', 'like', $unit)
+                    ->when(session()->get('current_role')->name == 'risk admin', fn($q) => $q->where('created_by', auth()->user()->employee_id))
                     ->whereYear('created_at', request('year', date('Y')))
             )->get();
 

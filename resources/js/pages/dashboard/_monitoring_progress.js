@@ -45,31 +45,34 @@ if (monitoringProgressTable) {
                         const data = response.data;
 
                         if (response.status == 200) {
-                            Swal.close();
+                            setTimeout(() => {
+                                Swal.close()
 
-                            data.data.forEach(item => {
-                                const row = document.createElement('tr')
-                                const column = document.createElement('td')
-                                column.innerHTML = item.name
-                                row.append(column)
-
-                                item.month.forEach(value => {
+                                data.data.forEach(item => {
+                                    const row = document.createElement('tr')
                                     const column = document.createElement('td')
-                                    column.innerHTML = value ? parseInt(value) + '%' : '0%'
-
-                                    if (value >= 75) {
-                                        column.classList.add('bg-success-transparent')
-                                    } else if (value >= 40) {
-                                        column.classList.add('bg-warning-transparent')
-                                    }
-
+                                    column.innerHTML = item.name
                                     row.append(column)
+
+                                    item.month.forEach(value => {
+                                        const column = document.createElement('td')
+                                        column.innerHTML = value ? parseInt(value) + '%' : '0%'
+
+                                        if (value >= 75) {
+                                            column.classList.add('bg-success-transparent')
+                                        } else if (value >= 40) {
+                                            column.classList.add('bg-warning-transparent')
+                                        }
+
+                                        row.append(column)
+                                    })
+
+                                    monitoringProgressChildTableBody.append(row)
                                 })
 
-                                monitoringProgressChildTableBody.append(row)
-                            })
-
-                            monitoringProgressChildModal.show()
+                                monitoringProgressChildModal.show()
+                                monitoringProgressChildModalTitle.textContent = 'Monitoring Progress ' + column.textContent
+                            }, 575)
                         } else {
                             Swal.fire({
                                 icon: 'error',
@@ -78,9 +81,6 @@ if (monitoringProgressTable) {
                         }
                     }
                 });
-
-                monitoringProgressChildModal.show()
-                monitoringProgressChildModalTitle.textContent = 'Monitoring Progress ' + column.innerHTML
             })
         }
     })

@@ -33,6 +33,10 @@ class MonitoringController extends Controller
             $worksheets = Worksheet::latest_monitoring_with_mitigation_query()
                 ->whereLike('w.sub_unit_code', request('unit', $unit))
                 ->when(request('document_status'), fn($q) => $q->where('w.status_monitoring', request('document_status')))
+                ->when(
+                    session()->get('current_role')?->name == 'risk admin',
+                    fn($q) => $q->where('w.created_by', auth()->user()->employee_id)
+                )
                 ->where('worksheet_year', request('year', date('Y')));
 
             return DataTables::query($worksheets)
@@ -322,6 +326,15 @@ class MonitoringController extends Controller
     public function show_monitoring(string $monitoring_id)
     {
         $monitoring = Monitoring::findByEncryptedIdOrFail($monitoring_id);
+        $worksheet = Worksheet::findOrFail($monitoring->worksheet_id);
+
+        if (
+            session()->get('current_role')?->name == 'risk admin' &&
+            $worksheet->created_by != auth()->user()->employee_id
+        ) {
+            abort(404, 'Data tidak ditemukan');
+        }
+
         $monitoring->load([
             'residuals.impact_scale',
             'residuals.impact_probability_scale',
@@ -333,7 +346,6 @@ class MonitoringController extends Controller
             'last_history',
         ]);
 
-        $worksheet = Worksheet::findOrFail($monitoring->worksheet_id);
         $worksheet->identification = WorksheetIdentification::identification_query()->whereWorksheetId($worksheet->id)->firstOrFail();
 
         $title = 'Risk Monitoring';

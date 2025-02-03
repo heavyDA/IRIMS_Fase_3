@@ -27,15 +27,16 @@ class TopRiskController extends Controller
 
         if (request()->ajax()) {
             $level = Role::getLevel();
-
             if ($level < 2) {
-                $worksheets = Worksheet::top_risk_upper_query($unit)
-                    ->whereLike('wtr.sub_unit_code', str_replace('%', '', $unit))
-                    ->whereStatus(DocumentStatus::APPROVED->value);
+                $worksheets = Worksheet::top_risk_upper_query(str_replace('.%', '%', $unit))
+                    ->whereLike('wtr.sub_unit_code', str_replace('.%', '', $unit))
+                    ->whereYear('w.created_at', request('year', date('Y')))
+                    ->where('w.status', DocumentStatus::APPROVED->value);
             } else {
-                $worksheets = Worksheet::top_risk_lower_query(str_replace('%', '', $unit))
-                    ->whereLike('w.sub_unit_code', $unit)
-                    ->whereStatus(DocumentStatus::APPROVED->value);
+                $worksheets = Worksheet::top_risk_lower_query(str_replace('.%', '%', $unit))
+                    ->whereLike('w.sub_unit_code', str_replace('.%', '%', $unit))
+                    ->whereYear('w.created_at', request('year', date('Y')))
+                    ->where('w.status', DocumentStatus::APPROVED->value);
             }
 
             return DataTables::query($worksheets)
@@ -74,13 +75,13 @@ class TopRiskController extends Controller
                 ->editColumn('top_risk_action', function ($worksheet) use ($unit, $level) {
                     if ($level < 2) {
                         if (
-                            $worksheet->submit_source_sub_unit_code == str_replace('%', '', $unit)
+                            $worksheet->submit_source_sub_unit_code == str_replace('.%', '', $unit)
                         ) {
                             return '<button type="button" class="btn btn-sm btn-success"><i class="ti ti-check"></i></button>';
                         }
                     } else {
                         if (
-                            $worksheet->source_sub_unit_code == str_replace('%', '', $unit)
+                            $worksheet->source_sub_unit_code == str_replace('.%', '', $unit)
                         ) {
                             return '<button type="button" class="btn btn-sm btn-success"><i class="ti ti-check"></i></button>';
                         }
@@ -108,13 +109,16 @@ class TopRiskController extends Controller
         $level = Role::getLevel();
 
         if ($level < 2) {
-            $worksheets = Worksheet::top_risk_upper_dashboard_query($unit)
-                ->whereLike('wtr.sub_unit_code', str_replace('%', '', $unit))
-                ->where('w.status', DocumentStatus::APPROVED->value);
+            $worksheets = Worksheet::top_risk_upper_dashboard_query(str_replace('.%', '%', $unit))
+                ->whereLike('wtr.sub_unit_code', str_replace('.%', '', $unit))
+                ->where('w.status', DocumentStatus::APPROVED->value)
+                ->whereYear('w.created_at', request('year', date('Y')))
+                ->groupBy('mr.id');
         } else {
-            $worksheets = Worksheet::top_risk_lower_query(str_replace('%', '', $unit))
-                ->whereLike('w.sub_unit_code', $unit)
-                ->where('w.status', DocumentStatus::APPROVED->value);
+            $worksheets = Worksheet::top_risk_lower_dashboard_query(str_replace('.%', '%', $unit))
+                ->whereLike('w.sub_unit_code', str_replace('.%', '%', $unit))
+                ->where('w.status', DocumentStatus::APPROVED->value)
+                ->whereYear('w.created_at', request('year', date('Y')));
         }
 
         return DataTables::query($worksheets)
@@ -184,7 +188,7 @@ class TopRiskController extends Controller
 
                     return [
                         'worksheet_id' => $worksheet->id,
-                        'sub_unit_code' => $user->unit_code == 'ap' ? '' : $user->unit_code,
+                        'sub_unit_code' => $user->sub_unit_code == 'ap' ? '' : $user->unit_code,
                         'source_sub_unit_code' => $user->sub_unit_code,
                         'created_at' => now(),
                         'updated_at' => now(),

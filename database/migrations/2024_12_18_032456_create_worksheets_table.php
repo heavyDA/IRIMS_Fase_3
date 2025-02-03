@@ -28,7 +28,7 @@ return new class extends Migration
             $table->string('status');
 
             $table->string('created_by', 50)->nullable();
-            $table->foreign('created_by')->references('employee_id')->on('users')->nullOnDelete();
+            $table->foreign('created_by')->references('employee_id')->on('users')->nullOnDelete()->cascadeOnUpdate();
             $table->timestamps();
             $table->softDeletes();
         });

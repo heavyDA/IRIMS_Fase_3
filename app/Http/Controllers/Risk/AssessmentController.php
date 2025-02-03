@@ -25,6 +25,7 @@ class AssessmentController extends Controller
 
             $incidents = WorksheetIncident::incident_query()
                 ->where('worksheet.sub_unit_code', 'like', $unit)
+                ->when(session()->get('current_role')?->name == 'risk admin', fn($q) => $q->where('worksheet.created_by', auth()->user()->employee_id))
                 ->when(request('year'), fn($q) => $q->whereYear('worksheet.created_at', request('year')))
                 ->when(
                     request('document_status'),

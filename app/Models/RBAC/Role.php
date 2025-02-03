@@ -32,7 +32,7 @@ class Role extends Model
             ) ||
             $user->sub_unit_code == 'ap'
         ) {
-            return 'ap%';
+            return 'ap.%';
         }
 
         if (

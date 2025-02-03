@@ -56,7 +56,8 @@ class DashboardController extends Controller
             )
             ->leftJoin('ra_worksheets as w', 'w.id', '=', 'm.worksheet_id')
             ->leftJoin('ra_monitoring_actualizations as ma', 'ma.monitoring_id', '=', 'm.id')
-            ->where('w.sub_unit_code', 'like', $unit)
+            ->whereLike('w.sub_unit_code', $unit)
+            ->whereNotLike('w.personnel_area_code', 'Reg %')
             ->when($current_role->name == 'risk admin', fn($q) => $q->where('w.created_by', $user->employee_id))
             ->whereYear('w.created_at', request('year', date('Y')))
             ->groupBy('m.id')
@@ -76,7 +77,8 @@ class DashboardController extends Controller
                     'name' => "[{$monitoring->personnel_area_code}] {$monitoring->sub_unit_name}",
                     'month' => array_splice($months, 4)
                 ];
-            });
+            })
+            ->sortBy('sub_unit_code');
 
         return view('dashboard.index', compact('count_worksheet', 'count_mitigation', 'count_mitigation_monitoring', 'monitoring_progress'));
     }
@@ -97,12 +99,12 @@ class DashboardController extends Controller
                         'worksheet',
                         fn($q) => $q
                             ->where('sub_unit_code', 'like', $unit)
+                            ->when(session()->get('current_role')->name == 'risk admin', fn($q) => $q->where('created_by', auth()->user()->employee_id))
                             ->whereYear('created_at', request('year', date('Y')))
                     )
             )
             ->selectRaw('risk_scale, risk_level, color, COUNT(worksheets.worksheet_id) as total')
             ->leftJoin('worksheets', 'worksheets.inherent_risk_scale', '=', 'm_heatmaps.risk_scale')
-            ->when(session()->get('current_role')->name == 'risk admin', fn($q) => $q->where('created_by', auth()->user()->employee_id))
             ->groupBy('risk_scale', 'risk_level')
             ->get();
 
@@ -175,6 +177,7 @@ class DashboardController extends Controller
         $level = Role::getTraverseLevel($unit);
 
         $data = Monitoring::monitoring_progress_each_unit_query($unit, $level, request('year', date('Y')))
+            ->whereNotLike('lu.personnel_area_code', 'Reg %')
             ->get()
             ->map(function ($monitoring) {
                 $months = collect($monitoring)->flatten()->toArray();
@@ -185,7 +188,8 @@ class DashboardController extends Controller
                     'name' => "[{$monitoring->personnel_area_code}] {$monitoring->sub_unit_name}",
                     'month' => array_splice($months, 4)
                 ];
-            });
+            })
+            ->sortBy('sub_unit_code');
 
         return response()->json([
             'data' => $data,
