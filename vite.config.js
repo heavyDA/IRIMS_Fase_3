@@ -10,6 +10,8 @@ export default defineConfig({
                 'resources/css/icons.css',
                 'resources/js/app.js',
                 'resources/js/pages/dashboard/index.js',
+                'resources/js/pages/dashboard/_monitoring_progress.js',
+                'resources/js/pages/dashboard/_top_risk.js',
                 'resources/js/pages/RBAC/users/index.js',
 
                 'resources/js/pages/risk/assessment/index.js',

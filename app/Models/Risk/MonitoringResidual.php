@@ -24,6 +24,11 @@ class MonitoringResidual extends Model
         'risk_mitigation_effectiveness',
     ];
 
+    public function monitoring()
+    {
+        return $this->belongsTo(Monitoring::class, 'monitoring_id', 'id');
+    }
+
     public function impact_scale()
     {
         return $this->belongsTo(BUMNScale::class, 'impact_scale_id', 'id');

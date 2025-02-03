@@ -14,6 +14,7 @@ use App\Models\Master\RiskTreatmentOption;
 use App\Models\Master\RiskTreatmentType;
 use App\Models\Master\RKAPProgramType;
 use App\Models\RBAC\Role;
+use App\Models\Risk\MonitoringResidual;
 use App\Models\Risk\Worksheet;
 use App\Models\Risk\WorksheetHistory;
 use App\Models\Risk\WorksheetIdentification;
@@ -671,6 +672,31 @@ class WorksheetController extends Controller
 
         return response()->json([
             'data' => $worksheets,
+            'message' => 'success',
+        ]);
+    }
+
+    public function get_by_actualization_risk_scale(int $riskScale)
+    {
+        if (Role::hasLookUpUnitHierarchy()) {
+            $unit = request('unit') ? request('unit') . '%' : Role::getDefaultSubUnit();
+        } else {
+            $unit = Role::getDefaultSubUnit();
+        }
+
+        $monitorings = MonitoringResidual::with([
+            'incident',
+            'monitoring.worksheet.identification' => fn($q) => $q->with('risk_category_t2', 'risk_category_t3'),
+        ])
+            ->where('risk_scale', $riskScale)
+            ->whereHas(
+                'monitoring.worksheet',
+                fn($q) => $q->where('sub_unit_code', 'like', $unit)
+                    ->whereYear('created_at', request('year', date('Y')))
+            )->get();
+
+        return response()->json([
+            'data' => $monitorings,
             'message' => 'success',
         ]);
     }

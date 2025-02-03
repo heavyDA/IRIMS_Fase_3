@@ -13,8 +13,8 @@
                 </a>
             </div>
             <div class="collapse show border-top" id="collapseExample2">
-                <div class="card-body overflow-scroll">
-                    <table id="progress-monitoring-table" class="table text-nowrap table-striped">
+                <div class="card-body" style="max-height: 32vh;overflow-y: scroll; overflow-x: scroll;">
+                    <table id="progress-monitoring-table" class="table text-nowrap table-striped table-hover">
                         <thead>
                             <tr>
                                 <th rowspan="2" style="width: 256px;"></th>
@@ -29,16 +29,21 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach ($units as $key => $unit)
+                            @foreach ($monitoring_progress as $key => $monitoring)
                                 <tr>
-                                    <td>{{ $unit->sub_unit_name }}</td>
-                                    @for ($i = 1; $i <= 12; $i++)
-                                        @if ($i == 1 && $key == 0)
-                                            <td class="text-center bg-success-transparent">100%</td>
+                                    <td class="units" style="cursor: pointer;"
+                                        data-unit="{{ $monitoring->sub_unit_code }}">
+                                        <span class="fw-bold">{{ $monitoring->name }}</span>
+                                    </td>
+                                    @foreach ($monitoring->month as $value)
+                                        @if ($value >= 75)
+                                            <td class="bg-success-transparent">{{ (int) ceil($value) }}%</td>
+                                        @elseif($value >= 40)
+                                            <td class="bg-warning-transparent">{{ (int) ceil($value) }}%</td>
                                         @else
-                                            <td class="text-center bg-warning-transparent">66%</td>
+                                            <td>{{ (int) ceil($value) }}%</td>
                                         @endif
-                                    @endfor
+                                    @endforeach
                                 </tr>
                             @endforeach
                         </tbody>
@@ -49,3 +54,36 @@
     </div>
 </div>
 <!-- /Top Risk -->
+<div class="modal fade" id="monitoring-progress-chid-modal" data-bs-backdrop="static" data-bs-keyboard="false"
+    tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog" style="max-width: 100% !important;">
+        <div class="modal-content mx-auto" style="width: 80vw !important">
+            <div class="modal-header">
+                <h6 class="modal-title" id="staticBackdropLabel">Monitoring Progress</h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="monitoring-progress-chid-table-wrapper"
+                    style="max-height: 72vh;overflow-y: scroll; overflow-x: scroll;">
+                    <table id="monitoring-progress-chid-table" class="table text-nowrap table-striped w-100">
+                        <thead>
+                            <tr>
+                                <th rowspan="2" style="width: 256px;"></th>
+                                <th colspan="12" class="text-center">Timeline</th>
+                            </tr>
+                            <tr>
+                                @for ($i = 1; $i <= 12; $i++)
+                                    <th class="text-center">
+                                        {{ format_date(request('year', date('Y') . sprintf('-%02d', $i) . '-01'))->translatedFormat('M') }}
+                                    </th>
+                                @endfor
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>

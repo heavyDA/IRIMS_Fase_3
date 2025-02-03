@@ -4,15 +4,15 @@
         <div class="card custom-card">
             <div class="card-header justify-content-between border-bottom-0">
                 <div class="card-title">
-                    Risk Map Inheren
+                    Peta Risiko Inheren
                 </div>
-                <a href="javascript:void(0);" data-bs-toggle="collapse" data-bs-target="#collapseExample"
-                    aria-expanded="false" aria-controls="collapseExample">
+                <a href="javascript:void(0);" data-bs-toggle="collapse" data-bs-target="#risk-map-inherent-collapse"
+                    aria-expanded="false" aria-controls="risk-map-inherent-collapse">
                     <i class="ri-arrow-down-s-line fs-18 collapse-open"></i>
                     <i class="ri-arrow-up-s-line collapse-close fs-18"></i>
                 </a>
             </div>
-            <div class="collapse show border-top" id="collapseExample">
+            <div class="collapse show border-top" id="risk-map-inherent-collapse">
                 <div class="card-body">
                     <div id="risk-chart-d3" style="height: 500px; width: 100%;">
                         <svg width="100%" height="100%" viewBox="0 0 262 262">
@@ -398,15 +398,15 @@
         <div class="card custom-card">
             <div class="card-header justify-content-between border-bottom-0">
                 <div class="card-title">
-                    Risk Map Actual
+                    Peta Risiko Aktual
                 </div>
-                <a href="javascript:void(0);" data-bs-toggle="collapse" data-bs-target="#collapseExample1"
-                    aria-expanded="false" aria-controls="collapseExample">
+                <a href="javascript:void(0);" data-bs-toggle="collapse" data-bs-target="#risk-map-actual-collapse"
+                    aria-expanded="false" aria-controls="risk-map-actual-collapse">
                     <i class="ri-arrow-down-s-line fs-18 collapse-open"></i>
                     <i class="ri-arrow-up-s-line collapse-close fs-18"></i>
                 </a>
             </div>
-            <div class="collapse show border-top" id="collapseExample1">
+            <div class="collapse show border-top" id="risk-map-actual-collapse">
                 <div class="card-body">
 
                     <div id="risk-chart-d3" style="height: 500px; width: 100%;">

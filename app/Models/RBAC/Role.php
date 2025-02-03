@@ -36,24 +36,35 @@ class Role extends Model
         }
 
         if (
-            str_contains($user->personnel_area_code, 'REG ') &&
-            in_array($role, ['risk analis', 'risk otorisator'])
+            $role != 'risk admin'
         ) {
-            return $user->sub_unit_code . '%';
-        }
-
-        if (
-            in_array($role, ['risk otorisator', 'risk owner'])
-        ) {
-            return $user->sub_unit_code . '%';
+            return $user->sub_unit_code . '.%';
         }
 
         return $user->sub_unit_code;
     }
 
-    public static function getLevel()
+    public static function getLevel(?string $unit = null)
     {
-        return preg_match_all('/\./', str_replace('%', '', static::getDefaultSubUnit()), $matches);
+        $unit = $unit ?? static::getDefaultSubUnit();
+        $level = preg_match_all('/\./', str_replace('%', '', $unit), $matches);
+        return $level ? $level - 1 : $level;
+    }
+
+    public static function getTraverseLevel(?string $unit = null)
+    {
+        $user = auth()->user();
+        $unit = $unit ?? static::getDefaultSubUnit();
+
+        $level = static::getLevel($unit);
+
+        if ($user->personnel_area_code == 'CGK') {
+            if ($level >= 3 && $level <= 4) {
+                return 5;
+            }
+        }
+
+        return $level + 1;
     }
 
     public function menus()

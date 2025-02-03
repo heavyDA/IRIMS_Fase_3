@@ -32,6 +32,12 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('dashboard/worksheet-by-inherent-risk-scale/{riskScale}', [DashboardController::class, 'worksheet_by_inherent_risk_scale'])
         ->name('dashboard.worksheet_by_inherent_risk_scale');
 
+    Route::group(['prefix' => 'analytics', 'as' => 'analytics.'], function () {
+        Route::get('inherent-risk-scale', [DashboardController::class, 'inherent_risk_scale'])->name('analytics.inherent_risk_scale');
+        Route::get('residual-risk-scale', [DashboardController::class, 'residual_risk_scale'])->name('analytics.residual_risk_scale');
+        Route::get('monitoring-progress-child', [DashboardController::class, 'monitoring_progress_child'])->name('analytics.monitoring_progress_child');
+    });
+
     Route::get('profile/unit_head', [AuthController::class, 'get_unit_head'])->name('profile.get_unit_head');
     Route::get('profile/risk_metric', [AuthController::class, 'get_risk_metric'])->name('profile.get_risk_metric');
 
@@ -39,6 +45,7 @@ Route::group(['middleware' => 'auth'], function () {
         Route::group(['as' => 'worksheet.', 'prefix' => 'worksheet'], function () {
             Route::get('', [WorksheetController::class, 'index'])->name('index');
             Route::get('get-by-inherent-risk-scale/{inherentScale}', [WorksheetController::class, 'get_by_inherent_risk_scale'])->name('get_by_inherent_risk_scale');
+            Route::get('get-by-actualization-risk-scale/{inherentScale}', [WorksheetController::class, 'get_by_actualization_risk_scale'])->name('get_by_actualization_risk_scale');
             Route::post('', [WorksheetController::class, 'store'])->name('store');
 
 

@@ -2,6 +2,23 @@
 
 @push('top-script')
     @vite(['resources/js/pages/dashboard/index.js'])
+    @if (session()->get('current_role')?->name == 'risk otorisator' ||
+            session()->get('current_role')?->name == 'risk analis' ||
+            session()->get('current_role')?->name == 'risk reviewer')
+        @vite(['resources/js/pages/dashboard/_top_risk.js', 'resources/js/pages/dashboard/_monitoring_progress'])
+    @endif
+    <style>
+        ::-webkit-scrollbar {
+            -webkit-appearance: none;
+            width: 12px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            border-radius: 4px;
+            background-color: rgba(0, 0, 0, .5);
+            -webkit-box-shadow: 0 0 1px rgba(255, 255, 255, .5);
+        }
+    </style>
 @endpush
 
 @section('header-content')
@@ -26,65 +43,107 @@
 @section('main-content')
     <div class="row mb-4">
         <div class="col-12">
-            <div class="row gy-2 justify-content-between">
-                <div class="col-12 col-md-4 col-lg-4">
-                    <div class="h-100 card custom-card overflow-hidden card-bg-primary">
-                        <div class="card-body h-100">
-                            <div class="d-flex flex-column justify-content-between flex-wrap gap-2 h-100 px-3">
-                                <label class="fs-20 fw-lighter d-block mb-1">Draft</label>
-                                <h1 class="text-end lh-1">{{ $count_worksheet?->draft ?? 0 }}</h1>
+            <div class="row">
+                <div class="col-12 col-lg-4">
+                    <div class="card custom-card overflow-hidden">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center flex-wrap gap-2">
+                                <div>
+                                    <span class="avatar avatar-lg bg-dark text-white">
+                                        <i class="ti ti-pencil-bolt fs-24"></i>
+                                    </span>
+                                </div>
+                                <div class="flex-fill">
+                                    <span class="d-block mb-1">Draft</span>
+                                    <h3 class="fw-semibold mb-0 lh-1">{{ $count_worksheet?->draft ?? 0 }}</h3>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="col-12 col-md-4 col-lg-4">
-                    <div class="h-100 card custom-card overflow-hidden card-bg-secondary">
-                        <div class="card-body h-100">
-                            <div class="d-flex flex-column justify-content-between flex-wrap gap-2 h-100 px-3">
-                                <label class="fs-20 fw-lighter d-block mb-1">On Progress</label>
-                                <h1 class="text-end lh-1">{{ $count_worksheet?->progress ?? 0 }}</h1>
+                <div class="col-12 col-lg-4">
+                    <div class="card custom-card overflow-hidden">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center flex-wrap gap-2">
+                                <div>
+                                    <span class="avatar avatar-lg bg-secondary text-white">
+                                        <i class="ti ti-progress fs-24"></i>
+                                    </span>
+                                </div>
+                                <div class="flex-fill">
+                                    <span class="d-block mb-1">On Progress</span>
+                                    <h3 class="fw-semibold mb-0 lh-1">{{ $count_worksheet?->progress ?? 0 }}</h3>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="col-12 col-md-4 col-lg-4">
-                    <div class="h-100 card custom-card overflow-hidden card-bg-success">
-                        <div class="card-body h-100">
-                            <div class="d-flex flex-column justify-content-between flex-wrap gap-2 h-100 px-3">
-                                <label class="fs-20 fw-lighter d-block mb-1">Profil Risiko</label>
-                                <h1 class="text-end lh-1">{{ $count_worksheet?->approved ?? 0 }}</h1>
+                <div class="col-12 col-lg-4">
+                    <div class="card custom-card overflow-hidden">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center flex-wrap gap-2">
+                                <div>
+                                    <span class="avatar avatar-lg bg-success text-white">
+                                        <i class="ti ti-checks fs-24"></i>
+                                    </span>
+                                </div>
+                                <div class="flex-fill">
+                                    <span class="d-block mb-1">Profil Risiko</span>
+                                    <h3 class="fw-semibold mb-0 lh-1">{{ $count_worksheet?->approved ?? 0 }}</h3>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="col-12 col-md-4 col-lg-4">
-                    <div class="h-100 card custom-card overflow-hidden card-bg-info">
-                        <div class="card-body h-100">
-                            <div class="d-flex flex-column justify-content-between flex-wrap gap-2 h-100 px-3">
-                                <label class="fs-20 fw-lighter d-block mb-1">Rencana Mitigasi</label>
-                                <h1 class="text-end lh-1">{{ $count_mitigation }}</h1>
+                <div class="col-12 col-lg-4">
+                    <div class="card custom-card overflow-hidden">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center flex-wrap gap-2">
+                                <div>
+                                    <span class="avatar avatar-lg bg-info text-white">
+                                        <i class="ti ti-file-search fs-24"></i>
+                                    </span>
+                                </div>
+                                <div class="flex-fill">
+                                    <span class="d-block mb-1">Rencana Mitigasi</span>
+                                    <h3 class="fw-semibold mb-0 lh-1">{{ $count_mitigation }}</h3>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="col-12 col-md-4 col-lg-4">
-                    <div class="h-100 card custom-card overflow-hidden card-bg-light">
-                        <div class="card-body h-100">
-                            <div class="d-flex flex-column justify-content-between flex-wrap gap-2 h-100 px-3">
-                                <label class="fs-20 fw-lighter d-block mb-1">Progress Mitigasi</label>
-                                <h1 class="text-end lh-1">
-                                    {{ $count_mitigation_monitoring?->progress ?? 0 }}</h1>
+                <div class="col-12 col-lg-4">
+                    <div class="card custom-card overflow-hidden">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center flex-wrap gap-2">
+                                <div>
+                                    <span class="avatar avatar-lg bg-warning text-white">
+                                        <i class="ti ti-file-report fs-24"></i>
+                                    </span>
+                                </div>
+                                <div class="flex-fill">
+                                    <span class="d-block mb-1">Progress Mitigasi</span>
+                                    <h3 class="fw-semibold mb-0 lh-1">{{ $count_mitigation_monitoring?->progress ?? 0 }}
+                                    </h3>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="col-12 col-md-4 col-lg-4">
-                    <div class="h-100 card custom-card overflow-hidden card-bg-success">
-                        <div class="card-body h-100">
-                            <div class="d-flex flex-column justify-content-between flex-wrap gap-2 h-100 px-3">
-                                <label class="fs-20 fw-lighter d-block mb-1">Penyelesaian Mitigasi</label>
-                                <h1 class="text-end lh-1">
-                                    {{ $count_mitigation_monitoring?->finished ?? 0 }}</h1>
+                <div class="col-12 col-lg-4">
+                    <div class="card custom-card overflow-hidden">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center flex-wrap gap-2">
+                                <div>
+                                    <span class="avatar avatar-lg bg-primary text-white">
+                                        <i class="ti ti-file-check fs-24"></i>
+                                    </span>
+                                </div>
+                                <div class="flex-fill">
+                                    <span class="d-block mb-1">Penyelesaian Mitigasi</span>
+                                    <h3 class="fw-semibold mb-0 lh-1">{{ $count_mitigation_monitoring?->finished ?? 0 }}
+                                    </h3>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -92,6 +151,8 @@
             </div>
         </div>
     </div>
+
+    @include('dashboard._risk_chart')
 
     @include('dashboard._risk_map')
     @includeWhen(session()->get('current_role')?->name != 'risk admin', 'dashboard._monitoring')
@@ -113,8 +174,8 @@
                 </div>
                 <div class="modal-body">
                     <div id="risk-map-inherent-table-wrapper">
-                        <table id="risk-map-inherent-table" class="table table-bordered table-stripped display nowrap"
-                            style="width: 100%;">
+                        <table id="risk-map-inherent-table"
+                            class="table table-bordered table-hover table-stripped display nowrap" style="width: 100%;">
                         </table>
                     </div>
                 </div>
@@ -131,8 +192,8 @@
                 </div>
                 <div class="modal-body">
                     <div id="risk-map-residual-table-wrapper">
-                        <table id="risk-map-residual-table" class="table table-bordered table-stripped display nowrap"
-                            style="width: 100%;">
+                        <table id="risk-map-residual-table"
+                            class="table table-bordered table-hover table-stripped display nowrap" style="width: 100%;">
                         </table>
                     </div>
                 </div>

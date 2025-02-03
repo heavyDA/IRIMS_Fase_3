@@ -516,6 +516,7 @@ class DefaultSeeder extends Seeder
             ['personnel_area_code' => 'CGK', 'position_name' => 'High & Medium Voltage Department Head'],
             ['personnel_area_code' => 'BDO', 'position_name' => 'General Manager KC Bandara Husein Sastranegara'],
             ['personnel_area_code' => 'BDO', 'position_name' => 'Airport Operation, Services & Security Division Head'],
+            ['personnel_area_code' => 'BDO', 'position_name' => 'Airport Operation Air Side Department Head'],
             ['personnel_area_code' => 'BDO', 'position_name' => 'Airport Rescue & Fire Fighting Department Head'],
             ['personnel_area_code' => 'DPS', 'position_name' => 'General Manager KC Bandara Internasional I Gusti Ngurah Rai'],
             ['personnel_area_code' => 'DPS', 'position_name' => 'Deputy General Manager Airport Operation & Security Services'],

@@ -14,7 +14,7 @@
             </div>
             <div class="collapse show border-top" id="collapseExample2">
                 <div class="card-body overflow-scroll">
-                    <table id="top-risk-table" class="table table-hover">
+                    <table id="top-risk-table" class="table table-bordered table-stripped display nowrapr">
                         <thead class="table-dark">
                             <tr>
                                 <th rowspan="3">No.</th>

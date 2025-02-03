@@ -140,6 +140,34 @@ class Worksheet extends Model
         );
     }
 
+    public static function risk_map_inherent_query(string $unit, int $year)
+    {
+        return DB::table('m_heatmaps as h')
+            ->withExpression(
+                'worksheets',
+                DB::table('ra_worksheets as w')
+                    ->selectRaw('personnel_area_code, sub_unit_code, wi.inherent_impact_probability_scale_id')
+                    ->leftJoin('ra_worksheet_identifications as wi', 'wi.worksheet_id', '=', 'w.id')
+                    ->where(
+                        fn($q) => $q->whereLike('sub_unit_code', $unit)
+                            ->when(
+                                session()->get('current_role')?->name == 'risk owner',
+                                fn($q) => $q->orWhereLike('sub_unit_code', str_replace('.%', '',  $unit))
+                            )
+                    )
+                    ->when(str_contains(auth()->user()->personnel_area_code, 'REG '), fn($q) => $q->whereNotLike('personnel_area_code', 'REG %'))
+                    ->whereYear('w.created_at', $year)
+            )
+            ->selectRaw('
+                h.risk_level,
+                h.color,
+                COALESCE(COUNT(w.sub_unit_code), 0) as count
+            ')
+            ->leftJoin('worksheets as w', 'w.inherent_impact_probability_scale_id', '=', 'h.id')
+            ->orderBy('risk_scale', 'asc')
+            ->groupBy('h.risk_level');
+    }
+
     public static function top_risk_lower_query($unit)
     {
         return DB::table('ra_worksheets as w')
