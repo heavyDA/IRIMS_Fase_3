@@ -5,7 +5,7 @@
     @if (session()->get('current_role')?->name == 'risk otorisator' ||
             session()->get('current_role')?->name == 'risk analis' ||
             session()->get('current_role')?->name == 'risk reviewer')
-        @vite(['resources/js/pages/dashboard/_top_risk.js', 'resources/js/pages/dashboard/_monitoring_progress'])
+        @vite(['resources/js/pages/dashboard/_top_risk.js', 'resources/js/pages/dashboard/_monitoring_progress.js'])
     @endif
     <style>
         ::-webkit-scrollbar {
