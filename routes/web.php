@@ -11,7 +11,6 @@ use App\Http\Controllers\Master\{
 use App\Http\Controllers\Risk\AssessmentController;
 use App\Http\Controllers\DashboardController;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\DB;
 
 
 Route::group(['prefix' => 'login', 'as' => 'auth.'], function () {
@@ -21,10 +20,17 @@ Route::group(['prefix' => 'login', 'as' => 'auth.'], function () {
 });
 
 Route::group(['middleware' => 'auth'], function () {
+<<<<<<< HEAD
     
     Route::view('/', 'dashboard.index')->name('dashboard.index');
    
     Route::get('/dashboard/getheatmap', [DashboardController::class, 'getheatmap'])->name('getheatmap');
+=======
+    Route::post('', [AuthController::class, 'change_role'])->name('change-role');
+    Route::get('/', function () {
+        return view('layouts.app');
+    })->name('dashboard');
+>>>>>>> 19ac13178505b997dfff1632375dd30e7d6b84ec
 
     Route::group(['as' => 'risk.', 'prefix' => 'risk'], function () {
         Route::group(['as' => 'assessment.worksheet.', 'prefix' => 'assessment/worksheet'], function () {
