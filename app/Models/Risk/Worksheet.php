@@ -31,7 +31,7 @@ class Worksheet extends Model
         'target_body',
         'status',
         'status_monitoring',
-        'creted_by',
+        'created_by',
     ];
 
     public function scopeActiveYear($query, $year = null)

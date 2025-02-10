@@ -3,21 +3,29 @@
 namespace App\View\Composers\Master;
 
 use App\Models\Master\Official;
-use Illuminate\Support\Facades\Cache;
+use App\Services\EOffice\UnitService;
 use Illuminate\View\View;
 
 class UnitComposer
 {
     public function compose(View $view)
     {
-        $units = Cache::remember(
-            'auth.' . auth()->user()->employee_id . '.related_units',
-            now()->addHours(1),
-            fn() => Official::getSubUnitOnly()
-                ->filterByRole(session()->get('current_role')?->name)
-                ->latest('sub_unit_code')
-                ->get()
-        );
+        $unitService = new UnitService(env('EOFFICE_URL'), env('EOFFICE_TOKEN'));
+        $currentUnit = session()?->get('current_unit') ?? auth()->user();
+        $units = collect([]);
+
+        try {
+            $units = cache()->remember(
+                'auth.' . auth()->user()->employee_id . '.supervised_units.' . $currentUnit->sub_unit_code,
+                now()->addMinutes(5),
+                fn() =>
+                    session()?->get('current_role')?->name == 'risk analis' ?
+                    $unitService->get_all() :
+                    $unitService->get_supervised($currentUnit->sub_unit_code)
+            );
+        } catch(\Exception $e) {
+            logger()->error('[UnitComposer] ' . $e->getMessage());
+        }
 
         $view->with('units', $units);
     }

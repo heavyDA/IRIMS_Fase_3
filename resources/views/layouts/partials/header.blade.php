@@ -6,6 +6,16 @@
 
         <!-- Start::header-content-left -->
         <div class="header-content-left">
+            <div class="header-element">
+                <div class="horizontal-logo">
+                    <a href="index.html" class="header-logo">
+                        <img src="{{ asset('assets/images/brand/favicon.ico') }}" alt="logo" class="desktop-logo">
+                        <img src="{{ asset('assets/images/brand/favicon.ico') }}" alt="logo" class="toggle-logo">
+                        <img src="{{ asset('assets/images/brand/favicon.ico') }}" alt="logo" class="desktop-dark">
+                        <img src="{{ asset('assets/images/brand/favicon.ico') }}" alt="logo" class="toggle-dark">
+                    </a>
+                </div>
+            </div>
             <!-- Start::header-element -->
             <div class="header-element">
                 <!-- Start::header-link -->
@@ -89,28 +99,35 @@
             <!-- Start::header-element -->
             <li class="header-element dropdown">
                 <!-- Start::header-link|dropdown-toggle -->
-                <a href="javascript:void(0);" class="header-link dropdown-toggle" id="mainHeaderProfile"
+                <a href="javascript:void(0);" class="header-link dropdown-toggle pr-2" id="mainHeaderProfile"
                     data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
                     <div class="d-flex align-items-center">
-                        <div class="me-xl-2 me-0">
+                        <div class="me-2 me-0">
                             <img src="{{ auth()->user()->image_url ?: asset('assets/images/media/user_blank.jpg') }}"
                                 alt="img" style="height:  42px; width: 42px;"
                                 class="avatar avatar-sm avatar-rounded">
                         </div>
-                        <div class="d-xl-block d-none lh-1">
-                            <span class="fw-medium lh-1">{{ auth()->user()->employee_name }}</span><br>
-                            <span
-                                class="fs-12 text-muted text-capitalize">{{ session()->get('current_role')?->name ?? '' }}</span>
+                        <div class="d-inline-block lh-1 flex-shrink-1" style="max-width: 320px; !important">
+                            <span class="fw-bold lh-1">{{ auth()->user()->employee_name }}</span><br>
+                            <span class="fs-12 text-muted text-capitalize text-wrap">
+                                [{{ auth()->user()->personnel_area_code }}] {{ auth()->user()->position_name }}<br>
+                                {{ session()->get('current_role')?->name ?? '' }}
+                            </span>
                         </div>
                     </div>
                 </a>
                 <!-- End::header-link|dropdown-toggle -->
                 <ul class="main-header-dropdown dropdown-menu pt-0 overflow-hidden header-profile-dropdown dropdown-menu-end"
-                    style="min-width: 240px !important;" aria-labelledby="mainHeaderProfile">
+                    style="min-width: 296px !important;" aria-labelledby="mainHeaderProfile">
                     <li>
-                        <div class="py-2 px-3">
-                            <span class="d-block fs-12 text-muted">[{{ auth()->user()->personnel_area_code }}]
-                                {{ auth()->user()->position_name }}</span>
+                        <div class="py-2 d-flex flex-column gap-1 px-3 align-items-top text-muted">
+                            <div class="d-flex align-self-top p-0">
+                                <i class="ti ti-id-badge me-2 fs-16"></i> {{ auth()->user()->employee_id }}
+                            </div>
+                            <div class="d-flex align-self-top p-0">
+                                <i class="ti ti-buildings me-2 fs-16"></i> {{ auth()->user()->sub_unit_name }} <br>
+                                {{ auth()->user()->personnel_area_name }}
+                            </div>
                         </div>
                     </li>
                     <li><a href="javascript:void(0);" onclick="document.querySelector('#signoutForm').submit()"

@@ -8,15 +8,23 @@ use App\Models\Master\Position;
 use App\Models\Master\RiskMetric;
 use App\Models\RBAC\Role;
 use App\Models\User;
+use App\Services\EOffice\AuthService;
+use App\Services\EOffice\OfficialService;
 use Exception;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
 
 class AuthController extends Controller
 {
+    public function __construct(
+        protected OfficialService $officialService,
+        protected AuthService $authService,
+        )
+    {
+        $this->officialService = new OfficialService(env('EOFFICE_URL'), env('EOFFICE_TOKEN'));
+        $this->authService = new AuthService(env('EOFFICE_URL'), env('EOFFICE_TOKEN'));
+    }
+
     public function index()
     {
         return view('auth.index');
@@ -25,27 +33,14 @@ class AuthController extends Controller
     public function authenticate(LoginRequest $request)
     {
         try {
-            $response = Http::withHeader('Authorization', env('EOFFICE_TOKEN'))
-                ->withoutVerifying()
-                ->timeout(5)
-                ->asForm()
-                ->post(env('EOFFICE_URL') . '/login_user', $request->only('username', 'password'));
-
-            if ($response->failed() || $response->serverError() || $response->clientError()) {
-                if ($response->status() < 500) {
-                    $json = $response->json();
-                    throw new Exception('[Authentication] ' . $json['message'], $response->status(), $response->toException());
-                }
-
-                throw new Exception('[Authentication] Failed to login through E Office Service. ', $response->status(), $response->toException());
-            }
+            $user = $this->authService->login($request->only('username', 'password'));
 
             $data = ['is_active' => true];
-            foreach ($response->json()['data'][0] as $key => $value) {
+            foreach ($user as $key => $value) {
                 $data[strtolower($key)] = $value;
             }
-            DB::beginTransaction();
 
+            DB::beginTransaction();
             $user = User::firstOrCreate([
                 'email' => $data['email'],
             ], $data);
@@ -58,9 +53,20 @@ class AuthController extends Controller
             $assigned_roles = $assigned_roles?->assigned_roles ? explode(',', $assigned_roles->assigned_roles) : ['risk admin'];
             $user->syncRoles($assigned_roles);
 
-            if (Auth::loginUsingId($user->id)) {
+            if (auth()->loginUsingId($user->id)) {
                 DB::commit();
 
+                session()->put('current_unit', (object) [
+                    'position_name' => $user->position_name,
+                    'organization_code' => $user->organization_code,
+                    'organization_name' => $user->organization_name,
+                    'unit_code' => $user->unit_code,
+                    'unit_name' => $user->unit_name,
+                    'sub_unit_code' => $user->sub_unit_code,
+                    'sub_unit_name' => $user->sub_unit_name,
+                    'personnel_area_code' => $user->personnel_area_code,
+                    'personnel_area_name' => $user->personnel_area_name,
+                ]);
                 session()->put('current_role', $user->roles()->first());
                 return redirect()->route('dashboard.index');
             }
@@ -68,7 +74,18 @@ class AuthController extends Controller
             logger()->error('[Authentication] ' . $e->getMessage());
         }
 
-        if (Auth::attempt($request->only('username', 'password'))) {
+        if (auth()->attempt($request->only('username', 'password'))) {
+            session()->put('current_unit', (object) [
+                'position_name' => auth()->user()->position_name,
+                'organization_code' => auth()->user()->organization_code,
+                'organization_name' => auth()->user()->organization_name,
+                'unit_code' => auth()->user()->unit_code,
+                'unit_name' => auth()->user()->unit_name,
+                'sub_unit_code' => auth()->user()->sub_unit_code,
+                'sub_unit_name' => auth()->user()->sub_unit_name,
+                'personnel_area_code' => auth()->user()->personnel_area_code,
+                'personnel_area_name' => auth()->user()->personnel_area_name,
+            ]);
             session()->put('current_role', auth()->user()->roles()->first());
             return redirect()->route('dashboard.index');
         }
@@ -79,7 +96,7 @@ class AuthController extends Controller
 
     public function unauthenticate()
     {
-        Auth::logout();
+        auth()->logout();
         session()->flush();
 
         return redirect()->route('auth.login');
@@ -96,33 +113,32 @@ class AuthController extends Controller
 
     public function get_unit_head()
     {
-        $data = ['pic_name' => ''];
+        $data = [
+            'pic_name' => '',
+            'pic_position_name' => '',
+            'pic_personnel_area_code' => '',
+            'pic_personnel_area_name' => '',
+            'pic_organization_code' => '',
+            'pic_organization_name' => '',
+            'pic_unit_code' => '',
+            'pic_unit_name' => '',
+            'pic_sub_unit_code' => '',
+            'pic_sub_unit_name' => '',
+        ];
+
         try {
-            $subUnit = auth()->user()->sub_unit_code;
-            $response = Http::withHeader('Authorization', env('EOFFICE_TOKEN'))
-                ->withoutVerifying()
-                ->timeout(10)
-                ->asForm()
-                ->post(env('EOFFICE_URL') . '/pejabat_get', [
-                    'effective_date' => '2025-01-06',
-                    'organization_code' => $subUnit
-                ]);
+            $official = $this->officialService->get(auth()->user()->sub_unit_code);
+            foreach ($official as $key => $value) {
+                $key = 'pic_' . $key;
 
-            if ($response->failed() || $response->serverError() || $response->clientError()) {
-                throw new Exception("Failed to get unit head data with organization code {$subUnit} from E Office Service. ", $response->status(), $response->toException());
+                if (array_key_exists($key, $data)) {
+                    $data[$key] = $value;
+                }
             }
 
-            $json = $response->json();
-
-            if ($json['totalData'] > 0) {
-                $subUnitHead = $json['data'][0];
-
-                $data = [
-                    'pic_name' => $subUnitHead['POSITION_NAME']
-                ];
-            }
+            $data['pic_name'] = "[{$official->personnel_area_code}] {$official->sub_unit_name}";
         } catch (Exception $e) {
-            logger()->error($e);
+            logger()->error('[Profile] Failed to get unit head.', [$e]);
         }
 
         return response()->json(['data' => $data]);

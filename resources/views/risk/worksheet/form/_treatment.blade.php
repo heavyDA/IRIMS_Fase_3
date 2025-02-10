@@ -8,7 +8,7 @@
                 </div>
             </div>
             <div class="row mb-3">
-                <div class="col-3">No. Penyebab Risiko</div>
+                <div class="col-3">No. Penyebab Risiko<span class="text-danger">*</span></div>
                 <div class="col">
                     <select class="form-control" name="risk_cause_number" data-custom>
                         <option>Pilih</option>
@@ -86,16 +86,18 @@
         </div>
     </div>
 
-    <button type="button" class="btn btn-secondary-light" data-bs-toggle="modal" data-bs-target="#treatmentModal">
+    <button type="button" class="btn btn-secondary-light" id="treatmentModalButton">
         <i class="ti ti-plus"></i> Tambah Rencana Mitigasi
     </button>
     <div class="row mt-2">
         <div class="col" style="overflow-x: scroll;">
-            <table id="worksheetTreatmentTable" class="table table-bordered table-stripped" style="width:100%">
+            <table id="worksheetTreatmentTable" class="table table-bordered table-hover" style="width:100%">
                 <thead class="table-dark">
                     <tr style="vertical-align: bottom;">
                         <th style="">Aksi</th>
                         <th style="">No. Penyebab Risiko</th>
+                        <th style="">Opsi Perlakuan Risiko</th>
+                        <th style="">Jenis Rencana Perlakuan Risiko</th>
                         <th style="">Rencana Perlakuan Risiko</th>
                         <th style="width: 220px !important;">Ouput Perlakuan Risiko</th>
                         <th style="">Tanggal Mulai</th>
@@ -119,7 +121,7 @@
         <div class="modal-dialog" style="max-width: 100% !important;">
             <div class="modal-content mx-auto" style="width: 80vw !important">
                 <div class="modal-header">
-                    <h6 class="modal-title" id="staticBackdropLabel">Pilihan Strategi Bisnis</h6>
+                    <h6 class="modal-title" id="staticBackdropLabel">Pilihan Rencana Perlakuan Risiko</h6>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
@@ -149,8 +151,8 @@
                                 Tanggal Mitigasi<span class="text-danger">*</span>
                             </div>
                             <div>
-                                <input type="hidden" name="mitigation_start_date" value="2024-01-01">
-                                <input type="hidden" name="mitigation_end_date" value="2024-06-30">
+                                <input type="hidden" name="mitigation_start_date" value="{{ date('Y') . '-01-01' }}">
+                                <input type="hidden" name="mitigation_end_date" value="{{ date('Y') . '-12-31' }}">
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="ti ti-calendar"></i></span>
                                     <input type="text" class="form-control" id="mitigation_date-picker">

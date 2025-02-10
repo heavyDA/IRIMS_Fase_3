@@ -19,8 +19,10 @@ use App\Models\Risk\Worksheet;
 use App\Models\Risk\WorksheetHistory;
 use App\Models\Risk\WorksheetIdentification;
 use App\Models\Risk\WorksheetMitigation;
+use App\Models\Risk\WorksheetTopRisk;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -68,7 +70,8 @@ class WorksheetController extends Controller
                 'company_code' => 'API',
                 'company_name' => 'PT Angkasa Pura Indonesia',
                 'target_body' => $request->context['target_body'],
-                'status' => DocumentStatus::DRAFT->value
+                'status' => DocumentStatus::DRAFT->value,
+                'created_by' => $user->employee_id,
             ] + $user->only('organization_name', 'organization_code', 'unit_name', 'unit_code', 'sub_unit_name', 'sub_unit_code', 'personnel_area_name', 'personnel_area_code'));
 
             $strategies = [];
@@ -170,7 +173,7 @@ class WorksheetController extends Controller
             }
 
             $worksheet->last_history()->create([
-                'created_by' => auth()->user()->employee_id,
+                'created_by' => $user->employee_id,
                 'created_role' => 'risk admin',
                 'receiver_id' => 2,
                 'receiver_role' => 'risk admin',
@@ -185,7 +188,7 @@ class WorksheetController extends Controller
             ]]);
         } catch (Exception $e) {
             DB::rollBack();
-            return response()->json(['error' => $e->getMessage()], 500);
+            return response()->json(['message' => $e->getMessage()], 500);
         }
     }
 
@@ -312,6 +315,7 @@ class WorksheetController extends Controller
                         return [
                             'id' => $mitigation['id'],
                             'key' => $mitigation['id'],
+                            'incident_id' => $incident->id,
                             'risk_number' => explode('.', $incident['risk_cause_code'])[0],
                             'risk_cause_number' => $incident['risk_cause_number'],
                             'risk_treatment_option' => $mitigation['risk_treatment_option_id'],
@@ -323,6 +327,15 @@ class WorksheetController extends Controller
                             'mitigation_start_date' => $mitigation['mitigation_start_date'],
                             'mitigation_end_date' => $mitigation['mitigation_end_date'],
                             'mitigation_pic' => $mitigation['mitigation_pic'],
+                            'organization_code' => $mitigation['organization_code'],
+                            'organization_name' => $mitigation['organization_name'],
+                            'unit_code' => $mitigation['unit_code'],
+                            'unit_name' => $mitigation['unit_name'],
+                            'sub_unit_code' => $mitigation['sub_unit_code'],
+                            'sub_unit_name' => $mitigation['sub_unit_name'],
+                            'personnel_area_code' => $mitigation['personnel_area_code'],
+                            'personnel_area_name' => $mitigation['personnel_area_name'],
+                            'position_name' => $mitigation['position_name'],
                         ];
                     });
                 }),
@@ -385,7 +398,6 @@ class WorksheetController extends Controller
         }
         try {
             DB::beginTransaction();
-            $user = auth()->user();
             $worksheet->update([
                 'worksheet_number' => $request->context['risk_number'],
                 'taget_body' => $request->context['target_body'],
@@ -412,10 +424,17 @@ class WorksheetController extends Controller
                 }
             }
 
+            if ($strategies) {
+                $strategies = $worksheet->strategies()->createMany($strategies)->pluck('id')->toArray();
+                throw_if(!$strategies, new Exception("Failed to create new strategy data with Worksheet ID {$worksheet->id}"));
+
+                $strategyIds = array_unique(array_merge($strategyIds, $strategies));
+            }
+
             if ($strategyIds) {
                 $worksheet->strategies()->whereNotIn('id', array_unique($strategyIds))->delete();
+                logger()->info("[Worksheet] Attempt to delete strategy data with Worksheet ID {$worksheet->id} Not In " . implode(',', array_unique($strategyIds)));
             }
-            $strategies = $worksheet->strategies()->createMany($strategies);
 
             $identification = [];
             foreach ($request->identification as $key => $value) {
@@ -458,12 +477,12 @@ class WorksheetController extends Controller
                     }
                 }
             }
-            unset($identification['target_body']);
-            throw_if(!$worksheet->identification()->update($identification), new Exception("Failed to update identification data with ID {$worksheet->id}: {$worksheet->identification->id}"));
 
+            unset($identification['target_body']);
+            throw_if(!$worksheet->identification()->update($identification), new Exception("Failed to update identification data with Worksheet ID {$worksheet->id}: {$worksheet->identification->id}"));
 
             $incidents = [];
-            $incidentsIds = [];
+            $incident_ids = [];
             $new_incidents = [];
             foreach ($request->incidents as $index => $item) {
                 $incident = [];
@@ -475,10 +494,10 @@ class WorksheetController extends Controller
                 }
 
                 if ($incident['id']) {
-                    $incidentsIds[] = $incident['id'];
+                    $incident_ids[] = $incident['id'];
                     throw_if(
                         !$worksheet->incidents()->where('id', $incident['id'])->update($incident),
-                        "Failed to update incident data with ID {$worksheet->id}: {$incident['id']}"
+                        "Failed to update incident data with Worksheet ID {$worksheet->id}: {$incident['id']}"
                     );
                     $incidents[] = $incident;
                 } else {
@@ -486,17 +505,26 @@ class WorksheetController extends Controller
                 }
             }
 
-            $worksheet->incidents()->whereNotIn('id', $incidentsIds)->delete();
             if ($new_incidents) {
-                $new_incidents = $worksheet->incidents()->createMany($new_incidents)->toArray();
+                $new_incidents = $worksheet->incidents()->createMany($new_incidents);
                 throw_if(
-                    empty($new_incidents),
-                    new Exception("Failed to create incidents with ID {$worksheet->id}")
+                    empty($new_incidents->toArray()),
+                    new Exception("Failed to create new incidents with Worksheet ID {$worksheet->id}")
                 );
+
+
+                $incident_ids = array_merge($new_incidents->pluck('id')->toArray());
             }
 
-            $incidents_array = array_merge($incidents, $new_incidents);
-            $mitigations = [];
+            if ($incident_ids) {
+                $worksheet->incidents()->whereNotIn('id', $incident_ids)->delete();
+                logger()->info("[Worksheet] Attempt to delete incident data with Worksheet ID {$worksheet->id} Not In ID " . implode(',', $incident_ids));
+            }
+
+
+            $incidents_array = array_merge($incidents, $new_incidents ? $new_incidents->toArray() : []);
+            $new_mitigations = [];
+            $mitigation_ids = [];
             foreach ($request->mitigations as $index => $item) {
                 $incidentIndex = array_search(
                     $item['risk_cause_number'],
@@ -507,8 +535,12 @@ class WorksheetController extends Controller
                     continue;
                 }
 
+                $mitigation = [
+                    'worksheet_incident_id' => $item['incident_id'] ?? null
+                ];
+
                 foreach ($item as $key => $value) {
-                    if ($key == 'key' || str_contains($key, '_number')) continue;
+                    if (in_array($key, ['incident_id', 'key']) || str_contains($key, '_number')) continue;
                     $key =
                         $key == 'risk_treatment_option' ||
                         $key == 'risk_treatment_type' ||
@@ -522,24 +554,36 @@ class WorksheetController extends Controller
                     }
                 }
 
-                if ($mitigation['id']) {
+                $mitigation_id = $mitigation['id'];
+                unset($mitigation['id']);
+
+                if (
+                    $mitigation_id && $mitigation['worksheet_incident_id'] == $incidents_array[$incidentIndex]['id']
+                ) {
+                    $mitigation_ids[] = $mitigation_id;
                     throw_if(
-                        !WorksheetMitigation::where('id', $mitigation['id'])->update($mitigation),
-                        "Failed to update mitigation data with ID {$worksheet->id}: {$mitigation['id']}"
+                        !WorksheetMitigation::where('id', $mitigation_id)->update($mitigation),
+                        "Failed to update mitigation data from Worksheet ID {$worksheet->id}: {$mitigation_id}"
                     );
                 } else {
                     $mitigation['worksheet_incident_id'] = $incidents_array[$incidentIndex]['id'];
                     $mitigation['created_at'] = now();
                     $mitigation['updated_at'] = now();
-                    $mitigations[] = $mitigation;
+                    $new_mitigations[] = $mitigation;
                 }
             }
 
-            $mitigations = WorksheetMitigation::insert($mitigations);
-            throw_if(
-                !$mitigations,
-                new Exception("Failed to create mitigations with ID {$worksheet->id}")
-            );
+            if ($mitigation_ids) {
+                WorksheetMitigation::whereNotIn('id', $mitigation_ids)->delete();
+                logger()->info("[Worksheet] Failed to delete mitigation data from Worksheet ID {$worksheet->id} Not In ID " . implode(',', $mitigation_ids));
+            }
+
+            if ($new_mitigations) {
+                throw_if(
+                    !WorksheetMitigation::insert($new_mitigations),
+                    new Exception("Failed to create mitigations from Worksheet ID {$worksheet->id}")
+                );
+            }
 
             $worksheet->last_history()->create([
                 'created_by' => auth()->user()->employee_id,
@@ -558,7 +602,7 @@ class WorksheetController extends Controller
         } catch (Exception $e) {
             DB::rollBack();
             logger()->error('[Worksheet] ' . $e->getMessage());
-            return response()->json(['error' => 'Gagal memperbarui kertas kerja'], 500);
+            return response()->json(['message' => 'Gagal memperbarui kertas kerja'], 500);
         }
     }
 

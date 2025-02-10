@@ -12,8 +12,12 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('ra_worksheet_mitigations', function (Blueprint $table) {
+            $table->string('organization_code')->default('');
+            $table->string('organization_name')->default('');
             $table->string('unit_code')->default('');
             $table->string('unit_name')->default('');
+            $table->string('sub_unit_code')->default('');
+            $table->string('sub_unit_name')->default('');
             $table->string('personnel_area_code')->default('');
             $table->string('personnel_area_name')->default('');
             $table->string('position_name')->default('');

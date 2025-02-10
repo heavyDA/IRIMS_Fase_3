@@ -26,9 +26,10 @@
 
 @push('bottom-script')
     @vite(['resources/js/pages/risk/worksheet/table_view.js'])
-    @if (str_contains(request()->route()->getName(), 'edit'))
+
+    @if (str_contains(request()->route()->getName(), 'worksheet.edit'))
         @vite(['resources/js/pages/risk/worksheet/edit.js'])
-    @else
+    @elseif (str_contains(request()->route()->getName(), 'worksheet.index'))
         @vite(['resources/js/pages/risk/worksheet/index.js'])
     @endif
 @endpush
@@ -108,7 +109,9 @@
                                                 @include('risk.worksheet.partials._risk_admin')
                                             @elseif (session()->get('current_role')?->name == 'risk owner' && $worksheet->last_history->status == 'on review')
                                                 @include('risk.worksheet.partials._risk_owner')
-                                            @elseif (session()->get('current_role')?->name == 'risk otorisator' && $worksheet->last_history->status == 'on confirmation')
+                                            @elseif (
+                                                \App\Models\RBAC\Role::risk_otorisator_worksheet_approval() && $worksheet->last_history->status == 'on confirmation'
+                                            )
                                                 @include('risk.worksheet.partials._risk_otorisator')
                                             @endif
                                         @endif
@@ -122,7 +125,7 @@
         </div>
     </div>
 
-    @if (isset($worksheet) && str_contains(request()->route()->getName(), 'show'))
+    @if (isset($worksheet) && str_contains(request()->route()->getName(), 'worksheet.show'))
         <div class="row">
             <div class="col">
                 <div class="accordion accordion-solid-info">
@@ -174,7 +177,8 @@
         </div>
     @endif
 
-    @if (str_contains(request()->route()->getName(), 'edit') || str_contains(request()->route()->getName(), 'index'))
+    @if (str_contains(request()->route()->getName(), 'worksheet.edit') ||
+            str_contains(request()->route()->getName(), 'worksheet.index'))
         <div class="row">
             <div class="col">
                 <div class="accordion accordion-primary">

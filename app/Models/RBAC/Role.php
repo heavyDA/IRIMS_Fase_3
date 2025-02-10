@@ -22,7 +22,7 @@ class Role extends Model
 
     public static function getDefaultSubUnit(): string
     {
-        $user = auth()->user();
+        $user = session()->get('current_unit') ?? auth()->user();
         $role = session()->get('current_role')?->name;
 
         if (
@@ -65,6 +65,31 @@ class Role extends Model
         }
 
         return $level + 1;
+    }
+
+    public static function risk_otorisator_worksheet_approval()
+    {
+        $role = session()?->get('current_role');
+        $user = auth()->user();
+        $level = Role::getLevel($user->sub_unit_code);
+
+        if ($role->name != 'risk otorisator') {
+            return false;
+        }
+
+        if (
+            $user->personnel_area_code == 'CGK' &&
+            in_array($level, [1, 2])
+        ) {
+            return false;
+        } else if (
+            $user->personnel_area_code == 'DPS' &&
+            $level == 1
+        ) {
+             return false;
+        }
+
+        return true;
     }
 
     public function menus()

@@ -192,8 +192,8 @@
             <div class="row mb-3">
                 <div class="col-3">Perkiraan Waktu Terpapar Risiko<span class="text-danger">*</span></div>
                 <div class="col">
-                    <input type="hidden" name="risk_impact_start_date" value="2024-01-01">
-                    <input type="hidden" name="risk_impact_end_date" value="2024-06-30">
+                    <input type="hidden" name="risk_impact_start_date" value="{{ date('Y') . '-01-01' }}">
+                    <input type="hidden" name="risk_impact_end_date" value="{{ date('Y') . '-12-31' }}">
                     <div class="input-group">
                         <span class="input-group-text"><i class="ti ti-calendar"></i></span>
                         <input type="text" class="form-control" id="risk_impact_date-picker">
@@ -420,7 +420,7 @@
 
     <div class="row mt-2">
         <div class="col py-2" style="overflow-x: scroll;">
-            <table id="worksheetIncidentTable" class="table table-bordered table-stripped" style="width:100%">
+            <table id="worksheetIncidentTable" class="table table-bordered table-hover" style="width:100%">
                 <thead class="table-dark">
                     <tr style="vertical-align: bottom;">
                         <th rowspan="2">Aksi</th>
@@ -451,7 +451,7 @@
         <div class="modal-dialog" style="max-width: 100% !important;">
             <div class="modal-content mx-auto" style="width: 80vw !important">
                 <div class="modal-header">
-                    <h6 class="modal-title" id="staticBackdropLabel">Tambah Peristiwa Risiko</h6>
+                    <h6 class="modal-title" id="staticBackdropLabel">Tambah Penyebab Risiko</h6>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">

@@ -24,7 +24,7 @@
             </div>
             <div class="row mb-1">
                 <div class="col-3">
-                    <span>No. Risiko</span>
+                    <span>No. Risiko<span class="text-danger">*</span></span>
                     <a tabindex="0"
                         class="link-secondary link-offset-2 link-underline-opacity-0 link-underline-opacity-50-hover text-decoration-underline mx-1"
                         role="button" data-bs-toggle="popover" data-bs-trigger="focus" data-bs-placement="right"
@@ -68,7 +68,7 @@
 
     <div class="row mt-2">
         <div class="col py-2" style="overflow-x: scroll;">
-            <table id="worksheetStrategyTable" class="table table-bordered table-stripped" style="width:100%">
+            <table id="worksheetStrategyTable" class="table table-bordered table-hover" style="width:100%">
                 <thead class="table-dark">
                     <tr>
                         <th style="width:100px;"></th>

@@ -1,5 +1,6 @@
-            <table class="table table-bordered table-stripped" style="width:100%">
-                <thead class="table-dark">
+<div class="table-container" style="height: 40vh;">
+<table class="table table-bordered table-hover" style="width:100%">
+                <thead class="table-dark" style="position: sticky; top: 0">
                     <tr style="vertical-align: bottom;">
                         <th style="">No. Risiko</th>
                         <th style="">No. Penyebab Risiko</th>
@@ -39,3 +40,4 @@
                     @endisset
                 </tbody>
             </table>
+        </div>

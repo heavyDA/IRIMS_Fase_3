@@ -507,6 +507,7 @@ class DefaultSeeder extends Seeder
             ['personnel_area_code' => 'PST', 'position_name' => 'Project Construction Division Head'],
             ['personnel_area_code' => 'CGK', 'position_name' => 'General Manager KC Bandara Internasional Soekarno-Hatta'],
             ['personnel_area_code' => 'CGK', 'position_name' => 'Deputy General Manager Airport Commercial Services'],
+            ['personnel_area_code' => 'CGK', 'position_name' => 'Assistant Deputy Airside Operation Services'],
             ['personnel_area_code' => 'CGK', 'position_name' => 'Assistant Deputy Aero Business'],
             ['personnel_area_code' => 'CGK', 'position_name' => 'International Aero Commercial Division Head'],
             ['personnel_area_code' => 'CGK', 'position_name' => 'International Airlines Support Department Head'],

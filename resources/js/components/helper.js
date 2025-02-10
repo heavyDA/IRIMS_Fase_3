@@ -48,6 +48,8 @@ function autoMergeCells(target, excludeColumns = []) {
     const tbody = table.querySelector('tbody');
     const rows = Array.from(tbody.querySelectorAll('tr'));
 
+    if (rows.length == 0) return;
+
     // First pass: Merge rows vertically
     for (let col = 0; col < rows[0].cells.length; col++) {
         // Skip excluded columns
@@ -193,6 +195,10 @@ function jsonToFormData(data) {
 }
 
 
+function generateRandomKey() {
+    return Math.random().toString(12).replace('0.', '')
+}
+
 export {
     defaultConfigFormatNumeral,
     defaultConfigQuill,
@@ -204,5 +210,6 @@ export {
     autoMergeCells,
     convertFileSize,
     buildFormData,
-    jsonToFormData
+    jsonToFormData,
+    generateRandomKey
 }
