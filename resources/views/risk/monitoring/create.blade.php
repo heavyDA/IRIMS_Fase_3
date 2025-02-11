@@ -35,7 +35,7 @@
 @endsection
 
 @section('main-content')
-    @include('risk.monitoring.table_detail')
+    @include('risk.monitoring.table')
     <div class="row mb-3">
         <div class="col">
             <div class="accordion accordion-solid-info">

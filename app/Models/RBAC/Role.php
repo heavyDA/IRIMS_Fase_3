@@ -40,8 +40,7 @@ class Role extends Model
         ) {
             return $user->sub_unit_code . '.%';
         }
-
-        return $user->sub_unit_code;
+        return $user->sub_unit_code . ($role == 'risk admin' ? '' : '.%');
     }
 
     public static function getLevel(?string $unit = null)

@@ -3,7 +3,7 @@
 
     <!-- Start::main-sidebar-header -->
     <div class="main-sidebar-header">
-        <a href="index.html" class="header-logo">
+        <a href="/" class="header-logo">
             <img src="{{ asset('assets/images/brand/logo.webp') }}" alt="logo" class="desktop-logo"
                 style="height: 96px;" />
             <img src="{{ asset('assets/images/brand/favicon.ico') }}" alt="logo" class="toggle-dark">

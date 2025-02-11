@@ -1,5 +1,6 @@
-            <table class="table table-bordered table-stripped" style="width:100%">
-                <thead class="table-dark">
+<div class="table-container" style="height: 40vh;">
+<table class="table table-bordered table-hover" style="width:100%">
+                <thead class="table-dark" style="position: sticky; top: 0">
                     <tr style="vertical-align: bottom;">
                         <th style="">No. Risiko</th>
                         <th style="">No. Penyebab Risiko</th>
@@ -22,7 +23,7 @@
                                 <tr>
                                     <td>{{ $worksheet->worksheet_number }}</td>
                                     <td>{{ $incident->risk_cause_number }}</td>
-                                    <td>{!! $incident->risk_chronology_body !!}</td>
+                                    <td>{!! html_entity_decode($worksheet->identification->risk_chronology_body) !!}</td>
                                     <td>{{ $mitigation?->risk_treatment_option?->name }}</td>
                                     <td>{{ $mitigation?->risk_treatment_type?->name }}</td>
                                     <td>{!! $mitigation->mitigation_plan !!}</td>
@@ -39,3 +40,4 @@
                     @endisset
                 </tbody>
             </table>
+        </div>

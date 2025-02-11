@@ -156,6 +156,7 @@ const defaultConfigChoices = {
     placeholder: true,
     placeholderValue: null,
     allowHTML: true,
+    searchResultLimit: 99999,
 }
 
 const defaultLocaleFlatpickr = {

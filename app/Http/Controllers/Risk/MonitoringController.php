@@ -35,7 +35,9 @@ class MonitoringController extends Controller
                     session()->get('current_role')?->name == 'risk admin',
                     fn($q) => $q->where('w.created_by', auth()->user()->employee_id)
                 )
-                ->where('worksheet_year', request('year', date('Y')));
+                ->where('worksheet_year', request('year', date('Y')))
+                ->latest('w.created_at')
+                ->latest('lm.created_at');
 
             return DataTables::query($worksheets)
                 ->filter(function ($q) {
@@ -686,20 +688,22 @@ class MonitoringController extends Controller
         $monitoring = Monitoring::findByEncryptedIdOrFail($monitoring_id);
         $currentRole = session()->get('current_role');
 
-        $rule = Str::snake($currentRole->name) . '_rule';
-
         try {
+            $rule = Str::snake($currentRole->name == 'risk analis' ? $request->role : $currentRole->name) . '_rule';
+            if (!method_exists($this, $rule)) {
+                throw new Exception("Target role not found: {$rule}");
+            }
             DB::beginTransaction();
-            $history = $this->$rule($monitoring, $request->status, $request->note);
+            $this->$rule($monitoring, $request->status, $request->note);
             DB::commit();
 
             flash_message('flash_message', 'Laporan monitoring berhasil disubmit.', State::SUCCESS);
-            return redirect()->route('risk.monitoring.show_monitoring', $monitoring_id);
         } catch (Exception $e) {
             DB::rollBack();
-            flash_message('flash_message', $e->getMessage(), State::ERROR);
-            return redirect()->route('risk.monitoring.show_monitoring', $monitoring_id);
+            flash_message('flash_message', 'Laporang monitorin gagal disubmit.', State::ERROR);
+            logger()->error("[Monitoring] Failed to update status of monitoring with ID {$monitoring->id}: ". $e->getMessage());
         }
+        return redirect()->route('risk.monitoring.show_monitoring', $monitoring_id);
     }
 
     protected function risk_admin_rule(Monitoring $monitoring, string $status, string $note): MonitoringHistory

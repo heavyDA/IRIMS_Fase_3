@@ -27,6 +27,8 @@ export default defineConfig({
                 'resources/js/pages/risk/monitoring/create.js',
                 'resources/js/pages/risk/monitoring/edit.js',
                 'resources/js/pages/risk/monitoring/detail.js',
+
+                'resources/js/pages/master/bumn_scale/index.js',
             ],
             refresh: true,
         }),

@@ -2,10 +2,12 @@
 
 namespace App\Models\Master;
 
+use App\Traits\HasEncryptedId;
 use Illuminate\Database\Eloquent\Model;
 
 class KBUMNRiskCategory extends Model
 {
+    use HasEncryptedId;
     protected $table = 'm_kbumn_risk_categories';
 
     protected $fillable = [

@@ -956,6 +956,23 @@ incidentForm.addEventListener('reset', async () => {
     incidentModal.hide();
 });
 
+incidentModalElement.addEventListener('show.bs.modal', () => {
+    const incidentsLength = worksheet.incidents.length;
+
+        if (incidentsLength >= risk_numbers.length) {
+            Swal.fire({
+                icon: 'warning',
+                title: '',
+                text: 'Tidak dapat menambahkan penyebab risiko karena sudah melebihi batas jumlah penyebab risiko.',
+            })
+
+            return e.preventDefault()
+        }
+
+        incidentRiskCauseNumber.value = risk_numbers[incidentsLength];
+        incidentRiskCauseCode.value = currentRiskNumber.value + '.' + risk_numbers[incidentsLength];
+})
+
 incidentModalElement.addEventListener('hide.bs.modal', async () => {
     const incidentsLength = worksheet.incidents.length;
 

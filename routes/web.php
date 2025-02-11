@@ -7,9 +7,12 @@ use App\Http\Controllers\Master\{
     BUMNScaleController,
     ExistingControlTypeController,
     HeatmapController,
+    IncidentCategoryController,
     KBUMNRiskCategoryController,
     KRIUnitController,
-    PICController
+    PICController,
+    RiskTreatmentOptionController,
+    RiskTreatmentTypeController
 };
 use App\Http\Controllers\Report\RiskProfileController;
 use App\Http\Controllers\Report\RiskMonitoringController;
@@ -100,46 +103,58 @@ Route::group(['middleware' => 'auth'], function () {
 
     Route::group(['as' => 'master.', 'prefix' => 'master'], function () {
         Route::resource(
-            'bumn-scale',
-            BUMNScaleController::class,
+            'bumn_scales',
+            BumnScaleController::class,
             [
-                'names' => custom_route_names('bumn-scale'),
-                'parameters' => ['bumn-scale' => 'bumn-scale']
+                'names' => custom_route_names('bumn_scales'),
+                'parameters' => ['bumn_scales' => 'bumn_scale'],
             ]
         );
         Route::resource(
-            'existing-control-type',
+            'existing_control_types',
             ExistingControlTypeController::class,
             [
-                'names' => custom_route_names('existing-control-type'),
-                'parameters' => ['existing-control-type' => 'existing-control-type']
+                'names' => custom_route_names('existing_control_types'),
+                'parameters' => ['existing_control_types' => 'existing_control_type'],
             ]
         );
         Route::resource(
-            'heatmap',
-            HeatmapController::class,
+            'incident_categories',
+            IncidentCategoryController::class,
             [
-                'names' => custom_route_names('heatmap'),
-                'parameters' => ['heatmap' => 'heatmap']
+                'names' => custom_route_names('incident_categories'),
+                'parameters' => ['incident_categories' => 'incident_category'],
             ]
         );
         Route::resource(
-            'kbumn-risk-category',
+            'risk_categories',
             KBUMNRiskCategoryController::class,
             [
-                'names' => custom_route_names('kbumn-risk-category'),
-                'parameters' => ['kbumn-risk-category' => 'kbumn-risk-category']
+                'names' => custom_route_names('risk_categories'),
+                'parameters' => ['risk_categories' => 'risk_category'],
+            ]
+        );
+        Route::resource(
+            'risk_treatment_types',
+            RiskTreatmentTypeController::class,
+            [
+                'names' => custom_route_names('risk_treatment_types'),
+                'parameters' => ['risk_treatment_types' => 'risk_treatment_type'],
+            ]
+        );
+        Route::resource(
+            'risk_treatment_options',
+            RiskTreatmentOptionController::class,
+            [
+                'names' => custom_route_names('risk_treatment_options'),
+                'parameters' => ['risk_treatment_options' => 'risk_treatment_option'],
             ]
         );
 
-        Route::resource(
-            'kri-unit',
-            KRIUnitController::class,
-            [
-                'names' => custom_route_names('kri-unit'),
-                'parameters' => ['kri-unit' => 'kri-unit']
-            ]
-        );
+        Route::get('bumn-scale', [BUMNScaleController::class, 'get_all']);
+        Route::get('existing-control-type', [ExistingControlTypeController::class, 'get_all']);
+        Route::get('heatmap', [HeatmapController::class, 'get_all']);
+
         Route::resource(
             'pic',
             PICController::class,

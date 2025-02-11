@@ -362,8 +362,6 @@ datatable.on('draw.dt', () => {
 
             inputCheckAll.checked = worksheetChecksLength == worksheetChecksCount
             worksheetSubmitButton.disabled = worksheetChecksCount == 0;
-
-            console.log(worksheetChecksCount)
         })
     })
 })
@@ -385,6 +383,7 @@ worksheetSubmitButton.addEventListener('click', async e => {
             let worksheets = []
             worksheetChecks.forEach(checkbox => {
                 if (checkbox.checked) {
+                    console.log(checkbox.value)
                     worksheets.push(checkbox.value)
                 }
             })

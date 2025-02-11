@@ -1,3 +1,4 @@
+@props(['message'])
 <div class="invalid-feedback">
-    {{ $message ?? '' }}
+    {{ $message ?? ''}}
 </div>

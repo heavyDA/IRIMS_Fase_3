@@ -14,6 +14,21 @@
             </div>
             <div class="collapse show border-top" id="collapseExample2">
                 <div class="card-body overflow-scroll">
+                    <div class="row mb-4 justify-content-end">
+                        <div class="col-12 col-xl-7">
+                            <div class="d-flex gap-2">
+                                <div class="input-group">
+                                    <span class="input-group-text" id="inputGroup-sizing-default"><i
+                                            class="ti ti-search"></i></span>
+                                    <input type="text" name="search" class="form-control" placeholder="Pencarian" id="toprisk-table-search">
+                                </div>
+                                <button style="min-width: 32px;" class="btn btn-light" type="reset" id="toprisk-table-refresh"
+                                    data-bs-toggle="tooltip" title="Reset">
+                                    <span><i class="me-1 ti ti-refresh"></i></span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                     <table id="top-risk-table" class="table table-bordered table-stripped display nowrapr">
                         <thead class="table-dark">
                             <tr>

@@ -149,6 +149,8 @@ class DefaultSeeder extends Seeder
          * Generate default permissions
          */
         $menus = Menu::all();
+
+        $defaultActions = ['index', 'show', 'create', 'store', 'edit', 'update', 'destroy'];
         $actions = [
             [
                 'name' => 'risk.worksheet.',
@@ -157,7 +159,31 @@ class DefaultSeeder extends Seeder
             [
                 'name' => 'risk.monitoring.',
                 'permissions' => ['show_monitoring', 'edit_monitoring', 'update_monitoring', 'update_status_monitoring', 'destroy_monitoring'],
-            ]
+            ],
+            [
+                'name' => 'bumn_scales',
+                'permissions' => $defaultActions,
+            ],
+            [
+                'name' => 'existing_control_types',
+                'permissions' => $defaultActions,
+            ],
+            [
+                'name' => 'incident_categories',
+                'permissions' => $defaultActions,
+            ],
+            [
+                'name' => 'risk_categories',
+                'permissions' => $defaultActions,
+            ],
+            [
+                'name' => 'risk_treatment_types',
+                'permissions' => $defaultActions,
+            ],
+            [
+                'name' => 'risk_treatment_options',
+                'permissions' => $defaultActions,
+            ],
         ];
 
         $permissions = [];
@@ -172,7 +198,6 @@ class DefaultSeeder extends Seeder
             }
         }
 
-        $defaultActions = ['index', 'show', 'create', 'store', 'edit', 'update', 'destroy'];
         foreach ($menus as $menu) {
             if (str_contains($menu->route, 'index')) {
                 foreach ($defaultActions as $action) {
@@ -196,9 +221,8 @@ class DefaultSeeder extends Seeder
         if (Permission::count() == 0) {
             $permissions = Permission::insert($permissions);
         }
-        $roles = [['name' => 'root'], ['name' => 'risk admin'], ['name' => 'risk owner'], ['name' => 'risk otorisator'], ['name' => 'risk analis'], ['name' => 'risk reviewer']];
 
-        // if (Role::count() == 0) {
+        $roles = [['name' => 'root'], ['name' => 'administrator'], ['name' => 'risk admin'], ['name' => 'risk owner'], ['name' => 'risk otorisator'], ['name' => 'risk analis'], ['name' => 'risk reviewer']];
         foreach ($roles as $role) {
             $role = Role::firstOrCreate($role);
 
@@ -320,13 +344,13 @@ class DefaultSeeder extends Seeder
                                 str_contains($menu->route, 'risk.worksheet') ||
                                 str_contains($menu->route, 'risk.monitoring') ||
                                 str_contains($menu->route, 'risk.process') ||
+                                str_contains($menu->route, 'risk.report') ||
                                 str_contains($menu->route, 'dashboard');
                         }
                     )->pluck('id')
                 );
             }
         }
-        // }
 
         $users = [
             [
@@ -335,7 +359,7 @@ class DefaultSeeder extends Seeder
                     'password' => bcrypt('rahasia#321'),
                     'email' => 'root@injourneyairports.id',
                     'employee_name' => 'Administrator',
-                    'employee_id' => '9999999',
+                    'employee_id' => 'x9999999',
                     'organization_code' => 'ap',
                     'organization_name' => '',
                     'personnel_area_name' => 'Kantor Pusat',
@@ -358,7 +382,7 @@ class DefaultSeeder extends Seeder
                     'password' => bcrypt('reviewer#321'),
                     'email' => 'reviewer@injourneyairports.id',
                     'employee_name' => 'Administrator',
-                    'employee_id' => '9999998',
+                    'employee_id' => 'x9999998',
                     'organization_code' => 'ap',
                     'organization_name' => '',
                     'personnel_area_name' => 'Sidoel Group',
@@ -381,7 +405,7 @@ class DefaultSeeder extends Seeder
                     'password' => bcrypt('user_analis_all#321'),
                     'email' => 'user_analis_all@injourneyairports.id',
                     'employee_name' => 'Administrator',
-                    'employee_id' => '9999999',
+                    'employee_id' => 'x9999997',
                     'organization_code' => 'ap',
                     'organization_name' => '',
                     'personnel_area_name' => 'Sidoel Group',
@@ -404,7 +428,7 @@ class DefaultSeeder extends Seeder
                     'password' => bcrypt('user_analis_pusat#321'),
                     'email' => 'user_analis_pusat@injourneyairports.id',
                     'employee_name' => 'Administrator',
-                    'employee_id' => '9999999',
+                    'employee_id' => 'x9999996',
                     'organization_code' => 'ap.50',
                     'organization_name' => '',
                     'personnel_area_name' => 'Kantor PUSAT',
@@ -427,7 +451,7 @@ class DefaultSeeder extends Seeder
                     'password' => bcrypt('user_analis_reg_1#321'),
                     'email' => 'user_analis_reg_1@injourneyairports.id',
                     'employee_name' => 'ANALIS REG 1',
-                    'employee_id' => '9999991',
+                    'employee_id' => 'x9999991',
                     'organization_code' => 'ap.51',
                     'organization_name' => 'Kantor Regional I (09 September 2024) - CGK',
                     'personnel_area_name' => 'Kantor Regional I',
@@ -450,7 +474,7 @@ class DefaultSeeder extends Seeder
                     'password' => bcrypt('user_analis_reg_3#321'),
                     'email' => 'user_analis_reg_3@injourneyairports.id',
                     'employee_name' => 'ANALIS REG 3',
-                    'employee_id' => '9999993',
+                    'employee_id' => 'x9999993',
                     'organization_code' => 'ap.52',
                     'organization_name' => 'Kantor Regional III (09 September 2024) - KNO',
                     'personnel_area_name' => 'Kantor Regional III',
@@ -473,7 +497,7 @@ class DefaultSeeder extends Seeder
                     'password' => bcrypt('user_analis_reg_2#321'),
                     'email' => 'user_analis_reg_2@injourneyairports.id',
                     'employee_name' => 'ANALIS REG 2',
-                    'employee_id' => '9999992',
+                    'employee_id' => 'x9999992',
                     'organization_code' => 'ap.53',
                     'organization_name' => 'Kantor Regional II (09 September 2024) - DPS',
                     'personnel_area_name' => 'Kantor Regional II',
@@ -505,6 +529,9 @@ class DefaultSeeder extends Seeder
             ['personnel_area_code' => 'PST', 'position_name' => 'Corporate BOD Office Support Division Head'],
             ['personnel_area_code' => 'PST', 'position_name' => 'Head of Airport Construction Area B'],
             ['personnel_area_code' => 'PST', 'position_name' => 'Project Construction Division Head'],
+            ['personnel_area_code' => 'PST', 'position_name' => 'Head of Airport Construction Area A'],
+            ['personnel_area_code' => 'PST', 'position_name' => 'Project Construction Division Head'],
+            ['personnel_area_code' => 'PST', 'position_name' => 'Project Monitoring & Evaluation Division Head'],
             ['personnel_area_code' => 'CGK', 'position_name' => 'General Manager KC Bandara Internasional Soekarno-Hatta'],
             ['personnel_area_code' => 'CGK', 'position_name' => 'Deputy General Manager Airport Commercial Services'],
             ['personnel_area_code' => 'CGK', 'position_name' => 'Assistant Deputy Airside Operation Services'],
@@ -531,6 +558,7 @@ class DefaultSeeder extends Seeder
             ['personnel_area_code' => 'LOP', 'position_name' => 'Safety Management System & Ohs Department Head'],
             ['personnel_area_code' => 'BTJ', 'position_name' => 'General Manager KC Bandara Internasional Sultan Iskandar Muda'],
             ['personnel_area_code' => 'BTJ', 'position_name' => 'Airport Safety, Risk and Performance Management Department Head'],
+            ['personnel_area_code' => 'BTJ', 'position_name' => 'Airport Technical Division Head'],
         ];
 
         foreach ($officials_to_users as $area) {

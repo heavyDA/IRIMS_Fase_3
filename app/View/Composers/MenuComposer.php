@@ -24,11 +24,10 @@ class MenuComposer
             ->whereNull('menu_id')
             ->get();
 
+        $currentRoute = get_current_route_name(false) ?? '#';
         $spatieMenu = SpatieMenu::new()
             ->addClass('main-menu');
         foreach ($menus as $menu) {
-            $currentRoute = check_current_route_name(remove_route_action($menu->route), get_current_route_name(true) ?? '#');
-
             if ($menu->children->isEmpty()) {
                 $link = Link::to(
                     Route::has($menu->route) ? route($menu->route) : 'javascript:void(0);',
@@ -40,7 +39,9 @@ class MenuComposer
                     ->addClass('side-menu__item')
                     ->addParentClass('slide');
 
-                if ($currentRoute) $link->isActive();
+                if (check_current_route_name(remove_route_action($menu->route), remove_route_action($currentRoute))) {
+                    $link->setActive();
+                }
 
                 $spatieMenu->add($link);
             } else {
@@ -56,7 +57,10 @@ class MenuComposer
                         ->addClass('side-menu__item')
                         ->addParentClass('slide');
 
-                    if ($currentRoute) $link->isActive();
+                    if (check_current_route_name(remove_route_action($child->route), remove_route_action($currentRoute))) {
+                        $subMenu->addParentClass('open')->addClass('active');
+                        $link->addClass('active');
+                    }
 
                     $subMenu->add($link);
                 }

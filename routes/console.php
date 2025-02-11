@@ -12,10 +12,11 @@ Artisan::command('inspire', function () {
 
 Schedule::job('App\Jobs\PositionJob')->everyFifteenSeconds();
 
-Artisan::command('fetch:position', function () {
-    PositionJob::dispatch();
-})->purpose('Fetch position from API');
-
 Artisan::command('fetch:official', function () {
     OfficialJob::dispatch();
-})->purpose('Fetch official from API');
+})->purpose('Fetch position from API');
+
+Artisan::command('fetch:position', function () {
+    PositionJob::dispatch();
+    Artisan::call('db:seed --class=PositionSeeder');
+})->purpose('Fetch position from API');

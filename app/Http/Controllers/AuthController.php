@@ -75,18 +75,27 @@ class AuthController extends Controller
         }
 
         if (auth()->attempt($request->only('username', 'password'))) {
+            $user = auth()->user();
+
+            if (!str_contains($user->employee_id, 'x9999')) {
+                $assigned_roles = Position::userAssignedRoles($user->personnel_area_code, $user->position_name)->first();
+                $assigned_roles = $assigned_roles?->assigned_roles ? explode(',', $assigned_roles->assigned_roles) : ['risk admin'];
+                $user->syncRoles($assigned_roles);
+            }
+
             session()->put('current_unit', (object) [
-                'position_name' => auth()->user()->position_name,
-                'organization_code' => auth()->user()->organization_code,
-                'organization_name' => auth()->user()->organization_name,
-                'unit_code' => auth()->user()->unit_code,
-                'unit_name' => auth()->user()->unit_name,
-                'sub_unit_code' => auth()->user()->sub_unit_code,
-                'sub_unit_name' => auth()->user()->sub_unit_name,
-                'personnel_area_code' => auth()->user()->personnel_area_code,
-                'personnel_area_name' => auth()->user()->personnel_area_name,
+                'position_name' => $user->position_name,
+                'organization_code' => $user->organization_code,
+                'organization_name' => $user->organization_name,
+                'unit_code' => $user->unit_code,
+                'unit_name' => $user->unit_name,
+                'sub_unit_code' => $user->sub_unit_code,
+                'sub_unit_name' => $user->sub_unit_name,
+                'personnel_area_code' => $user->personnel_area_code,
+                'personnel_area_name' => $user->personnel_area_name,
             ]);
-            session()->put('current_role', auth()->user()->roles()->first());
+
+            session()->put('current_role', $user->roles()->first());
             return redirect()->route('dashboard.index');
         }
 

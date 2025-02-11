@@ -27,14 +27,14 @@ class DashboardController extends Controller
                 COALESCE(COUNT(IF(ra_worksheets.status = 'approved', 1, NULL))) as approved
             ")
             ->where('ra_worksheets.sub_unit_code', 'like', $unit)
-            ->when($current_role->name == 'risk admin', fn($q) => $q->where('ra_worksheets.created_by', $user->employee_id))
+            ->when($current_role?->name == 'risk admin', fn($q) => $q->where('ra_worksheets.created_by', $user->employee_id))
             ->whereYear('ra_worksheets.created_at', request('year', date('Y')))
             ->first();
 
         $count_mitigation = WorksheetMitigation::whereHas(
             'worksheet',
             fn($q) => $q->where('ra_worksheets.sub_unit_code', 'like', $unit)
-                ->when($current_role->name == 'risk admin', fn($q) => $q->where('ra_worksheets.created_by', $user->employee_id))
+                ->when($current_role?->name == 'risk admin', fn($q) => $q->where('ra_worksheets.created_by', $user->employee_id))
                 ->whereYear('ra_worksheets.created_at', request('year', date('Y')))
         )
             ->count();
@@ -58,7 +58,7 @@ class DashboardController extends Controller
             ->leftJoin('ra_monitoring_actualizations as ma', 'ma.monitoring_id', '=', 'm.id')
             ->whereLike('w.sub_unit_code', $unit)
             ->whereNotLike('w.personnel_area_code', 'Reg %')
-            ->when($current_role->name == 'risk admin', fn($q) => $q->where('w.created_by', $user->employee_id))
+            ->when($current_role?->name == 'risk admin', fn($q) => $q->where('w.created_by', $user->employee_id))
             ->whereYear('w.created_at', request('year', date('Y')))
             ->groupBy('m.id')
             ->first();

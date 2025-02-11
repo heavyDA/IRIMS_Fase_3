@@ -34,7 +34,8 @@ class AssessmentController extends Controller
 
                         return $q->whereNotIn('status', ['draft', 'approved']);
                     }
-                );
+                )
+                ->latest('worksheet.created_at');
 
             return DataTables::query($incidents)
                 ->filter(function ($q) {

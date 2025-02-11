@@ -3,23 +3,24 @@
 namespace App\Jobs;
 
 use App\Models\Master\Position;
+use App\Services\EOffice\UnitService;
 use Exception;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Http;
 
 class PositionJob
 {
     use Queueable;
+
+    protected UnitService $unitService;
 
     /**
      * Create a new job instance.
      */
     public function __construct()
     {
-        //
+        $this->unitService = new UnitService(env('EOFFICE_URL'), env('EOFFICE_TOKEN'));
     }
 
     /**
@@ -28,30 +29,25 @@ class PositionJob
     public function handle(): void
     {
         try {
-            $http = Http::withHeader('Authorization', env('EOFFICE_TOKEN'))
-                ->withoutVerifying()
-                ->asForm()
-                ->post(env('EOFFICE_URL') . '/roles_get', ['effective_date' => '2025-01-06']);
+            $data = $this->unitService->get_all();
 
             $created = 0;
             $updated = 0;
-            if ($http->ok()) {
-                $json = $http->json();
-                foreach ($json['data'] as $item) {
-                    if (!$item['UNIT_CODE']) {
-                        continue;
-                    }
-
-                    foreach (array_keys($item) as $key) {
-                        $_item[strtolower($key)] = trim($item[$key]);
-                    }
+            if ($data->isNotEmpty()) {
+                foreach ($data as $item) {
+                    if (!$item->sub_unit_code) continue;
 
                     $position = Position::updateOrCreate(
                         [
-                            'personnel_area_code' => $_item['personnel_area_code'],
-                            'unit_code' => $_item['unit_code'],
+                            'personnel_area_code' => $item->personnel_area_code,
+                            'unit_code' => $item->sub_unit_code,
                         ],
-                        $_item
+                        [
+                            'unit_code_doc' => $item->sub_unit_code_doc,
+                            'unit_name' => $item->sub_unit_name,
+                            'position_name' => $item->position_name,
+                            'assigned_roles' => 'risk admin',
+                        ]
                     );
 
                     if ($position->wasRecentlyCreated) {
@@ -60,6 +56,7 @@ class PositionJob
                         $updated++;
                     }
                 }
+
                 logger("[Position Job] successfully fetched data number of created: $created, updated: $updated");
                 Cache::put('master.positions', Position::all());
                 Cache::put('master.position_pics', Position::distinct()->select('id', 'personnel_area_code', 'unit_code', 'unit_name', 'position_name')->get());

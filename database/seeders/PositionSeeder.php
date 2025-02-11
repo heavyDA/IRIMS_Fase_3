@@ -6427,7 +6427,7 @@ class PositionSeeder extends Seeder
 
         foreach ($positions as $position) {
             Position::where('personnel_area_code', $position['personnel_area_code'])
-                ->where('unit_code', $position['unit_code'])
+                ->where('unit_code_doc', $position['unit_code'])
                 ->update([
                     'assigned_roles' => $position['assigned_roles']
                 ]);

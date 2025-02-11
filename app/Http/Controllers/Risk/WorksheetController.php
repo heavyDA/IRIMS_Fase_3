@@ -651,20 +651,22 @@ class WorksheetController extends Controller
             abort(404, 'Data tidak ditemukan');
         }
 
-        $rule = Str::snake($currentRole->name) . '_rule';
-
         try {
+            $rule = Str::snake($currentRole->name == 'risk analis' ? $request->role : $currentRole->name) . '_rule';
+            if (!method_exists($this, $rule)) {
+                throw new Exception("Target role not found: {$rule}");
+            }
             DB::beginTransaction();
             $this->$rule($worksheet, $request->status, $request->note);
             DB::commit();
 
-            flash_message('flash_message', 'Status berhasil diperbarui', State::SUCCESS);
-            return redirect()->route('risk.worksheet.show', $worksheetId);
+            flash_message('flash_message', 'Status Kertas Kerja berhasil diperbarui', State::SUCCESS);
         } catch (Exception $e) {
             DB::rollBack();
-            flash_message('flash_message', $e->getMessage(), State::ERROR);
-            return redirect()->route('risk.worksheet.show', $worksheetId);
+            logger()->error("[Worksheet] Failed to update status of worksheet with ID {$worksheet->id}: ". $e->getMessage());
+            flash_message('flash_message', 'Status Kertas Kerja gagal diperbarui', State::ERROR);
         }
+        return redirect()->route('risk.worksheet.show', $worksheetId);
     }
 
     protected function risk_admin_rule(Worksheet $worksheet, string $status, string $note): WorksheetHistory

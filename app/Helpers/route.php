@@ -40,7 +40,7 @@ if (!function_exists('get_current_route_name')) {
 if (!function_exists('check_current_route_name')) {
     function check_current_route_name(string $routeTarget, string $currentRoute): bool
     {
-        return $routeTarget !== "" && $routeTarget === $currentRoute;
+        return $routeTarget && $routeTarget === $currentRoute;
     }
 }
 

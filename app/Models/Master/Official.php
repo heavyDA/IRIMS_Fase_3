@@ -9,13 +9,31 @@ class Official extends Model
 {
     protected $table = 'm_officials';
 
+    protected $fillable = [
+        'email',
+        'username',
+        'employee_id',
+        'employee_name',
+        'unit_code',
+        'unit_name',
+        'sub_unit_code',
+        'sub_unit_name',
+        'organization_code',
+        'organization_name',
+        'personnel_area_code',
+        'personnel_area_name',
+        'position_name',
+        'employee_grade_code',
+        'employee_grade',
+    ];
+
     public function scopeGetSubUnitOnly($query)
     {
-        return $query->distinct()->select('sub_unit_code', 'sub_unit_name', 'personnel_area_code')->oldest('sub_unit_code');
+        return $query->select('sub_unit_code', 'sub_unit_name', 'personnel_area_code')->oldest('sub_unit_code');
     }
 
     public function scopeFilterByRole($query)
     {
-        return $query->where('sub_unit_code', 'like', Role::getDefaultSubUnit());
+        return $query->whereLike('sub_unit_code', Role::getDefaultSubUnit());
     }
 }

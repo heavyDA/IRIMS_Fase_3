@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 
 class HeatmapController extends Controller
 {
-    public function index()
+    public function get_all()
     {
         return response()->json(['data' => Heatmap::all()]);
     }

@@ -81,40 +81,26 @@
                                     @endif
                                     @isset($worksheet)
                                         @if (
-                                            ($worksheet->status == 'draft' &&
-                                                in_array(session()->get('current_role')?->name, ['risk admin', 'risk owner', 'risk analis'])) ||
-                                                ($worksheet->status == 'on review' &&
-                                                    in_array(session()->get('current_role')?->name, ['risk owner', 'risk analis'])))
+                                            (
+                                                $worksheet->status == 'draft' &&
+                                                in_array(session()->get('current_role')?->name, ['risk admin', 'risk owner', 'risk analis'])
+                                            ) ||
+                                            (
+                                                $worksheet->status == 'on review' &&
+                                                in_array(session()->get('current_role')?->name, ['risk owner', 'risk analis'])
+                                            ) ||
+                                            auth()->user()->hasAnyRole('superadmin|risk analis|root')
+                                        )
                                             <form action="{{ route('risk.worksheet.destroy', $worksheet->getEncryptedId()) }}"
                                                 method="POST">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button style="min-width: 128px;" type="submit" class="btn btn-danger">
+                                                <button onclick="confirm('Hapus kertas kerja ini?') ? true : event.preventDefault()" style="min-width: 128px;" type="submit" class="btn btn-danger">
                                                     <span><i class="ti ti-x"></i></span>&nbsp;Hapus
                                                 </button>
                                             </form>
                                         @endif
-                                        @if (!str_contains(request()->route()->getName(), 'edit'))
-                                            @if (
-                                                (session()->get('current_role')?->name == 'risk admin' && $worksheet->last_history->status == 'draft') ||
-                                                    (session()->get('current_role')?->name == 'risk owner' &&
-                                                        in_array($worksheet->last_history->status, ['draft', 'on review'])) ||
-                                                    session()->get('current_role')?->name == 'risk analis')
-                                                <a href="{{ route('risk.worksheet.edit', $worksheet->getEncryptedId()) }}"
-                                                    style="min-width: 128px;" class="btn btn-success">
-                                                    <span><i class="ti ti-edit"></i></span>&nbsp;Update
-                                                </a>
-                                            @endif
-                                            @if (session()->get('current_role')?->name == 'risk admin' && $worksheet->last_history->status == 'draft')
-                                                @include('risk.worksheet.partials._risk_admin')
-                                            @elseif (session()->get('current_role')?->name == 'risk owner' && $worksheet->last_history->status == 'on review')
-                                                @include('risk.worksheet.partials._risk_owner')
-                                            @elseif (
-                                                \App\Models\RBAC\Role::risk_otorisator_worksheet_approval() && $worksheet->last_history->status == 'on confirmation'
-                                            )
-                                                @include('risk.worksheet.partials._risk_otorisator')
-                                            @endif
-                                        @endif
+                                        @include('risk.worksheet.partials._history', compact('worksheet'))
                                     @endisset
                                 </div>
                             </div>
