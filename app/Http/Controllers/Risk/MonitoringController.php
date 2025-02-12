@@ -26,10 +26,17 @@ class MonitoringController extends Controller
 {
     public function index()
     {
+        $role = session()->get('current_role') ?? auth()->user()->roles()->first();
         if (request()->ajax()) {
             $unit = Role::getDefaultSubUnit();
             $worksheets = Worksheet::latest_monitoring_with_mitigation_query()
-                ->whereLike('w.sub_unit_code', request('unit', $unit))
+                ->where(function($q) use($unit, $role) {
+                    $q->whereLike('w.sub_unit_code', $unit)
+                    ->when(
+                        $role->name == 'risk owner' && str_contains($unit, '.%'),
+                        fn($q) => $q->orWhereLike('w.sub_unit_code', str_replace('.%', '', $unit))
+                    );
+                })
                 ->when(request('document_status'), fn($q) => $q->where('w.status_monitoring', request('document_status')))
                 ->when(
                     session()->get('current_role')?->name == 'risk admin',
@@ -708,13 +715,19 @@ class MonitoringController extends Controller
 
     protected function risk_admin_rule(Monitoring $monitoring, string $status, string $note): MonitoringHistory
     {
+        $status = DocumentStatus::tryFrom($status);
+        if ($status != DocumentStatus::ON_REVIEW) {
+            $status = $status instanceof DocumentStatus ? $status->value : $status;
+            throw new Exception("Attempt to update monitoring with ID {$monitoring->id} status from {$monitoring->status} to ". ($status ?? '')  . ' as Risk Admin');
+        }
+
         $monitoring->update(['status' => DocumentStatus::ON_REVIEW->value]);
         return $monitoring->histories()->create([
             'created_by' => auth()->user()->employee_id,
             'created_role' => 'risk admin',
             'receiver_id' => 3,
             'receiver_role' => 'risk owner',
-            'status' => DocumentStatus::ON_REVIEW->value,
+            'status' => $status->value,
             'note' => $note
         ]);
     }
@@ -722,34 +735,48 @@ class MonitoringController extends Controller
     protected function risk_owner_rule(Monitoring $monitoring, string $status, string $note): MonitoringHistory
     {
         $status = DocumentStatus::tryFrom($status);
-        if ($status == DocumentStatus::DRAFT) {
-            $monitoring->update(['status' => $status->value]);
-            return $monitoring->histories()->create([
+        if ($status == DocumentStatus::REVISED) {
+            $status = DocumentStatus::DRAFT;
+            $history = [
                 'created_by' => auth()->user()->employee_id,
                 'created_role' => 'risk owner',
                 'receiver_id' => 2,
                 'receiver_role' => 'risk admin',
                 'status' => $status->value,
                 'note' => $note
-            ]);
+            ];
+        } else if ($status == DocumentStatus::ON_REVIEW) {
+            $history = [
+                'created_by' => auth()->user()->employee_id,
+                'created_role' => 'risk owner',
+                'receiver_id' => 3,
+                'receiver_role' => 'risk owner',
+                'status' => $status->value,
+                'note' => $note
+            ];
+        } else if ($status == DocumentStatus::ON_CONFIRMATION) {
+            $history = [
+                'created_by' => auth()->user()->employee_id,
+                'created_role' => 'risk owner',
+                'receiver_id' => 4,
+                'receiver_role' => 'risk otorisator',
+                'status' => $status->value,
+                'note' => $note
+            ];
+        } else {
+            $status = $status instanceof DocumentStatus ? $status->value : $status;
+            throw new Exception("Attempt to update monitoring with ID {$monitoring->id} status from {$monitoring->status} to ". ($status ?? '')  . ' as Risk Owner');
         }
 
-        $monitoring->update(['status' => DocumentStatus::ON_CONFIRMATION->value]);
-        return $monitoring->histories()->create([
-            'created_by' => auth()->user()->employee_id,
-            'created_role' => 'risk owner',
-            'receiver_id' => 4,
-            'receiver_role' => 'risk otorisator',
-            'status' => DocumentStatus::ON_CONFIRMATION->value,
-            'note' => $note
-        ]);
+        $monitoring->update(['status' => $status->value]);
+
+        return $monitoring->histories()->create($history);
     }
 
     protected function risk_otorisator_rule(Monitoring $monitoring, string $status, string $note): MonitoringHistory
     {
         $status = DocumentStatus::tryFrom($status);
         if ($status == DocumentStatus::ON_REVIEW) {
-            $monitoring->update(['status' => $status->value]);
             return $monitoring->histories()->create([
                 'created_by' => auth()->user()->employee_id,
                 'created_role' => 'risk otorisator',
@@ -758,16 +785,23 @@ class MonitoringController extends Controller
                 'status' => $status->value,
                 'note' => $note
             ]);
+        } else if ($status == DocumentStatus::APPROVED) {
+            $role = $monitoring->worksheet->creator->roles()->first();
+
+            $history = [
+                'created_by' => auth()->user()->employee_id,
+                'created_role' => 'risk otorisator',
+                'receiver_id' => $role?->id ?? 2,
+                'receiver_role' => $role?->name ?? 'risk admin',
+                'status' => $status->value,
+                'note' => $note
+            ];
+        } else {
+            $status = $status instanceof DocumentStatus ? $status->value : $status;
+            throw new Exception("Attempt to update monitoring with ID {$monitoring->id} status from {$monitoring->status} to ". ($status ?? '')  . ' as Risk Otorisator');
         }
 
-        $monitoring->update(['status' => DocumentStatus::APPROVED->value]);
-        return $monitoring->histories()->create([
-            'created_by' => auth()->user()->employee_id,
-            'created_role' => 'risk otorisator',
-            'receiver_id' => 2,
-            'receiver_role' => 'risk admin',
-            'status' => DocumentStatus::APPROVED->value,
-            'note' => $note
-        ]);
+        $monitoring->update(['status' => $status->value]);
+        return $monitoring->histories()->create($history);
     }
 }

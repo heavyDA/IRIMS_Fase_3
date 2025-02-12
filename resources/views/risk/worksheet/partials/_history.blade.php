@@ -12,7 +12,7 @@
                 <span><i class="ti ti-edit"></i></span>&nbsp;Update
             </a>
         @endif
-        @if (session()->get('current_role')?->name == 'risk admin' && $worksheet->last_history->status == 'draft')
+        @if (in_array(session()->get('current_role')?->name, ['risk admin', 'risk owner']) && $worksheet->last_history->status == 'draft')
             @include('risk.worksheet.partials._risk_admin')
         @elseif (session()->get('current_role')?->name == 'risk owner' && $worksheet->last_history->status == 'on review')
             @include('risk.worksheet.partials._risk_owner')

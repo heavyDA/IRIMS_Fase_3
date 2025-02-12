@@ -17,14 +17,20 @@ class AssessmentController extends Controller
         if (request()->ajax()) {
             $unit = Role::getDefaultSubUnit();
 
+            $role = session()->get('current_role') ?? auth()->user()->roles()->first();
             if (Role::hasLookUpUnitHierarchy()) {
                 $unit = request('unit') ? request('unit') . '%' : $unit;
             }
 
             $incidents = WorksheetIncident::incident_query()
-                ->where('worksheet.sub_unit_code', 'like', $unit)
                 ->when(session()->get('current_role')?->name == 'risk admin', fn($q) => $q->where('worksheet.created_by', auth()->user()->employee_id))
-                ->when(request('year'), fn($q) => $q->whereYear('worksheet.created_at', request('year')))
+                ->where(function($q) use($unit, $role) {
+                    $q->whereLike('worksheet.sub_unit_code', $unit)
+                    ->when(
+                        $role->name == 'risk owner' && str_contains($unit, '.%'),
+                        fn($q) => $q->orWhereLike('worksheet.sub_unit_code', str_replace('.%', '', $unit))
+                    );
+                })
                 ->when(
                     request('document_status'),
                     function ($q) {
@@ -35,6 +41,7 @@ class AssessmentController extends Controller
                         return $q->whereNotIn('status', ['draft', 'approved']);
                     }
                 )
+                ->whereYear('worksheet.created_at', request('year', date('Y')))
                 ->latest('worksheet.created_at');
 
             return DataTables::query($incidents)

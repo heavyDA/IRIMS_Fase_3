@@ -17,15 +17,22 @@ class RiskProfileController extends Controller
 {
     public function index()
     {
+        $role = session()->get('current_role') ?? auth()->user()->roles()->first();
         if (request()->ajax()) {
-            $unit = Role::getDefaultSubUnit();
-
             if (Role::hasLookUpUnitHierarchy()) {
-                $unit = request('unit') ? request('unit') . '%' : $unit;
+                $unit = request('unit') ? request('unit') . '%' : Role::getDefaultSubUnit();
+            } else {
+                $unit = Role::getDefaultSubUnit();
             }
 
             $incidents = WorksheetIncident::incident_query()
-                ->where('worksheet.sub_unit_code', 'like', $unit)
+                ->where(function($q) use($unit, $role) {
+                    $q->whereLike('worksheet.sub_unit_code', $unit)
+                    ->when(
+                        $role->name == 'risk owner' && str_contains($unit, '.%'),
+                        fn($q) => $q->orWhereLike('worksheet.sub_unit_code', str_replace('.%', '', $unit))
+                    );
+                })
                 ->when(request('year'), fn($q) => $q->whereYear('worksheet.created_at', request('year')))
                 ->when(
                     request('document_status'),
@@ -82,14 +89,22 @@ class RiskProfileController extends Controller
 
     public function export()
     {
+        $role = session()->get('current_role') ?? auth()->user()->roles()->first();
         if (Role::hasLookUpUnitHierarchy()) {
             $unit = request('unit') ? request('unit') . '%' : Role::getDefaultSubUnit();
         } else {
             $unit = Role::getDefaultSubUnit();
         }
 
+
         $incidents = WorksheetIncident::incident_query()
-            ->where('worksheet.sub_unit_code', 'like', $unit)
+            ->where(function($q) use($unit, $role) {
+                $q->whereLike('worksheet.sub_unit_code', $unit)
+                ->when(
+                    $role->name == 'risk owner' && str_contains($unit, '.%'),
+                    fn($q) => $q->orWhereLike('worksheet.sub_unit_code', str_replace('.%', '', $unit))
+                );
+            })
             ->when(request('year'), fn($q) => $q->whereYear('worksheet.created_at', request('year')))
             ->when(
                 request('document_status'),

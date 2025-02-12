@@ -4,6 +4,7 @@ namespace App\Models\Risk;
 
 use App\Enums\DocumentStatus;
 use App\Models\RBAC\Role;
+use App\Models\User;
 use App\Traits\HasEncryptedId;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
@@ -85,6 +86,11 @@ class Worksheet extends Model
         return Attribute::make(
             get: fn() => $this->created_at->format('Y'),
         );
+    }
+
+    public function creator()
+    {
+        return $this->belongsTo(User::class, 'created_by', 'employee_id');
     }
 
     public function strategies()

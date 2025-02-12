@@ -50,7 +50,7 @@
                         id="approveForm" method="POST">
                         @csrf
                         @method('PUT')
-                        <input type="hidden" name="status" value="approve">
+                        <input type="hidden" name="status" value="approved">
                         <div class="d-flex flex-column mb-2">
                             <div>
                                 Catatan

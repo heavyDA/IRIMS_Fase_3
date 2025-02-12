@@ -172,15 +172,27 @@ class WorksheetController extends Controller
                 $mitigations[] = $incidents[$incidentIndex]->mitigations()->create($mitigation);
             }
 
-            $worksheet->last_history()->create([
+            $role = session()->get('current_role') ?? $user->roles()->first();
+            $history = [
                 'created_by' => $user->employee_id,
-                'created_role' => 'risk admin',
-                'receiver_id' => 2,
-                'receiver_role' => 'risk admin',
+                'created_role' => $role->name,
                 'status' => DocumentStatus::DRAFT->value,
                 'note' => 'Membuat kertas kerja baru'
-            ]);
+            ];
 
+            if ($role->name == 'risk admin') {
+                $history = array_merge($history, [
+                    'receiver_id' => 3,
+                    'receiver_role' => 'risk owner',
+                ]);
+            } else {
+                $history = array_merge($history, [
+                    'receiver_id' => $role->id,
+                    'receiver_role' => $role->name,
+                ]);
+            }
+
+            $worksheet->last_history()->create($history);
             DB::commit();
             return response()->json(['data' => [
                 'redirect' => route('risk.worksheet.show', $worksheet->getEncryptedId()),
@@ -585,14 +597,27 @@ class WorksheetController extends Controller
                 );
             }
 
-            $worksheet->last_history()->create([
+            $role = session()->get('current_role') ?? auth()->user()->roles()->first();
+            $history = [
                 'created_by' => auth()->user()->employee_id,
-                'created_role' => 'risk admin',
-                'receiver_id' => 2,
-                'receiver_role' => 'risk admin',
+                'created_role' => $role->name,
                 'status' => $worksheet->status,
                 'note' => 'Memperbarui kertas kerja'
-            ]);
+            ];
+
+            if ($role->name == 'risk admin') {
+                $history = array_merge($history, [
+                    'receiver_id' => 3,
+                    'receiver_role' => 'risk owner',
+                ]);
+            } else {
+                $history = array_merge($history, [
+                    'receiver_id' => $role->id,
+                    'receiver_role' => $role->name,
+                ]);
+            }
+
+            $worksheet->last_history()->create($history);
 
             DB::commit();
             return response()->json(['data' => [
@@ -663,56 +688,76 @@ class WorksheetController extends Controller
             flash_message('flash_message', 'Status Kertas Kerja berhasil diperbarui', State::SUCCESS);
         } catch (Exception $e) {
             DB::rollBack();
-            logger()->error("[Worksheet] Failed to update status of worksheet with ID {$worksheet->id}: ". $e->getMessage());
+            logger()->error("[Worksheet] Failed to update status of worksheet with ID {$worksheet->id}: " . $e->getMessage());
             flash_message('flash_message', 'Status Kertas Kerja gagal diperbarui', State::ERROR);
         }
         return redirect()->route('risk.worksheet.show', $worksheetId);
     }
 
-    protected function risk_admin_rule(Worksheet $worksheet, string $status, string $note): WorksheetHistory
+    protected function risk_admin_rule(Worksheet $worksheet, string $status, ?string $note = ''): WorksheetHistory
     {
+        $status = DocumentStatus::tryFrom($status);
+        if ($status != DocumentStatus::ON_REVIEW) {
+            $status = $status instanceof DocumentStatus ? $status->value : $status;
+            throw new Exception("Attempt to update worksheet with ID {$worksheet->id} status from {$worksheet->status} to ". ($status ?? '')  . ' as Risk Admin');
+        }
+
         $worksheet->update(['status' => DocumentStatus::ON_REVIEW->value]);
         return $worksheet->histories()->create([
             'created_by' => auth()->user()->employee_id,
             'created_role' => 'risk admin',
             'receiver_id' => 3,
             'receiver_role' => 'risk owner',
-            'status' => DocumentStatus::ON_REVIEW->value,
+            'status' => $status->value,
             'note' => $note
         ]);
     }
 
-    protected function risk_owner_rule(Worksheet $worksheet, string $status, string $note): WorksheetHistory
+    protected function risk_owner_rule(Worksheet $worksheet, string $status, ?string $note = ''): WorksheetHistory
     {
         $status = DocumentStatus::tryFrom($status);
-        if ($status == DocumentStatus::DRAFT) {
-            $worksheet->update(['status' => $status->value]);
-            return $worksheet->histories()->create([
+        if ($status == DocumentStatus::REVISED) {
+            $status = DocumentStatus::DRAFT;
+            $history = [
                 'created_by' => auth()->user()->employee_id,
                 'created_role' => 'risk owner',
                 'receiver_id' => 2,
                 'receiver_role' => 'risk admin',
                 'status' => $status->value,
                 'note' => $note
-            ]);
+            ];
+        } else if ($status == DocumentStatus::ON_REVIEW) {
+            $history = [
+                'created_by' => auth()->user()->employee_id,
+                'created_role' => 'risk owner',
+                'receiver_id' => 3,
+                'receiver_role' => 'risk owner',
+                'status' => $status->value,
+                'note' => $note
+            ];
+        } else if ($status == DocumentStatus::ON_CONFIRMATION) {
+            $history = [
+                'created_by' => auth()->user()->employee_id,
+                'created_role' => 'risk owner',
+                'receiver_id' => 4,
+                'receiver_role' => 'risk otorisator',
+                'status' => $status->value,
+                'note' => $note
+            ];
+        } else {
+            $status = $status instanceof DocumentStatus ? $status->value : $status;
+            throw new Exception("Attempt to update worksheet with ID {$worksheet->id} status from {$worksheet->status} to ". ($status ?? '')  . ' as Risk Owner');
         }
 
-        $worksheet->update(['status' => DocumentStatus::ON_CONFIRMATION->value]);
-        return $worksheet->histories()->create([
-            'created_by' => auth()->user()->employee_id,
-            'created_role' => 'risk owner',
-            'receiver_id' => 4,
-            'receiver_role' => 'risk otorisator',
-            'status' => DocumentStatus::ON_CONFIRMATION->value,
-            'note' => $note
-        ]);
+        $worksheet->update(['status' => $status->value]);
+
+        return $worksheet->histories()->create($history);
     }
 
-    protected function risk_otorisator_rule(Worksheet $worksheet, string $status, string $note): WorksheetHistory
+    protected function risk_otorisator_rule(Worksheet $worksheet, string $status, ?string $note = ''): WorksheetHistory
     {
         $status = DocumentStatus::tryFrom($status);
         if ($status == DocumentStatus::ON_REVIEW) {
-            $worksheet->update(['status' => $status->value]);
             return $worksheet->histories()->create([
                 'created_by' => auth()->user()->employee_id,
                 'created_role' => 'risk otorisator',
@@ -721,17 +766,23 @@ class WorksheetController extends Controller
                 'status' => $status->value,
                 'note' => $note
             ]);
+        } else if ($status == DocumentStatus::APPROVED) {
+            $role = $worksheet->creator?->roles()?->first();
+            $history = [
+                'created_by' => auth()->user()->employee_id,
+                'created_role' => 'risk otorisator',
+                'receiver_id' => $role?->id ?? 'risk admin',
+                'receiver_role' => $role?->name ?? 'risk admin',
+                'status' => $status->value,
+                'note' => $note
+            ];
+        } else {
+            $status = $status instanceof DocumentStatus ? $status->value : $status;
+            throw new Exception("Attempt to update worksheet with ID {$worksheet->id} status from {$worksheet->status} to ". ($status ?? '')  . ' as Risk Otorisator');
         }
 
-        $worksheet->update(['status' => DocumentStatus::APPROVED->value]);
-        return $worksheet->histories()->create([
-            'created_by' => auth()->user()->employee_id,
-            'created_role' => 'risk otorisator',
-            'receiver_id' => 2,
-            'receiver_role' => 'risk admin',
-            'status' => DocumentStatus::APPROVED->value,
-            'note' => $note
-        ]);
+        $worksheet->update(['status' => $status->value]);
+        return $worksheet->histories()->create($history);
     }
 
     public function get_by_inherent_risk_scale(int $riskScale)

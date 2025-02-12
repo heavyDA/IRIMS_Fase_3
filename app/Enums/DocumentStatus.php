@@ -11,7 +11,7 @@ enum DocumentStatus: string
     case APPROVAL = 'approval';
     case APPROVED = 'approved';
 
-    case REVISED = 'revisi';
+    case REVISED = 'revise';
 
     case ON_MONITORING = 'on monitoring';
     case ON_PROGRESS_MONITORING = 'on progress monitoring';
@@ -32,7 +32,7 @@ enum DocumentStatus: string
             self::ON_PROGRESS_MONITORING => 'On Progress Monitoring',
             self::APPROVAL => 'Approval',
             self::APPROVED => 'Approved',
-            self::REVISED => 'Revised',
+            self::REVISED => 'Revise',
         };
     }
 

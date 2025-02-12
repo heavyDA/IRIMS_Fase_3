@@ -23,11 +23,23 @@ class RiskMonitoringController extends Controller
         $title = 'Risk Monitoring';
 
         if (request()->ajax()) {
-            $unit = Role::getDefaultSubUnit();
+            $role = session()->get('current_role') ?? auth()->user()->roles()->first();
+            if (Role::hasLookUpUnitHierarchy()) {
+                $unit = request('unit') ? request('unit') . '%' : Role::getDefaultSubUnit();
+            } else {
+                $unit = Role::getDefaultSubUnit();
+            }
+
             $worksheets = Worksheet::latest_monitoring_with_mitigation_query()
-                ->where('worksheet_year', request('year', date('Y')))
+                ->where(function ($q) use ($unit, $role) {
+                    $q->whereLike('w.sub_unit_code', $unit)
+                        ->when(
+                            $role->name == 'risk owner' && str_contains($unit, '.%'),
+                            fn($q) => $q->orWhereLike('w.sub_unit_code', str_replace('.%', '', $unit))
+                        );
+                })
                 ->when(request('document_status'), fn($q) => $q->where('w.status_monitoring', request('document_status')))
-                ->whereLike('w.sub_unit_code', request('unit', $unit));
+                ->where('worksheet_year', request('year', date('Y')));
 
             return DataTables::query($worksheets)
                 ->filter(function ($q) {
@@ -68,9 +80,21 @@ class RiskMonitoringController extends Controller
 
     public function export()
     {
-        $unit = Role::getDefaultSubUnit();
+        $role = session()->get('current_role') ?? auth()->user()->roles()->first();
+        if (Role::hasLookUpUnitHierarchy()) {
+            $unit = request('unit') ? request('unit') . '%' : Role::getDefaultSubUnit();
+        } else {
+            $unit = Role::getDefaultSubUnit();
+        }
+
         $worksheets = Worksheet::latest_monitoring_with_mitigation_query()
-            ->whereLike('sub_unit_code', request('unit', $unit))
+            ->where(function ($q) use ($unit, $role) {
+                $q->whereLike('w.sub_unit_code', $unit)
+                    ->when(
+                        $role->name == 'risk owner' && str_contains($unit, '.%'),
+                        fn($q) => $q->orWhereLike('w.sub_unit_code', str_replace('.%', '', $unit))
+                    );
+            })
             ->when(request('document_status'), fn($q) => $q->where('w.status_monitoring', request('document_status')))
             ->where('w.worksheet_year', request('year', date('Y')))
             ->when(

@@ -7,26 +7,40 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h6 class="modal-title" id="staticBackdropLabel">Revisi Kertas Kerja</h6>
+                    <h6 class="modal-title" id="staticBackdropLabel">Submit Laporan Monitoring</h6>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <form action="{{ route('risk.monitoring.update_status_monitoring', $monitoring->getEncryptedId()) }}"
-                        id="updateStatusForm" method="POST">
+                    <form action="{{ route('risk.monitoring.update_status_monitoring', $monitoring->getEncryptedId()) }}" id="updateStatusForm"
+                        method="POST">
                         @csrf
                         @method('PUT')
                         <input type="hidden" name="status" value="draft">
                         <div class="d-flex flex-column mb-2">
                             <div>
-                                Tujuan
+                                Submit Sebagai
                             </div>
                             <div>
-                                {{-- <div id="note-editor" class="textarea"></div> --}}
                                 <select name="role" class="form-select" required>
                                     <option value="">Pilih</option>
                                     <option value="risk admin">Risk Admin</option>
                                     <option value="risk owner">Risk Owner</option>
                                     <option value="risk otorisator">Risk Otorisator</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="d-flex flex-column mb-2">
+                            <div>
+                                Status
+                            </div>
+                            <div>
+                                <select name="status" class="form-select" required>
+                                    <option value="">Pilih</option>
+                                    <option value="draft">Draft</option>
+                                    <option value="on review">On Review</option>
+                                    <option value="on confirmation">On Confirmation</option>
+                                    <option value="approved">Approved</option>
+                                    <option value="revise">Revisi</option>
                                 </select>
                             </div>
                         </div>

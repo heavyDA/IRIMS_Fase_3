@@ -13,7 +13,7 @@ class DashboardController extends Controller
     public function index()
     {
         $user = auth()->user();
-        $current_role = session()?->get('current_role');
+        $current_role = session()?->get('current_role') ?? $user->roles()->first();
         if (Role::hasLookUpUnitHierarchy()) {
             $unit = request('unit') ? request('unit') . '%' : Role::getDefaultSubUnit();
         } else {
@@ -21,19 +21,32 @@ class DashboardController extends Controller
         }
 
         $count_worksheet = DB::table('ra_worksheets')
+            ->where(function($q) use($unit, $current_role) {
+                $q->whereLike('ra_worksheets.sub_unit_code', $unit)
+                ->when(
+                    $current_role->name == 'risk owner' && str_contains($unit, '.%'),
+                    fn($q) => $q->orWhereLike('ra_worksheets.sub_unit_code', str_replace('.%', '', $unit))
+                );
+            })
+            ->when($current_role?->name == 'risk admin', fn($q) => $q->where('ra_worksheets.created_by', $user->employee_id))
             ->selectRaw("
                 COALESCE(COUNT(IF(ra_worksheets.status = 'draft', 1, NULL))) as draft,
                 COALESCE(COUNT(IF(ra_worksheets.status != 'draft' and ra_worksheets.status != 'approved', 1, NULL))) as progress,
                 COALESCE(COUNT(IF(ra_worksheets.status = 'approved', 1, NULL))) as approved
             ")
-            ->where('ra_worksheets.sub_unit_code', 'like', $unit)
-            ->when($current_role?->name == 'risk admin', fn($q) => $q->where('ra_worksheets.created_by', $user->employee_id))
             ->whereYear('ra_worksheets.created_at', request('year', date('Y')))
             ->first();
 
         $count_mitigation = WorksheetMitigation::whereHas(
             'worksheet',
-            fn($q) => $q->where('ra_worksheets.sub_unit_code', 'like', $unit)
+            fn($q) => $q
+            ->where(function($q) use($unit, $current_role) {
+                $q->whereLike('ra_worksheets.sub_unit_code', $unit)
+                ->when(
+                    $current_role->name == 'risk owner' && str_contains($unit, '.%'),
+                    fn($q) => $q->orWhereLike('ra_worksheets.sub_unit_code', str_replace('.%', '', $unit))
+                );
+            })
                 ->when($current_role?->name == 'risk admin', fn($q) => $q->where('ra_worksheets.created_by', $user->employee_id))
                 ->whereYear('ra_worksheets.created_at', request('year', date('Y')))
         )
@@ -56,7 +69,13 @@ class DashboardController extends Controller
             )
             ->leftJoin('ra_worksheets as w', 'w.id', '=', 'm.worksheet_id')
             ->leftJoin('ra_monitoring_actualizations as ma', 'ma.monitoring_id', '=', 'm.id')
-            ->whereLike('w.sub_unit_code', $unit)
+            ->where(function($q) use($unit, $current_role) {
+                $q->whereLike('w.sub_unit_code', $unit)
+                ->when(
+                    $current_role->name == 'risk owner' && str_contains($unit, '.%'),
+                    fn($q) => $q->orWhereLike('w.sub_unit_code', str_replace('.%', '', $unit))
+                );
+            })
             ->whereNotLike('w.personnel_area_code', 'Reg %')
             ->when($current_role?->name == 'risk admin', fn($q) => $q->where('w.created_by', $user->employee_id))
             ->whereYear('w.created_at', request('year', date('Y')))
@@ -64,7 +83,6 @@ class DashboardController extends Controller
             ->first();
 
         $level = Role::getTraverseLevel();
-        $unit = Role::getDefaultSubUnit();
 
         $monitoring_progress = Monitoring::monitoring_progress_each_unit_query($unit, $level, request('year', date('Y')))
             ->get()
@@ -173,7 +191,8 @@ class DashboardController extends Controller
 
     public function monitoring_progress_child()
     {
-        $unit = request('unit', Role::getDefaultSubUnit()) . '.%';
+        $unit = request('unit', Role::getDefaultSubUnit());
+        $unit = str_contains($unit, '.%') ? $unit : $unit . '.%';
         $level = Role::getTraverseLevel($unit);
 
         $data = Monitoring::monitoring_progress_each_unit_query($unit, $level, request('year', date('Y')))

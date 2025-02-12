@@ -18,7 +18,7 @@
                         method="POST">
                         @csrf
                         @method('PUT')
-                        <input type="hidden" name="status" value="draft">
+                        <input type="hidden" name="status" value="revise">
                         <div class="d-flex flex-column mb-2">
                             <div>
                                 Catatan
