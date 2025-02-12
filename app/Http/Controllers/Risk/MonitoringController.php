@@ -32,10 +32,7 @@ class MonitoringController extends Controller
             $worksheets = Worksheet::latest_monitoring_with_mitigation_query()
                 ->where(function($q) use($unit, $role) {
                     $q->whereLike('w.sub_unit_code', $unit)
-                    ->when(
-                        $role->name == 'risk owner' && str_contains($unit, '.%'),
-                        fn($q) => $q->orWhereLike('w.sub_unit_code', str_replace('.%', '', $unit))
-                    );
+                    ->orWhereLike('w.sub_unit_code', str_replace('.%', '', $unit));
                 })
                 ->when(request('document_status'), fn($q) => $q->where('w.status_monitoring', request('document_status')))
                 ->when(

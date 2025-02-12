@@ -26,10 +26,7 @@ class AssessmentController extends Controller
                 ->when(session()->get('current_role')?->name == 'risk admin', fn($q) => $q->where('worksheet.created_by', auth()->user()->employee_id))
                 ->where(function($q) use($unit, $role) {
                     $q->whereLike('worksheet.sub_unit_code', $unit)
-                    ->when(
-                        $role->name == 'risk owner' && str_contains($unit, '.%'),
-                        fn($q) => $q->orWhereLike('worksheet.sub_unit_code', str_replace('.%', '', $unit))
-                    );
+                    ->orWhereLike('worksheet.sub_unit_code', str_replace('.%', '', $unit));
                 })
                 ->when(
                     request('document_status'),

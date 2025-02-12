@@ -38,11 +38,7 @@ class Position extends Model
     public function scopeFilterByRole($query)
     {
         $unit = Role::getDefaultSubUnit();
-        $role = session()->get('current_role') ?? auth()->user()->roles()->first();
         return $query->whereLike('sub_unit_code', $unit)
-        ->when(
-            $role->name == 'risk owner',
-            fn($q) => $q->orWhereLike('sub_unit_code', str_replace('.%', '', $unit))
-        );
+        ->orWhereLike('sub_unit_code', str_replace('.%', '', $unit));
     }
 }

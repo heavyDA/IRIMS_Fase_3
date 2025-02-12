@@ -28,10 +28,7 @@ class RiskProfileController extends Controller
             $incidents = WorksheetIncident::incident_query()
                 ->where(function($q) use($unit, $role) {
                     $q->whereLike('worksheet.sub_unit_code', $unit)
-                    ->when(
-                        $role->name == 'risk owner' && str_contains($unit, '.%'),
-                        fn($q) => $q->orWhereLike('worksheet.sub_unit_code', str_replace('.%', '', $unit))
-                    );
+                    ->orWhereLike('worksheet.sub_unit_code', str_replace('.%', '', $unit));
                 })
                 ->when(request('year'), fn($q) => $q->whereYear('worksheet.created_at', request('year')))
                 ->when(
@@ -100,10 +97,7 @@ class RiskProfileController extends Controller
         $incidents = WorksheetIncident::incident_query()
             ->where(function($q) use($unit, $role) {
                 $q->whereLike('worksheet.sub_unit_code', $unit)
-                ->when(
-                    $role->name == 'risk owner' && str_contains($unit, '.%'),
-                    fn($q) => $q->orWhereLike('worksheet.sub_unit_code', str_replace('.%', '', $unit))
-                );
+                ->orWhereLike('worksheet.sub_unit_code', str_replace('.%', '', $unit));
             })
             ->when(request('year'), fn($q) => $q->whereYear('worksheet.created_at', request('year')))
             ->when(
