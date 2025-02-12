@@ -796,7 +796,10 @@ class WorksheetController extends Controller
         $worksheets = Worksheet::with([
             'identification' => fn($q) => $q->with('risk_category_t2', 'risk_category_t3')
         ])
-            ->where('sub_unit_code', 'like', $unit)
+            ->where(
+                fn($q) => $q->where('sub_unit_code', $unit)
+                ->orWhere('sub_unit_code', str_replace('.%', '', $unit))
+            )
             ->whereHas('identification', fn($q) => $q->where('inherent_risk_scale', $riskScale))
             ->when(session()->get('current_role')->name == 'risk admin', fn($q) => $q->where('created_by', auth()->user()->employee_id))
             ->whereYear('created_at', request('year', date('Y')))
@@ -823,7 +826,10 @@ class WorksheetController extends Controller
             ->where('risk_scale', $riskScale)
             ->whereHas(
                 'monitoring.worksheet',
-                fn($q) => $q->where('sub_unit_code', 'like', $unit)
+                fn($q) => $q->where(
+                        fn($q) => $q->where('sub_unit_code', $unit)
+                        ->orWhereLike('sub_unit_code', str_replace('.%', '', $unit))
+                    )
                     ->when(session()->get('current_role')->name == 'risk admin', fn($q) => $q->where('created_by', auth()->user()->employee_id))
                     ->whereYear('created_at', request('year', date('Y')))
             )->get();
