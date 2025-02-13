@@ -27,14 +27,22 @@ class TopRiskController extends Controller
         }
 
         if (request()->ajax()) {
+            $risk_otorisator_permission = Role::risk_otorisator_top_risk_approval();
             $level = Role::getLevel();
+
+            $source_unit = '';
             if ($level < 2) {
                 $worksheets = Worksheet::top_risk_upper_query(str_replace('.%', '%', $unit))
-                    ->whereLike('wtr.sub_unit_code', str_replace('.%', '', $unit))
+                    ->whereLike('w.sub_unit_code', str_replace('.%', '', $unit))
                     ->whereYear('w.created_at', request('year', date('Y')))
                     ->where('w.status', DocumentStatus::APPROVED->value);
             } else {
-                $worksheets = Worksheet::top_risk_lower_query(str_replace('.%', '%', $unit))
+                if (!$risk_otorisator_permission) {
+                    $source_unit = explode('.', str_replace('.%', '', $unit));
+                    $source_unit = implode('.', array_slice($source_unit, 0, 3)) . '%';
+                }
+
+                $worksheets = Worksheet::top_risk_lower_query($source_unit ?: str_replace('.%', '%', $unit))
                     ->whereLike('w.sub_unit_code', str_replace('.%', '%', $unit))
                     ->whereYear('w.created_at', request('year', date('Y')))
                     ->where('w.status', DocumentStatus::APPROVED->value);
@@ -73,7 +81,7 @@ class TopRiskController extends Controller
 
                     return view('risk.top_risk._table_status', compact('status', 'class', 'worksheet_number', 'route'))->render();
                 })
-                ->editColumn('top_risk_action', function ($worksheet) use ($unit, $level) {
+                ->editColumn('top_risk_action', function ($worksheet) use ($risk_otorisator_permission, $source_unit, $unit, $level) {
                     if ($level < 2) {
                         if (
                             $worksheet->submit_source_sub_unit_code == str_replace('.%', '', $unit)
@@ -82,12 +90,16 @@ class TopRiskController extends Controller
                         }
                     } else {
                         if (
-                            $worksheet->source_sub_unit_code == str_replace('.%', '', $unit)
+                            $worksheet->source_sub_unit_code == str_replace('.%', '', $unit) ||
+                            ($source_unit && $worksheet->source_sub_unit_code == str_replace('%', '', $source_unit))
                         ) {
                             return '<button type="button" class="btn btn-sm btn-success"><i class="ti ti-check"></i></button>';
                         }
                     }
 
+                    if (!$risk_otorisator_permission) {
+                        return '';
+                    }
 
                     return '<input class="worksheet-selects" type="checkbox" name="worksheets[' . $worksheet->id . ']" value="' . $worksheet->id . '">';
                 })
@@ -107,19 +119,31 @@ class TopRiskController extends Controller
         } else {
             $unit = Role::getDefaultSubUnit();
         }
+
         $level = Role::getLevel();
+        $risk_otorisator_permission = Role::risk_otorisator_top_risk_approval();
+        $source_unit = '';
+        if (!$risk_otorisator_permission) {
+            $source_unit = explode('.', str_replace('.%', '', $unit));
+            $source_unit = implode('.', array_slice($source_unit, 0, 3)) . '%';
+        }
 
         if ($level < 2) {
             $worksheets = Worksheet::top_risk_upper_dashboard_query(str_replace('.%', '%', $unit))
-                ->whereLike('wtr.sub_unit_code', str_replace('.%', '', $unit))
+                ->whereLike('wtr.source_sub_unit_code', str_replace('.%', '', $unit))
                 ->where('w.status', DocumentStatus::APPROVED->value)
                 ->whereYear('w.created_at', request('year', date('Y')))
-                ->groupBy('mr.id');
+                ->whereNotNull('wtr.id')
+                ->orderBy('w.id', 'desc')
+                ->groupBy('winc.id', 'wim.id');
         } else {
-            $worksheets = Worksheet::top_risk_lower_dashboard_query(str_replace('.%', '%', $unit))
+            $worksheets = Worksheet::top_risk_lower_dashboard_query($source_unit ?: str_replace('.%', '', $unit))
                 ->whereLike('w.sub_unit_code', str_replace('.%', '%', $unit))
                 ->where('w.status', DocumentStatus::APPROVED->value)
-                ->whereYear('w.created_at', request('year', date('Y')));
+                ->whereYear('w.created_at', request('year', date('Y')))
+                ->whereNotNull('wtr.id')
+                ->orderBy('w.id', 'desc')
+                ->groupBy('winc.id', 'wim.id');
         }
 
         return DataTables::query($worksheets)
@@ -155,7 +179,7 @@ class TopRiskController extends Controller
 
                 return view('risk.top_risk._table_status', compact('status', 'class', 'worksheet_number', 'route'))->render();
             })
-            ->editColumn('top_risk_action', function ($worksheet) use ($unit, $level) {
+            ->editColumn('top_risk_action', function ($worksheet) use ($unit, $source_unit, $level) {
                 if ($level < 2) {
                     if (
                         $worksheet->submit_source_sub_unit_code == str_replace('%', '', $unit)
@@ -164,7 +188,8 @@ class TopRiskController extends Controller
                     }
                 } else {
                     if (
-                        $worksheet->source_sub_unit_code == str_replace('%', '', $unit)
+                        $worksheet->source_sub_unit_code == str_replace('%', '', $unit) ||
+                        ($source_unit && $worksheet->source_sub_unit_code == $source_unit)
                     ) {
                         return '<button type="button" class="btn btn-sm btn-success"><i class="ti ti-check"></i></button>';
                     }
@@ -179,8 +204,12 @@ class TopRiskController extends Controller
 
     public function store(Request $request)
     {
+        if (!Role::risk_otorisator_top_risk_approval()) {
+            abort(403);
+        }
+
         try {
-            $worksheets = Worksheet::whereIn('id', $request->worksheets)->get();
+            $worksheets = Worksheet::whereIn('id', array_unique($request->worksheets))->get();
 
             DB::beginTransaction();
             WorksheetTopRisk::upsert(

@@ -367,7 +367,7 @@ datatable.on('draw.dt', () => {
 })
 
 const worksheetSubmitButton = document.querySelector('#worksheet-submit-button')
-worksheetSubmitButton.addEventListener('click', async e => {
+worksheetSubmitButton?.addEventListener('click', async e => {
     e.preventDefault()
 
     Swal.fire({

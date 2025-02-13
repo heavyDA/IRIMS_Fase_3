@@ -390,8 +390,10 @@ class Worksheet extends Model
             ->withExpression('heatmaps', DB::table('m_heatmaps'))
             ->withExpression('risk_categories', DB::table('m_kbumn_risk_categories'))
             ->leftJoin('ra_worksheet_identifications as wi', 'wi.worksheet_id', '=', 'w.id')
+            ->leftJoin('ra_worksheet_incidents as winc', 'winc.worksheet_id', '=', 'w.id')
+            ->leftJoin('ra_worksheet_mitigations as wim', 'wim.worksheet_incident_id', '=', 'winc.id')
             ->leftJoin('ra_monitorings as m', 'm.worksheet_id', '=', 'w.id')
-            ->joinSub(
+            ->leftJoinSub(
                 DB::table('ra_monitorings')
                     ->select('worksheet_id', DB::raw('MAX(period_date) as period_date'))
                     ->groupBy('worksheet_id'),
@@ -402,8 +404,6 @@ class Worksheet extends Model
                 }
             )
             ->leftJoin('ra_monitoring_residuals as mr', 'mr.monitoring_id', '=', 'm.id')
-            ->leftJoin('ra_worksheet_mitigations as wim', 'wim.worksheet_incident_id', '=', 'mr.worksheet_incident_id')
-            ->leftJoin('ra_worksheet_incidents as winc', 'winc.id', '=', 'wim.worksheet_incident_id')
             ->leftJoin(
                 'ra_worksheet_top_risks as wtr',
                 fn($q) => $q->on('wtr.worksheet_id', '=', 'w.id')
@@ -655,8 +655,9 @@ class Worksheet extends Model
             ->withExpression('risk_categories', DB::table('m_kbumn_risk_categories'))
             ->leftJoin('ra_worksheet_identifications as wi', 'wi.worksheet_id', '=', 'w.id')
             ->leftJoin('ra_worksheet_incidents as winc', 'winc.worksheet_id', '=', 'w.id')
+            ->leftJoin('ra_worksheet_mitigations as wim', 'wim.worksheet_incident_id', '=', 'winc.id')
             ->leftJoin('ra_monitorings as m', 'm.worksheet_id', '=', 'w.id')
-            ->joinSub(
+            ->leftJoinSub(
                 DB::table('ra_monitorings')
                     ->select('worksheet_id', DB::raw('MAX(period_date) as period_date'))
                     ->groupBy('worksheet_id'),
@@ -667,7 +668,6 @@ class Worksheet extends Model
                 }
             )
             ->leftJoin('ra_monitoring_residuals as mr', 'mr.monitoring_id', '=', 'm.id')
-            ->leftJoin('ra_worksheet_mitigations as wim', 'wim.worksheet_incident_id', '=', 'mr.worksheet_incident_id')
             ->leftJoin(
                 'ra_worksheet_top_risks as wtr',
                 fn($q) => $q->on('wtr.worksheet_id', '=', 'w.id')

@@ -1,8 +1,13 @@
 import createDatatable from "js/components/datatable"
 import { decodeHtml } from "js/components/helper"
+import debounce from "js/utils/debounce"
 
 const dashboardFilter = document.querySelector('#dashboard-filter')
 const selectYear = dashboardFilter.querySelector('select[name="year"]')
+const topriskTableFilter = document.querySelector('#toprisk-table-search')
+const topriskTableRefresh = document.querySelector('#toprisk-table-refresh')
+
+
 const topRiskDatatable = createDatatable('#top-risk-table', {
     handleColumnSearchField: false,
     responsive: false,
@@ -18,8 +23,77 @@ const topRiskDatatable = createDatatable('#top-risk-table', {
     scrollX: true,
     fixedColumns: true,
     lengthChange: false,
-    pageLength: -1,
+    pageLength: 10,
+    drawCallback: function (settings) {
+        const api = this.api();
+        const columnsToMerge = [0, 1, 2, 3, 4, 5, 6, 7];
 
+        // Reset all cells visibility first
+        api.cells().every(function () {
+            const node = this.node();
+            if (node) {
+                node.style.display = '';
+                node.setAttribute('rowspan', 1);
+            }
+        });
+
+        // Group rows by worksheet ID
+        const groups = {};
+        api.rows({ page: 'current' }).every(function (rowIdx) {
+            const data = this.data();
+            const worksheetNumber = data.worksheet_number;
+            if (!groups[worksheetNumber]) {
+                groups[worksheetNumber] = [];
+            }
+            groups[worksheetNumber].push(rowIdx);
+        });
+
+        // Process each column for each worksheet group separately
+        Object.values(groups).forEach(groupRows => {
+            columnsToMerge.forEach(colIdx => {
+                let lastValue = null;
+                let rowsToMerge = 1;
+                let firstRow = null;
+
+                groupRows.forEach(rowIdx => {
+                    const value = api.cell(rowIdx, colIdx).data();
+                    const currentCell = api.cell(rowIdx, colIdx).node();
+
+                    if (lastValue === null) {
+                        lastValue = value;
+                        firstRow = rowIdx;
+                        return;
+                    }
+
+                    // Strict comparison for values
+                    if (JSON.stringify(lastValue) === JSON.stringify(value)) {
+                        rowsToMerge++;
+                        if (currentCell) {
+                            currentCell.style.display = 'none';
+                        }
+                    } else {
+                        if (rowsToMerge > 1) {
+                            const firstCell = api.cell(firstRow, colIdx).node();
+                            if (firstCell) {
+                                firstCell.setAttribute('rowspan', rowsToMerge);
+                            }
+                        }
+                        lastValue = value;
+                        firstRow = rowIdx;
+                        rowsToMerge = 1;
+                    }
+                });
+
+                // Handle the last group
+                if (rowsToMerge > 1) {
+                    const firstCell = api.cell(firstRow, colIdx).node();
+                    if (firstCell) {
+                        firstCell.setAttribute('rowspan', rowsToMerge);
+                    }
+                }
+            });
+        });
+    },
     scrollY: '48vh',
     columns: [
         {
@@ -179,3 +253,13 @@ const topRiskDatatable = createDatatable('#top-risk-table', {
 selectYear.addEventListener('change', e => {
     topRiskDatatable.draw()
 })
+
+topriskTableFilter.addEventListener('input', debounce(e => {
+    topRiskDatatable.search(e.target.value).draw()
+}, 875));
+
+topriskTableRefresh.addEventListener('click', e => {
+    topriskTableFilter.value = '';
+
+    topRiskDatatable.search('').draw()
+});

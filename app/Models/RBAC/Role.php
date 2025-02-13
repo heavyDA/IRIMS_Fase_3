@@ -68,8 +68,8 @@ class Role extends Model
 
     public static function risk_otorisator_worksheet_approval()
     {
-        $role = session()?->get('current_role');
-        $user = auth()->user();
+        $user = session()->get('current_unit') ?? auth()->user();
+        $role = session()?->get('current_role') ?? auth()->roles()->first();
         $level = Role::getLevel($user->sub_unit_code);
 
         if ($role->name != 'risk otorisator') {
@@ -78,7 +78,32 @@ class Role extends Model
 
         if (
             $user->personnel_area_code == 'CGK' &&
-            in_array($level, [1, 2])
+            $level < 3
+        ) {
+            return false;
+        } else if (
+            $user->personnel_area_code == 'DPS' &&
+            $level == 1
+        ) {
+             return false;
+        }
+
+        return true;
+    }
+
+    public static function risk_otorisator_top_risk_approval()
+    {
+        $user = session()->get('current_unit') ?? auth()->user();
+        $role = session()?->get('current_role') ?? auth()->roles()->first();
+        $level = Role::getLevel($user->sub_unit_code);
+
+        if ($role->name != 'risk otorisator') {
+            return false;
+        }
+
+        if (
+            $user->personnel_area_code == 'CGK' &&
+            $level > 1
         ) {
             return false;
         } else if (

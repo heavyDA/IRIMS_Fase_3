@@ -29,7 +29,7 @@
                             </div>
                         </div>
                     </div>
-                    <table id="top-risk-table" class="table table-bordered table-stripped display nowrapr">
+                    <table id="top-risk-table" class="table table-bordered table-hover display nowrapr">
                         <thead class="table-dark">
                             <tr>
                                 <th rowspan="3">No.</th>
