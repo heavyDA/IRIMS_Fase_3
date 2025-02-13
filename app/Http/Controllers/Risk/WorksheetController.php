@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Risk;
 
+use Symfony\Component\HttpFoundation\Response as ResponseStatus;
 use App\Enums\DocumentStatus;
 use App\Enums\State;
 use App\Http\Controllers\Controller;
@@ -197,10 +198,10 @@ class WorksheetController extends Controller
             return response()->json(['data' => [
                 'redirect' => route('risk.worksheet.show', $worksheet->getEncryptedId()),
                 'message' => 'Kertas kerja berhasil dibuat'
-            ]]);
+            ]])->header('Cache-Control', 'no-store');
         } catch (Exception $e) {
             DB::rollBack();
-            return response()->json(['message' => $e->getMessage()], 500);
+            return response()->json(['message' => $e->getMessage()], 500)->header('Cache-Control', 'no-store');
         }
     }
 
@@ -356,7 +357,7 @@ class WorksheetController extends Controller
             return response()->json([
                 'data' => $data,
                 'message' => 'success'
-            ]);
+            ])->header('Cache-Control', 'no-store');
         }
 
         $title = 'Detail Kertas Kerja';
@@ -406,7 +407,7 @@ class WorksheetController extends Controller
             session()->get('current_role')?->name == 'risk admin' &&
             $worksheet->created_by != auth()->user()->employee_id
         ) {
-            abort(404, 'Data tidak ditemukan');
+            abort(ResponseStatus::HTTP_NOT_FOUND, 'Data tidak ditemukan');
         }
         try {
             DB::beginTransaction();
@@ -429,7 +430,7 @@ class WorksheetController extends Controller
                     unset($strategy['id']);
                     throw_if(
                         !$worksheet->strategies()->where('id', $items['id'])->update($strategy),
-                        new Exception("Failed to update strategy data with ID {$worksheet->id}: {$items['id']}")
+                        new Exception("Failed to update strategy data with ID {$worksheet->id}: {$items['id']}", ResponseStatus::HTTP_BAD_REQUEST)
                     );
                 } else {
                     $strategies[] = $strategy;
@@ -438,7 +439,7 @@ class WorksheetController extends Controller
 
             if ($strategies) {
                 $strategies = $worksheet->strategies()->createMany($strategies)->pluck('id')->toArray();
-                throw_if(!$strategies, new Exception("Failed to create new strategy data with Worksheet ID {$worksheet->id}"));
+                throw_if(!$strategies, new Exception("Failed to create new strategy data with Worksheet ID {$worksheet->id}", ResponseStatus::HTTP_BAD_REQUEST));
 
                 $strategyIds = array_unique(array_merge($strategyIds, $strategies));
             }
@@ -491,7 +492,7 @@ class WorksheetController extends Controller
             }
 
             unset($identification['target_body']);
-            throw_if(!$worksheet->identification()->update($identification), new Exception("Failed to update identification data with Worksheet ID {$worksheet->id}: {$worksheet->identification->id}"));
+            throw_if(!$worksheet->identification()->update($identification), new Exception("Failed to update identification data with Worksheet ID {$worksheet->id}: {$worksheet->identification->id}", ResponseStatus::HTTP_BAD_REQUEST));
 
             $incidents = [];
             $incident_ids = [];
@@ -509,7 +510,7 @@ class WorksheetController extends Controller
                     $incident_ids[] = $incident['id'];
                     throw_if(
                         !$worksheet->incidents()->where('id', $incident['id'])->update($incident),
-                        "Failed to update incident data with Worksheet ID {$worksheet->id}: {$incident['id']}"
+                        new Exception("Failed to update incident data with Worksheet ID {$worksheet->id}: {$incident['id']}", ResponseStatus::HTTP_BAD_REQUEST)
                     );
                     $incidents[] = $incident;
                 } else {
@@ -521,11 +522,11 @@ class WorksheetController extends Controller
                 $new_incidents = $worksheet->incidents()->createMany($new_incidents);
                 throw_if(
                     empty($new_incidents->toArray()),
-                    new Exception("Failed to create new incidents with Worksheet ID {$worksheet->id}")
+                    new Exception("Failed to create new incidents with Worksheet ID {$worksheet->id}", ResponseStatus::HTTP_BAD_REQUEST)
                 );
 
 
-                $incident_ids = array_merge($new_incidents->pluck('id')->toArray());
+                $incident_ids = array_unique(array_merge($incident_ids, $new_incidents->pluck('id')->toArray()));
             }
 
             if ($incident_ids) {
@@ -575,7 +576,7 @@ class WorksheetController extends Controller
                     $mitigation_ids[] = $mitigation_id;
                     throw_if(
                         !WorksheetMitigation::where('id', $mitigation_id)->update($mitigation),
-                        "Failed to update mitigation data from Worksheet ID {$worksheet->id}: {$mitigation_id}"
+                        new Exception("Failed to update mitigation data from Worksheet ID {$worksheet->id}: {$mitigation_id}", ResponseStatus::HTTP_BAD_REQUEST)
                     );
                 } else {
                     $mitigation['worksheet_incident_id'] = $incidents_array[$incidentIndex]['id'];
@@ -586,14 +587,15 @@ class WorksheetController extends Controller
             }
 
             if ($mitigation_ids) {
-                WorksheetMitigation::whereNotIn('id', $mitigation_ids)->delete();
+                $mitigation_ids = array_unique($mitigation_ids);
+                WorksheetMitigation::whereIn('worksheet_incident_id', $incident_ids)->whereNotIn('id', $mitigation_ids)->delete();
                 logger()->info("[Worksheet] Failed to delete mitigation data from Worksheet ID {$worksheet->id} Not In ID " . implode(',', $mitigation_ids));
             }
 
             if ($new_mitigations) {
                 throw_if(
                     !WorksheetMitigation::insert($new_mitigations),
-                    new Exception("Failed to create mitigations from Worksheet ID {$worksheet->id}")
+                    new Exception("Failed to create mitigations from Worksheet ID {$worksheet->id}", ResponseStatus::HTTP_BAD_REQUEST)
                 );
             }
 
@@ -623,11 +625,13 @@ class WorksheetController extends Controller
             return response()->json(['data' => [
                 'message' => 'Kertas kerja berhasil diperbarui',
                 'redirect' => route('risk.worksheet.show', $worksheet->getEncryptedId())
-            ]]);
+            ]])->header('Cache-Control', 'no-store');
         } catch (Exception $e) {
             DB::rollBack();
-            logger()->error('[Worksheet] ' . $e->getMessage());
-            return response()->json(['message' => 'Gagal memperbarui kertas kerja'], 500);
+            logger()->error('[Worksheet] ' . $e->getMessage(), [$e]);
+            return response()
+                ->json(['message' => 'Gagal memperbarui kertas kerja'], $e->getCode() ?: ResponseStatus::HTTP_INTERNAL_SERVER_ERROR)
+                ->header('Cache-Control', 'no-store');
         }
     }
 
@@ -699,7 +703,7 @@ class WorksheetController extends Controller
         $status = DocumentStatus::tryFrom($status);
         if ($status != DocumentStatus::ON_REVIEW) {
             $status = $status instanceof DocumentStatus ? $status->value : $status;
-            throw new Exception("Attempt to update worksheet with ID {$worksheet->id} status from {$worksheet->status} to ". ($status ?? '')  . ' as Risk Admin');
+            throw new Exception("Attempt to update worksheet with ID {$worksheet->id} status from {$worksheet->status} to " . ($status ?? '')  . ' as Risk Admin');
         }
 
         $worksheet->update(['status' => DocumentStatus::ON_REVIEW->value]);
@@ -746,7 +750,7 @@ class WorksheetController extends Controller
             ];
         } else {
             $status = $status instanceof DocumentStatus ? $status->value : $status;
-            throw new Exception("Attempt to update worksheet with ID {$worksheet->id} status from {$worksheet->status} to ". ($status ?? '')  . ' as Risk Owner');
+            throw new Exception("Attempt to update worksheet with ID {$worksheet->id} status from {$worksheet->status} to " . ($status ?? '')  . ' as Risk Owner');
         }
 
         $worksheet->update(['status' => $status->value]);
@@ -778,7 +782,7 @@ class WorksheetController extends Controller
             ];
         } else {
             $status = $status instanceof DocumentStatus ? $status->value : $status;
-            throw new Exception("Attempt to update worksheet with ID {$worksheet->id} status from {$worksheet->status} to ". ($status ?? '')  . ' as Risk Otorisator');
+            throw new Exception("Attempt to update worksheet with ID {$worksheet->id} status from {$worksheet->status} to " . ($status ?? '')  . ' as Risk Otorisator');
         }
 
         $worksheet->update(['status' => $status->value]);
@@ -797,8 +801,8 @@ class WorksheetController extends Controller
             'identification' => fn($q) => $q->with('risk_category_t2', 'risk_category_t3')
         ])
             ->where(
-                fn($q) => $q->where('sub_unit_code', $unit)
-                ->orWhere('sub_unit_code', str_replace('.%', '', $unit))
+                fn($q) => $q->whereLike('sub_unit_code', $unit)
+                    ->orWhereLike('sub_unit_code', str_replace('.%', '', $unit))
             )
             ->whereHas('identification', fn($q) => $q->where('inherent_risk_scale', $riskScale))
             ->when(session()->get('current_role')->name == 'risk admin', fn($q) => $q->where('created_by', auth()->user()->employee_id))
@@ -808,7 +812,7 @@ class WorksheetController extends Controller
         return response()->json([
             'data' => $worksheets,
             'message' => 'success',
-        ]);
+        ])->header('Cache-Control', 'no-store');
     }
 
     public function get_by_actualization_risk_scale(int $riskScale)
@@ -827,9 +831,9 @@ class WorksheetController extends Controller
             ->whereHas(
                 'monitoring.worksheet',
                 fn($q) => $q->where(
-                        fn($q) => $q->where('sub_unit_code', $unit)
+                    fn($q) => $q->whereLike('sub_unit_code', $unit)
                         ->orWhereLike('sub_unit_code', str_replace('.%', '', $unit))
-                    )
+                )
                     ->when(session()->get('current_role')->name == 'risk admin', fn($q) => $q->where('created_by', auth()->user()->employee_id))
                     ->whereYear('created_at', request('year', date('Y')))
             )->get();
@@ -837,6 +841,6 @@ class WorksheetController extends Controller
         return response()->json([
             'data' => $monitorings,
             'message' => 'success',
-        ]);
+        ])->header('Cache-Control', 'no-store');
     }
 }

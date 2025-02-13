@@ -1306,11 +1306,12 @@ const onTreatmentEdit = (data) => {
 
 const onTreatmentSave = (data) => {
     for (let key of Object.keys(data)) {
-        if (key == 'key' || key == 'id') {
+        if (['key', 'id', 'incident_id'].includes(key) || data[key] === undefined) {
             continue
         }
 
         if (!data[key] || data[key] == 'Pilih') {
+            console.log(key, data, data[key])
             Swal.fire('Peringatan', 'Pastikan semua isian harus terisi', 'warning');
             return;
         }

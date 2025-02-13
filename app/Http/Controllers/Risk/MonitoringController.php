@@ -30,9 +30,9 @@ class MonitoringController extends Controller
         if (request()->ajax()) {
             $unit = Role::getDefaultSubUnit();
             $worksheets = Worksheet::latest_monitoring_with_mitigation_query()
-                ->where(function($q) use($unit, $role) {
+                ->where(function ($q) use ($unit, $role) {
                     $q->whereLike('w.sub_unit_code', $unit)
-                    ->orWhereLike('w.sub_unit_code', str_replace('.%', '', $unit));
+                        ->orWhereLike('w.sub_unit_code', str_replace('.%', '', $unit));
                 })
                 ->when(request('document_status'), fn($q) => $q->where('w.status_monitoring', request('document_status')))
                 ->when(
@@ -148,7 +148,7 @@ class MonitoringController extends Controller
                     'residuals' => $residuals,
                     'actualizations' => $actualizations
                 ]
-            ]);
+            ])->header('Cache-Control', 'no-store');
         }
 
         $worksheet->load('strategies', 'incidents.mitigations', 'monitorings');
@@ -316,14 +316,14 @@ class MonitoringController extends Controller
                 'data' => [
                     'redirect' => route('risk.monitoring.show', $worksheet->getEncryptedId())
                 ],
-            ]);
+            ])->header('Cache-Control', 'no-store');
         } catch (Exception $e) {
             DB::rollBack();
             logger()->error($e);
 
             return response()->json([
                 'message' => 'Gagal menyimpan laporan monitoring',
-            ], Response::HTTP_BAD_REQUEST);
+            ], Response::HTTP_BAD_REQUEST)->header('Cache-Control', 'no-store');
         }
     }
 
@@ -475,7 +475,7 @@ class MonitoringController extends Controller
                     'alteration' => $alteration,
                     'incident' => $incident,
                 ]
-            ]);
+            ])->header('Cache-Control', 'no-store');
         }
 
 
@@ -661,11 +661,11 @@ class MonitoringController extends Controller
                 'data' => [
                     'redirect' => route('risk.monitoring.show_monitoring', $monitoring_id)
                 ]
-            ]);
+            ])->header('Cache-Control', 'no-store');
         } catch (Exception $e) {
             DB::rollBack();
             logger()->error('[Worksheet Monitoring] Update Monitoring with ID ' . $monitoring->id . ' ' . $e->getMessage());
-            return response()->json(['message' => 'Gagal memperbarui laporan monitoring'], Response::HTTP_BAD_REQUEST);
+            return response()->json(['message' => 'Gagal memperbarui laporan monitoring'], Response::HTTP_BAD_REQUEST)->header('Cache-Control', 'no-store');
         }
     }
 
@@ -705,7 +705,7 @@ class MonitoringController extends Controller
         } catch (Exception $e) {
             DB::rollBack();
             flash_message('flash_message', 'Laporang monitorin gagal disubmit.', State::ERROR);
-            logger()->error("[Monitoring] Failed to update status of monitoring with ID {$monitoring->id}: ". $e->getMessage());
+            logger()->error("[Monitoring] Failed to update status of monitoring with ID {$monitoring->id}: " . $e->getMessage());
         }
         return redirect()->route('risk.monitoring.show_monitoring', $monitoring_id);
     }
@@ -715,7 +715,7 @@ class MonitoringController extends Controller
         $status = DocumentStatus::tryFrom($status);
         if ($status != DocumentStatus::ON_REVIEW) {
             $status = $status instanceof DocumentStatus ? $status->value : $status;
-            throw new Exception("Attempt to update monitoring with ID {$monitoring->id} status from {$monitoring->status} to ". ($status ?? '')  . ' as Risk Admin');
+            throw new Exception("Attempt to update monitoring with ID {$monitoring->id} status from {$monitoring->status} to " . ($status ?? '')  . ' as Risk Admin');
         }
 
         $monitoring->update(['status' => DocumentStatus::ON_REVIEW->value]);
@@ -762,7 +762,7 @@ class MonitoringController extends Controller
             ];
         } else {
             $status = $status instanceof DocumentStatus ? $status->value : $status;
-            throw new Exception("Attempt to update monitoring with ID {$monitoring->id} status from {$monitoring->status} to ". ($status ?? '')  . ' as Risk Owner');
+            throw new Exception("Attempt to update monitoring with ID {$monitoring->id} status from {$monitoring->status} to " . ($status ?? '')  . ' as Risk Owner');
         }
 
         $monitoring->update(['status' => $status->value]);
@@ -795,7 +795,7 @@ class MonitoringController extends Controller
             ];
         } else {
             $status = $status instanceof DocumentStatus ? $status->value : $status;
-            throw new Exception("Attempt to update monitoring with ID {$monitoring->id} status from {$monitoring->status} to ". ($status ?? '')  . ' as Risk Otorisator');
+            throw new Exception("Attempt to update monitoring with ID {$monitoring->id} status from {$monitoring->status} to " . ($status ?? '')  . ' as Risk Otorisator');
         }
 
         $monitoring->update(['status' => $status->value]);

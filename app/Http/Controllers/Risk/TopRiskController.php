@@ -13,6 +13,7 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
+use Symfony\Component\HttpFoundation\Response as ResponseStatus;
 use Yajra\DataTables\Facades\DataTables;
 
 class TopRiskController extends Controller
@@ -199,15 +200,15 @@ class TopRiskController extends Controller
             DB::commit();
             return response()->json(
                 ['message' => 'Berhasil submit top risk.'],
-                200
-            );
+                ResponseStatus::HTTP_OK
+            )->header('Cache-Control', 'no-store');
         } catch (Exception $e) {
             DB::rollBack();
             logger()->error('[Risk Profile] Gagal menyimpan top risk. ' . $e->getMessage());
             return response()->json(
                 ['message' => 'Gagal submit top risk.'],
-                400
-            );
+                ResponseStatus::HTTP_BAD_REQUEST
+            )->header('Cache-Control', 'no-store');
         }
     }
 }
