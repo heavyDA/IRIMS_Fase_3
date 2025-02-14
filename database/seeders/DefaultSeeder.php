@@ -287,7 +287,7 @@ class DefaultSeeder extends Seeder
         foreach ($roles as $role) {
             $role = Role::firstOrCreate($role);
 
-            if ($role->name == 'root') {
+            if (in_array($role->name, ['root', 'administrator'])) {
                 $permissions = Permission::all();
 
                 $role->syncPermissions($permissions->pluck('name'));
