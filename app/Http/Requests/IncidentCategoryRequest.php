@@ -11,7 +11,7 @@ class IncidentCategoryRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return auth()->user()?->roles()?->first()?->name == 'administrator';
+        return auth()->user()->canany('master.incident_categories.store', 'master.incident_categories.create');
     }
 
     /**

@@ -15,7 +15,7 @@ class RiskTreatmentOptionController extends Controller
         if (request()->ajax()) {
             $risk_treatment_options = RiskTreatmentOption::query();
             return DataTables::of($risk_treatment_options)
-                ->addColumn('action', function($risk_treatment_option) {
+                ->addColumn('action', function ($risk_treatment_option) {
                     $id = $risk_treatment_option->getEncryptedId();
                     $actions = [
                         [
@@ -49,10 +49,10 @@ class RiskTreatmentOptionController extends Controller
     public function store(RiskTreatmentOptionRequest $request)
     {
         RiskTreatmentOption::create($request->only('name'))
-        ?
-        flash_message('flash_message', 'Jenis Rencana Perlakuan Risiko berhasil diperbarui')
-        :
-        flash_message('flash_message', 'Jenis Rencana Perlakuan Risiko gagal diperbarui', State::ERROR);
+            ?
+            flash_message('flash_message', 'Jenis Rencana Perlakuan Risiko berhasil ditambahkan')
+            :
+            flash_message('flash_message', 'Jenis Rencana Perlakuan Risiko gagal ditambahkan', State::ERROR);
 
         return redirect()->route('master.risk_treatment_options.index');
     }
@@ -60,7 +60,7 @@ class RiskTreatmentOptionController extends Controller
     public function edit(string $risk_treatment_option)
     {
         $risk_treatment_option = RiskTreatmentOption::findByEncryptedIdOrFail($risk_treatment_option);
-        return view('master.risk_treatment_option.edit', compact('scale'));
+        return view('master.risk_treatment_option.edit', compact('risk_treatment_option'));
     }
 
     public function update(string $risk_treatment_option, RiskTreatmentOptionRequest $request)
@@ -70,9 +70,21 @@ class RiskTreatmentOptionController extends Controller
         $risk_treatment_option->update(
             $request->only('name')
         ) ?
-        flash_message('flash_message', 'Jenis Rencana Perlakuan Risiko berhasil diperbarui')
-        :
-        flash_message('flash_message', 'Jenis Rencana Perlakuan Risiko gagal diperbarui', State::ERROR);
+            flash_message('flash_message', 'Jenis Rencana Perlakuan Risiko berhasil diperbarui')
+            :
+            flash_message('flash_message', 'Jenis Rencana Perlakuan Risiko gagal diperbarui', State::ERROR);
+
+        return redirect()->route('master.risk_treatment_options.index');
+    }
+
+    public function destroy(string $risk_treatment_option)
+    {
+        $risk_treatment_option = RiskTreatmentOption::findByEncryptedIdOrFail($risk_treatment_option);
+
+        $risk_treatment_option->delete() ?
+            flash_message('flash_message', 'Jenis Rencana Perlakuan Risiko berhasil dihapus')
+            :
+            flash_message('flash_message', 'Jenis Rencana Perlakuan Risiko gagal dihapus', State::ERROR);
 
         return redirect()->route('master.risk_treatment_options.index');
     }

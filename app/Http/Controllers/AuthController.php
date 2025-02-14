@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Enums\State;
 use App\Http\Requests\LoginRequest;
+use App\Models\Master\Official;
 use App\Models\Master\Position;
 use App\Models\Master\RiskMetric;
 use App\Models\RBAC\Role;
@@ -19,8 +20,7 @@ class AuthController extends Controller
     public function __construct(
         protected OfficialService $officialService,
         protected AuthService $authService,
-        )
-    {
+    ) {
         $this->officialService = new OfficialService(env('EOFFICE_URL'), env('EOFFICE_TOKEN'));
         $this->authService = new AuthService(env('EOFFICE_URL'), env('EOFFICE_TOKEN'));
     }
@@ -49,7 +49,9 @@ class AuthController extends Controller
                 $user->update($data);
             }
 
-            $assigned_roles = Position::userAssignedRoles($user->personnel_area_code, $user->position_name)->first();
+            $assigned_roles = Position::whereUnitCode($user->sub_unit_code)
+                ->wherePositionName($user->position_name)
+                ->first();
             $assigned_roles = $assigned_roles?->assigned_roles ? explode(',', $assigned_roles->assigned_roles) : ['risk admin'];
             $user->syncRoles($assigned_roles);
 
@@ -78,7 +80,9 @@ class AuthController extends Controller
             $user = auth()->user();
 
             if (!str_contains($user->employee_id, 'x9999')) {
-                $assigned_roles = Position::userAssignedRoles($user->personnel_area_code, $user->position_name)->first();
+                $assigned_roles = Position::whereUnitCode($user->sub_unit_code)
+                    ->wherePositionName($user->position_name)
+                    ->first();
                 $assigned_roles = $assigned_roles?->assigned_roles ? explode(',', $assigned_roles->assigned_roles) : ['risk admin'];
                 $user->syncRoles($assigned_roles);
             }
@@ -120,6 +124,23 @@ class AuthController extends Controller
         return redirect()->back();
     }
 
+    public function change_unit(Request $request)
+    {
+        if (Role::hasLookUpUnitHierarchy()) {
+            $unit = Official::getSubUnitOnly()
+                ->whereSubUnitCode($request->unit)
+                ->first();
+            if ($unit) {
+                session()->put('current_unit', $unit);
+                flash_message('flash_message',  'Berhasil mengganti unit kerja', State::SUCCESS->color());
+                return redirect()->route('dashboard.index');
+            }
+        }
+
+        flash_message('flash_message',  'Gagal mengganti unit kerja', State::ERROR->color());
+        return redirect()->route('dashboard.index');
+    }
+
     public function get_unit_head()
     {
         $data = [
@@ -150,12 +171,12 @@ class AuthController extends Controller
             logger()->error('[Profile] Failed to get unit head.', [$e]);
         }
 
-        return response()->json(['data' => $data]);
+        return response()->json(['data' => $data])->header('Cache-Control', 'no-store');
     }
 
     public function get_risk_metric()
     {
         $risk_metric = RiskMetric::where('organization_code', '=', substr(auth()->user()->sub_unit_code, 0, 5))->first();
-        return response()->json(['data' => $risk_metric]);
+        return response()->json(['data' => $risk_metric])->header('Cache-Control', 'no-store');
     }
 }

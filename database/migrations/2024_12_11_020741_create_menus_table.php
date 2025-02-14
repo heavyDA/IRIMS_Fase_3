@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('menus', function (Blueprint $table) {
             $table->id();
             $table->foreignId('menu_id')->nullable()->constrained();
-            $table->string('name', 25);
+            $table->string('name');
             $table->string('route')->default('#');
             $table->string('icon_type')->default('tabler-icons');
             $table->string('icon_alias')->default('ti ti');

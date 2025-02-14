@@ -283,8 +283,8 @@ const fetchers = {
 const fetchData = async () => {
     await Promise.allSettled([
         axios.get(window.location.href.replace('/edit', '')),
-        axios.get('/master/bumn-scale'),
-        axios.get('/master/heatmap'),
+        axios.get('/master/data/bumn-scales'),
+        axios.get('/master/data/heatmaps'),
         axios.get('/profile/unit_head'),
         axios.get('/profile/risk_metric'),
     ]).then(res => {

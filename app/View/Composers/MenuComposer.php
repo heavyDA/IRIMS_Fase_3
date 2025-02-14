@@ -17,12 +17,19 @@ class MenuComposer
     public function compose(View $view)
     {
         $role = session()->get('current_role') ?? Auth::user()->roles()->first() ?? null;
-        $menus = Menu::with([
-            'children' => fn($q) => $q->when($role?->name !== 'root', fn($qw) => $qw->whereHas('roles', fn($qr) => $qr->whereRoleId($role?->id)))
-        ])
-            ->when($role?->name !== 'root', fn($qw) => $qw->whereHas('roles', fn($qr) => $qr->whereRoleId($role?->id)))
-            ->whereNull('menu_id')
-            ->get();
+
+        $menus = session()->get('current_menu');
+        if (!$menus) {
+            $menus = Menu::with([
+                'children' => fn($q) => $q->when($role?->name !== 'root', fn($qw) => $qw->whereHas('roles', fn($qr) => $qr->whereRoleId($role?->id)))
+            ])
+                ->when($role?->name !== 'root', fn($qw) => $qw->whereHas('roles', fn($qr) => $qr->whereRoleId($role?->id)))
+                ->whereNull('menu_id')
+                ->orderBy('position', 'asc')
+                ->get();
+
+            session()->put('current_menu', $menus);
+        }
 
         $currentRoute = get_current_route_name(false) ?? '#';
         $spatieMenu = SpatieMenu::new()

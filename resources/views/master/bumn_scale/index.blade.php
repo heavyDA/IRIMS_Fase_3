@@ -18,8 +18,8 @@
         </div>
     </div>
     <div class="btn-list">
-        @canany('master.bumn_scale.store', 'master.bumn_scale.create')
-            <a href="{{ route('master.bumn_scale.create') }}"
+        @canany('master.bumn_scales.store', 'master.bumn_scales.create')
+            <a href="{{ route('master.bumn_scales.create') }}"
                 class="btn btn-primary-light btn-wave me-2 waves-effect waves-light">
                 <i class="ti ti-plus align-middle"></i> Tambah Skala
             </a>
@@ -38,7 +38,8 @@
                                     class="ti ti-search"></i></span>
                             <input type="text" name="search" class="form-control" placeholder="Pencarian">
                         </div>
-                        <button style="min-width: 32px;" class="btn btn-light" type="reset" data-bs-toggle="tooltip" title="Reset">
+                        <button style="min-width: 32px;" class="btn btn-light" type="reset" data-bs-toggle="tooltip"
+                            title="Reset">
                             <span><i class="me-1 ti ti-refresh"></i></span>
                         </button>
                     </div>
@@ -46,7 +47,7 @@
             </div>
             <table id="bumn-scale-table" class="table table-bordered table-hover display nowrap" style="width: 100%;">
                 <thead class="table-dark">
-                   <tr>
+                    <tr>
                         <th class="text-center">Kategori Dampak</th>
                         <th class="text-center">Skala</th>
                         <th class="text-center">Kriteria</th>
@@ -54,7 +55,7 @@
                         <th class="text-center">Min</th>
                         <th class="text-center">Maks</th>
                         <th class="text-center">Action</th>
-                   </tr>
+                    </tr>
                 </thead>
             </table>
         </x-slot>

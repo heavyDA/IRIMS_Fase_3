@@ -27,6 +27,13 @@ class Official extends Model
         'employee_grade',
     ];
 
+    public function scopeUserAssignedRoles($query, string $personnel_area_code, string $position_name)
+    {
+        return $query
+            ->where('personnel_area_code', $personnel_area_code)
+            ->where('position_name', $position_name);
+    }
+
     public function scopeGetSubUnitOnly($query)
     {
         return $query->select('sub_unit_code', 'sub_unit_name', 'personnel_area_code')->oldest('sub_unit_code');
@@ -36,6 +43,6 @@ class Official extends Model
     {
         $unit = Role::getDefaultSubUnit();
         return $query->whereLike('sub_unit_code', $unit)
-        ->orWhereLike('sub_unit_code', str_replace('.%', '', $unit));
+            ->orWhereLike('sub_unit_code', str_replace('.%', '', $unit));
     }
 }

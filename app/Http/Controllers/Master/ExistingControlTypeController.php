@@ -15,7 +15,7 @@ class ExistingControlTypeController extends Controller
         if (request()->ajax()) {
             $existing_control_types = ExistingControlType::query();
             return DataTables::of($existing_control_types)
-                ->addColumn('action', function($existing_control_type) {
+                ->addColumn('action', function ($existing_control_type) {
                     $id = $existing_control_type->getEncryptedId();
                     $actions = [
                         [
@@ -48,10 +48,10 @@ class ExistingControlTypeController extends Controller
     public function store(ExistingControlTypeRequest $request)
     {
         ExistingControlType::create($request->only('type', 'name'))
-        ?
-        flash_message('flash_message', 'Jenis Existing Control berhasil diperbarui')
-        :
-        flash_message('flash_message', 'Jenis Existing Control gagal diperbarui', State::ERROR);
+            ?
+            flash_message('flash_message', 'Jenis Existing Control berhasil diperbarui')
+            :
+            flash_message('flash_message', 'Jenis Existing Control gagal diperbarui', State::ERROR);
 
         return redirect()->route('master.existing_control_types.index');
     }
@@ -59,7 +59,7 @@ class ExistingControlTypeController extends Controller
     public function edit(string $existing_control_type)
     {
         $existing_control_type = ExistingControlType::findByEncryptedIdOrFail($existing_control_type);
-        return view('master.existing_control_type.edit', compact('scale'));
+        return view('master.existing_control_type.edit', compact('existing_control_type'));
     }
 
     public function update(string $existing_control_type, ExistingControlTypeRequest $request)
@@ -69,12 +69,25 @@ class ExistingControlTypeController extends Controller
         $existing_control_type->update(
             $request->only('type', 'name')
         ) ?
-        flash_message('flash_message', 'Jenis Existing Control berhasil diperbarui')
-        :
-        flash_message('flash_message', 'Jenis Existing Control gagal diperbarui', State::ERROR);
+            flash_message('flash_message', 'Jenis Existing Control berhasil diperbarui')
+            :
+            flash_message('flash_message', 'Jenis Existing Control gagal diperbarui', State::ERROR);
 
         return redirect()->route('master.existing_control_types.index');
     }
+
+    public function destroy(string $existing_control_type)
+    {
+        $existing_control_type = ExistingControlType::findByEncryptedIdOrFail($existing_control_type);
+
+        $existing_control_type->delete() ?
+            flash_message('flash_message', 'Jenis Existing Control berhasil dihapus')
+            :
+            flash_message('flash_message', 'Jenis Existing Control gagal dihapus', State::ERROR);
+
+        return redirect()->route('master.existing_control_types.index');
+    }
+
 
     public function get_all()
     {

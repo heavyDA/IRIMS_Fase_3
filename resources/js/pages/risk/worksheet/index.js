@@ -284,8 +284,8 @@ const fetchers = {
 
 const fetchData = async () => {
     await Promise.allSettled([
-        axios.get('/master/bumn-scale'),
-        axios.get('/master/heatmap'),
+        axios.get('/master/data/bumn-scales'),
+        axios.get('/master/data/heatmaps'),
         axios.get('/profile/unit_head'),
         axios.get('/profile/risk_metric'),
     ]).then(res => {
@@ -959,18 +959,18 @@ incidentForm.addEventListener('reset', async () => {
 incidentModalElement.addEventListener('show.bs.modal', () => {
     const incidentsLength = worksheet.incidents.length;
 
-        if (incidentsLength >= risk_numbers.length) {
-            Swal.fire({
-                icon: 'warning',
-                title: '',
-                text: 'Tidak dapat menambahkan penyebab risiko karena sudah melebihi batas jumlah penyebab risiko.',
-            })
+    if (incidentsLength >= risk_numbers.length) {
+        Swal.fire({
+            icon: 'warning',
+            title: '',
+            text: 'Tidak dapat menambahkan penyebab risiko karena sudah melebihi batas jumlah penyebab risiko.',
+        })
 
-            return e.preventDefault()
-        }
+        return e.preventDefault()
+    }
 
-        incidentRiskCauseNumber.value = risk_numbers[incidentsLength];
-        incidentRiskCauseCode.value = currentRiskNumber.value + '.' + risk_numbers[incidentsLength];
+    incidentRiskCauseNumber.value = risk_numbers[incidentsLength];
+    incidentRiskCauseCode.value = currentRiskNumber.value + '.' + risk_numbers[incidentsLength];
 })
 
 incidentModalElement.addEventListener('hide.bs.modal', async () => {

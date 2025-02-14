@@ -104,6 +104,57 @@ class DefaultSeeder extends Seeder
                 ],
             ],
             [
+                'name' => 'Master Data',
+                'route' => 'master',
+                'icon_name' => 'cube',
+                'position' => 8,
+                'children' => [
+                    [
+                        'name' => 'Skala',
+                        'route' => 'master.bumn_scales.index',
+                        'position' => 0
+                    ],
+                    [
+                        'name' => 'Jenis Existing Control',
+                        'route' => 'master.existing_control_types.index',
+                        'position' => 1
+                    ],
+                    [
+                        'name' => 'Kategori Risiko',
+                        'route' => 'master.risk_categories.index',
+                        'position' => 3
+                    ],
+                    [
+                        'name' => 'Opsi Perlakuan Risiko',
+                        'route' => 'master.risk_treatment_options.index',
+                        'position' => 4
+                    ],
+                    [
+                        'name' => 'Jenis Rencana Perlakuan Risiko',
+                        'route' => 'master.risk_treatment_types.index',
+                        'position' => 5
+                    ],
+                    [
+                        'name' => 'Kategori Kejadian',
+                        'route' => 'master.incident_categories.index',
+                        'position' => 6
+                    ],
+                ]
+            ],
+            [
+                'name' => 'Pengaturan',
+                'route' => 'setting',
+                'icon_name' => 'settings',
+                'position' => 9,
+                'children' => [
+                    [
+                        'name' => 'Matrik Strategi Risiko',
+                        'route' => 'setting.risk_metrics.index',
+                        'position' => 0,
+                    ],
+                ]
+            ],
+            [
                 'name' => 'Akses',
                 'route' => 'access',
                 'icon_name' => 'shield-lock',
@@ -114,36 +165,41 @@ class DefaultSeeder extends Seeder
                         'route' => 'rbac.user.index',
                         'position' => 0,
                     ],
-                    [
-                        'name' => 'Menu',
-                        'route' => 'rbac.menu.index',
-                        'position' => 1,
-                    ],
-                    [
-                        'name' => 'Grup',
-                        'route' => 'rbac.role.index',
-                        'position' => 2,
-                    ],
-                    [
-                        'name' => 'Hak Akses',
-                        'route' => 'rbac.permission.index',
-                        'position' => 3,
-                    ],
+                    // [
+                    //     'name' => 'Menu',
+                    //     'route' => 'rbac.menu.index',
+                    //     'position' => 1,
+                    // ],
+                    // [
+                    //     'name' => 'Grup',
+                    //     'route' => 'rbac.role.index',
+                    //     'position' => 2,
+                    // ],
+                    // [
+                    //     'name' => 'Hak Akses',
+                    //     'route' => 'rbac.permission.index',
+                    //     'position' => 3,
+                    // ],
                 ],
             ],
         ];
 
-        if (Menu::count() == 0) {
-            foreach ($menus as $key => $menu) {
-                $children = $menu['children'] ?? [];
-                unset($menu['children']);
+        // if (Menu::count() == 0) {
+        foreach ($menus as $key => $menu) {
+            $children = $menu['children'] ?? [];
+            unset($menu['children']);
 
-                $menu = Menu::firstOrCreate(['name' => $menu['name'], 'route' => $menu['route']], $menu + ['position' => $key + 1]);
-                if ($children) {
-                    $menu->children()->createMany($children);
+            $menu = Menu::firstOrCreate(['route' => $menu['route']], $menu + ['position' => $key + 1]);
+            if ($menu->wasRecentlyCreated && $children) {
+                foreach ($children as $child) {
+                    $menu->children()->updateOrCreate(
+                        ['route' => $child['route']],
+                        $child
+                    );
                 }
             }
         }
+        // }
 
         /**
          * Generate default permissions

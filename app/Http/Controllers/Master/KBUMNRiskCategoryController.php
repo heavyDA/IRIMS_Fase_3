@@ -15,7 +15,7 @@ class KBUMNRiskCategoryController extends Controller
         if (request()->ajax()) {
             $risk_categories = KBUMNRiskCategory::query();
             return DataTables::of($risk_categories)
-                ->addColumn('action', function($risk_categories) {
+                ->addColumn('action', function ($risk_categories) {
                     $id = $risk_categories->getEncryptedId();
                     $actions = [
                         [
@@ -49,10 +49,10 @@ class KBUMNRiskCategoryController extends Controller
     public function store(RiskCategoryRequest $request)
     {
         KBUMNRiskCategory::create($request->only('type', 'name'))
-        ?
-        flash_message('flash_message', 'Kategori Risiko berhasil diperbarui')
-        :
-        flash_message('flash_message', 'Kategori Risiko gagal diperbarui', State::ERROR);
+            ?
+            flash_message('flash_message', 'Kategori Risiko berhasil ditambahkan')
+            :
+            flash_message('flash_message', 'Kategori Risiko gagal ditambahkan', State::ERROR);
 
         return redirect()->route('master.risk_categories.index');
     }
@@ -60,7 +60,7 @@ class KBUMNRiskCategoryController extends Controller
     public function edit(string $risk_category)
     {
         $risk_category = KBUMNRiskCategory::findByEncryptedIdOrFail($risk_category);
-        return view('master.risk_category.edit', compact('scale'));
+        return view('master.risk_category.edit', compact('risk_category'));
     }
 
     public function update(string $risk_category, RiskCategoryRequest $request)
@@ -70,9 +70,9 @@ class KBUMNRiskCategoryController extends Controller
         $risk_category->update(
             $request->only('type', 'name')
         ) ?
-        flash_message('flash_message', 'Kategori Risiko berhasil diperbarui')
-        :
-        flash_message('flash_message', 'Kategori Risiko gagal diperbarui', State::ERROR);
+            flash_message('flash_message', 'Kategori Risiko berhasil diperbarui')
+            :
+            flash_message('flash_message', 'Kategori Risiko gagal diperbarui', State::ERROR);
 
         return redirect()->route('master.risk_categories.index');
     }

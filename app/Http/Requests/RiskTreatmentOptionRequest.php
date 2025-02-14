@@ -11,7 +11,7 @@ class RiskTreatmentOptionRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return auth()->user()?->roles()?->first()?->name == 'administrator';
+        return auth()->user()->canany('master.risk_treatment_options.store', 'master.risk_treatment_options.create');
     }
 
     /**

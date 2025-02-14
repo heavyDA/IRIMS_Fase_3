@@ -30,15 +30,27 @@ class Position extends Model
         return $query->distinct()->select('personnel_area_code', 'unit_name');
     }
 
+    public function scopeBranch($query)
+    {
+        return $query->whereRaw("
+        (personnel_area_code like 'PST' OR personnel_area_code like 'REG%') 
+        AND (LENGTH(unit_code) - LENGTH(REPLACE(unit_code, '.', ''))) = 1
+        ");
+    }
+
     public function scopeGetSubUnitOnly($query)
     {
-        return $query->distinct()->select('sub_unit_code', 'sub_unit_name', 'personnel_area_code')->oldest('sub_unit_code');
+        return $query->distinct()->selectRaw('
+            unit_code as sub_unit_code, 
+            unit_name as sub_unit_name, 
+            personnel_area_code
+        ')->oldest('sub_unit_code');
     }
 
     public function scopeFilterByRole($query)
     {
         $unit = Role::getDefaultSubUnit();
-        return $query->whereLike('sub_unit_code', $unit)
-        ->orWhereLike('sub_unit_code', str_replace('.%', '', $unit));
+        return $query->whereLike('unit_code', $unit)
+            ->orWhereLike('unit_code', str_replace('.%', '', $unit));
     }
 }

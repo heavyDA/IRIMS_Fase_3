@@ -11,6 +11,7 @@ use App\Http\Controllers\Master\{
     KBUMNRiskCategoryController,
     KRIUnitController,
     PICController,
+    RiskMetricsController,
     RiskTreatmentOptionController,
     RiskTreatmentTypeController
 };
@@ -103,15 +104,15 @@ Route::group(['middleware' => 'auth'], function () {
 
     Route::group(['as' => 'master.', 'prefix' => 'master'], function () {
         Route::resource(
-            'bumn_scales',
-            BumnScaleController::class,
+            'skala',
+            BUMNScaleController::class,
             [
                 'names' => custom_route_names('bumn_scales'),
                 'parameters' => ['bumn_scales' => 'bumn_scale'],
             ]
         );
         Route::resource(
-            'existing_control_types',
+            'jenis-existing-control',
             ExistingControlTypeController::class,
             [
                 'names' => custom_route_names('existing_control_types'),
@@ -119,7 +120,7 @@ Route::group(['middleware' => 'auth'], function () {
             ]
         );
         Route::resource(
-            'incident_categories',
+            'kategori-kejadian',
             IncidentCategoryController::class,
             [
                 'names' => custom_route_names('incident_categories'),
@@ -127,7 +128,7 @@ Route::group(['middleware' => 'auth'], function () {
             ]
         );
         Route::resource(
-            'risk_categories',
+            'kategori-risiko',
             KBUMNRiskCategoryController::class,
             [
                 'names' => custom_route_names('risk_categories'),
@@ -135,7 +136,7 @@ Route::group(['middleware' => 'auth'], function () {
             ]
         );
         Route::resource(
-            'risk_treatment_types',
+            'jenis-rencana-perlakuan-risiko',
             RiskTreatmentTypeController::class,
             [
                 'names' => custom_route_names('risk_treatment_types'),
@@ -143,7 +144,7 @@ Route::group(['middleware' => 'auth'], function () {
             ]
         );
         Route::resource(
-            'risk_treatment_options',
+            'opsi-rencana-perlakuan-risiko',
             RiskTreatmentOptionController::class,
             [
                 'names' => custom_route_names('risk_treatment_options'),
@@ -151,9 +152,8 @@ Route::group(['middleware' => 'auth'], function () {
             ]
         );
 
-        Route::get('bumn-scale', [BUMNScaleController::class, 'get_all']);
-        Route::get('existing-control-type', [ExistingControlTypeController::class, 'get_all']);
-        Route::get('heatmap', [HeatmapController::class, 'get_all']);
+        Route::get('data/bumn-scales', [BUMNScaleController::class, 'get_all']);
+        Route::get('data/heatmaps', [HeatmapController::class, 'get_all']);
 
         Route::resource(
             'pic',
@@ -161,6 +161,17 @@ Route::group(['middleware' => 'auth'], function () {
             [
                 'names' => custom_route_names('pic'),
                 'parameters' => ['pic' => 'pic']
+            ]
+        );
+    });
+
+    Route::group(['as' => 'setting.', 'prefix' => 'pengaturan'], function () {
+        Route::resource(
+            'risk-metrics',
+            RiskMetricsController::class,
+            [
+                'names' => custom_route_names('risk_metrics'),
+                'parameters' => ['risk_metric' => 'risk_metric'],
             ]
         );
     });

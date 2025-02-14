@@ -29,6 +29,12 @@ export default defineConfig({
                 'resources/js/pages/risk/monitoring/detail.js',
 
                 'resources/js/pages/master/bumn_scale/index.js',
+                'resources/js/pages/master/existing_control_type/index.js',
+                'resources/js/pages/master/risk_category/index.js',
+                'resources/js/pages/master/risk_treatment_type/index.js',
+                'resources/js/pages/master/risk_treatment_option/index.js',
+                'resources/js/pages/setting/risk_metric/index.js',
+                'resources/js/pages/setting/risk_metric/form.js',
             ],
             refresh: true,
         }),

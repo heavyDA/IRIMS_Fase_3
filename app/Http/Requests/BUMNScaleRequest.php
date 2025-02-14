@@ -11,7 +11,7 @@ class BUMNScaleRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return auth()->user()->canany('master.bumn_scale.store', 'master.bumn_scale.create');
+        return auth()->user()->canany('master.bumn_scales.store', 'master.bumn_scales.create');
     }
 
     /**

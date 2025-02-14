@@ -15,7 +15,7 @@ class IncidentCategoryController extends Controller
         if (request()->ajax()) {
             $incident_categories = IncidentCategory::query();
             return DataTables::of($incident_categories)
-                ->addColumn('action', function($incident_category) {
+                ->addColumn('action', function ($incident_category) {
                     $id = $incident_category->getEncryptedId();
                     $actions = [
                         [
@@ -49,10 +49,10 @@ class IncidentCategoryController extends Controller
     public function store(IncidentCategoryRequest $request)
     {
         IncidentCategory::create($request->only('type', 'name'))
-        ?
-        flash_message('flash_message', 'Jenis Existing Control berhasil diperbarui')
-        :
-        flash_message('flash_message', 'Jenis Existing Control gagal diperbarui', State::ERROR);
+            ?
+            flash_message('flash_message', 'Kategori Kejadian berhasil ditambahkan')
+            :
+            flash_message('flash_message', 'Kategori Kejadian gagal ditambahkan', State::ERROR);
 
         return redirect()->route('master.incident_categories.index');
     }
@@ -60,7 +60,7 @@ class IncidentCategoryController extends Controller
     public function edit(string $incident_category)
     {
         $incident_category = IncidentCategory::findByEncryptedIdOrFail($incident_category);
-        return view('master.incident_category.edit', compact('scale'));
+        return view('master.incident_category.edit', compact('incident_category'));
     }
 
     public function update(string $incident_category, IncidentCategoryRequest $request)
@@ -70,9 +70,21 @@ class IncidentCategoryController extends Controller
         $incident_category->update(
             $request->only('type', 'name')
         ) ?
-        flash_message('flash_message', 'Jenis Existing Control berhasil diperbarui')
-        :
-        flash_message('flash_message', 'Jenis Existing Control gagal diperbarui', State::ERROR);
+            flash_message('flash_message', 'Kategori Kejadian berhasil diperbarui')
+            :
+            flash_message('flash_message', 'Kategori Kejadian gagal diperbarui', State::ERROR);
+
+        return redirect()->route('master.incident_categories.index');
+    }
+
+    public function destroy(string $incident_category)
+    {
+        $incident_category = IncidentCategory::findByEncryptedIdOrFail($incident_category);
+
+        $incident_category->delete() ?
+            flash_message('flash_message', 'Kategori Kejadian berhasil dihapus')
+            :
+            flash_message('flash_message', 'Kategori Kejadian gagal dihapus', State::ERROR);
 
         return redirect()->route('master.incident_categories.index');
     }

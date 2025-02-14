@@ -622,6 +622,7 @@ class WorksheetController extends Controller
             $worksheet->last_history()->create($history);
 
             DB::commit();
+            flash_message('flash_message', 'Kertas kerja berhasil diperbarui', State::SUCCESS);
             return response()->json(['data' => [
                 'message' => 'Kertas kerja berhasil diperbarui',
                 'redirect' => route('risk.worksheet.show', $worksheet->getEncryptedId())
@@ -629,6 +630,7 @@ class WorksheetController extends Controller
         } catch (Exception $e) {
             DB::rollBack();
             logger()->error('[Worksheet] ' . $e->getMessage(), [$e]);
+            flash_message('flash_message', 'Gagal memperbarui kertas kerja', State::ERROR);
             return response()
                 ->json(['message' => 'Gagal memperbarui kertas kerja'], $e->getCode() ?: ResponseStatus::HTTP_INTERNAL_SERVER_ERROR)
                 ->header('Cache-Control', 'no-store');

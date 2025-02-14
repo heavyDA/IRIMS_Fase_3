@@ -11,7 +11,7 @@ class RiskCategoryRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return auth()->user()?->roles()?->first()?->name == 'administrator';
+        return auth()->user()->canany('master.risk_categories.store', 'master.risk_categories.create');
     }
 
     /**
@@ -22,7 +22,7 @@ class RiskCategoryRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'type' => 'required|array:T2,T3',
+            'type' => 'required|in:T2,T3',
             'name' => 'required',
         ];
     }

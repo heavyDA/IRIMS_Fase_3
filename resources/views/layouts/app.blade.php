@@ -66,6 +66,7 @@
 
     @if (session()->has('flash_message'))
         <script defer>
+            console.log('asd');
             document.addEventListener('DOMContentLoaded', () => {
                 const message = @json(session('flash_message'));
                 if (typeof window.alert_message === 'function') {

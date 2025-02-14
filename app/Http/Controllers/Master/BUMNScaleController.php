@@ -15,7 +15,7 @@ class BUMNScaleController extends Controller
         if (request()->ajax()) {
             $bumn_scales = BUMNScale::query();
             return DataTables::of($bumn_scales)
-                ->addColumn('action', function($bumn_scale) {
+                ->addColumn('action', function ($bumn_scale) {
                     $id = $bumn_scale->getEncryptedId();
                     $actions = [
                         [
@@ -48,18 +48,18 @@ class BUMNScaleController extends Controller
     public function store(BUMNScaleRequest $request)
     {
         BUMNScale::create($request->only('impact_category', 'scale', 'criteria', 'description', 'min', 'max'))
-        ?
-        flash_message('flash_message', 'Skala berhasil ditambahkan')
-        :
-        flash_message('flash_message', 'Skala gagal ditambahkan', State::ERROR);
+            ?
+            flash_message('flash_message', 'Skala berhasil ditambahkan')
+            :
+            flash_message('flash_message', 'Skala gagal ditambahkan', State::ERROR);
 
         return redirect()->route('master.bumn_scales.index');
     }
 
-    public function edit(string $bumn_scale_id)
+    public function edit(string $bumn_scale)
     {
-        $bumn_scale = BUMNScale::findByEncryptedIdOrFail($bumn_scale_id);
-        return view('master.bumn_scale.edit', compact('bumn_scale', 'bumn_scale_id'));
+        $bumn_scale = BUMNScale::findByEncryptedIdOrFail($bumn_scale);
+        return view('master.bumn_scale.edit', compact('bumn_scale'));
     }
 
     public function update(string $bumn_scale, BUMNScaleRequest $request)
@@ -69,9 +69,9 @@ class BUMNScaleController extends Controller
         $bumn_scale->update(
             $request->only('impact_category', 'scale', 'criteria', 'description', 'min', 'max')
         ) ?
-        flash_message('flash_message', 'Skala berhasil diperbarui')
-        :
-        flash_message('flash_message', 'Skala gagal diperbarui', State::ERROR);
+            flash_message('flash_message', 'Skala berhasil diperbarui')
+            :
+            flash_message('flash_message', 'Skala gagal diperbarui', State::ERROR);
 
         return redirect()->route('master.bumn_scales.index');
     }
@@ -81,9 +81,9 @@ class BUMNScaleController extends Controller
         $bumn_scale = BUMNScale::findByEncryptedIdOrFail($bumn_scale);
 
         $bumn_scale->delete() ?
-        flash_message('flash_message', 'Skala berhasil dihapus')
-        :
-        flash_message('flash_message', 'Skala gagal dihapus', State::ERROR);
+            flash_message('flash_message', 'Skala berhasil dihapus')
+            :
+            flash_message('flash_message', 'Skala gagal dihapus', State::ERROR);
 
         return redirect()->route('master.bumn_scales.index');
     }

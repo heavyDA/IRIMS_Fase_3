@@ -11,7 +11,7 @@ class ExistingControlTypeRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return auth()->user()?->roles()?->first()?->name == 'administrator';
+        return auth()->user()->canany('master.existing_control_types.store', 'master.existing_control_types.create');
     }
 
     /**

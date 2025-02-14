@@ -2,8 +2,9 @@
 
 namespace App\View\Composers\Master;
 
-use App\Models\Master\Official;
-use App\Services\EOffice\UnitService;
+// use App\Models\Master\Official;
+use App\Models\Master\Position;
+// use App\Services\EOffice\UnitService;
 use Illuminate\View\View;
 
 class UnitComposer
@@ -18,13 +19,12 @@ class UnitComposer
                 'auth.' . auth()->user()->employee_id . '.supervised_units.' . $currentUnit->sub_unit_code,
                 now()->addMinutes(5),
                 fn() =>
-                Official::getSubUnitOnly()
-                ->filterByRole(session()->get('current_role')?->name)
-                ->latest('sub_unit_code')
-                ->get()
+                Position::getSubUnitOnly()
+                    ->filterByRole(session()->get('current_role')?->name)
+                    ->latest('unit_code')
+                    ->get()
             );
-
-        } catch(\Exception $e) {
+        } catch (\Exception $e) {
             logger()->error('[UnitComposer] ' . $e->getMessage());
         }
 
