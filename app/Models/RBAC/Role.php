@@ -22,15 +22,14 @@ class Role extends Model
 
     public static function getDefaultSubUnit(): string
     {
-        $user = session()->get('current_unit') ?? auth()->user();
+        $user = auth()->user();
+        $unit = session()->get('current_unit') ?? $user;
         $role = session()->get('current_role')?->name;
 
         if (
-            (
-                $user->personnel_area_code == 'PST' &&
-                in_array($role, ['risk analis', 'risk reviewer'])
-            ) ||
-            $user->sub_unit_code == 'ap'
+            ($unit->personnel_area_code == '' && $user->hasRole('risk analis'))  ||
+            $user->hasRole('risk reviewer')
+
         ) {
             return 'ap.%';
         }
@@ -38,9 +37,9 @@ class Role extends Model
         if (
             $role != 'risk admin'
         ) {
-            return $user->sub_unit_code . '.%';
+            return $unit->sub_unit_code . '.%';
         }
-        return $user->sub_unit_code . ($role == 'risk admin' ? '' : '.%');
+        return $unit->sub_unit_code . ($role == 'risk admin' ? '' : '.%');
     }
 
     public static function getLevel(?string $unit = null)
@@ -85,7 +84,7 @@ class Role extends Model
             $user->personnel_area_code == 'DPS' &&
             $level == 1
         ) {
-             return false;
+            return false;
         }
 
         return true;
@@ -110,7 +109,7 @@ class Role extends Model
             $user->personnel_area_code == 'DPS' &&
             $level == 1
         ) {
-             return false;
+            return false;
         }
 
         return true;

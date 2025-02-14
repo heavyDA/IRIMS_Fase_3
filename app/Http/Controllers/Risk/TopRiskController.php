@@ -29,11 +29,15 @@ class TopRiskController extends Controller
         if (request()->ajax()) {
             $risk_otorisator_permission = Role::risk_otorisator_top_risk_approval();
             $level = Role::getLevel();
-
             $source_unit = '';
-            if ($level < 2) {
+            if ($level == 0) {
                 $worksheets = Worksheet::top_risk_upper_query(str_replace('.%', '%', $unit))
-                    ->whereLike('w.sub_unit_code', str_replace('.%', '', $unit))
+                    ->whereLike('wtr.sub_unit_code', str_replace('.%', '', $unit))
+                    ->whereYear('w.created_at', request('year', date('Y')))
+                    ->where('w.status', DocumentStatus::APPROVED->value);
+            } else if ($level == 1) {
+                $worksheets = Worksheet::top_risk_upper_query(str_replace('.%', '%', $unit))
+                    ->whereLike('wtr.sub_unit_code', str_replace('.%', '', $unit))
                     ->whereYear('w.created_at', request('year', date('Y')))
                     ->where('w.status', DocumentStatus::APPROVED->value);
             } else {
@@ -97,7 +101,7 @@ class TopRiskController extends Controller
                         }
                     }
 
-                    if (!$risk_otorisator_permission) {
+                    if ($level > 2 && !$risk_otorisator_permission) {
                         return '';
                     }
 
@@ -128,12 +132,20 @@ class TopRiskController extends Controller
             $source_unit = implode('.', array_slice($source_unit, 0, 3)) . '%';
         }
 
-        if ($level < 2) {
-            $worksheets = Worksheet::top_risk_upper_dashboard_query(str_replace('.%', '%', $unit))
+        if ($level == 0) {
+            $worksheets = Worksheet::top_risk_upper_dashboard_query(str_replace('.%', '', $unit))
                 ->whereLike('wtr.source_sub_unit_code', str_replace('.%', '', $unit))
                 ->where('w.status', DocumentStatus::APPROVED->value)
                 ->whereYear('w.created_at', request('year', date('Y')))
                 ->whereNotNull('wtr.id')
+                ->orderBy('w.id', 'desc')
+                ->groupBy('winc.id', 'wim.id');
+        } else if ($level == 1) {
+            $worksheets = Worksheet::top_risk_upper_dashboard_query(str_replace('.%', '%', $unit))
+                ->whereLike('wtr.sub_unit_code', str_replace('.%', '', $unit))
+                ->where('w.status', DocumentStatus::APPROVED->value)
+                ->whereYear('w.created_at', request('year', date('Y')))
+                ->whereNotNull('wtr_submit.id')
                 ->orderBy('w.id', 'desc')
                 ->groupBy('winc.id', 'wim.id');
         } else {
@@ -204,11 +216,14 @@ class TopRiskController extends Controller
 
     public function store(Request $request)
     {
-        if (!Role::risk_otorisator_top_risk_approval()) {
-            abort(403);
-        }
 
         try {
+            throw_if(
+                !Role::risk_otorisator_top_risk_approval() && !auth()->user()->hasAnyRole('superadmin', 'root', 'risk analis', 'risk otorisator'),
+                new Exception('Failed to submit top risk, User ID: ' . auth()->user()->employee_id . ' doesn\'t have access')
+            );
+
+
             $worksheets = Worksheet::whereIn('id', array_unique($request->worksheets))->get();
 
             DB::beginTransaction();
@@ -228,14 +243,14 @@ class TopRiskController extends Controller
             );
             DB::commit();
             return response()->json(
-                ['message' => 'Berhasil submit top risk.'],
+                ['message' => 'Profil Risiko berhasil disimpan sebagai top risk.'],
                 ResponseStatus::HTTP_OK
             )->header('Cache-Control', 'no-store');
         } catch (Exception $e) {
             DB::rollBack();
             logger()->error('[Risk Profile] Gagal menyimpan top risk. ' . $e->getMessage());
             return response()->json(
-                ['message' => 'Gagal submit top risk.'],
+                ['message' => 'Profil Risiko gagal disimpan sebagai top risk.'],
                 ResponseStatus::HTTP_BAD_REQUEST
             )->header('Cache-Control', 'no-store');
         }

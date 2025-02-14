@@ -383,20 +383,22 @@ worksheetSubmitButton?.addEventListener('click', async e => {
             let worksheets = []
             worksheetChecks.forEach(checkbox => {
                 if (checkbox.checked) {
-                    console.log(checkbox.value)
                     worksheets.push(checkbox.value)
                 }
             })
 
             worksheets = new Set(worksheets)
-            const response = await axios.post('/risk-process/top-risk', { worksheets: [...worksheets] })
-            const data = await response.data;
 
-            if (response.status != 200) {
-                return Swal.showValidationMessage(data.message)
+            try {
+                const response = await axios.post('/risk-process/top-risk', { worksheets: [...worksheets] })
+                const data = await response.data;
+
+                return data
+            } catch (error) {
+
+                return Swal.showValidationMessage(error?.response?.data?.message)
             }
 
-            return data
         }
     }).then(async (result) => {
         if (result.isConfirmed) {
