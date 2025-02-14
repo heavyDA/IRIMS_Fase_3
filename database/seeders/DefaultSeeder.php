@@ -152,6 +152,11 @@ class DefaultSeeder extends Seeder
                         'route' => 'setting.risk_metrics.index',
                         'position' => 0,
                     ],
+                    [
+                        'name' => 'Posisi',
+                        'route' => 'setting.positions.index',
+                        'position' => 1,
+                    ],
                 ]
             ],
             [
@@ -588,6 +593,12 @@ class DefaultSeeder extends Seeder
             ['personnel_area_code' => 'PST', 'position_name' => 'Head of Airport Construction Area A'],
             ['personnel_area_code' => 'PST', 'position_name' => 'Project Construction Division Head'],
             ['personnel_area_code' => 'PST', 'position_name' => 'Project Monitoring & Evaluation Division Head'],
+            ['personnel_area_code' => 'REG I', 'position_name' => 'Regional CEO - Kantor Regional I'],
+            ['personnel_area_code' => 'REG II', 'position_name' => 'Regional CEO - Kantor Regional II'],
+            ['personnel_area_code' => 'REG III', 'position_name' => 'Regional CEO - Kantor Regional III'],
+            ['personnel_area_code' => 'REG IV', 'position_name' => 'Regional CEO - Kantor Regional IV'],
+            ['personnel_area_code' => 'REG V', 'position_name' => 'Regional CEO - Kantor Regional V'],
+            ['personnel_area_code' => 'REG VI', 'position_name' => 'Regional CEO - Kantor Regional VI'],
             ['personnel_area_code' => 'CGK', 'position_name' => 'General Manager KC Bandara Internasional Soekarno-Hatta'],
             ['personnel_area_code' => 'CGK', 'position_name' => 'Deputy General Manager Airport Commercial Services'],
             ['personnel_area_code' => 'CGK', 'position_name' => 'Assistant Deputy Airside Operation Services'],
