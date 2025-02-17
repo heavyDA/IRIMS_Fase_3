@@ -21,6 +21,7 @@ use App\Http\Controllers\Risk\AssessmentController;
 use App\Http\Controllers\Risk\MonitoringController;
 use App\Http\Controllers\Risk\TopRiskController;
 use App\Http\Controllers\Risk\WorksheetController;
+use App\Http\Controllers\Setting\PositionController;
 use Illuminate\Support\Facades\Route;
 
 Route::group(['prefix' => 'login', 'as' => 'auth.'], function () {
@@ -154,6 +155,7 @@ Route::group(['middleware' => 'auth'], function () {
 
         Route::get('data/bumn-scales', [BUMNScaleController::class, 'get_all']);
         Route::get('data/heatmaps', [HeatmapController::class, 'get_all']);
+        Route::get('data/pics', [PICController::class, 'get_all']);
 
         Route::resource(
             'pic',
@@ -167,11 +169,19 @@ Route::group(['middleware' => 'auth'], function () {
 
     Route::group(['as' => 'setting.', 'prefix' => 'pengaturan'], function () {
         Route::resource(
-            'risk-metrics',
+            'matriks-strategi-risiko',
             RiskMetricsController::class,
             [
                 'names' => custom_route_names('risk_metrics'),
                 'parameters' => ['risk_metric' => 'risk_metric'],
+            ]
+        );
+        Route::resource(
+            'posisi',
+            PositionController::class,
+            [
+                'names' => custom_route_names('positions'),
+                'parameters' => ['position' => 'position'],
             ]
         );
     });
