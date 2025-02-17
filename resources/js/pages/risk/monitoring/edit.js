@@ -118,9 +118,9 @@ const fetchers = {
 
 const fetchData = async () => {
     await Promise.allSettled([
-        axios.get('/master/bumn-scale'),
-        axios.get('/master/heatmap'),
-        axios.get('/master/pic'),
+        axios.get('/data/bumn-scales'),
+        axios.get('/data/heatmaps'),
+        axios.get('/data/pics'),
         axios.get('/profile/risk_metric'),
         axios.get(window.location.href),
     ]).then(res => {
