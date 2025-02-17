@@ -15,7 +15,7 @@
 @endpush
 
 @push('bottom-script')
-    @vite(['resources/js/pages/risk/process/monitoring/detail.js'])
+    @vite(['resources/js/pages/risk/monitoring/detail.js'])
 @endpush
 
 @section('header-content')
