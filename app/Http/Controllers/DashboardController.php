@@ -21,9 +21,9 @@ class DashboardController extends Controller
         }
 
         $count_worksheet = DB::table('ra_worksheets')
-            ->where(function($q) use($unit, $current_role) {
+            ->where(function ($q) use ($unit, $current_role) {
                 $q->whereLike('ra_worksheets.sub_unit_code', $unit)
-                ->orWhereLike('ra_worksheets.sub_unit_code', str_replace('.%', '', $unit));
+                    ->orWhereLike('ra_worksheets.sub_unit_code', str_replace('.%', '', $unit));
             })
             ->when($current_role?->name == 'risk admin', fn($q) => $q->where('ra_worksheets.created_by', $user->employee_id))
             ->selectRaw("
@@ -37,10 +37,10 @@ class DashboardController extends Controller
         $count_mitigation = WorksheetMitigation::whereHas(
             'worksheet',
             fn($q) => $q
-            ->where(function($q) use($unit, $current_role) {
-                $q->whereLike('ra_worksheets.sub_unit_code', $unit)
-                ->orWhereLike('ra_worksheets.sub_unit_code', str_replace('.%', '', $unit));
-            })
+                ->where(function ($q) use ($unit, $current_role) {
+                    $q->whereLike('ra_worksheets.sub_unit_code', $unit)
+                        ->orWhereLike('ra_worksheets.sub_unit_code', str_replace('.%', '', $unit));
+                })
                 ->when($current_role?->name == 'risk admin', fn($q) => $q->where('ra_worksheets.created_by', $user->employee_id))
                 ->whereYear('ra_worksheets.created_at', request('year', date('Y')))
         )
@@ -63,9 +63,9 @@ class DashboardController extends Controller
             )
             ->leftJoin('ra_worksheets as w', 'w.id', '=', 'm.worksheet_id')
             ->leftJoin('ra_monitoring_actualizations as ma', 'ma.monitoring_id', '=', 'm.id')
-            ->where(function($q) use($unit, $current_role) {
+            ->where(function ($q) use ($unit, $current_role) {
                 $q->whereLike('w.sub_unit_code', $unit)
-                ->orWhereLike('w.sub_unit_code', str_replace('.%', '', $unit));
+                    ->orWhereLike('w.sub_unit_code', str_replace('.%', '', $unit));
             })
             ->whereNotLike('w.personnel_area_code', 'Reg %')
             ->when($current_role?->name == 'risk admin', fn($q) => $q->where('w.created_by', $user->employee_id))
@@ -109,7 +109,7 @@ class DashboardController extends Controller
                         fn($q) => $q
                             ->where(
                                 fn($q) => $q->where('sub_unit_code', 'like', $unit)
-                                ->orWhereLike('sub_unit_code', str_replace('.%', '', $unit))
+                                    ->orWhereLike('sub_unit_code', str_replace('.%', '', $unit))
                             )
                             ->when(session()->get('current_role')->name == 'risk admin', fn($q) => $q->where('created_by', auth()->user()->employee_id))
                             ->whereYear('created_at', request('year', date('Y')))
@@ -147,7 +147,7 @@ class DashboardController extends Controller
                     ->leftJoin('ra_worksheet_identifications as i', 'w.id', '=', 'i.worksheet_id')
                     ->where(
                         fn($q) => $q->where('sub_unit_code', 'like', $unit)
-                        ->orWhereLike('sub_unit_code', str_replace('.%', '', $unit))
+                            ->orWhereLike('sub_unit_code', str_replace('.%', '', $unit))
                     )
                     ->when(session()->get('current_role')->name == 'risk admin', fn($q) => $q->where('created_by', auth()->user()->employee_id))
                     ->whereYear('w.created_at', request('year', date('Y')))

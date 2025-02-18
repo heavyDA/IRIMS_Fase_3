@@ -2,9 +2,7 @@
 
 @push('top-script')
     @vite(['resources/js/pages/dashboard/index.js'])
-    @if (session()->get('current_role')?->name == 'risk otorisator' ||
-            session()->get('current_role')?->name == 'risk analis' ||
-            session()->get('current_role')?->name == 'risk reviewer')
+    @if (session()->get('current_role')?->name != 'risk admin')
         @vite(['resources/js/pages/dashboard/_top_risk.js', 'resources/js/pages/dashboard/_monitoring_progress.js'])
     @endif
     <style>
@@ -157,11 +155,7 @@
 
     @include('dashboard._risk_map')
     @includeWhen(session()->get('current_role')?->name != 'risk admin', 'dashboard._monitoring')
-    @if (session()->get('current_role')?->name == 'risk otorisator' ||
-            session()->get('current_role')?->name == 'risk analis' ||
-            session()->get('current_role')?->name == 'risk reviewer')
-        @include('dashboard._top_risk')
-    @endif
+    @includeWhen(session()->get('current_role')?->name != 'risk admin', 'dashboard._top_risk')
 @endsection
 
 @push('element')

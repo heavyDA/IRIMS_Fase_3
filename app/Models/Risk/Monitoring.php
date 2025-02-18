@@ -86,32 +86,49 @@ class Monitoring extends Model
                         function ($q) use ($role, $unit, $level) {
                             $q->where(
                                 fn($q) =>
-                                    $q->whereLike('sub_unit_code', $unit)
+                                $q->whereLike('sub_unit_code', $unit)
                                     ->whereRaw("(LENGTH(sub_unit_code) - LENGTH(REPLACE(sub_unit_code, '.', ''))) = ?", $level)
-                                )
+                            )
                                 ->when($level > 3, fn($q) => $q->orWhereLike('sub_unit_code', str_replace('.%', '',  $unit)));
                         }
                     )
                     ->when(str_contains($user->personnel_area_code, 'REG '), fn($q) => $q->whereNotLike('personnel_area_code', 'REG %'))
             )
             ->withExpression(
+                'existing_worksheets',
+                DB::table('ra_worksheets as w')
+                    ->selectRaw('
+                        lu.sub_unit_code,
+                        GROUP_CONCAT(w.id) as worksheet_ids,
+                        COUNT(w.id) as total_worksheets
+                    ')
+                    ->leftJoin(
+                        'lower_units as lu',
+                        function ($q) use ($role) {
+                            $q->on('w.sub_unit_code', 'like', DB::raw("CONCAT(lu.sub_unit_code, '.%')"))
+                                ->orWhere('w.sub_unit_code', DB::raw("lu.sub_unit_code"));
+                        }
+                    )
+                    ->whereYear('w.created_at', $year)
+                    ->groupBy('lu.sub_unit_code')
+            )
+            ->withExpression(
                 'monitoring_summary',
-                DB::table('ra_monitorings as m')
+                DB::table('existing_worksheets as w')
                     ->selectRaw("
                         lu.sub_unit_code,
                         MONTH(m.period_date) AS month,
-                        COUNT(m.id) AS total_monitorings,
+                        total_worksheets,
                         SUM(CASE WHEN m.status = 'approved' THEN 1 ELSE 0 END) AS approved_monitorings
                     ")
-                    ->join('ra_worksheets as w', 'm.worksheet_id', '=', 'w.id')
+                    ->leftJoin('ra_monitorings as m', DB::raw('FIND_IN_SET(m.worksheet_id, w.worksheet_ids)'), '>', DB::raw('0'))
                     ->join(
                         'lower_units as lu',
-                        function ($q) use($role) {
+                        function ($q) use ($role) {
                             $q->on('w.sub_unit_code', 'like', DB::raw("CONCAT(lu.sub_unit_code, '.%')"))
-                            ->orWhere('w.sub_unit_code', DB::raw("lu.sub_unit_code"));
+                                ->orWhere('w.sub_unit_code', DB::raw("lu.sub_unit_code"));
                         }
                     )
-                    ->whereYear('m.period_date', $year)
                     ->groupBy('lu.sub_unit_code', DB::raw('MONTH(m.period_date)'))
             )
             ->selectRaw("
@@ -120,40 +137,40 @@ class Monitoring extends Model
                 lu.personnel_area_code,
                 lu.personnel_area_name,
                 COALESCE(SUM(CASE WHEN ms.month = 1 THEN ms.approved_monitorings END), 0)
-                / NULLIF(SUM(CASE WHEN ms.month = 1 THEN ms.total_monitorings END), 0) * 100 AS m1,
+                / NULLIF(SUM(CASE WHEN ms.month = 1 THEN ms.total_worksheets END), 0) * 100 AS m1,
 
                 COALESCE(SUM(CASE WHEN ms.month = 2 THEN ms.approved_monitorings END), 0)
-                / NULLIF(SUM(CASE WHEN ms.month = 2 THEN ms.total_monitorings END), 0) * 100 AS m2,
+                / NULLIF(SUM(CASE WHEN ms.month = 2 THEN ms.total_worksheets END), 0) * 100 AS m2,
 
                 COALESCE(SUM(CASE WHEN ms.month = 3 THEN ms.approved_monitorings END), 0)
-                / NULLIF(SUM(CASE WHEN ms.month = 3 THEN ms.total_monitorings END), 0) * 100 AS m3,
+                / NULLIF(SUM(CASE WHEN ms.month = 3 THEN ms.total_worksheets END), 0) * 100 AS m3,
 
                 COALESCE(SUM(CASE WHEN ms.month = 4 THEN ms.approved_monitorings END), 0)
-                / NULLIF(SUM(CASE WHEN ms.month = 4 THEN ms.total_monitorings END), 0) * 100 AS m4,
+                / NULLIF(SUM(CASE WHEN ms.month = 4 THEN ms.total_worksheets END), 0) * 100 AS m4,
 
                 COALESCE(SUM(CASE WHEN ms.month = 5 THEN ms.approved_monitorings END), 0)
-                / NULLIF(SUM(CASE WHEN ms.month = 5 THEN ms.total_monitorings END), 0) * 100 AS m5,
+                / NULLIF(SUM(CASE WHEN ms.month = 5 THEN ms.total_worksheets END), 0) * 100 AS m5,
 
                 COALESCE(SUM(CASE WHEN ms.month = 6 THEN ms.approved_monitorings END), 0)
-                / NULLIF(SUM(CASE WHEN ms.month = 6 THEN ms.total_monitorings END), 0) * 100 AS m6,
+                / NULLIF(SUM(CASE WHEN ms.month = 6 THEN ms.total_worksheets END), 0) * 100 AS m6,
 
                 COALESCE(SUM(CASE WHEN ms.month = 7 THEN ms.approved_monitorings END), 0)
-                / NULLIF(SUM(CASE WHEN ms.month = 7 THEN ms.total_monitorings END), 0) * 100 AS m7,
+                / NULLIF(SUM(CASE WHEN ms.month = 7 THEN ms.total_worksheets END), 0) * 100 AS m7,
 
                 COALESCE(SUM(CASE WHEN ms.month = 8 THEN ms.approved_monitorings END), 0)
-                / NULLIF(SUM(CASE WHEN ms.month = 8 THEN ms.total_monitorings END), 0) * 100 AS m8,
+                / NULLIF(SUM(CASE WHEN ms.month = 8 THEN ms.total_worksheets END), 0) * 100 AS m8,
 
                 COALESCE(SUM(CASE WHEN ms.month = 9 THEN ms.approved_monitorings END), 0)
-                / NULLIF(SUM(CASE WHEN ms.month = 9 THEN ms.total_monitorings END), 0) * 100 AS m9,
+                / NULLIF(SUM(CASE WHEN ms.month = 9 THEN ms.total_worksheets END), 0) * 100 AS m9,
 
                 COALESCE(SUM(CASE WHEN ms.month = 10 THEN ms.approved_monitorings END), 0)
-                / NULLIF(SUM(CASE WHEN ms.month = 10 THEN ms.total_monitorings END), 0) * 100 AS m10,
+                / NULLIF(SUM(CASE WHEN ms.month = 10 THEN ms.total_worksheets END), 0) * 100 AS m10,
 
                 COALESCE(SUM(CASE WHEN ms.month = 11 THEN ms.approved_monitorings END), 0)
-                / NULLIF(SUM(CASE WHEN ms.month = 11 THEN ms.total_monitorings END), 0) * 100 AS m11,
+                / NULLIF(SUM(CASE WHEN ms.month = 11 THEN ms.total_worksheets END), 0) * 100 AS m11,
 
                 COALESCE(SUM(CASE WHEN ms.month = 12 THEN ms.approved_monitorings END), 0)
-                / NULLIF(SUM(CASE WHEN ms.month = 12 THEN ms.total_monitorings END), 0) * 100 AS m12
+                / NULLIF(SUM(CASE WHEN ms.month = 12 THEN ms.total_worksheets END), 0) * 100 AS m12
             ")
             ->leftJoin('monitoring_summary as ms', 'ms.sub_unit_code', '=', 'lu.sub_unit_code')
             ->groupBy('lu.sub_unit_code', 'lu.sub_unit_name', 'lu.personnel_area_code', 'lu.personnel_area_name');

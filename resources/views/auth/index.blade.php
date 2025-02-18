@@ -8,7 +8,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ config('app.name', 'IRIMS') }}</title>
+    <title>{{ config('app.name', 'SIERINA') }}</title>
 
     <link rel="icon" href="{{ asset('assets/images/brand/favicon.ico') }}" type="image/x-icon">
 
@@ -64,9 +64,11 @@
                     </div>
                 </div>
                 <div class="my-2 text-center d-flex flex-column justify-content-center">
-                    <p style="height:8px">INTEGRATED RISK MANAGEMENT SYSTEM (IRIMS)</p>
-                    <p>powered by <strong>MR</strong></p>
-                    <p style="height:8px">2024 © PT ANGKASA PURA INDONESIA</p>
+                    <p style="height:8px" style="text-center">
+                        <strong>Sistem Informasi Enterprise Risk Management<br>
+                            Injourney Airport (SIERINA)</strong><br>
+                        2024 © PT ANGKASA PURA INDONESIA
+                    </p>
                 </div>
             </div>
         </div>
