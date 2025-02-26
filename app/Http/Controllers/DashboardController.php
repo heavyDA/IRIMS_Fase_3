@@ -224,20 +224,20 @@ class DashboardController extends Controller
                 'monitorings',
                 DB::table('ra_monitorings as m')
                     ->select(
-                        'mr.id',
-                        'm.id as monitoring_id',
-                        'mr.worksheet_incident_id',
-                        'mr.risk_scale',
-                        'mr.risk_level'
+                        'm.id',
+                        'mr.impact_probability_scale_id',
+                        'h.risk_scale',
+                        'h.risk_level'
                     )
                     ->leftJoin('ra_monitoring_residuals as mr', 'mr.monitoring_id', '=', 'm.id')
+                    ->leftJoin('m_heatmaps as h', 'h.id', '=', 'mr.impact_probability_scale_id')
                     ->whereRaw('
                             m.id IN (select id from latest_monitorings) AND
                             m.worksheet_id IN (select id from worksheets)
                         ')
             )
-            ->selectRaw('m_heatmaps.risk_scale, m_heatmaps.risk_level, color, COUNT(m.worksheet_incident_id) as total')
-            ->leftJoin('monitorings as m', 'm.risk_scale', '=', 'm_heatmaps.risk_scale')
+            ->selectRaw('m_heatmaps.risk_scale, m_heatmaps.risk_level, color, COALESCE(COUNT(m.id), 0) as total')
+            ->leftJoin('monitorings as m', 'm.impact_probability_scale_id', '=', 'm_heatmaps.id')
             ->groupBy('risk_scale', 'risk_level')
             ->get();
 
