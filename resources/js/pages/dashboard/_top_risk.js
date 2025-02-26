@@ -12,7 +12,14 @@ const columns = [
         sortable: true,
         data: 'worksheet_number',
         name: 'worksheet_number',
-        width: '64px'
+        width: '64px',
+        render: function (data, type, row) {
+            if (type !== 'display') {
+                return data
+            }
+
+            return `<a class="link-primary link-offset-2 link-underline-opacity-0 link-underline-opacity-50-hover text-decoration-none" href="${row.worksheet_id}">${data}</a>`
+        }
     },
     {
         sortable: true,

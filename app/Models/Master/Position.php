@@ -43,8 +43,10 @@ class Position extends Model
                     ->selectRaw("
                         branch_code,
                         unit_code,
+                        unit_code_doc,
                         unit_name,
                         sub_unit_code,
+                        sub_unit_code_doc,
                         sub_unit_name,
                         position_name,
                         (LENGTH(sub_unit_code) - length(replace(sub_unit_code, '.', ''))) as level
@@ -56,8 +58,10 @@ class Position extends Model
                             ->selectRaw("
                                 p.branch_code,
                                 p.unit_code,
+                                p.unit_code_doc,
                                 p.unit_name,
                                 p.sub_unit_code,
+                                p.sub_unit_code_doc,
                                 p.sub_unit_name,
                                 p.position_name,
                                 (LENGTH(p.sub_unit_code) - length(replace(p.sub_unit_code, '.', ''))) as level

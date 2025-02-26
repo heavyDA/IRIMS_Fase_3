@@ -99,7 +99,12 @@ class DashboardController extends Controller
                 $this->roleService->isRiskOwner() || $this->roleService->isRiskAdmin()
             ) ?: $unit;
         }
-        $monitorings = Worksheet::progressMonitoringQuery($unit?->sub_unit_code, request('year', date('Y')));
+
+        if ($this->roleService->isRiskOwner() && !request('unit')) {
+            $monitorings = Worksheet::progressMonitoringRiskOwnerQuery($unit?->sub_unit_code, request('year', date('Y')));
+        } else {
+            $monitorings = Worksheet::progressMonitoringQuery($unit?->sub_unit_code, request('year', date('Y')));
+        }
 
         return DataTables::of($monitorings)
             ->make(true);

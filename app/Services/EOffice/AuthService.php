@@ -7,7 +7,7 @@ class AuthService extends EOfficeAbstract
 {
     public function __construct(?string $host, ?string $token)
     {
-        parent::__construct($host, $token);
+        parent::__construct($host, $token, 5);
     }
 
     public function login(array $payload = ['username' => '', 'password' => '']): ?object

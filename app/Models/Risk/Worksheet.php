@@ -906,10 +906,87 @@ class Worksheet extends Model
         ")
             ->leftJoin('worksheets as w', 'w.sub_unit_code', '=', 'children.sub_unit_code')
             ->leftJoin('monitorings as m', 'm.sub_unit_code', '=', 'children.sub_unit_code')
-            ->groupBy('children.sub_unit_code');;
+            ->groupBy('children.sub_unit_code');
     }
 
-    public static function progressMonitoringRiskOwnerQuery(?string $unitCode, ?int $year = null) {}
+    public static function progressMonitoringRiskOwnerQuery(?string $unitCode, ?int $year = null)
+    {
+        return Position::hierarchyQuery($unitCode, true)
+            ->withExpression(
+                'worksheets',
+                DB::table('position_hierarchy as ph')
+                    ->selectRaw("
+                    '{$unitCode}' as current_unit_code,
+                    ph.sub_unit_code,
+                    COALESCE(COUNT(distinct w.id),0) as total_worksheet    
+                ")
+                    ->leftJoin(
+                        'ra_worksheets as w',
+                        fn($q) => $q->on('w.sub_unit_code', '=', 'ph.sub_unit_code')
+                            ->whereYear('w.created_at', $year ?? Date('Y'))
+                    )
+                    ->groupBy('current_unit_code')
+            )
+            ->withExpression(
+                'monitorings',
+                DB::table('position_hierarchy as ph')
+                    ->selectRaw("
+                        '{$unitCode}' as current_unit_code,
+                        ph.sub_unit_code,
+                        month(period_date) as period_month,
+                        COALESCE(COUNT(IF(m.status = 'approved', m.id, NULL)),0) as total_approved   
+                    ")
+                    ->leftJoin(
+                        'ra_worksheets as w',
+                        fn($q) => $q->on('w.sub_unit_code', '=', 'ph.sub_unit_code')
+                            ->whereYear('w.created_at', $year ?? Date('Y'))
+                    )
+                    ->leftJoin('ra_monitorings as m', 'm.worksheet_id', 'w.id')
+                    ->groupBy('current_unit_code', 'period_month')
+            )
+            ->selectRaw("
+                position_hierarchy.*,
+                w.total_worksheet,
+                COALESCE(SUM(CASE WHEN m.period_month = 1 THEN m.total_approved END), 0)
+                / NULLIF(SUM(CASE WHEN m.period_month = 1 THEN w.total_worksheet END), 0) * 100 AS m1,
+                
+                COALESCE(SUM(CASE WHEN m.period_month = 2 THEN m.total_approved END), 0)
+                / NULLIF(SUM(CASE WHEN m.period_month = 2 THEN w.total_worksheet END), 0) * 100 AS m2,
+                
+                COALESCE(SUM(CASE WHEN m.period_month = 3 THEN m.total_approved END), 0)
+                / NULLIF(SUM(CASE WHEN m.period_month = 3 THEN w.total_worksheet END), 0) * 100 AS m3,
+                
+                COALESCE(SUM(CASE WHEN m.period_month = 4 THEN m.total_approved END), 0)
+                / NULLIF(SUM(CASE WHEN m.period_month = 4 THEN w.total_worksheet END), 0) * 100 AS m4,
+                
+                COALESCE(SUM(CASE WHEN m.period_month = 5 THEN m.total_approved END), 0)
+                / NULLIF(SUM(CASE WHEN m.period_month = 5 THEN w.total_worksheet END), 0) * 100 AS m5,
+                
+                COALESCE(SUM(CASE WHEN m.period_month = 6 THEN m.total_approved END), 0)
+                / NULLIF(SUM(CASE WHEN m.period_month = 6 THEN w.total_worksheet END), 0) * 100 AS m6,
+                
+                COALESCE(SUM(CASE WHEN m.period_month = 7 THEN m.total_approved END), 0)
+                / NULLIF(SUM(CASE WHEN m.period_month = 7 THEN w.total_worksheet END), 0) * 100 AS m7,
+                
+                COALESCE(SUM(CASE WHEN m.period_month = 8 THEN m.total_approved END), 0)
+                / NULLIF(SUM(CASE WHEN m.period_month = 8 THEN w.total_worksheet END), 0) * 100 AS m8,
+                
+                COALESCE(SUM(CASE WHEN m.period_month = 9 THEN m.total_approved END), 0)
+                / NULLIF(SUM(CASE WHEN m.period_month = 9 THEN w.total_worksheet END), 0) * 100 AS m9,
+                
+                COALESCE(SUM(CASE WHEN m.period_month = 10 THEN m.total_approved END), 0)
+                / NULLIF(SUM(CASE WHEN m.period_month = 10 THEN w.total_worksheet END), 0) * 100 AS m10,
+                
+                COALESCE(SUM(CASE WHEN m.period_month = 11 THEN m.total_approved END), 0)
+                / NULLIF(SUM(CASE WHEN m.period_month = 11 THEN w.total_worksheet END), 0) * 100 AS m11,
+                
+                COALESCE(SUM(CASE WHEN m.period_month = 12 THEN m.total_approved END), 0)
+                / NULLIF(SUM(CASE WHEN m.period_month = 12 THEN w.total_worksheet END), 0) * 100 AS m12
+        ")
+            ->leftJoin('worksheets as w', 'w.current_unit_code', '=', 'position_hierarchy.sub_unit_code')
+            ->leftJoin('monitorings as m', 'm.current_unit_code', '=', 'position_hierarchy.sub_unit_code')
+            ->groupBy('position_hierarchy.sub_unit_code');
+    }
 
     public static function assessmentQuery()
     {

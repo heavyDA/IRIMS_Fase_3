@@ -25,6 +25,7 @@ use App\Services\PositionService;
 use App\Services\RoleService;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Yajra\DataTables\Facades\DataTables;
@@ -838,6 +839,9 @@ class WorksheetController extends Controller
             ->whereYear('w.created_at', request('year', date('Y')));
 
         return DataTables::of($worksheets)
+            ->editColumn('worksheet_id', function ($worksheet) {
+                return route('risk.worksheet.show', Crypt::encryptString((string) $worksheet->worksheet_id));
+            })
             ->orderColumn('created_at', 'w.created_at $1')
             ->make(true);
     }
@@ -875,8 +879,10 @@ class WorksheetController extends Controller
             ->groupBy('lm.id');
 
         return DataTables::query($worksheets)
+            ->editColumn('worksheet_id', function ($worksheet) {
+                return route('risk.worksheet.show', Crypt::encryptString((string) $worksheet->worksheet_id));
+            })
             ->orderColumn('period_date', 'lm.period_date $1')
-            ->rawColumns(['status_monitoring'])
             ->make(true);
     }
 }

@@ -131,6 +131,13 @@ const openModalInherent = (inherentScale) => {
                         data: 'worksheet_number',
                         name: 'worksheet_number',
                         width: '120px',
+                        render: (data, type, row) => {
+                            if (type !== 'display') {
+                                return data
+                            }
+
+                            return `<a class="link-primary link-offset-2 link-underline-opacity-0 link-underline-opacity-50-hover text-decoration-none" href="${row.worksheet_id}">${data}</a>`
+                        }
                     },
                     {
                         sortable: false,
@@ -211,6 +218,10 @@ const openModalInherent = (inherentScale) => {
                                 return data
                             }
 
+                            if (!data) {
+                                return ''
+                            }
+
                             return formatNumeral(data.replaceAll('.', ','), defaultConfigFormatNumeral)
                         }
                     },
@@ -223,7 +234,7 @@ const openModalInherent = (inherentScale) => {
                 ]
                 datatableInherent = createDatatable(table, {
                     handleColumnSearchField: false,
-                    responsive: true,
+                    responsive: false,
                     serverSide: true,
                     ordering: false,
                     processing: true,
@@ -377,6 +388,13 @@ const openModalResidual = (residualScale) => {
                         data: 'worksheet_number',
                         name: 'worksheet_number',
                         width: '120px',
+                        render: (data, type, row) => {
+                            if (type !== 'display') {
+                                return data
+                            }
+
+                            return `<a class="link-primary link-offset-2 link-underline-opacity-0 link-underline-opacity-50-hover text-decoration-none" href="${row.worksheet_id}">${data}</a>`
+                        }
                     },
                     {
                         sortable: false,
@@ -458,6 +476,10 @@ const openModalResidual = (residualScale) => {
                                 return data
                             }
 
+                            if (!data) {
+                                return ''
+                            }
+
                             return formatNumeral(data.replaceAll('.', ','), defaultConfigFormatNumeral)
                         }
                     },
@@ -492,6 +514,10 @@ const openModalResidual = (residualScale) => {
                         render: function (data, type, row) {
                             if (type !== 'display') {
                                 return data
+                            }
+
+                            if (!data) {
+                                return ''
                             }
 
                             return formatNumeral(data.replaceAll('.', ','), defaultConfigFormatNumeral)

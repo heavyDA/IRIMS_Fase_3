@@ -208,6 +208,9 @@ class TopRiskController extends Controller
                     );
                 }
             })
+            ->editColumn('worksheet_id', function ($worksheet) {
+                return route('risk.worksheet.show', Crypt::encryptString($worksheet->id));
+            })
             ->editColumn('status', function ($worksheet) {
                 $status = DocumentStatus::tryFrom($worksheet->status);
                 $class = $status?->color() ?? 'info';

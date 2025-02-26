@@ -10,11 +10,9 @@ abstract class EOfficeAbstract
 {
     public function __construct(
         private ?string $host = null,
-        private ?string $token = null
-    ) {
-        $this->host = $host;
-        $this->token = $token;
-    }
+        private ?string $token = null,
+        public ?int $timeout = 10
+    ) {}
 
     public function getHost(): ?string
     {
@@ -35,7 +33,7 @@ abstract class EOfficeAbstract
         $request = Http::withoutVerifying()
             ->withHeader('Authorization', $this->getToken())
             ->asForm()
-            ->timeout(10)
+            ->timeout($this->timeout)
             ->post($this->getHost() . $path, $payload);
 
         if ($request->failed() || $request->serverError() || $request->clientError()) {
