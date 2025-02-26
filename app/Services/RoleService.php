@@ -79,7 +79,7 @@ class RoleService
 
     public function getTraverseUnitLevel(?string $unit = '', ?int $traverse = 1): array
     {
-        $level = $unit ?: $this->getUnitLevel();
+        $level = $unit ? get_unit_level($unit) : $this->getUnitLevel();
 
         if ($this->getCurrentRole()->name == 'risk admin') {
             return [$level, $level];

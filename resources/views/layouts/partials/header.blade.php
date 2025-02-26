@@ -105,6 +105,7 @@
                         <div class="me-2 me-0">
                             <img src="{{ auth()->user()->image_url ?: asset('assets/images/media/user_blank.jpg') }}"
                                 alt="img" style="height:  42px; width: 42px;"
+                                onerror="this.onerror=null; this.src='{{ asset('assets/images/media/user_blank.jpg') }}'"
                                 class="avatar avatar-sm avatar-rounded">
                         </div>
                         <div class="d-inline-block lh-1 flex-shrink-1" style="max-width: 320px; !important">

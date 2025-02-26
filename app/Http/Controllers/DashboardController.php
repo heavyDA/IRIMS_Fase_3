@@ -8,34 +8,42 @@ use App\Models\Risk\Monitoring;
 use App\Models\Risk\Worksheet;
 use App\Models\Risk\WorksheetIdentification;
 use App\Models\Risk\WorksheetMitigation;
+use App\Services\PositionService;
 use App\Services\RoleService;
 use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\Facades\DataTables;
 
 class DashboardController extends Controller
 {
-    public function __construct(private RoleService $roleService) {}
+    public function __construct(
+        private RoleService $roleService,
+        private PositionService $positionService
+    ) {}
 
     public function index()
     {
-        $user = auth()->user();
-        $currentRole = session()?->get('current_role', $user->roles()->first());
-        $currentUnit = session()?->get('current_unit', $user);
-        $level = get_unit_level($currentUnit->sub_unit_code);
-        $levels = $currentRole->name == 'risk admin' ? [$level, $level] : [$level, $level + 1];
+        $unit = $this->roleService->getCurrentUnit();
+        if (request('unit')) {
+            $unit = $this->positionService->getUnitBelow(
+                $unit?->sub_unit_code,
+                request('unit'),
+                $this->roleService->isRiskOwner() || $this->roleService->isRiskAdmin()
+            ) ?: $unit;
+        }
+        $levels = $this->roleService->getTraverseUnitLevel($unit?->sub_unit_code, 1);
 
-        $count_worksheet = Worksheet::getCountByStatus($currentUnit?->sub_unit_code, $currentRole?->name == 'risk owner')
+        $count_worksheet = Worksheet::getCountByStatus($unit?->sub_unit_code)
             ->withExpression(
                 'position_hierarchy',
                 Position::hierarchyQuery(
-                    $currentUnit?->sub_unit_code,
-                    $currentRole?->name == 'risk owner'
+                    $unit?->sub_unit_code,
+                    $this->roleService->isRiskOwner() || $this->roleService->isRiskAdmin()
                 )
             )
             ->join('position_hierarchy as ph', 'ra_worksheets.sub_unit_code', 'ph.sub_unit_code')
             ->when(
-                $currentRole?->name == 'risk admin',
-                fn($q) => $q->where('ra_worksheets.created_by', $user->employee_id)
+                $this->roleService->isRiskAdmin(),
+                fn($q) => $q->where('ra_worksheets.created_by', auth()->user()->employee_id)
                     ->whereBetween('ph.level', $levels)
             )
             ->whereYear('ra_worksheets.created_at', request('year', date('Y')))
@@ -47,14 +55,14 @@ class DashboardController extends Controller
                 ->withExpression(
                     'position_hierarchy',
                     Position::hierarchyQuery(
-                        $currentUnit?->sub_unit_code,
-                        $currentRole?->name == 'risk owner'
+                        $unit?->sub_unit_code,
+                        $this->roleService->isRiskOwner() || $this->roleService->isRiskAdmin()
                     )
                 )
                 ->join('position_hierarchy as ph', 'ra_worksheets.sub_unit_code', 'ph.sub_unit_code')
                 ->when(
-                    $currentRole?->name == 'risk admin',
-                    fn($q) => $q->where('ra_worksheets.created_by', $user->employee_id)
+                    $this->roleService->isRiskAdmin(),
+                    fn($q) => $q->where('ra_worksheets.created_by', auth()->user()->employee_id)
                         ->whereBetween('ph.level', $levels)
                 )
                 ->whereYear('ra_worksheets.created_at', request('year', date('Y')))
@@ -65,14 +73,14 @@ class DashboardController extends Controller
             ->withExpression(
                 'position_hierarchy',
                 Position::hierarchyQuery(
-                    $currentUnit?->sub_unit_code,
-                    $currentRole?->name == 'risk owner'
+                    $unit?->sub_unit_code,
+                    $this->roleService->isRiskOwner() || $this->roleService->isRiskAdmin()
                 )
             )
             ->join('position_hierarchy as ph', 'w.sub_unit_code', 'ph.sub_unit_code')
             ->when(
-                $currentRole?->name == 'risk admin',
-                fn($q) => $q->where('w.created_by', $user->employee_id)
+                $this->roleService->isRiskAdmin(),
+                fn($q) => $q->where('w.created_by', auth()->user()->employee_id)
                     ->whereBetween('ph.level', $levels)
             )
             ->whereYear('w.created_at', request('year', date('Y')))
@@ -83,7 +91,15 @@ class DashboardController extends Controller
 
     public function get_monitoring_progress()
     {
-        $monitorings = Worksheet::progressMonitoringQuery($this->roleService->getCurrentUnit()->sub_unit_code, request('year', date('Y')));
+        $unit = $this->roleService->getCurrentUnit();
+        if (request('unit')) {
+            $unit = $this->positionService->getUnitBelow(
+                $unit?->sub_unit_code,
+                request('unit'),
+                $this->roleService->isRiskOwner() || $this->roleService->isRiskAdmin()
+            ) ?: $unit;
+        }
+        $monitorings = Worksheet::progressMonitoringQuery($unit?->sub_unit_code, request('year', date('Y')));
 
         return DataTables::of($monitorings)
             ->make(true);
@@ -91,11 +107,15 @@ class DashboardController extends Controller
 
     public function inherent_risk_scale()
     {
-        $user = auth()->user();
-        $currentRole = session()?->get('current_role', $user->roles()->first());
-        $currentUnit = session()?->get('current_unit', $user);
-        $level = get_unit_level($currentUnit->sub_unit_code);
-        $levels = $currentRole->name == 'risk admin' ? [$level, $level] : [$level, $level + 1];
+        $unit = $this->roleService->getCurrentUnit();
+        if (request('unit')) {
+            $unit = $this->positionService->getUnitBelow(
+                $unit?->sub_unit_code,
+                request('unit'),
+                $this->roleService->isRiskOwner() || $this->roleService->isRiskAdmin()
+            ) ?: $unit;
+        }
+        $levels = $this->roleService->getTraverseUnitLevel($unit->sub_unit_code, 1);
 
         $inherent_scales = DB::table('m_heatmaps')
             ->withExpression(
@@ -108,14 +128,14 @@ class DashboardController extends Controller
                             ->withExpression(
                                 'position_hierarchy',
                                 Position::hierarchyQuery(
-                                    $currentUnit?->sub_unit_code,
-                                    $currentRole?->name == 'risk owner'
+                                    $unit?->sub_unit_code,
+                                    $this->roleService->isRiskOwner() || $this->roleService->isRiskAdmin()
                                 )
                             )
                             ->join('position_hierarchy as ph', 'ra_worksheets.sub_unit_code', 'ph.sub_unit_code')
                             ->when(
-                                $currentRole?->name == 'risk admin',
-                                fn($q) => $q->where('created_by', $user->employee_id)
+                                $this->roleService->isRiskAdmin(),
+                                fn($q) => $q->where('created_by', auth()->user()->employee_id)
                                     ->whereBetween('ph.level', $levels)
                             )
                             ->whereYear('created_at', request('year', date('Y')))
@@ -134,11 +154,15 @@ class DashboardController extends Controller
 
     public function target_residual_risk_scale()
     {
-        $user = auth()->user();
-        $currentRole = session()?->get('current_role', $user->roles()->first());
-        $currentUnit = session()?->get('current_unit', $user);
-        $level = get_unit_level($currentUnit->sub_unit_code);
-        $levels = $currentRole->name == 'risk admin' ? [$level, $level] : [$level, $level + 1];
+        $unit = $this->roleService->getCurrentUnit();
+        if (request('unit')) {
+            $unit = $this->positionService->getUnitBelow(
+                $unit?->sub_unit_code,
+                request('unit'),
+                $this->roleService->isRiskOwner() || $this->roleService->isRiskAdmin()
+            ) ?: $unit;
+        }
+        $levels = $this->roleService->getTraverseUnitLevel($unit->sub_unit_code, 1);
 
         $residual_scales = DB::table('m_heatmaps')
             ->withExpression(
@@ -155,14 +179,14 @@ class DashboardController extends Controller
                     ->withExpression(
                         'position_hierarchy',
                         Position::hierarchyQuery(
-                            $currentUnit?->sub_unit_code,
-                            $currentRole?->name == 'risk owner'
+                            $unit?->sub_unit_code,
+                            $this->roleService->isRiskOwner() || $this->roleService->isRiskAdmin()
                         )
                     )
                     ->join('position_hierarchy as ph', 'w.sub_unit_code', 'ph.sub_unit_code')
                     ->when(
-                        $currentRole?->name == 'risk admin',
-                        fn($q) => $q->where('created_by', $user->employee_id)
+                        $this->roleService->isRiskAdmin(),
+                        fn($q) => $q->where('created_by', auth()->user()->employee_id)
                             ->whereBetween('ph.level', $levels)
                     )
                     ->whereYear('w.created_at', request('year', date('Y')))
@@ -180,11 +204,15 @@ class DashboardController extends Controller
 
     public function residual_risk_scale()
     {
-        $user = auth()->user();
-        $currentRole = session()?->get('current_role', $user->roles()->first());
-        $currentUnit = session()?->get('current_unit', $user);
-        $level = get_unit_level($currentUnit->sub_unit_code);
-        $levels = $currentRole->name == 'risk admin' ? [$level, $level] : [$level, $level + 1];
+        $unit = $this->roleService->getCurrentUnit();
+        if (request('unit')) {
+            $unit = $this->positionService->getUnitBelow(
+                $unit?->sub_unit_code,
+                request('unit'),
+                $this->roleService->isRiskOwner() || $this->roleService->isRiskAdmin()
+            ) ?: $unit;
+        }
+        $levels = $this->roleService->getTraverseUnitLevel($unit->sub_unit_code, 1);
 
         $residual_scales = DB::table('m_heatmaps')
             ->withExpression(
@@ -201,14 +229,14 @@ class DashboardController extends Controller
                     ->withExpression(
                         'position_hierarchy',
                         Position::hierarchyQuery(
-                            $currentUnit?->sub_unit_code,
-                            $currentRole?->name == 'risk owner'
+                            $unit?->sub_unit_code,
+                            $this->roleService->isRiskOwner() || $this->roleService->isRiskAdmin()
                         )
                     )
                     ->join('position_hierarchy as ph', 'w.sub_unit_code', 'ph.sub_unit_code')
                     ->when(
-                        $currentRole?->name == 'risk admin',
-                        fn($q) => $q->where('created_by', $user->employee_id)
+                        $this->roleService->isRiskAdmin(),
+                        fn($q) => $q->where('created_by', auth()->user()->employee_id)
                             ->whereBetween('ph.level', $levels)
                     )
                     ->whereYear('w.created_at', request('year', date('Y')))

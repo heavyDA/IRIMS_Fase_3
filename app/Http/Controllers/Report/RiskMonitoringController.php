@@ -31,7 +31,7 @@ class RiskMonitoringController extends Controller
                 $unit = $this->positionService->getUnitBelow(
                     $unit?->sub_unit_code,
                     request('unit'),
-                    $this->roleService->isRiskOwner()
+                    $this->roleService->isRiskOwner() || $this->roleService->isRiskAdmin()
                 ) ?: $unit;
             }
 
@@ -43,7 +43,7 @@ class RiskMonitoringController extends Controller
                             'position_hierarchy',
                             Position::hierarchyQuery(
                                 $unit?->sub_unit_code,
-                                $this->roleService->isRiskOwner()
+                                $this->roleService->isRiskOwner() || $this->roleService->isRiskAdmin()
                             )
                         )
                         ->join('position_hierarchy as ph', 'ph.sub_unit_code', 'w.sub_unit_code')
@@ -112,7 +112,7 @@ class RiskMonitoringController extends Controller
             $unit = $this->positionService->getUnitBelow(
                 $unit?->sub_unit_code,
                 request('unit'),
-                $this->roleService->isRiskOwner()
+                $this->roleService->isRiskOwner() || $this->roleService->isRiskAdmin()
             ) ?: $unit;
         }
 
@@ -121,7 +121,7 @@ class RiskMonitoringController extends Controller
                 'position_hierarchy',
                 Position::hierarchyQuery(
                     $unit?->sub_unit_code,
-                    $this->roleService->isRiskOwner()
+                    $this->roleService->isRiskOwner() || $this->roleService->isRiskAdmin()
                 )
             )
             ->join('position_hierarchy as ph', 'ph.sub_unit_code', 'w.sub_unit_code')

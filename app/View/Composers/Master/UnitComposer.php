@@ -13,13 +13,12 @@ class UnitComposer
     {
         $currentUnit = $this->roleService->getCurrentUnit();
         $units = collect([]);
-
         try {
             $units = cache()->remember(
                 'current_unit_hierarchy.' . auth()->user()->employee_id . '.' . $currentUnit->sub_unit_code,
                 now()->addMinutes(5),
                 fn() =>
-                Position::hierarchyQuery($currentUnit->sub_unit_code, $this->roleService->isRiskOwner())
+                Position::hierarchyQuery($currentUnit->sub_unit_code, $this->roleService->isRiskOwner() || $this->roleService->isRiskAdmin() || $this->roleService->isRiskAdmin())
                     ->whereBetween('level', $this->roleService->getTraverseUnitLevel())
                     ->latest('unit_code')
                     ->get()
