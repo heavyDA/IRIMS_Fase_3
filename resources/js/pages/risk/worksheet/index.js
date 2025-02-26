@@ -533,19 +533,23 @@ identificationRiskCategoryT2.addEventListener('change', e => {
 
     if (current?.value?.toString()?.toLowerCase() != 'pilih') {
         identificationRiskCategoryT3Choices
+            .setChoiceByValue('Pilih')
             .clearChoices()
             .setChoices(
-                fetchers.risk_categories
-                    .filter(item => item.parent_id == current.customProperties.id)
-                    .map(item => ({
-                        value: item.id,
-                        label: item.name,
-                        customProperties: item
-                    }))
+                [
+                    { value: 'Pilih', label: 'Pilih' },
+                    ...fetchers.risk_categories
+                        .filter(item => item.parent_id == current.customProperties.id)
+                        .map(item => ({
+                            value: item.id,
+                            label: item.name,
+                            customProperties: item
+                        }))
+                ]
             )
             .enable()
     } else {
-        identificationRiskCategoryT3Choices.clearChoices().disable();
+        identificationRiskCategoryT3Choices.setChoiceByValue('Pilih').clearChoices().setChoices([{ value: 'Pilih', label: 'Pilih' }]).disable();
     }
 })
 identificationRiskCategoryT3Choices.disable();

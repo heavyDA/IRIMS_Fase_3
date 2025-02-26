@@ -288,6 +288,7 @@ const fetchData = async () => {
         axios.get('/master/data/heatmaps'),
         axios.get('/profile/unit_head'),
         axios.get('/profile/risk_metric'),
+        axios.get('/master/data/risk-categories'),
     ]).then(res => {
         for (let [index, key] of Object.keys(fetchers).entries()) {
             if (res[index].status == 'fulfilled') {
@@ -530,19 +531,23 @@ identificationRiskCategoryT2.addEventListener('change', e => {
 
     if (current?.value?.toString()?.toLowerCase() != 'pilih') {
         identificationRiskCategoryT3Choices
+            .setChoiceByValue('Pilih')
             .clearChoices()
             .setChoices(
-                fetchers.risk_categories
-                    .filter(item => item.parent_id == current.customProperties.id)
-                    .map(item => ({
-                        value: item.id,
-                        label: item.name,
-                        customProperties: item
-                    }))
+                [
+                    { value: 'Pilih', label: 'Pilih' },
+                    ...fetchers.risk_categories
+                        .filter(item => item.parent_id == current.customProperties.id)
+                        .map(item => ({
+                            value: item.id,
+                            label: item.name,
+                            customProperties: item
+                        }))
+                ]
             )
             .enable()
     } else {
-        identificationRiskCategoryT3Choices.clearChoices().disable();
+        identificationRiskCategoryT3Choices.setChoiceByValue('Pilih').clearChoices().setChoices([{ value: 'Pilih', label: 'Pilih' }]).disable();
     }
 })
 identificationRiskCategoryT3Choices.disable();
@@ -1343,7 +1348,6 @@ const onTreatmentSave = (data) => {
         }
 
         if (!data[key] || data[key] == 'Pilih') {
-            console.log(key, data, data[key])
             Swal.fire('Peringatan', 'Pastikan semua isian harus terisi', 'warning');
             return;
         }
@@ -1498,12 +1502,11 @@ for (const key of Object.keys(fetchers.data.identification)) {
             identificationRiskImpactChoices.setChoiceByValue(fetchers.data.identification[key].toString());
             identificationRiskImpact.dispatchEvent(new Event('change'));
         } else if (key == 'kbumn_risk_category_t2') {
-            identificationRiskCategoryT2.value = fetchers.data.identification[key];
-            identificationRiskCategoryT2Choices.setChoiceByValue(fetchers.data.identification[key].toString());
+            identificationRiskCategoryT2Choices.setChoiceByValue(fetchers.data.identification[key]);
             identificationRiskCategoryT2.dispatchEvent(new Event('change'));
+
         } else if (key == 'kbumn_risk_category_t3') {
-            identificationRiskCategoryT3.value = fetchers.data.identification[key];
-            identificationRiskCategoryT3Choices.setChoiceByValue(fetchers.data.identification[key].toString());
+            identificationRiskCategoryT3Choices.setChoiceByValue(fetchers.data.identification[key]);
             identificationRiskCategoryT3.dispatchEvent(new Event('change'));
         } else if (key == 'existing_control_type') {
             identificationExistingControlType.value = fetchers.data.identification[key];
