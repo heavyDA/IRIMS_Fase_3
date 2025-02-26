@@ -103,7 +103,8 @@
                     data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
                     <div class="d-flex align-items-center">
                         <div class="me-2 me-0">
-                            <img src="{{ auth()->user()->image_url ?: asset('assets/images/media/user_blank.jpg') }}"
+                            <img loading="lazy"
+                                src="{{ auth()->user()->image_url ?: asset('assets/images/media/user_blank.jpg') }}"
                                 alt="img" style="height:  42px; width: 42px;"
                                 onerror="this.onerror=null; this.src='{{ asset('assets/images/media/user_blank.jpg') }}'"
                                 class="avatar avatar-sm avatar-rounded">
