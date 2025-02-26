@@ -41,13 +41,6 @@
                 </div>
             </div>
             <div class="row mb-1">
-                <div class="col-3">No. Penyebab Risiko</div>
-                <div class="col">
-                    <select name="risk_cause_number" class="form-select">
-                    </select>
-                </div>
-            </div>
-            <div class="row mb-1">
                 <div class="col-3">
                     <span>Peristiwa Risiko</span>
                     <a tabindex="0"
@@ -55,7 +48,7 @@
                         role="button" data-bs-toggle="popover" data-bs-trigger="focus" data-bs-placement="right"
                         data-bs-html="true"
                         data-bs-content="
-                        <div class=&quot;col-md-12&quot; style=&quot;padding:20px;&quot;>
+                        <div class='col-md-12' style='padding:20px;'>
                         <p>Diisi dengan peristiwa risiko yang relevan serta peristiwa risko harus diidentifikasi secara tepat <strong>(bukan negasi sasaran, negasi dampak)</strong></p>
                     </div>
                     "
@@ -65,7 +58,7 @@
                 </div>
                 <div class="col">
                     <div id="risk_chronology_body-editor" class="textarea not-allowed"></div>
-                    <textarea type="text" name="risk_chronology_body" class="d-none"></textarea>
+                    <textarea type="text" name="risk_chronology_body" class="d-none">{!! $worksheet->identification->risk_chronology_body !!}</textarea>
                 </div>
             </div>
             <div class="row mb-1">
@@ -95,6 +88,32 @@
                 <div class="col">
                     <div id="inherent_body-editor" class="textarea not-allowed"></div>
                     <textarea type="text" name="inherent_body" class="d-none">{!! isset($worksheet) ? html_entity_decode($worksheet->target_body) : '' !!}</textarea>
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-3">Level Target Risiko Residual {{ $isQuantitative ? 'Kuantitatif' : 'Kualitatif' }}
+                </div>
+                <div class="col row">
+                    <div class="col-12 col-md-6 col-lg-3">
+                        <label>Q1</label>
+                        <input disabled type="text" class="not-allowed form-control"
+                            value="{{ $worksheet?->identification?->residual_1_impact_probability_level ?? '' }}">
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-3">
+                        <label>Q2</label>
+                        <input disabled type="text" class="not-allowed form-control"
+                            value="{{ $worksheet?->identification?->residual_2_impact_probability_level ?? '' }}">
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-3">
+                        <label>Q3</label>
+                        <input disabled type="text" class="not-allowed form-control"
+                            value="{{ $worksheet?->identification?->residual_3_impact_probability_level ?? '' }}">
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-3">
+                        <label>Q4</label>
+                        <input disabled type="text" class="not-allowed form-control"
+                            value="{{ $worksheet?->identification?->residual_4_impact_probability_level ?? '' }}">
+                    </div>
                 </div>
             </div>
             <div class="row mb-3">
@@ -212,15 +231,6 @@
                         <option value="0">Tidak Efektif</option>
                         <option value="1">Efektif</option>
                     </select>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-3"></div>
-                <div class="col">
-                    <div class="d-flex">
-                        <button type="button" form="residualForm" class="btn btn-success"
-                            id="residualFormButton">Simpan Realisasi Risiko Residual</button>
-                    </div>
                 </div>
             </div>
         </div>

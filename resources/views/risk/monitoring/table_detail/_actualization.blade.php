@@ -4,8 +4,9 @@
             <thead class="table-dark">
                 <tr>
                     <th rowspan="2" style="width: 100px;">No. Penyebab Risiko</th>
-                    <th rowspan="2" style="width: 240px;">Realisasi Perlakuan Risiko</th>
-                    <th rowspan="2" style="width: 240px;">Realisasi Output atas masing-masing Breakdown Perlakuan
+                    <th rowspan="2" style="width: 240px !important;">Realisasi Perlakuan Risiko</th>
+                    <th rowspan="2" style="width: 240px !important;">Realisasi Output atas masing-masing Breakdown
+                        Perlakuan
                         Risiko</th>
                     <th rowspan="2" style="width: 140px;">Realisasi Biaya Perlakuan Risiko</th>
                     <th rowspan="2" style="width: 100px;">Persentase Serapan Biaya</th>
@@ -49,7 +50,7 @@
                             @endif
                             @for ($i = 1; $i <= 12; $i++)
                                 @if ($monitoring->period_date_format->month == $i)
-                                    <td>1</td>
+                                    <td class="bg-success">1</td>
                                 @else
                                     <td>0</td>
                                 @endif
@@ -73,9 +74,9 @@
                                 <td>
                                     <div class="d-flex flex-column gap-2">
                                         @foreach ($actualization->documents as $document)
-                                            <a class="badge bg-success-transparent" target="_blank"
-                                                href="{{ route('file.serve', $document['url']) }}"
-                                                target="_blank">{{ $document['name'] }}</a>
+                                            <a style="max-width: 164px;" class="badge bg-success-transparent text-truncate"
+                                                target="_blank"
+                                                href="{{ route('file.serve', $document['url']) }}">{{ $document['name'] }}</a>
                                         @endforeach
                                     </div>
                                 </td>

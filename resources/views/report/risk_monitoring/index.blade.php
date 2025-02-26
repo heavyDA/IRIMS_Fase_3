@@ -38,31 +38,34 @@
                             data-bs-toggle="tooltip" title="Filter" aria-controls="worksheet-table-offcanvas">
                             <span><i class="me-1 ti ti-filter"></i></span>
                         </button>
-                        <button style="min-width: 120px;" id="worksheet-export"
+                        <a style="min-width: 120px;" id="worksheet-export" target="_blank"
                             data-url="{{ route('risk.report.risk_monitoring.export') }}" data-bs-toggle="tooltip"
                             title="Export To Excel" class="btn btn-block btn-success"><i class="ti ti-file-export"></i>
-                            Export Excel</button>
+                            Export Excel</a>
                     </div>
                 </div>
             </div>
-            <table id="worksheet-table" class="table table-bordered table-stripped display nowrap" style="width: 100%;">
+            <table id="worksheet-table" class="table table-bordered table-stripped display "
+                style="width: 100%;table-layour: fixed;border-collapse: collapse;">
                 <thead class="table-dark">
                     <tr>
-                        <th rowspan="2">No.</th>
-                        <th rowspan="2">Status</th>
-                        <th rowspan="2">Organisasi</th>
-                        <th rowspan="2">Pilihan Sasaran</th>
-                        <th rowspan="2">Peristiwa Risiko</th>
-                        <th rowspan="2">Rencana Pengendalian</th>
-                        <th rowspan="2">Realisasi Rencana Perlakuan</th>
-                        <th colspan="2">Risiko Inheren</th>
-                        <th colspan="2">Risiko Residual</th>
+                        <th class="table-dark-custom" rowspan="2">No.</th>
+                        <th class="table-dark-custom" rowspan="2">Status</th>
+                        <th class="table-dark-custom" rowspan="2">Organisasi</th>
+                        <th class="table-dark-custom" rowspan="2">Pilihan Sasaran</th>
+                        <th class="table-dark-custom" rowspan="2">Peristiwa Risiko</th>
+                        <th class="table-dark-custom" rowspan="2">Rencana Pengendalian</th>
+                        <th class="table-dark-custom" rowspan="2">Realisasi Rencana Perlakuan</th>
+                        <th class="table-dark-custom" style="text-align: center !important;" colspan="2">Risiko Inheren
+                        </th>
+                        <th class="table-dark-custom" style="text-align: center !important;" colspan="2">Risiko Residual
+                        </th>
                     </tr>
                     <tr>
-                        <th>Level</th>
-                        <th>Skala Risiko</th>
-                        <th>Level</th>
-                        <th>Skala Risiko</th>
+                        <th class="table-dark-custom" style="text-align: center !important;">Level</th>
+                        <th class="table-dark-custom" style="text-align: center !important;">Skala Risiko</th>
+                        <th class="table-dark-custom" style="text-align: center !important;">Level</th>
+                        <th class="table-dark-custom" style="text-align: center !important;">Skala Risiko</th>
                     </tr>
                 </thead>
             </table>
@@ -107,7 +110,7 @@
                             @endif
                             @foreach ($units as $unit)
                                 <option value="{{ $unit->sub_unit_code }}">
-                                    [{{ $unit->personnel_area_code }}] {{ $unit->sub_unit_name }}</option>
+                                    [{{ $unit->branch_code }}] {{ $unit->sub_unit_name }}</option>
                             @endforeach
                         </select>
                     </div>

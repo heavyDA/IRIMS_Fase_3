@@ -3,6 +3,7 @@
 namespace App\Models\Risk;
 
 use App\Enums\DocumentStatus;
+use App\Models\Master\Position;
 use App\Models\RBAC\Role;
 use App\Models\User;
 use App\Traits\HasEncryptedId;
@@ -175,7 +176,7 @@ class Worksheet extends Model
             ->groupBy('h.risk_level');
     }
 
-    public static function top_risk_lower_query($unit)
+    public static function topRiskLowerQuery(?string $unit)
     {
         return DB::table('ra_worksheets as w')
             ->select(
@@ -254,10 +255,20 @@ class Worksheet extends Model
                 'r3.scale as residual_3_impact_scale',
                 'r4.scale as residual_4_impact_scale',
                 'h_i.risk_scale as inherent_impact_probability_scale',
+                'h_i.risk_level as inherent_impact_probability_level',
+                'h_i.color as inherent_impact_probability_color',
                 'h_r1.risk_scale as residual_1_impact_probability_scale',
+                'h_r1.risk_level as residual_1_impact_probability_level',
+                'h_r1.color as residual_1_impact_probability_color',
                 'h_r2.risk_scale as residual_2_impact_probability_scale',
+                'h_r2.risk_level as residual_2_impact_probability_level',
+                'h_r2.color as residual_2_impact_probability_color',
                 'h_r3.risk_scale as residual_3_impact_probability_scale',
+                'h_r3.risk_level as residual_3_impact_probability_level',
+                'h_r3.color as residual_3_impact_probability_color',
                 'h_r4.risk_scale as residual_4_impact_probability_scale',
+                'h_r4.risk_level as residual_4_impact_probability_level',
+                'h_r4.color as residual_4_impact_probability_color',
 
                 'wtr.id as top_risk_id',
                 'wtr.sub_unit_code as destination_sub_unit_code',
@@ -271,7 +282,7 @@ class Worksheet extends Model
             ->leftJoin(
                 'ra_worksheet_top_risks as wtr',
                 fn($q) => $q->on('wtr.worksheet_id', '=', 'w.id')
-                    ->where('wtr.source_sub_unit_code', 'like', $unit)
+                    ->where('wtr.source_sub_unit_code', $unit)
             )
             ->leftJoin('m_kri_units as kri_unit', 'kri_unit.id', '=', 'winc.kri_unit_id')
             ->leftJoin('m_existing_control_types', 'm_existing_control_types.id', '=', 'wi.existing_control_type_id')
@@ -290,7 +301,7 @@ class Worksheet extends Model
             ->leftJoin('heatmaps as h_r4', 'h_r4.id', '=', 'wi.residual_4_impact_probability_scale_id');
     }
 
-    public static function top_risk_lower_dashboard_query($unit)
+    public static function topRiskLowerDashboardQuery($unit)
     {
         return DB::table('ra_worksheets as w')
             ->select(
@@ -310,8 +321,9 @@ class Worksheet extends Model
                 'wim.mitigation_pic',
 
                 'mr.id as mr_id',
-                'mr.risk_scale as actual_risk_scale',
-                'mr.risk_level as actual_risk_level',
+                'h_mr.risk_scale as actual_risk_scale',
+                'h_mr.risk_level as actual_risk_level',
+                'h_mr.color as actual_risk_color',
 
                 'w.worksheet_code',
                 'w.worksheet_number',
@@ -377,10 +389,20 @@ class Worksheet extends Model
                 'r3.scale as residual_3_impact_scale',
                 'r4.scale as residual_4_impact_scale',
                 'h_i.risk_scale as inherent_impact_probability_scale',
+                'h_i.risk_level as inherent_impact_probability_level',
+                'h_i.color as inherent_impact_probability_color',
                 'h_r1.risk_scale as residual_1_impact_probability_scale',
+                'h_r1.risk_level as residual_1_impact_probability_level',
+                'h_r1.color as residual_1_impact_probability_color',
                 'h_r2.risk_scale as residual_2_impact_probability_scale',
+                'h_r2.risk_level as residual_2_impact_probability_level',
+                'h_r2.color as residual_2_impact_probability_color',
                 'h_r3.risk_scale as residual_3_impact_probability_scale',
+                'h_r3.risk_level as residual_3_impact_probability_level',
+                'h_r3.color as residual_3_impact_probability_color',
                 'h_r4.risk_scale as residual_4_impact_probability_scale',
+                'h_r4.risk_level as residual_4_impact_probability_level',
+                'h_r4.color as residual_4_impact_probability_color',
 
                 'wtr.id as top_risk_id',
                 'wtr.sub_unit_code as destination_sub_unit_code',
@@ -404,11 +426,7 @@ class Worksheet extends Model
                 }
             )
             ->leftJoin('ra_monitoring_residuals as mr', 'mr.monitoring_id', '=', 'm.id')
-            ->leftJoin(
-                'ra_worksheet_top_risks as wtr',
-                fn($q) => $q->on('wtr.worksheet_id', '=', 'w.id')
-                    ->whereLike('wtr.source_sub_unit_code', $unit)
-            )
+            ->leftJoin('ra_worksheet_top_risks as wtr', 'wtr.worksheet_id', '=', 'w.id')
             ->leftJoin('m_kri_units as kri_unit', 'kri_unit.id', '=', 'winc.kri_unit_id')
             ->leftJoin('m_existing_control_types', 'm_existing_control_types.id', '=', 'wi.existing_control_type_id')
             ->leftJoin('m_control_effectiveness_assessments', 'm_control_effectiveness_assessments.id', '=', 'wi.control_effectiveness_assessment_id')
@@ -419,6 +437,7 @@ class Worksheet extends Model
             ->leftJoin('scales as r2', 'r2.id', '=', 'wi.residual_2_impact_scale_id')
             ->leftJoin('scales as r3', 'r3.id', '=', 'wi.residual_3_impact_scale_id')
             ->leftJoin('scales as r4', 'r4.id', '=', 'wi.residual_4_impact_scale_id')
+            ->leftJoin('heatmaps as h_mr', 'h_mr.id', '=', 'mr.impact_probability_scale_id')
             ->leftJoin('heatmaps as h_i', 'h_i.id', '=', 'wi.inherent_impact_probability_scale_id')
             ->leftJoin('heatmaps as h_r1', 'h_r1.id', '=', 'wi.residual_1_impact_probability_scale_id')
             ->leftJoin('heatmaps as h_r2', 'h_r2.id', '=', 'wi.residual_2_impact_probability_scale_id')
@@ -426,7 +445,7 @@ class Worksheet extends Model
             ->leftJoin('heatmaps as h_r4', 'h_r4.id', '=', 'wi.residual_4_impact_probability_scale_id');
     }
 
-    public static function top_risk_upper_query($unit)
+    public static function topRiskUpperQuery(?string $unit, ?string $subUnit)
     {
         return DB::table('ra_worksheets as w')
             ->select(
@@ -505,10 +524,20 @@ class Worksheet extends Model
                 'r3.scale as residual_3_impact_scale',
                 'r4.scale as residual_4_impact_scale',
                 'h_i.risk_scale as inherent_impact_probability_scale',
+                'h_i.risk_level as inherent_impact_probability_level',
+                'h_i.color as inherent_impact_probability_color',
                 'h_r1.risk_scale as residual_1_impact_probability_scale',
+                'h_r1.risk_level as residual_1_impact_probability_level',
+                'h_r1.color as residual_1_impact_probability_color',
                 'h_r2.risk_scale as residual_2_impact_probability_scale',
+                'h_r2.risk_level as residual_2_impact_probability_level',
+                'h_r2.color as residual_2_impact_probability_color',
                 'h_r3.risk_scale as residual_3_impact_probability_scale',
+                'h_r3.risk_level as residual_3_impact_probability_level',
+                'h_r3.color as residual_3_impact_probability_color',
                 'h_r4.risk_scale as residual_4_impact_probability_scale',
+                'h_r4.risk_level as residual_4_impact_probability_level',
+                'h_r4.color as residual_4_impact_probability_color',
 
                 'wtr.id as top_risk_id',
                 'wtr.sub_unit_code as destination_sub_unit_code',
@@ -523,15 +552,15 @@ class Worksheet extends Model
             ->withExpression('risk_categories', DB::table('m_kbumn_risk_categories'))
             ->leftJoin('ra_worksheet_identifications as wi', 'wi.worksheet_id', '=', 'w.id')
             ->leftJoin('ra_worksheet_incidents as winc', 'winc.worksheet_id', '=', 'w.id')
-            ->leftJoin(
+            ->join(
                 'ra_worksheet_top_risks as wtr',
                 fn($q) => $q->on('wtr.worksheet_id', '=', 'w.id')
-                    ->whereLike('wtr.source_sub_unit_code', $unit)
+                    ->whereLike('wtr.sub_unit_code', $unit)
             )
             ->leftJoin(
                 'ra_worksheet_top_risks as wtr_submit',
                 fn($q) => $q->on('wtr_submit.worksheet_id', '=', 'w.id')
-                    ->whereLike('wtr_submit.source_sub_unit_code', str_replace('%', '', $unit))
+                    ->whereLike('wtr_submit.source_sub_unit_code', $subUnit)
             )
             ->leftJoin('m_kri_units as kri_unit', 'kri_unit.id', '=', 'winc.kri_unit_id')
             ->leftJoin('m_existing_control_types', 'm_existing_control_types.id', '=', 'wi.existing_control_type_id')
@@ -550,7 +579,7 @@ class Worksheet extends Model
             ->leftJoin('heatmaps as h_r4', 'h_r4.id', '=', 'wi.residual_4_impact_probability_scale_id');
     }
 
-    public static function top_risk_upper_dashboard_query($unit)
+    public static function topRiskUpperDashboardQuery(?string $unit, ?string $subUnit)
     {
         return DB::table('ra_worksheets as w')
             ->select(
@@ -570,8 +599,9 @@ class Worksheet extends Model
                 'wim.mitigation_pic',
 
                 'mr.id as mr_id',
-                'mr.risk_scale as actual_risk_scale',
-                'mr.risk_level as actual_risk_level',
+                'h_mr.risk_scale as actual_risk_scale',
+                'h_mr.risk_level as actual_risk_level',
+                'h_mr.color as actual_risk_color',
 
                 'w.worksheet_code',
                 'w.worksheet_number',
@@ -637,10 +667,20 @@ class Worksheet extends Model
                 'r3.scale as residual_3_impact_scale',
                 'r4.scale as residual_4_impact_scale',
                 'h_i.risk_scale as inherent_impact_probability_scale',
+                'h_i.risk_level as inherent_impact_probability_level',
+                'h_i.color as inherent_impact_probability_color',
                 'h_r1.risk_scale as residual_1_impact_probability_scale',
+                'h_r1.risk_level as residual_1_impact_probability_level',
+                'h_r1.color as residual_1_impact_probability_color',
                 'h_r2.risk_scale as residual_2_impact_probability_scale',
+                'h_r2.risk_level as residual_2_impact_probability_level',
+                'h_r2.color as residual_2_impact_probability_color',
                 'h_r3.risk_scale as residual_3_impact_probability_scale',
+                'h_r3.risk_level as residual_3_impact_probability_level',
+                'h_r3.color as residual_3_impact_probability_color',
                 'h_r4.risk_scale as residual_4_impact_probability_scale',
+                'h_r4.risk_level as residual_4_impact_probability_level',
+                'h_r4.color as residual_4_impact_probability_color',
 
                 'wtr.id as top_risk_id',
                 'wtr.sub_unit_code as destination_sub_unit_code',
@@ -668,15 +708,15 @@ class Worksheet extends Model
                 }
             )
             ->leftJoin('ra_monitoring_residuals as mr', 'mr.monitoring_id', '=', 'm.id')
-            ->leftJoin(
+            ->join(
                 'ra_worksheet_top_risks as wtr',
                 fn($q) => $q->on('wtr.worksheet_id', '=', 'w.id')
-                    ->whereLike('wtr.source_sub_unit_code', $unit)
+                    ->whereLike('wtr.sub_unit_code', $unit)
             )
             ->leftJoin(
                 'ra_worksheet_top_risks as wtr_submit',
                 fn($q) => $q->on('wtr_submit.worksheet_id', '=', 'w.id')
-                    ->whereLike('wtr_submit.source_sub_unit_code', str_replace('%', '', $unit))
+                    ->whereLike('wtr_submit.source_sub_unit_code', $subUnit)
             )
             ->leftJoin('m_kri_units as kri_unit', 'kri_unit.id', '=', 'winc.kri_unit_id')
             ->leftJoin('m_existing_control_types', 'm_existing_control_types.id', '=', 'wi.existing_control_type_id')
@@ -688,6 +728,7 @@ class Worksheet extends Model
             ->leftJoin('scales as r2', 'r2.id', '=', 'wi.residual_2_impact_scale_id')
             ->leftJoin('scales as r3', 'r3.id', '=', 'wi.residual_3_impact_scale_id')
             ->leftJoin('scales as r4', 'r4.id', '=', 'wi.residual_4_impact_scale_id')
+            ->leftJoin('heatmaps as h_mr', 'h_mr.id', '=', 'mr.impact_probability_scale_id')
             ->leftJoin('heatmaps as h_i', 'h_i.id', '=', 'wi.inherent_impact_probability_scale_id')
             ->leftJoin('heatmaps as h_r1', 'h_r1.id', '=', 'wi.residual_1_impact_probability_scale_id')
             ->leftJoin('heatmaps as h_r2', 'h_r2.id', '=', 'wi.residual_2_impact_probability_scale_id')
@@ -695,7 +736,7 @@ class Worksheet extends Model
             ->leftJoin('heatmaps as h_r4', 'h_r4.id', '=', 'wi.residual_4_impact_probability_scale_id');
     }
 
-    public static function latest_monitoring_with_mitigation_query()
+    public static function latestMonitoringWithMitigationQuery()
     {
         return DB::table('worksheets as w')
             ->withExpression(
@@ -704,9 +745,13 @@ class Worksheet extends Model
                     'w.id',
                     'w.worksheet_number',
                     'w.target_body',
+                    'rc_t2.name as risk_category_t2_name',
+                    'rc_t3.name as risk_category_t3_name',
                     'wi.risk_chronology_body',
+                    'wi.inherent_impact_probability_scale_id',
                     'wi.inherent_risk_level',
                     'wi.inherent_risk_scale',
+                    'wi.inherent_risk_exposure',
 
                     'w.personnel_area_code',
                     'w.personnel_area_name',
@@ -722,6 +767,8 @@ class Worksheet extends Model
                     DB::raw('YEAR(w.created_at) as worksheet_year')
                 )
                     ->leftJoin('ra_worksheet_identifications as wi', 'wi.worksheet_id', '=', 'w.id')
+                    ->leftJoin('m_kbumn_risk_categories as rc_t2', 'rc_t2.id', '=', 'wi.risk_category_t2_id')
+                    ->leftJoin('m_kbumn_risk_categories as rc_t3', 'rc_t3.id', '=', 'wi.risk_category_t3_id')
                     ->whereStatus(DocumentStatus::APPROVED->value)
             )
             ->withExpression(
@@ -750,10 +797,16 @@ class Worksheet extends Model
                 'wmit.mitigation_plan',
                 'ma.actualization_plan_output',
 
-                'w.inherent_risk_level',
-                'w.inherent_risk_scale',
-                'mr.risk_level as residual_risk_level',
-                'mr.risk_scale as residual_risk_scale',
+                'w.risk_category_t2_name',
+                'w.risk_category_t3_name',
+                'hi.color as inherent_risk_color',
+                'hi.risk_level as inherent_risk_level',
+                'hi.risk_scale as inherent_risk_scale',
+                'w.inherent_risk_exposure',
+                'hr.color as residual_risk_color',
+                'hr.risk_level as residual_risk_level',
+                'hr.risk_scale as residual_risk_scale',
+                'mr.risk_exposure as residual_risk_exposure',
                 'w.personnel_area_code',
                 'w.personnel_area_name',
                 'w.unit_code',
@@ -763,18 +816,226 @@ class Worksheet extends Model
 
                 'w.status',
                 'w.status_monitoring',
-                'w.created_by'
+                'w.created_by',
+                'lm.created_at',
+                'lm.period_date'
             )
+            ->withExpression('heatmaps', DB::table('m_heatmaps'))
+            ->leftJoin('heatmaps as hi', 'hi.id', '=', 'w.inherent_impact_probability_scale_id')
             ->leftJoin('latest_monitoring as lm', 'lm.worksheet_id', '=', 'w.id')
             ->leftJoin('ra_monitoring_actualizations as ma', 'ma.monitoring_id', '=', 'lm.id')
             ->leftJoin('ra_worksheet_mitigations as wmit', 'wmit.id', '=', 'ma.worksheet_mitigation_id')
             ->leftJoin('ra_worksheet_incidents as winc', 'winc.id', '=', 'wmit.worksheet_incident_id')
-            ->leftJoin(
-                'ra_monitoring_residuals as mr',
-                function ($join) {
-                    $join->on('mr.monitoring_id', '=', 'lm.id')
-                        ->whereRaw('mr.worksheet_incident_id = winc.id');
-                }
-            );
+            ->leftJoin('ra_monitoring_residuals as mr', 'mr.monitoring_id', '=', 'lm.id')
+            ->leftJoin('heatmaps as hr', 'hr.id', '=', 'mr.impact_probability_scale_id');
+    }
+
+    public static function progressMonitoringQuery(?string $unitCode = 'ap', ?int $year = null)
+    {
+        return Position::hierarchyWithTraverseQuery(unitCode: $unitCode)
+            ->withExpression(
+                'worksheets',
+                DB::table('children as c')
+                    ->selectRaw("
+                    c.sub_unit_code,
+                    COALESCE(COUNT(distinct w.id),0) as total_worksheet    
+                ")
+                    ->leftJoin('position_hierarchy as ph', 'ph.unit_code', 'c.sub_unit_code')
+                    ->leftJoin(
+                        'ra_worksheets as w',
+                        fn($q) => $q->on('w.sub_unit_code', '=', 'ph.sub_unit_code')
+                            ->whereYear('w.created_at', $year ?? Date('Y'))
+                    )
+                    ->groupBy('c.sub_unit_code')
+            )
+            ->withExpression(
+                'monitorings',
+                DB::table('children as c')
+                    ->selectRaw("
+                        c.sub_unit_code,
+                        month(period_date) as period_month,
+                        COALESCE(COUNT(IF(m.status = 'approved', m.id, NULL)),0) as total_approved   
+                    ")
+                    ->leftJoin('position_hierarchy as ph', 'ph.unit_code', 'c.sub_unit_code')
+                    ->leftJoin(
+                        'ra_worksheets as w',
+                        fn($q) => $q->on('w.sub_unit_code', '=', 'ph.sub_unit_code')
+                            ->whereYear('w.created_at', $year ?? Date('Y'))
+                    )
+                    ->leftJoin('ra_monitorings as m', 'm.worksheet_id', 'w.id')
+                    ->groupBy('c.sub_unit_code', 'period_month')
+            )
+            ->selectRaw("
+                children.*,
+                w.total_worksheet,
+                COALESCE(SUM(CASE WHEN m.period_month = 1 THEN m.total_approved END), 0)
+                / NULLIF(SUM(CASE WHEN m.period_month = 1 THEN w.total_worksheet END), 0) * 100 AS m1,
+                
+                COALESCE(SUM(CASE WHEN m.period_month = 2 THEN m.total_approved END), 0)
+                / NULLIF(SUM(CASE WHEN m.period_month = 2 THEN w.total_worksheet END), 0) * 100 AS m2,
+                
+                COALESCE(SUM(CASE WHEN m.period_month = 3 THEN m.total_approved END), 0)
+                / NULLIF(SUM(CASE WHEN m.period_month = 3 THEN w.total_worksheet END), 0) * 100 AS m3,
+                
+                COALESCE(SUM(CASE WHEN m.period_month = 4 THEN m.total_approved END), 0)
+                / NULLIF(SUM(CASE WHEN m.period_month = 4 THEN w.total_worksheet END), 0) * 100 AS m4,
+                
+                COALESCE(SUM(CASE WHEN m.period_month = 5 THEN m.total_approved END), 0)
+                / NULLIF(SUM(CASE WHEN m.period_month = 5 THEN w.total_worksheet END), 0) * 100 AS m5,
+                
+                COALESCE(SUM(CASE WHEN m.period_month = 6 THEN m.total_approved END), 0)
+                / NULLIF(SUM(CASE WHEN m.period_month = 6 THEN w.total_worksheet END), 0) * 100 AS m6,
+                
+                COALESCE(SUM(CASE WHEN m.period_month = 7 THEN m.total_approved END), 0)
+                / NULLIF(SUM(CASE WHEN m.period_month = 7 THEN w.total_worksheet END), 0) * 100 AS m7,
+                
+                COALESCE(SUM(CASE WHEN m.period_month = 8 THEN m.total_approved END), 0)
+                / NULLIF(SUM(CASE WHEN m.period_month = 8 THEN w.total_worksheet END), 0) * 100 AS m8,
+                
+                COALESCE(SUM(CASE WHEN m.period_month = 9 THEN m.total_approved END), 0)
+                / NULLIF(SUM(CASE WHEN m.period_month = 9 THEN w.total_worksheet END), 0) * 100 AS m9,
+                
+                COALESCE(SUM(CASE WHEN m.period_month = 10 THEN m.total_approved END), 0)
+                / NULLIF(SUM(CASE WHEN m.period_month = 10 THEN w.total_worksheet END), 0) * 100 AS m10,
+                
+                COALESCE(SUM(CASE WHEN m.period_month = 11 THEN m.total_approved END), 0)
+                / NULLIF(SUM(CASE WHEN m.period_month = 11 THEN w.total_worksheet END), 0) * 100 AS m11,
+                
+                COALESCE(SUM(CASE WHEN m.period_month = 12 THEN m.total_approved END), 0)
+                / NULLIF(SUM(CASE WHEN m.period_month = 12 THEN w.total_worksheet END), 0) * 100 AS m12
+        ")
+            ->leftJoin('worksheets as w', 'w.sub_unit_code', '=', 'children.sub_unit_code')
+            ->leftJoin('monitorings as m', 'm.sub_unit_code', '=', 'children.sub_unit_code')
+            ->groupBy('children.sub_unit_code');;
+    }
+
+    public static function progressMonitoringRiskOwnerQuery(?string $unitCode, ?int $year = null) {}
+
+    public static function assessmentQuery()
+    {
+        return DB::table('ra_worksheets as w')
+            ->select(
+                'w.worksheet_code',
+                'w.worksheet_number',
+                'w.unit_code',
+                'w.unit_name',
+                'w.sub_unit_code',
+                'w.sub_unit_name',
+                'w.organization_code',
+                'w.organization_name',
+                'w.personnel_area_code',
+                'w.personnel_area_name',
+                'w.company_code',
+                'w.company_name',
+                'w.target_body',
+                'w.status',
+                'w.status_monitoring',
+
+                'winc.id',
+                'winc.worksheet_id',
+                'winc.risk_cause_number',
+                'winc.risk_cause_code',
+                'winc.risk_cause_body',
+                'winc.kri_body',
+                'winc.kri_unit_id',
+                'winc.kri_threshold_safe',
+                'winc.kri_threshold_caution',
+                'winc.kri_threshold_danger',
+                'wi.existing_control_body',
+
+                'wi.risk_chronology_body',
+                'wi.risk_chronology_description',
+                'wi.risk_impact_category',
+                'wi.risk_impact_body',
+                'wi.risk_impact_start_date',
+                'wi.risk_impact_end_date',
+
+                'wi.inherent_body',
+                'wi.inherent_impact_value',
+                'wi.inherent_impact_probability',
+                'wi.inherent_risk_exposure',
+                'wi.inherent_risk_level',
+                'wi.inherent_risk_scale',
+
+                'wi.residual_1_impact_value',
+                'wi.residual_1_impact_probability',
+                'wi.residual_1_risk_exposure',
+                'wi.residual_1_risk_level',
+                'wi.residual_1_risk_scale',
+                'wi.residual_2_impact_value',
+                'wi.residual_2_impact_probability',
+                'wi.residual_2_risk_exposure',
+                'wi.residual_2_risk_level',
+                'wi.residual_2_risk_scale',
+                'wi.residual_3_impact_value',
+                'wi.residual_3_impact_probability',
+                'wi.residual_3_risk_exposure',
+                'wi.residual_3_risk_level',
+                'wi.residual_3_risk_scale',
+                'wi.residual_4_impact_value',
+                'wi.residual_4_impact_probability',
+                'wi.residual_4_risk_exposure',
+                'wi.residual_4_risk_level',
+                'wi.residual_4_risk_scale',
+
+                'ku.name as kri_unit_name',
+                'ect.name as existing_control_type_name',
+                'cea.name as control_effectiveness_assessment_name',
+                'rc_t2.name as risk_category_t2_name',
+                'rc_t3.name as risk_category_t3_name',
+                'i.scale as inherent_impact_scale',
+                'r1.scale as residual_1_impact_scale',
+                'r2.scale as residual_2_impact_scale',
+                'r3.scale as residual_3_impact_scale',
+                'r4.scale as residual_4_impact_scale',
+                'h_i.risk_scale as inherent_impact_probability_scale',
+                'h_i.risk_level as inherent_impact_probability_level',
+                'h_i.color as inherent_impact_probability_color',
+                'h_r1.risk_scale as residual_1_impact_probability_scale',
+                'h_r1.risk_level as residual_1_impact_probability_level',
+                'h_r1.color as residual_1_impact_probability_color',
+                'h_r2.risk_scale as residual_2_impact_probability_scale',
+                'h_r2.risk_level as residual_2_impact_probability_level',
+                'h_r2.color as residual_2_impact_probability_color',
+                'h_r3.risk_scale as residual_3_impact_probability_scale',
+                'h_r3.risk_level as residual_3_impact_probability_level',
+                'h_r3.color as residual_3_impact_probability_color',
+                'h_r4.risk_scale as residual_4_impact_probability_scale',
+                'h_r4.risk_level as residual_4_impact_probability_level',
+                'h_r4.color as residual_4_impact_probability_color',
+                'w.created_at'
+            )
+            ->withExpression('scales', DB::table('m_bumn_scales'))
+            ->withExpression('heatmaps', DB::table('m_heatmaps'))
+            ->withExpression('risk_categories', DB::table('m_kbumn_risk_categories'))
+            ->leftJoin('ra_worksheet_incidents as winc', 'winc.worksheet_id', '=', 'w.id')
+            ->leftJoin('ra_worksheet_identifications as wi', 'wi.worksheet_id', '=', 'w.id')
+            ->leftJoin('m_kri_units as ku', 'ku.id', '=', 'winc.kri_unit_id')
+            ->leftJoin('m_existing_control_types as ect', 'ect.id', '=', 'wi.existing_control_type_id')
+            ->leftJoin('m_control_effectiveness_assessments as cea', 'cea.id', '=', 'wi.control_effectiveness_assessment_id')
+            ->leftJoin('risk_categories as rc_t2', 'rc_t2.id', '=', 'wi.risk_category_t2_id')
+            ->leftJoin('risk_categories as rc_t3', 'rc_t3.id', '=', 'wi.risk_category_t3_id')
+            ->leftJoin('scales as i', 'i.id', '=', 'wi.inherent_impact_scale_id')
+            ->leftJoin('scales as r1', 'r1.id', '=', 'wi.residual_1_impact_scale_id')
+            ->leftJoin('scales as r2', 'r2.id', '=', 'wi.residual_2_impact_scale_id')
+            ->leftJoin('scales as r3', 'r3.id', '=', 'wi.residual_3_impact_scale_id')
+            ->leftJoin('scales as r4', 'r4.id', '=', 'wi.residual_4_impact_scale_id')
+            ->leftJoin('heatmaps as h_i', 'h_i.id', '=', 'wi.inherent_impact_probability_scale_id')
+            ->leftJoin('heatmaps as h_r1', 'h_r1.id', '=', 'wi.residual_1_impact_probability_scale_id')
+            ->leftJoin('heatmaps as h_r2', 'h_r2.id', '=', 'wi.residual_2_impact_probability_scale_id')
+            ->leftJoin('heatmaps as h_r3', 'h_r3.id', '=', 'wi.residual_3_impact_probability_scale_id')
+            ->leftJoin('heatmaps as h_r4', 'h_r4.id', '=', 'wi.residual_4_impact_probability_scale_id');
+    }
+
+    public function scopeGetCountByStatus($query)
+    {
+        $table = app(self::class)->getTable();
+
+        return $query
+            ->selectRaw("
+                COALESCE(COUNT(IF({$table}.status = 'draft', 1, NULL))) as draft,
+                COALESCE(COUNT(IF({$table}.status != 'draft' and {$table}.status != 'approved', 1, NULL))) as progress,
+                COALESCE(COUNT(IF({$table}.status = 'approved', 1, NULL))) as approved
+            ");
     }
 }

@@ -19,7 +19,7 @@
 </head>
 
 <body>
-    @include('layouts.partials.switcher')
+    {{-- @include('layouts.partials.switcher') --}}
     <!-- Loader -->
     <div id="loader">
         <img src="{{ asset('assets/images/media/loader.svg') }}" alt="">
@@ -66,7 +66,6 @@
 
     @if (session()->has('flash_message'))
         <script defer>
-            console.log('asd');
             document.addEventListener('DOMContentLoaded', () => {
                 const message = @json(session('flash_message'));
                 if (typeof window.alert_message === 'function') {

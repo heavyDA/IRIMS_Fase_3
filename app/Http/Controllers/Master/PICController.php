@@ -4,27 +4,26 @@ namespace App\Http\Controllers\Master;
 
 use App\Http\Controllers\Controller;
 use App\Models\Master\Position;
-use Illuminate\Support\Facades\Cache;
 
 class PICController extends Controller
 {
     public function get_all()
     {
-        $data = Cache::get('master.position_pics', []);
-
-        if (empty($data)) {
-            Cache::put(
-                'master.position_pics',
-                Position::distinct()
+        $data = cache()->remember(
+            'master.position_pics',
+            now()->addMinutes(5),
+            function () {
+                $units = Position::distinct()
                     ->select(
-                        'id',
-                        'personnel_area_code',
-                        'unit_code',
-                        'unit_name',
+                        'sub_unit_code_doc as personnel_area_code',
+                        'sub_unit_code as unit_code',
+                        'sub_unit_name as unit_name',
                         'position_name',
-                    )->get()
-            );
-        }
+                    )->get();
+
+                return $units->isEmpty() ? null : $units;
+            }
+        );
 
         return response()->json(['data' => $data]);
     }

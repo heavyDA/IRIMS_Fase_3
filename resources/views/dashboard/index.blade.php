@@ -32,7 +32,6 @@
                         <option {{ $year->year == date('Y') ? 'selected' : '' }} value={{ $year->year }}>
                             {{ $year->year }}</option>
                     @endforeach
-                    <option>2024</option>
                 </select>
             </div>
         </form>
@@ -44,7 +43,8 @@
         <div class="col-12">
             <div class="row">
                 <div class="col-12 col-lg-4">
-                    <div class="card custom-card overflow-hidden">
+                    <a href="{{ route('risk.assessment.index') }}?document_status=draft"
+                        class="card custom-card overflow-hidden">
                         <div class="card-body">
                             <div class="d-flex align-items-center flex-wrap gap-2">
                                 <div>
@@ -58,10 +58,11 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </a>
                 </div>
                 <div class="col-12 col-lg-4">
-                    <div class="card custom-card overflow-hidden">
+                    <a href="{{ route('risk.assessment.index') }}?document_status=on progress"
+                        class="card custom-card overflow-hidden">
                         <div class="card-body">
                             <div class="d-flex align-items-center flex-wrap gap-2">
                                 <div>
@@ -75,10 +76,11 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </a>
                 </div>
                 <div class="col-12 col-lg-4">
-                    <div class="card custom-card overflow-hidden">
+                    <a href="{{ route('risk.assessment.index') }}?document_status=approved"
+                        class="card custom-card overflow-hidden">
                         <div class="card-body">
                             <div class="d-flex align-items-center flex-wrap gap-2">
                                 <div>
@@ -92,7 +94,7 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </a>
                 </div>
                 <div class="col-12 col-lg-4">
                     <div class="card custom-card overflow-hidden">
@@ -155,7 +157,9 @@
 
     @include('dashboard._risk_map')
     @includeWhen(session()->get('current_role')?->name != 'risk admin', 'dashboard._monitoring')
-    @includeWhen(session()->get('current_role')?->name != 'risk admin', 'dashboard._top_risk')
+    @includeWhen(
+        !in_array(session()->get('current_role')?->name, ['risk admin', 'risk owner']),
+        'dashboard._top_risk')
 @endsection
 
 @push('element')

@@ -428,7 +428,7 @@ class DefaultSeeder extends Seeder
                     'position_name' => 'Administrator',
                     'unit_name' => '',
                     'sub_unit_name' => '',
-                    'unit_code' => 'ap',
+                    'unit_code' => 'root',
                     'sub_unit_code' => 'ap',
                     'employee_grade_code' => '-',
                     'employee_grade' => '-',
@@ -451,7 +451,7 @@ class DefaultSeeder extends Seeder
                     'position_name' => 'Reviewer',
                     'unit_name' => '',
                     'sub_unit_name' => '',
-                    'unit_code' => 'ap',
+                    'unit_code' => 'root',
                     'sub_unit_code' => 'ap',
                     'employee_grade_code' => '-',
                     'employee_grade' => '-',
@@ -637,19 +637,24 @@ class DefaultSeeder extends Seeder
                 continue;
             }
 
+            $official = $official->toArray();
+            unset($official['id']);
+
             $user = User::updateOrCreate(
-                ['employee_id' => $official->employee_id],
-                $official->toArray() +
+                ['employee_id' => $official['employee_id'], 'personnel_area_code' => $official['personnel_area_code']],
+                $official +
                     [
-                        'password' => bcrypt($official->username . '#321'),
+                        'password' => bcrypt($official['username'] . '#321'),
                         'image_url' => '',
                         'is_active' => true,
                     ]
             );
 
-            $position = Position::whereLike('position_name', '%' . $official->position_name . '%')->first();
+            $position = Position::whereSubUnitCode($official['sub_unit_code'])
+                ->where('position_name', $official['position_name'])
+                ->first();
             if (!$position) {
-                logger()->error('[DefaultSeeder] Position not found: ' . $official->position_name);
+                logger()->error('[DefaultSeeder] Position not found: ' . $official['position_name']);
                 $user->syncRoles('risk admin');
                 continue;
             }

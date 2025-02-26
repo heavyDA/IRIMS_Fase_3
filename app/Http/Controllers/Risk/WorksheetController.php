@@ -11,6 +11,7 @@ use App\Models\Master\ExistingControlType;
 use App\Models\Master\KBUMNRiskCategory;
 use App\Models\Master\KRIThreshold;
 use App\Models\Master\KRIUnit;
+use App\Models\Master\Position;
 use App\Models\Master\RiskTreatmentOption;
 use App\Models\Master\RiskTreatmentType;
 use App\Models\Master\RKAPProgramType;
@@ -20,15 +21,21 @@ use App\Models\Risk\Worksheet;
 use App\Models\Risk\WorksheetHistory;
 use App\Models\Risk\WorksheetIdentification;
 use App\Models\Risk\WorksheetMitigation;
-use App\Models\Risk\WorksheetTopRisk;
+use App\Services\PositionService;
+use App\Services\RoleService;
 use Exception;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Yajra\DataTables\Facades\DataTables;
 
 class WorksheetController extends Controller
 {
+    public function __construct(
+        private RoleService $roleService,
+        private PositionService $positionService
+    ) {}
+
     public function index()
     {
         $title = 'Form Kertas Kerja';
@@ -409,6 +416,8 @@ class WorksheetController extends Controller
         ) {
             abort(ResponseStatus::HTTP_NOT_FOUND, 'Data tidak ditemukan');
         }
+
+        $hasAlreadyApproved = $worksheet->histories()->where('status', DocumentStatus::APPROVED->value)->exists();
         try {
             DB::beginTransaction();
             $worksheet->update([
@@ -619,6 +628,11 @@ class WorksheetController extends Controller
                 ]);
             }
 
+            if ($hasAlreadyApproved) {
+                $history['status'] = DocumentStatus::APPROVED->value;
+                $worksheet->update(['status' => DocumentStatus::APPROVED->value]);
+            }
+
             $worksheet->last_history()->create($history);
 
             DB::commit();
@@ -694,7 +708,7 @@ class WorksheetController extends Controller
             flash_message('flash_message', 'Status Kertas Kerja berhasil diperbarui', State::SUCCESS);
         } catch (Exception $e) {
             DB::rollBack();
-            logger()->error("[Worksheet] Failed to update status of worksheet with ID {$worksheet->id}: " . $e->getMessage());
+            logger()->error("[Worksheet] Failed to update status of worksheet with ID {$worksheet->id}: " . $e->getMessage(), [$e]);
             flash_message('flash_message', 'Status Kertas Kerja gagal diperbarui', State::ERROR);
         }
         return redirect()->route('risk.worksheet.show', $worksheetId);
@@ -763,15 +777,16 @@ class WorksheetController extends Controller
     protected function risk_otorisator_rule(Worksheet $worksheet, string $status, ?string $note = ''): WorksheetHistory
     {
         $status = DocumentStatus::tryFrom($status);
-        if ($status == DocumentStatus::ON_REVIEW) {
-            return $worksheet->histories()->create([
+        if ($status == DocumentStatus::ON_REVIEW || $status == DocumentStatus::REVISED) {
+            $status = DocumentStatus::ON_REVIEW;
+            $history = [
                 'created_by' => auth()->user()->employee_id,
                 'created_role' => 'risk otorisator',
                 'receiver_id' => 3,
                 'receiver_role' => 'risk owner',
                 'status' => $status->value,
                 'note' => $note
-            ]);
+            ];
         } else if ($status == DocumentStatus::APPROVED) {
             $role = $worksheet->creator?->roles()?->first();
             $history = [
@@ -793,56 +808,75 @@ class WorksheetController extends Controller
 
     public function get_by_inherent_risk_scale(int $riskScale)
     {
-        if (Role::hasLookUpUnitHierarchy()) {
-            $unit = request('unit') ? request('unit') . '%' : Role::getDefaultSubUnit();
-        } else {
-            $unit = Role::getDefaultSubUnit();
+        $unit = $this->roleService->getCurrentUnit();
+        if (request('unit')) {
+            $unit = $this->positionService->getUnitBelow(
+                $unit?->sub_unit_code,
+                request('unit'),
+                $this->roleService->isRiskOwner()
+            ) ?: $unit;
         }
 
-        $worksheets = Worksheet::with([
-            'identification' => fn($q) => $q->with('risk_category_t2', 'risk_category_t3')
-        ])
-            ->where(
-                fn($q) => $q->whereLike('sub_unit_code', $unit)
-                    ->orWhereLike('sub_unit_code', str_replace('.%', '', $unit))
+        $worksheets = Worksheet::assessmentQuery()
+            ->when(
+                !$this->roleService->isRiskAdmin(),
+                fn($q) => $q->withExpression(
+                    'position_hierarchy',
+                    Position::hierarchyQuery(
+                        $unit?->sub_unit_code ?? '-',
+                        $this->roleService->isRiskOwner()
+                    )
+                )
+                    ->join('position_hierarchy as ph', 'ph.sub_unit_code', 'w.sub_unit_code')
             )
-            ->whereHas('identification', fn($q) => $q->where('inherent_risk_scale', $riskScale))
-            ->when(session()->get('current_role')->name == 'risk admin', fn($q) => $q->where('created_by', auth()->user()->employee_id))
-            ->whereYear('created_at', request('year', date('Y')))
-            ->get();
+            ->when(
+                $this->roleService->isRiskAdmin(),
+                fn($q) => $q->where('w.created_by', auth()->user()->employee_id)
+                    ->where('w.sub_unit_code', $unit?->sub_unit_code ?? '')
+            )
+            ->where('h_i.risk_scale', $riskScale)
+            ->whereYear('w.created_at', request('year', date('Y')));
 
-        return response()->json([
-            'data' => $worksheets,
-            'message' => 'success',
-        ])->header('Cache-Control', 'no-store');
+        return DataTables::of($worksheets)
+            ->orderColumn('created_at', 'w.created_at $1')
+            ->make(true);
     }
 
     public function get_by_actualization_risk_scale(int $riskScale)
     {
-        if (Role::hasLookUpUnitHierarchy()) {
-            $unit = request('unit') ? request('unit') . '%' : Role::getDefaultSubUnit();
-        } else {
-            $unit = Role::getDefaultSubUnit();
+        $unit = $this->roleService->getCurrentUnit();
+        if (request('unit')) {
+            $unit = $this->positionService->getUnitBelow(
+                $unit?->sub_unit_code,
+                request('unit'),
+                $this->roleService->isRiskOwner()
+            ) ?: $unit;
         }
 
-        $monitorings = MonitoringResidual::with([
-            'incident',
-            'monitoring.worksheet.identification' => fn($q) => $q->with('risk_category_t2', 'risk_category_t3'),
-        ])
-            ->where('risk_scale', $riskScale)
-            ->whereHas(
-                'monitoring.worksheet',
-                fn($q) => $q->where(
-                    fn($q) => $q->whereLike('sub_unit_code', $unit)
-                        ->orWhereLike('sub_unit_code', str_replace('.%', '', $unit))
+        $worksheets = Worksheet::latestMonitoringWithMitigationQuery()
+            ->when(
+                !$this->roleService->isRiskAdmin(),
+                fn($q) => $q->withExpression(
+                    'position_hierarchy',
+                    Position::hierarchyQuery(
+                        $unit?->sub_unit_code ?? '-',
+                        $this->roleService->isRiskOwner()
+                    )
                 )
-                    ->when(session()->get('current_role')->name == 'risk admin', fn($q) => $q->where('created_by', auth()->user()->employee_id))
-                    ->whereYear('created_at', request('year', date('Y')))
-            )->get();
+                    ->join('position_hierarchy as ph', 'ph.sub_unit_code', 'w.sub_unit_code')
+            )
+            ->when(
+                $this->roleService->isRiskAdmin(),
+                fn($q) => $q->where('w.created_by', auth()->user()->employee_id)
+                    ->where('w.sub_unit_code', $unit?->sub_unit_code ?? '-')
+            )
+            ->when(request('document_status'), fn($q) => $q->where('w.status_monitoring', request('document_status')))
+            ->where('worksheet_year', request('year', date('Y')))
+            ->groupBy('lm.id');
 
-        return response()->json([
-            'data' => $monitorings,
-            'message' => 'success',
-        ])->header('Cache-Control', 'no-store');
+        return DataTables::query($worksheets)
+            ->orderColumn('period_date', 'lm.period_date $1')
+            ->rawColumns(['status_monitoring'])
+            ->make(true);
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\View\Composers\Master\RoleComposer;
 use App\View\Composers\MenuComposer;
 use App\View\Composers\Master\UnitComposer;
 use App\View\Composers\Risk\WorksheetYearComposer;
@@ -33,6 +34,7 @@ class ViewServiceProvider extends ServiceProvider
             'report.risk_monitoring.index',
             'report.risk_profile.index',
         ], WorksheetYearComposer::class);
+
         View::composer([
             'risk.process.index',
             'risk.assessment.index',
@@ -40,5 +42,10 @@ class ViewServiceProvider extends ServiceProvider
             'report.risk_monitoring.index',
             'report.risk_profile.index',
         ], UnitComposer::class);
+
+        View::composer([
+            'setting.position.create',
+            'setting.position.edit',
+        ], RoleComposer::class);
     }
 }

@@ -24,12 +24,12 @@ return new class extends Migration
                 ->nullable()
                 ->constrained('m_heatmaps', null, 'monitoring_residuals_heatmap_idx')
                 ->nullOnDelete();
-            $table->string('impact_probability')->default('');
-            $table->string('impact_value')->default('');
-            $table->string('risk_exposure')->default('');
-            $table->string('risk_level')->default('');
-            $table->string('risk_scale')->default('');
-            $table->string('risk_mitigation_effectiveness')->default('');
+            $table->string('impact_probability')->nullable()->default('');
+            $table->string('impact_value')->nullable()->default('');
+            $table->string('risk_exposure')->nullable()->default('');
+            $table->string('risk_level')->nullable()->default('');
+            $table->string('risk_scale')->nullable()->default('');
+            $table->string('risk_mitigation_effectiveness')->nullable()->default('');
             $table->timestamps();
         });
     }

@@ -18,7 +18,7 @@
 </head>
 
 <body>
-    @include('layouts.partials.switcher')
+    {{-- @include('layouts.partials.switcher') --}}
 
     <div class="container">
         <div class="row justify-content-center authentication authentication-basic align-items-center h-100">
@@ -48,8 +48,7 @@
                                     <div class="position-relative">
                                         {{ html()->password('password')->class(['form-control', 'form-control-lg'])->id('signinPassword')->placeholder('Password') }}
                                         <a href="javascript:void(0);" class="show-password-button text-muted"
-                                            onclick="createpassword('signinPassword',this)" id="signinShowPassword"><i
-                                                class="ri-eye-off-line align-middle"></i></a>
+                                            id="signinShowPassword"><i class="ri-eye-off-line align-middle"></i></a>
                                     </div>
                                     @error('password')
                                         <x-forms.error>{{ $message }}</x-forms.error>
@@ -67,12 +66,26 @@
                     <p style="height:8px" style="text-center">
                         <strong>Sistem Informasi Enterprise Risk Management<br>
                             Injourney Airport (SIERINA)</strong><br>
-                        2024 © PT ANGKASA PURA INDONESIA
+                        Powered by <strong>MR</strong><br>
+                        {{ date('Y') }} © PT ANGKASA PURA INDONESIA<br>
                     </p>
                 </div>
             </div>
         </div>
     </div>
 </body>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const showPasswordButton = document.getElementById('signinShowPassword');
+        const passwordInput = document.getElementById('signinPassword');
+
+        showPasswordButton.addEventListener('click', () => {
+            const type = passwordInput.type === 'password' ? 'text' : 'password';
+            passwordInput.type = type;
+            showPasswordButton.innerHTML = type === 'password' ?
+                `<i class="ri-eye-off-line align-middle">` : `<i class="ri-eye-line align-middle">`;
+        });
+    })
+</script>
 
 </html>

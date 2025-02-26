@@ -2,6 +2,7 @@
 
 namespace App\Models\RBAC;
 
+use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Role as Model;
 
 class Role extends Model
@@ -27,7 +28,7 @@ class Role extends Model
         $role = session()->get('current_role')?->name;
 
         if (
-            ($unit->personnel_area_code == '' && $user->hasRole('risk analis'))  ||
+            ($unit->sub_unit_code == 'ap' && $user->hasRole('risk analis'))  ||
             $user->hasRole('risk reviewer')
 
         ) {

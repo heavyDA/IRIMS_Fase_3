@@ -49,9 +49,10 @@ class AuthController extends Controller
                 $user->update($data);
             }
 
-            $assigned_roles = Position::whereUnitCode($user->sub_unit_code)
+            $assigned_roles = Position::whereSubUnitCode($user->sub_unit_code)
                 ->wherePositionName($user->position_name)
                 ->first();
+
             $assigned_roles = $assigned_roles?->assigned_roles ? explode(',', $assigned_roles->assigned_roles) : ['risk admin'];
             $user->syncRoles($assigned_roles);
 
@@ -80,7 +81,7 @@ class AuthController extends Controller
             $user = auth()->user();
 
             if (!str_contains($user->employee_id, 'x9999')) {
-                $assigned_roles = Position::whereUnitCode($user->sub_unit_code)
+                $assigned_roles = Position::whereSubUnitCode($user->sub_unit_code)
                     ->wherePositionName($user->position_name)
                     ->first();
                 $assigned_roles = $assigned_roles?->assigned_roles ? explode(',', $assigned_roles->assigned_roles) : ['risk admin'];
@@ -109,8 +110,11 @@ class AuthController extends Controller
 
     public function unauthenticate()
     {
+        cache()->delete('current_unit_hierarchy.' . auth()->user()->employee_id . '.' . session()->get('current_unit', auth()->user())->sub_unit_code);
+
         auth()->logout();
         session()->flush();
+
 
         return redirect()->route('auth.login');
     }
@@ -127,7 +131,7 @@ class AuthController extends Controller
     public function change_unit(Request $request)
     {
         if (Role::hasLookUpUnitHierarchy()) {
-            $unit = Official::getSubUnitOnly()
+            $unit = Position::getSubUnitOnly()
                 ->whereSubUnitCode($request->unit)
                 ->first();
             if ($unit) {
@@ -157,18 +161,21 @@ class AuthController extends Controller
         ];
 
         try {
-            $official = $this->officialService->get(auth()->user()->sub_unit_code);
-            foreach ($official as $key => $value) {
-                $key = 'pic_' . $key;
-
-                if (array_key_exists($key, $data)) {
-                    $data[$key] = $value;
-                }
-            }
-
-            $data['pic_name'] = "[{$official->personnel_area_code}] {$official->sub_unit_name}";
+            $position = Position::whereSubUnitCode(auth()->user()->sub_unit_code)->first();
+            $data = [
+                'pic_name' => "[{$position->sub_unit_code_doc}] {$position->sub_unit_name}",
+                'pic_position_name' => $position->position_name,
+                'pic_personnel_area_code' => $position->sub_unit_code_doc,
+                'pic_personnel_area_name' => auth()->user()->personnel_area_name,
+                'pic_organization_code' => $position->sub_unit_code,
+                'pic_organization_name' => $position->sub_unit_name,
+                'pic_unit_code' => $position->unit_code,
+                'pic_unit_name' => $position->unit_name,
+                'pic_sub_unit_code' => $position->sub_unit_code,
+                'pic_sub_unit_name' => $position->sub_unit_name,
+            ];
         } catch (Exception $e) {
-            logger()->error('[Profile] Failed to get unit head.', [$e]);
+            logger()->error('[Profile] Failed to get unit head.', [$e->getMessage()]);
         }
 
         return response()->json(['data' => $data])->header('Cache-Control', 'no-store');

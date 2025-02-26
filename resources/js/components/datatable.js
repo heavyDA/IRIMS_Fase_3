@@ -1,8 +1,16 @@
-import DataTables from "datatables.net"
-import 'datatables.net'
-import 'datatables.net-bs5'
+// Core DataTables and Bootstrap 5
+import DataTables from 'datatables.net-bs5'
+import 'datatables.net-bs5/css/dataTables.bootstrap5.min.css'
+import 'css/app.css'
+
+// Responsive extension
 import 'datatables.net-responsive'
 import 'datatables.net-responsive-bs5'
+import 'datatables.net-responsive-bs5/css/responsive.bootstrap5.min.css'
+
+import 'datatables.net-fixedcolumns'
+import 'datatables.net-fixedcolumns-bs5'
+import 'datatables.net-fixedcolumns-bs5/css/fixedColumns.bootstrap5.min.css'
 
 import debounce from "js/utils/debounce"
 

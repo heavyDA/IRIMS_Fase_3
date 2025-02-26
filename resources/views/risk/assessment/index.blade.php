@@ -11,6 +11,7 @@
             <nav>
                 <ol class="breadcrumb mb-0">
                     <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="javascript:void(0);">Risk Process</a></li>
                     <li class="breadcrumb-item active" aria-current="page">{{ $title }}</li>
                 </ol>
             </nav>
@@ -48,34 +49,40 @@
                     </div>
                 </div>
             </div>
-            <table id="worksheet-table" class="table table-bordered table-stripped display nowrap" style="width: 100%;">
-                <thead class="table-dark">
+            <table id="worksheet-table" class="table table-bordered table-stripped display"
+                style="width: 100%;table-layout: fixed;border-collapse: collapse;">
+                <thead>
                     <tr>
-                        <th class="text-center" rowspan="3">No.</th>
-                        <th class="text-center" rowspan="3">Status</th>
-                        <th class="text-center" rowspan="3">Organisasi</th>
-                        <th class="text-center" rowspan="3">Pilihan Sasaran</th>
-                        <th class="text-center" rowspan="3">Peristiwa Risiko</th>
-                        <th class="text-center" rowspan="3">Penyebab Risiko</th>
-                        <th class="text-center" rowspan="3">Dampak</th>
-                        <th class="text-center" colspan="2">Risiko Inheren</th>
-                        <th class="text-center" colspan="8">Risiko Residual</th>
+                        <th class="table-dark-custom" rowspan="3">No.</th>
+                        <th class="table-dark-custom" rowspan="3">Status</th>
+                        <th class="table-dark-custom" rowspan="3">Organisasi</th>
+                        <th class="table-dark-custom" rowspan="3">Pilihan Sasaran</th>
+                        <th class="table-dark-custom" rowspan="3">Peristiwa Risiko</th>
+                        <th class="table-dark-custom" rowspan="3">Penyebab Risiko</th>
+                        <th class="table-dark-custom" rowspan="3">Dampak</th>
+                        <th class="table-dark-custom" style="text-align: center !important;" colspan="2">Inheren
+                        </th>
+                        <th class="table-dark-custom" style="text-align: center !important;" colspan="8">Target
+                            Residual
+                        </th>
                     </tr>
                     <tr>
-                        <th class="text-center" rowspan="2">Level</th>
-                        <th class="text-center" rowspan="2">Skala Risiko</th>
-                        <th class="text-center" colspan="4">Level</th>
-                        <th class="text-center" colspan="4">Skala Risiko</th>
+                        <th style="text-align: center !important;" class="table-dark-custom" rowspan="2">Level</th>
+                        <th style="text-align: center !important;" class="table-dark-custom" rowspan="2">Skala Risiko
+                        </th>
+                        <th style="text-align: center !important;" class="table-dark-custom" colspan="4">Level</th>
+                        <th style="text-align: center !important;" class="table-dark-custom" colspan="4">Skala Risiko
+                        </th>
                     </tr>
                     <tr>
-                        <th class="text-center">Q1</th>
-                        <th class="text-center">Q2</th>
-                        <th class="text-center">Q3</th>
-                        <th class="text-center">Q4</th>
-                        <th class="text-center">Q1</th>
-                        <th class="text-center">Q2</th>
-                        <th class="text-center">Q3</th>
-                        <th class="text-center">Q4</th>
+                        <th style="text-align: center !important;" class="table-dark-custom">Q1</th>
+                        <th style="text-align: center !important;" class="table-dark-custom">Q2</th>
+                        <th style="text-align: center !important;" class="table-dark-custom">Q3</th>
+                        <th style="text-align: center !important;" class="table-dark-custom">Q4</th>
+                        <th style="text-align: center !important;" class="table-dark-custom">Q1</th>
+                        <th style="text-align: center !important;" class="table-dark-custom">Q2</th>
+                        <th style="text-align: center !important;" class="table-dark-custom">Q3</th>
+                        <th style="text-align: center !important;" class="table-dark-custom">Q4</th>
                     </tr>
                 </thead>
             </table>
@@ -120,7 +127,7 @@
                             @endif
                             @foreach ($units as $unit)
                                 <option value="{{ $unit->sub_unit_code }}">
-                                    [{{ $unit->personnel_area_code }}] {{ $unit->sub_unit_name }}</option>
+                                    [{{ $unit->branch_code }}] {{ $unit->sub_unit_name }}</option>
                             @endforeach
                         </select>
                     </div>
@@ -128,9 +135,12 @@
                         <label for="document_status" class="form-label">Status Dokumen</label>
                         <select name="document_status" class="form-select">
                             <option value="">Semua</option>
-                            <option value="draft">Draft</option>
-                            <option value="on progress">On Progress</option>
-                            <option value="approved">Approved</option>
+                            <option {{ request('document_status') == 'draft' ? 'selected' : null }} value="draft">Draft
+                            </option>
+                            <option {{ request('document_status') == 'on progress' ? 'selected' : null }}
+                                value="on progress">On Progress</option>
+                            <option {{ request('document_status') == 'approved' ? 'selected' : null }} value="approved">
+                                Approved</option>
                         </select>
                     </div>
                     <div class="col-12 d-grid">

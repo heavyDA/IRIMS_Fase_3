@@ -38,9 +38,6 @@
                 <div class="col">
                     <select class="form-select" name="kbumn_risk_category_t2">
                         <option>Pilih</option>
-                        @foreach ($kbumn_risk_categories['T2'] as $item)
-                            <option value="{{ $item->id }}">{{ $item->name }}</option>
-                        @endforeach
                     </select>
                 </div>
             </div>
@@ -49,9 +46,6 @@
                 <div class="col">
                     <select class="form-select" name="kbumn_risk_category_t3">
                         <option>Pilih</option>
-                        @foreach ($kbumn_risk_categories['T3'] as $item)
-                            <option value="{{ $item->id }}">{{ $item->name }}</option>
-                        @endforeach
                     </select>
                 </div>
             </div>
@@ -96,6 +90,40 @@
                     <div class="mb-2">
                         <div id="risk_chronology_description-editor" class="textarea"></div>
                         <textarea class="d-none form-control" name="risk_chronology_description" rows="4"></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col">
+                    <button type="button" class="btn btn-secondary-light" data-bs-toggle="modal"
+                        data-bs-target="#incidentModal">
+                        <i class="ti ti-plus"></i>Tambah Penyebab Risiko
+                    </button>
+
+                    <div class="row mt-2">
+                        <div class="col py-2" style="overflow-x: scroll;">
+                            <table id="worksheetIncidentTable" class="table table-bordered table-hover"
+                                style="width:100%">
+                                <thead style="font-size:16px;" class="table-dark">
+                                    <tr style="vertical-align: bottom;">
+                                        <th rowspan="2">Aksi</th>
+                                        <th style="" rowspan="2">No. Penyebab Risiko</th>
+                                        <th style="" rowspan="2">Kode Penyebab risiko</th>
+                                        <th style="width: 220px !important;" rowspan="2">Penyebab risiko</th>
+                                        <th style="" rowspan="2">Key Risk Indicators</th>
+                                        <th style="" rowspan="2">Unit Satuan KRI</th>
+                                        <th style="" colspan="3">Kategori Threshold KRI</th>
+                                    </tr>
+                                    <tr style="vertical-align: bottom;">
+                                        <th rowspan="2">Aman</th>
+                                        <th rowspan="2">Hati-Hati</th>
+                                        <th rowspan="2">Bahaya</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -249,8 +277,12 @@
                                 class="link-secondary link-offset-2 link-underline-opacity-0 link-underline-opacity-50-hover text-decoration-underline mx-1"
                                 role="button" data-bs-toggle="popover" data-bs-trigger="focus"
                                 data-bs-placement="right" title="Information" data-bs-html="true"
-                                data-bs-content='<p>Diisi dengan penilaian dampak Risiko Inheren dengan skala 1 s.d. 5
-                                <br><strong>Reference to Table Skala KBUMN</strong></p>'><i
+                                data-bs-content='
+                                
+                                    <p>Diisi dengan penilaian dampak Risiko Inheren dengan skala 1 s.d. 5
+                                    <br><strong>Reference to Table Skala KBUMN</strong></p><br>
+                                    <img class="w-100" src="{{ asset('assets/images/pendukung/tabel_skala_bumn.png') }}"/>
+                                '><i
                                     class="ti ti-info-circle h5 text-secondary"></i>
                             </a>
                         </div>
@@ -411,35 +443,6 @@
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
-
-    <button type="button" class="btn btn-secondary-light" data-bs-toggle="modal" data-bs-target="#incidentModal">
-        <i class="ti ti-plus"></i>Tambah Penyebab Risiko
-    </button>
-
-    <div class="row mt-2">
-        <div class="col py-2" style="overflow-x: scroll;">
-            <table id="worksheetIncidentTable" class="table table-bordered table-hover" style="width:100%">
-                <thead class="table-dark">
-                    <tr style="vertical-align: bottom;">
-                        <th rowspan="2">Aksi</th>
-                        <th style="" rowspan="2">No. Penyebab Risiko</th>
-                        <th style="" rowspan="2">Kode Penyebab risiko</th>
-                        <th style="width: 220px !important;" rowspan="2">Penyebab risiko</th>
-                        <th style="" rowspan="2">Key Risk Indicators</th>
-                        <th style="" rowspan="2">Unit Satuan KRI</th>
-                        <th style="" colspan="3">Kategori Threshold KRI</th>
-                    </tr>
-                    <tr style="vertical-align: bottom;">
-                        <th rowspan="2">Aman</th>
-                        <th rowspan="2">Hati-Hati</th>
-                        <th rowspan="2">Bahaya</th>
-                    </tr>
-                </thead>
-                <tbody>
-                </tbody>
-            </table>
         </div>
     </div>
 </form>

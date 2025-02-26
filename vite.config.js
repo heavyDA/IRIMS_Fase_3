@@ -35,6 +35,7 @@ export default defineConfig({
                 'resources/js/pages/master/risk_treatment_option/index.js',
                 'resources/js/pages/setting/risk_metric/index.js',
                 'resources/js/pages/setting/risk_metric/form.js',
+                'resources/js/pages/setting/position/index.js',
             ],
             refresh: true,
         }),

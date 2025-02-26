@@ -2,25 +2,25 @@
 
 namespace App\View\Composers\Master;
 
-// use App\Models\Master\Official;
 use App\Models\Master\Position;
-// use App\Services\EOffice\UnitService;
+use App\Services\RoleService;
 use Illuminate\View\View;
 
 class UnitComposer
 {
+    public function __construct(private RoleService $roleService) {}
     public function compose(View $view)
     {
-        $currentUnit = session()?->get('current_unit') ?? auth()->user();
+        $currentUnit = $this->roleService->getCurrentUnit();
         $units = collect([]);
 
         try {
             $units = cache()->remember(
-                'auth.' . auth()->user()->employee_id . '.supervised_units.' . $currentUnit->sub_unit_code,
+                'current_unit_hierarchy.' . auth()->user()->employee_id . '.' . $currentUnit->sub_unit_code,
                 now()->addMinutes(5),
                 fn() =>
-                Position::getSubUnitOnly()
-                    ->filterByRole(session()->get('current_role')?->name)
+                Position::hierarchyQuery($currentUnit->sub_unit_code, $this->roleService->isRiskOwner())
+                    ->whereBetween('level', $this->roleService->getTraverseUnitLevel())
                     ->latest('unit_code')
                     ->get()
             );

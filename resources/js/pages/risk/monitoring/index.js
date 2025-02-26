@@ -1,7 +1,7 @@
 import { Offcanvas } from "bootstrap";
 import Choices from "choices.js";
 import createDatatable from "js/components/datatable";
-import { decodeHtml, defaultConfigChoices } from "js/components/helper";
+import { decodeHtml, defaultConfigChoices, renderHeatmapBadge } from "js/components/helper";
 import debounce from "js/utils/debounce";
 
 const inputSearch = document.querySelector('input[name="search"]')
@@ -37,7 +37,7 @@ worksheetTableFilter.addEventListener('reset', e => {
     selectDocumentStatusChoices.destroy()
     selectDocumentStatusChoices.init()
 
-    datatable.page.len(selectLength.value).search('').draw();
+    datatable.page.len(selectLength.value).search('').order([columns.length - 1, 'desc']).draw();
 })
 
 worksheetTableFilter.addEventListener('submit', e => {
@@ -54,24 +54,194 @@ inputSearch.addEventListener('input', debounce(
     875
 ))
 
-// selectLength.addEventListener('change', e => {
-//     datatable.page.len(e.target.value).draw();
-// })
+selectLength.addEventListener('change', e => {
+    datatable.page.len(e.target.value).draw();
+})
 
-// selectUnit.addEventListener('change', e => {
-//     datatable.draw()
-// })
-// selectYear.addEventListener('change', e => {
-//     datatable.draw()
-// })
-// selectDocumentStatus.addEventListener('change', e => {
-//     datatable.draw()
-// })
+selectUnit.addEventListener('change', e => {
+    datatable.draw()
+})
+selectYear.addEventListener('change', e => {
+    datatable.draw()
+})
+selectDocumentStatus.addEventListener('change', e => {
+    datatable.draw()
+})
 
+const columns = [
+    {
+        orderable: true,
+        data: 'worksheet_number',
+        name: 'worksheet_number',
+        width: '96px'
+    },
+    {
+        orderable: true,
+        data: 'status_monitoring',
+        name: 'status_monitoring',
+        width: '120px'
+    },
+    {
+        orderable: true,
+        data: 'sub_unit_name',
+        name: 'sub_unit_name',
+        width: '128px',
+        render: function (data, type, row) {
+            if (type !== 'display') {
+                return data
+            }
+
+            return `[${row.personnel_area_code}] ${row.sub_unit_name}`
+        }
+    },
+    {
+        orderable: true,
+        data: 'target_body',
+        name: 'target_body',
+        width: '256px',
+        render: function (data, type, row) {
+            if (type !== 'display') {
+                return data
+            }
+
+            if (!data) {
+                return '';
+            }
+
+            const decodeData = decodeHtml(decodeHtml(data))
+            const parsedData = new DOMParser().parseFromString(decodeData, 'text/html');
+
+            return parsedData.body ? parsedData.body.innerHTML : '';
+        }
+    },
+    {
+        orderable: true,
+        data: 'risk_chronology_body',
+        name: 'risk_chronology_body',
+        width: '256px',
+        render: function (data, type, row) {
+            if (type !== 'display') {
+                return data
+            }
+
+            if (!data) {
+                return '';
+            }
+
+            const decodeData = decodeHtml(decodeHtml(data))
+            const parsedData = new DOMParser().parseFromString(decodeData, 'text/html');
+
+            return parsedData.body ? parsedData.body.innerHTML : '';
+        }
+    },
+    {
+        orderable: true,
+        data: 'mitigation_plan',
+        name: 'mitigation_plan',
+        width: '256px',
+        render: function (data, type, row) {
+            if (type !== 'display') {
+                return data
+            }
+
+            if (!data) {
+                return '';
+            }
+
+            const decodeData = decodeHtml(decodeHtml(data))
+            const parsedData = new DOMParser().parseFromString(decodeData, 'text/html');
+
+            return parsedData.body ? parsedData.body.innerHTML : '';
+        }
+    },
+    {
+        orderable: true,
+        data: 'actualization_plan_output',
+        name: 'actualization_plan_output',
+        width: '256px',
+        render: function (data, type, row) {
+            if (type !== 'display') {
+                return data
+            }
+
+            if (!data) {
+                return '-';
+            }
+
+            const decodeData = decodeHtml(decodeHtml(data))
+            const parsedData = new DOMParser().parseFromString(decodeData, 'text/html');
+
+            return parsedData.body ? parsedData.body.innerHTML : '-';
+        }
+    },
+    {
+        orderable: true,
+        data: 'inherent_risk_level',
+        name: 'inherent_risk_level',
+        width: '160px',
+        render: function (data, type, row) {
+            if (type !== 'display') {
+                return data
+            }
+
+            if (!data) {
+                return '';
+            }
+
+            return renderHeatmapBadge(data, row.inherent_risk_color)
+        }
+    },
+    {
+        orderable: true,
+        data: 'inherent_risk_scale',
+        name: 'inherent_risk_scale',
+        width: '160px',
+        render: function (data, type, row) {
+            if (type !== 'display') return data;
+
+            return data ? data : '-';
+        }
+    },
+    {
+        orderable: true,
+        data: 'residual_risk_level',
+        name: 'residual_risk_level',
+        width: '160px',
+        render: function (data, type, row) {
+            if (type !== 'display') {
+                return data
+            }
+
+            if (!data) {
+                return '';
+            }
+
+            return renderHeatmapBadge(data, row.residual_risk_color)
+        }
+    },
+    {
+        orderable: true,
+        data: 'residual_risk_scale',
+        name: 'residual_risk_scale',
+        width: '160px',
+        render: function (data, type, row) {
+            if (type !== 'display') return data;
+
+            return data ? data : '-';
+        }
+    },
+    {
+        orderable: true,
+        data: 'created_at',
+        name: 'created_at',
+        visible: false
+    }
+]
 const datatable = createDatatable('table', {
     handleColumnSearchField: false,
     responsive: false,
     serverSide: true,
+    processing: true,
     ajax: {
         url: window.location.href,
         data: function (d) {
@@ -80,13 +250,21 @@ const datatable = createDatatable('table', {
             d.document_status = selectDocumentStatus.value
         }
     },
-    fixedColumns: true,
+    columnDefs: [{ targets: [3], width: 128 }],
+    fixedColumns: {
+        start: 4
+    },
+    scrollX: true,
+    scrollY: '48vh',
+    scrollCollapse: true,
     lengthChange: false,
+    autoWidth: true,
     pageLength: 10,
-    processing: true,
+    columns: columns,
+    order: [[columns.length - 1, 'desc']],
     drawCallback: function (settings) {
         const api = this.api();
-        const columnsToMerge = [0, 1, 2, 3, 4, 5, 6,];
+        const columnsToMerge = [0, 1, 2, 3, 4, 7, 8, 9, 10];
 
         // Reset all cells visibility first
         api.cells().every(function () {
@@ -159,163 +337,8 @@ const datatable = createDatatable('table', {
                 }
             });
         });
-    },
-    scrollX: true,
-    scrollY: '48vh',
-    columns: [
-        {
-            sortable: true,
-            data: 'worksheet_number',
-            name: 'worksheet_number',
-            width: '64px'
-        },
-        {
-            sortable: true,
-            data: 'status_monitoring',
-            name: 'status_monitoring',
-            width: '128px'
-        },
-        {
-            sortable: true,
-            data: 'sub_unit_name',
-            name: 'sub_unit_name',
-            width: '256px',
-            render: function (data, type, row) {
-                if (type !== 'display') {
-                    return data
-                }
-
-                return `[${row.personnel_area_code}] ${row.sub_unit_name}`
-            }
-        },
-        {
-            sortable: true,
-            data: 'target_body',
-            name: 'target_body',
-            width: '256px',
-            render: function (data, type, row) {
-                if (type !== 'display') {
-                    return data
-                }
-
-                if (!data) {
-                    return '';
-                }
-
-                const decodeData = decodeHtml(decodeHtml(data))
-                const parsedData = new DOMParser().parseFromString(decodeData, 'text/html');
-
-                return parsedData.body ? parsedData.body.innerHTML : '';
-            }
-        },
-        {
-            sortable: true,
-            data: 'risk_chronology_body',
-            name: 'risk_chronology_body',
-            width: '256px',
-            render: function (data, type, row) {
-                if (type !== 'display') {
-                    return data
-                }
-
-                if (!data) {
-                    return '';
-                }
-
-                const decodeData = decodeHtml(decodeHtml(data))
-                const parsedData = new DOMParser().parseFromString(decodeData, 'text/html');
-
-                return parsedData.body ? parsedData.body.innerHTML : '';
-            }
-        },
-        {
-            sortable: true,
-            data: 'mitigation_plan',
-            name: 'mitigation_plan',
-            width: '256px',
-            render: function (data, type, row) {
-                if (type !== 'display') {
-                    return data
-                }
-
-                if (!data) {
-                    return '';
-                }
-
-                const decodeData = decodeHtml(decodeHtml(data))
-                const parsedData = new DOMParser().parseFromString(decodeData, 'text/html');
-
-                return parsedData.body ? parsedData.body.innerHTML : '';
-            }
-        },
-        {
-            sortable: true,
-            data: 'actualization_plan_output',
-            name: 'actualization_plan_output',
-            width: '256px',
-            render: function (data, type, row) {
-                if (type !== 'display') {
-                    return data
-                }
-
-                if (!data) {
-                    return '-';
-                }
-
-                const decodeData = decodeHtml(decodeHtml(data))
-                const parsedData = new DOMParser().parseFromString(decodeData, 'text/html');
-
-                return parsedData.body ? parsedData.body.innerHTML : '-';
-            }
-        },
-        {
-            sortable: true,
-            data: 'inherent_risk_level',
-            name: 'inherent_risk_level',
-            width: '160px',
-            render: function (data, type, row) {
-                if (type !== 'display') return data;
-
-                return data ? data : '-';
-            }
-        },
-        {
-            sortable: true,
-            data: 'inherent_risk_scale',
-            name: 'inherent_risk_scale',
-            width: '160px',
-            render: function (data, type, row) {
-                if (type !== 'display') return data;
-
-                return data ? data : '-';
-            }
-        },
-        {
-            sortable: true,
-            data: 'residual_risk_level',
-            name: 'residual_risk_level',
-            width: '160px',
-            render: function (data, type, row) {
-                if (type !== 'display') return data;
-
-                return data ? data : '-';
-            }
-        },
-        {
-            sortable: true,
-            data: 'residual_risk_scale',
-            name: 'residual_risk_scale',
-            width: '160px',
-            render: function (data, type, row) {
-                if (type !== 'display') return data;
-
-                return data ? data : '-';
-            }
-        }
-    ],
+    }
 })
-
-
 
 datatable.on('draw', function () {
     const thead = document.querySelector('table thead')

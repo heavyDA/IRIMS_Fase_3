@@ -30,6 +30,27 @@ if (!function_exists('money_format')) {
     }
 }
 
+if (!function_exists('string_to_bool')) {
+    function string_to_bool(?string $string = ''): bool|null
+    {
+        if (strtolower($string) == 'pilih' || !in_array($string, ['0', '1', 0, 1])) {
+            return null;
+        }
+        return (bool) $string;
+    }
+}
+
+if (!function_exists('check_select_option_value')) {
+    function check_select_option_value(?string $value = '', ?bool $nullable = true): string|null
+    {
+        if (strtolower($value) == 'pilih' || !$value) {
+            return $nullable ? null : '';
+        }
+
+        return $value;
+    }
+}
+
 if (!function_exists('strip_html')) {
     function strip_html(string|null $string): string
     {
@@ -44,6 +65,15 @@ if (!function_exists('get_unit_level')) {
         return $count;
     }
 }
+
+if (!function_exists('get_unit_manager')) {
+    function get_unit_manager(?string $unit = ''): false|string
+    {
+        if (!$unit) return false;
+        return implode('.', array_slice(explode('.', $unit), 0, 3));
+    }
+}
+
 
 if (!function_exists('excel_build_nested_headers')) {
     function excel_build_nested_headers(array $columns = [], array $nested_columns = []): array

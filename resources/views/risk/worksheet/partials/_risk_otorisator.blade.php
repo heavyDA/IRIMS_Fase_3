@@ -5,7 +5,7 @@
     <span><i class="ti ti-pencil-exclamation"></i></span>&nbsp;Revise
 </button>
 @push('element')
-    <div class="modal fade" id="reviseModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+    <div class="modal fade modal-status" id="reviseModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
         aria-labelledby="staticBackdropLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -24,20 +24,21 @@
                                 Catatan
                             </div>
                             <div>
-                                {{-- <div id="note-editor" class="textarea"></div> --}}
-                                <textarea class="form-control" name="note" rows="4"></textarea>
+                                <div id="revise-note-editor" class="textarea"></div>
+                                <textarea class="form-control" id="revise-note" name="note" rows="4"></textarea>
                             </div>
                         </div>
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="reset" class="btn btn-secondary" form="reviseForm">Batal</button>
+                    <button onclick="this.form.reset()" data-bs-dismiss="modal" data-bs-target="#reviseModal" type="button"
+                        class="btn btn-secondary" form="reviseForm">Batal</button>
                     <button type="submit" form="reviseForm" class="btn btn-primary">Simpan</button>
                 </div>
             </div>
         </div>
     </div>
-    <div class="modal fade" id="approveModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+    <div class="modal fade modal-status" id="approveModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
         aria-labelledby="staticBackdropLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -56,14 +57,15 @@
                                 Catatan
                             </div>
                             <div>
-                                {{-- <div id="note-editor" class="textarea"></div> --}}
-                                <textarea class="form-control" name="note" rows="4"></textarea>
+                                <div id="approve-note-editor" class="textarea"></div>
+                                <textarea class="form-control" id="approve-note" name="note" rows="4"></textarea>
                             </div>
                         </div>
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="reset" class="btn btn-secondary" form="approveForm">Batal</button>
+                    <button onclick="this.form.reset()" data-bs-dismiss="modal" data-bs-target="#approveModal"
+                        type="button" class="btn btn-secondary" form="approveForm">Batal</button>
                     <button type="submit" form="approveForm" class="btn btn-primary">Simpan</button>
                 </div>
             </div>

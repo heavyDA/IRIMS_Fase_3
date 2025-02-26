@@ -22,16 +22,16 @@ class UnitService extends EOfficeAbstract
     protected function transform_key(array $item): object
     {
         return (object) [
-            'personnel_area_code' => $item['branch_code'],
-            'regional_category' => $item['regional_category'],
-            'sub_unit_code' => $item['unit_id'],
-            'sub_unit_code_doc' => $item['unit_code_doc'],
-            'sub_unit_name' => $item['unit_name'],
-            'position_name' => $item['position_name'],
             'unit_code' => $item['supervision_unit_id'],
             'unit_code_doc' => $item['supervision_unit_code_doc'],
             'unit_name' => $item['supervision_unit_name'],
             'unit_position_name' => $item['supervision_position_name'],
+            'sub_unit_code' => $item['unit_id'],
+            'sub_unit_code_doc' => $item['unit_code_doc'],
+            'sub_unit_name' => $item['unit_name'],
+            'branch_code' => $item['branch_code'],
+            'regional_category' => $item['regional_category'],
+            'position_name' => $item['position_name'],
         ];
     }
 
@@ -132,7 +132,7 @@ class UnitService extends EOfficeAbstract
 
             $items = [];
             foreach ($data as $item) {
-                foreach($item as $key => $value) {
+                foreach ($item as $key => $value) {
                     $item[$this->replace_id_with_code(strtolower($key))] = $value;
                 }
                 $items[] = (object) $item;

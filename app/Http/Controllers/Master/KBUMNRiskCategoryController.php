@@ -76,4 +76,9 @@ class KBUMNRiskCategoryController extends Controller
 
         return redirect()->route('master.risk_categories.index');
     }
+
+    public function get_all()
+    {
+        return response()->json(['data' => KBUMNRiskCategory::orderBy('type')->get()]);
+    }
 }

@@ -13,10 +13,10 @@ return new class extends Migration
     {
         Schema::create('m_positions', function (Blueprint $table) {
             $table->id();
-            $table->string('personnel_area_code');
-            $table->string('unit_code');
+            $table->string('personnel_area_code')->nullable();
+            $table->string('unit_code')->nullable();
             $table->string('unit_name');
-            $table->string('position_name');
+            $table->string('position_name')->nullable();
             $table->timestamps();
         });
     }

@@ -8,11 +8,14 @@ use App\Http\Controllers\Controller;
 use App\Models\Master\IncidentCategory;
 use App\Models\Master\IncidentFrequency;
 use App\Models\Master\KBUMNRiskCategory;
+use App\Models\Master\Position;
 use App\Models\RBAC\Role;
 use App\Models\Risk\Worksheet;
 use App\Models\Risk\Monitoring;
 use App\Models\Risk\MonitoringHistory;
 use App\Models\Risk\WorksheetIdentification;
+use App\Services\PositionService;
+use App\Services\RoleService;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
@@ -24,24 +27,42 @@ use Yajra\DataTables\Facades\DataTables;
 
 class MonitoringController extends Controller
 {
+    public function __construct(
+        private RoleService $roleService,
+        private PositionService $positionService
+    ) {}
+
     public function index()
     {
-        $role = session()->get('current_role') ?? auth()->user()->roles()->first();
         if (request()->ajax()) {
-            $unit = Role::getDefaultSubUnit();
-            $worksheets = Worksheet::latest_monitoring_with_mitigation_query()
-                ->where(function ($q) use ($unit, $role) {
-                    $q->whereLike('w.sub_unit_code', $unit)
-                        ->orWhereLike('w.sub_unit_code', str_replace('.%', '', $unit));
-                })
-                ->when(request('document_status'), fn($q) => $q->where('w.status_monitoring', request('document_status')))
+            $unit = $this->roleService->getCurrentUnit();
+            if (request('unit')) {
+                $unit = $this->positionService->getUnitBelow(
+                    $unit?->sub_unit_code,
+                    request('unit'),
+                    $this->roleService->isRiskOwner()
+                ) ?: $unit;
+            }
+
+            $worksheets = Worksheet::latestMonitoringWithMitigationQuery()
                 ->when(
-                    session()->get('current_role')?->name == 'risk admin',
-                    fn($q) => $q->where('w.created_by', auth()->user()->employee_id)
+                    !$this->roleService->isRiskAdmin(),
+                    fn($q) => $q->withExpression(
+                        'position_hierarchy',
+                        Position::hierarchyQuery(
+                            $unit?->sub_unit_code ?? '-',
+                            $this->roleService->isRiskOwner()
+                        )
+                    )
+                        ->join('position_hierarchy as ph', 'ph.sub_unit_code', 'w.sub_unit_code')
                 )
-                ->where('worksheet_year', request('year', date('Y')))
-                ->latest('w.created_at')
-                ->latest('lm.created_at');
+                ->when(
+                    $this->roleService->isRiskAdmin(),
+                    fn($q) => $q->where('w.created_by', auth()->user()->employee_id)
+                        ->where('w.sub_unit_code', $unit?->sub_unit_code ?? '-')
+                )
+                ->when(request('document_status'), fn($q) => $q->where('w.status_monitoring', request('document_status')))
+                ->where('worksheet_year', request('year', date('Y')));
 
             return DataTables::query($worksheets)
                 ->filter(function ($q) {
@@ -73,6 +94,17 @@ class MonitoringController extends Controller
 
                     return view('risk.monitoring._table_status', compact('status', 'class', 'key', 'worksheet_number', 'route'))->render();
                 })
+                ->orderColumn('worksheet_number', 'w.worksheet_number $1')
+                ->orderColumn('status_monitoring', 'w.status_monitoring $1')
+                ->orderColumn('target_body', 'w.target_body $1')
+                ->orderColumn('risk_chronology_body', 'w.risk_chronology_body $1')
+                ->orderColumn('mitigation_plan', 'wmit.mitigation_plan $1')
+                ->orderColumn('actualization_plan_output', 'ma.actualization_plan_output $1')
+                ->orderColumn('inherent_risk_level', 'w.inherent_risk_level $1')
+                ->orderColumn('inherent_risk_scale', 'w.inherent_risk_scale $1')
+                ->orderColumn('residual_risk_level', 'mr.risk_level $1')
+                ->orderColumn('residual_risk_scale', 'mr.risk_scale $1')
+                ->orderColumn('created_at', 'lm.created_at $1')
                 ->rawColumns(['status_monitoring'])
                 ->make(true);
         }
@@ -98,21 +130,17 @@ class MonitoringController extends Controller
             $worksheet->load('incidents.mitigations');
 
             $actualizations = [];
-            $residuals = [];
+            $quarter = ceil(date('m') / 3);
+            $residual = [
+                'period_date' => date('Y-m-d'),
+                'quarter' => $quarter,
+                'risk_chronology_body' => $worksheet->identification->risk_chronology_body,
+                'risk_impact_category' => $worksheet->identification->risk_impact_category,
+                'risk_mitigation_effectiveness' => '',
+            ];
 
             $actualizationsIndex = 0;
-            $worksheet->incidents->each(function ($incident) use ($worksheet, &$actualizations, &$residuals, &$actualizationsIndex) {
-                $quarter = ceil(date('m') / 3);
-                $residuals[] = [
-                    'incident_id' => $incident->id,
-                    'period_date' => date('Y-m-d'),
-                    'quarter' => $quarter,
-                    'risk_cause_number' => $incident->risk_cause_number,
-                    'risk_chronology_body' => $worksheet->identification->risk_chronology_body,
-                    'risk_impact_category' => $worksheet->identification->risk_impact_category,
-                    'risk_mitigation_effectiveness' => '',
-                    'residual' => [],
-                ];
+            $worksheet->incidents->each(function ($incident) use ($quarter, &$actualizations, &$actualizationsIndex) {
                 $incident->mitigations->each(function ($mitigation) use ($incident, $quarter, &$actualizations, &$actualizationsIndex) {
                     $actualizations[] = [
                         'key' => $actualizationsIndex,
@@ -145,7 +173,7 @@ class MonitoringController extends Controller
                         'risk_level' => $worksheet->identification->inherent_risk_level,
                         'risk_scale' => $worksheet->identification->inherent_risk_scale,
                     ],
-                    'residuals' => $residuals,
+                    'residual' => $residual,
                     'actualizations' => $actualizations
                 ]
             ])->header('Cache-Control', 'no-store');
@@ -179,80 +207,24 @@ class MonitoringController extends Controller
         try {
             DB::beginTransaction();
             $monitoring = $worksheet->monitorings()->create([
-                'period_date' => $request->residuals[0]['period_date'],
+                'period_date' => $request->residual['period_date'],
                 'created_by' => $user->employee_id,
                 'status' => DocumentStatus::DRAFT->value
             ]);
 
-            $residuals = [];
-            foreach ($request->residuals as $residual) {
-                $_residual = [
-                    'worksheet_incident_id' => $residual['incident_id'],
-                    'quarter' => $residual['quarter'],
-                    'risk_mitigation_effectiveness' => (bool) $residual['risk_mitigation_effectiveness'],
-                ];
-
-                if (array_key_exists('residual', $residual)) {
-                    foreach ($residual['residual'] as $key => $item) {
-                        if ($item) {
-                            foreach ($item as $key => $value) {
-                                if ($key == 'impact_scale' || $key == 'impact_probability_scale') {
-                                    $_residual[$key . '_id'] = $value == 'Pilih' ? null : $value;
-                                } else {
-                                    $_residual[$key] = $value ?: '';
-                                }
-                            }
-                            break;
-                        }
-                    }
-                }
-                $residuals[] = $_residual;
-            }
-
-            $monitoring->residuals()->createMany($residuals);
-
-            $alteration = [];
-            foreach ($request->alteration as $key => $value) {
-                $alteration[str_replace('alteration_', '', $key)] = $value ?: '';
-            }
-            $monitoring->alteration()->create($alteration);
-
-            $incident = [];
-            foreach ($request->incident as $key => $value) {
-                if (str_contains($key, 'category') || $key == 'incident_frequency') {
-                    $incident[$key . '_id'] = $value == 'Pilih' ? null : $value;
-                } else if ($key == 'incident_repetitive' || $key == 'insurance_status') {
-                    $incident[$key] = $value == 'Pilih' ? null : $value != '0';
-                } else {
-                    $incident[$key] = $value ?: '';
-                }
-            }
-            $monitoring->incident()->create($incident);
+            $monitoring->residual()->create($this->residualRequestMapping($request->residual));
+            $monitoring->alteration()->create([
+                'body' => $request->alteration['alteration_body'] ?? '',
+                'impact' => $request->alteration['alteration_impact'] ?? '',
+                'description' => $request->alteration['alteration_description'] ?? '',
+            ]);
+            $monitoring->incident()->create($this->incidentRequestMapping($request->incident));
 
             $actualizations = [];
             foreach ($request->actualizations as $actual) {
-                $actualization = [];
-
-                foreach ($actual as $key => $value) {
-                    if (str_contains($key, 'actualization_progress')) {
-                        if ($value && !is_string($value)) {
-                            foreach ($value as $v) {
-                                if ($v) {
-                                    $actualization['actualization_progress'] = $v;
-                                }
-                            }
-                        }
-                    } else if (str_contains($key, 'kri')) {
-                        $actualization[str_replace('actualization_', '', $key)] = $value ?: '';
-                    } else if ($key == 'actualization_mitigation_id') {
-                        $actualization['worksheet_mitigation_id'] = $value ?: null;
-                    } else {
-                        $actualization[$key] = $value ?: '';
-                    }
-                }
-
-                $actualizations[] = $actualization;
+                $actualizations[] = $this->actualizationRequestMapping($actual);
             }
+
             $actualizations = $monitoring->actualizations()->createMany($actualizations);
             $monitoring->histories()->create([
                 'created_by' => $user->employee_id,
@@ -269,9 +241,7 @@ class MonitoringController extends Controller
             foreach ($request->actualizations as $key => $item) {
                 $directory = $user->sub_unit_code
                     . '/risk_monitoring/'
-                    . $monitoring->period_date_format->translatedFormat('F')
-                    . '/'
-                    . $item['actualization_mitigation_id'];
+                    . $monitoring->period_date_format->translatedFormat('F');
 
                 if (!Storage::disk('local')->exists($directory)) {
                     Storage::disk('local')->makeDirectory($directory);
@@ -279,10 +249,10 @@ class MonitoringController extends Controller
 
                 $documents = [];
                 if ($request->hasFile("actualizations.{$key}.actualization_documents")) {
-                    $files = $request->actualizations[$key]['actualization_documents'];
+                    $files = $request->file("actualizations.{$key}.actualization_documents");
                     if ($files) {
                         foreach ($files as $file) {
-                            if ($file) {
+                            if ($file->isValid()) {
                                 $id = Str::uuid();
 
                                 $file->storeAs($directory, $id . '.' . $file->getClientOriginalExtension());
@@ -340,9 +310,9 @@ class MonitoringController extends Controller
         }
 
         $monitoring->load([
-            'residuals.impact_scale',
-            'residuals.impact_probability_scale',
-            'residuals.incident',
+            'residual.impact_scale',
+            'residual.impact_probability_scale',
+            'residual',
             'actualizations.mitigation.incident',
             'alteration',
             'incident',
@@ -360,9 +330,9 @@ class MonitoringController extends Controller
     {
         $monitoring = Monitoring::findByEncryptedIdOrFail($monitoring_id);
         $monitoring->load([
-            'residuals.impact_scale',
-            'residuals.impact_probability_scale',
-            'residuals.incident',
+            'residual.impact_scale',
+            'residual.impact_probability_scale',
+            'residual.incident',
             'actualizations.mitigation.incident',
             'alteration',
             'incident',
@@ -374,60 +344,51 @@ class MonitoringController extends Controller
         $worksheet->identification = WorksheetIdentification::identification_query()->whereWorksheetId($worksheet->id)->firstOrFail();
 
         if (request()->ajax()) {
-            $actualizations = [];
-            $residuals = [];
-
-            $actualizationsIndex = 0;
-            foreach ($monitoring->residuals as $index => $residual) {
-                $values = [];
-                for ($i = 0; $i <= 4; $i++) {
-                    if ($i == $residual->quarter) {
-                        $values[] =
-                            [
-                                'impact_probability' =>     $residual->impact_probability,
-                                'impact_probability_scale' => $residual->impact_probability_scale_id ?? '',
-                                'impact_scale' => $residual->impact_scale_id ?? '',
-                                'impact_value' => $residual->impact_value,
-                                'risk_exposure' => $residual->risk_exposure,
-                                'risk_level' => $residual->risk_level,
-                                'risk_scale' => $residual->risk_scale,
-                            ];
-                    } else {
-                        $values[] = [];
-                    }
+            $residual = [
+                'period_date' => $monitoring->period_date,
+                'risk_chronology_body' => $worksheet->identification->risk_chronology_body,
+                'risk_impact_category' => $worksheet->identification->risk_impact_category,
+                'risk_mitigation_effectiveness' => $monitoring->residual->risk_mitigation_effectiveness,
+                'quarter' => $monitoring->residual->quarter,
+            ];
+            $values = [];
+            for ($i = 0; $i <= 4; $i++) {
+                if ($i == $monitoring->residual->quarter) {
+                    $values[] =
+                        [
+                            'impact_probability' =>     $monitoring->residual->impact_probability,
+                            'impact_probability_scale' => $monitoring->residual->impact_probability_scale_id ?? '',
+                            'impact_scale' => $monitoring->residual->impact_scale_id ?? '',
+                            'impact_value' => $monitoring->residual->impact_value,
+                            'risk_exposure' => $monitoring->residual->risk_exposure,
+                            'risk_level' => $monitoring->residual->risk_level,
+                            'risk_scale' => $monitoring->residual->risk_scale,
+                        ];
+                } else {
+                    $values[] = [];
                 }
-
-                $residuals[] = [
-                    'key' => $index,
-                    'id' => $residual->id,
-                    'period_date' => $monitoring->period_date,
-                    'incident_id' => $residual->incident->id,
-                    'risk_cause_number' => $residual->incident->risk_cause_number,
-                    'risk_chronology_body' => $worksheet->identification->risk_chronology_body,
-                    'risk_impact_category' => $worksheet->identification->risk_impact_category,
-                    'risk_mitigation_effectiveness' => $residual->risk_mitigation_effectiveness,
-                    'quarter' => $residual->quarter,
-                    "residual" => $values
-                ];
             }
+            $residual['residual'] = $values;
 
+            $actualizations = [];
             foreach ($monitoring->actualizations as $index => $actualization) {
                 $actualizations[] = [
                     'key' => $index,
                     'id' => $monitoring->actualizations[$index]->id,
                     'risk_cause_number' => $actualization->mitigation->incident->risk_cause_number,
+                    'risk_cause_body' => $actualization->mitigation->incident->risk_cause_body,
                     'actualization_mitigation_id' => $actualization->mitigation->id,
                     'actualization_mitigation_plan' => $actualization->mitigation->mitigation_plan,
                     'actualization_cost' => $monitoring->actualizations[$index]->actualization_cost,
                     'actualization_cost_absorption' => $monitoring->actualizations[$index]->actualization_cost_absorption,
-                    'quarter' => $monitoring->residuals[0]->quarter,
+                    'quarter' => $monitoring->residual->quarter,
                     'actualization_documents' => $monitoring->actualizations[$index]->documents,
                     'actualization_kri' => $actualization->mitigation->incident->kri_body,
                     'actualization_kri_threshold' => $monitoring->actualizations[$index]->kri_threshold ?? '',
                     'actualization_kri_threshold_score' => $monitoring->actualizations[$index]->kri_threshold_score ?? '',
                     'actualization_plan_body' => $monitoring->actualizations[$index]->actualization_plan_body,
                     'actualization_plan_output' => $monitoring->actualizations[$index]->actualization_plan_output,
-                    "actualization_plan_progress[{$monitoring->residuals[0]->quarter}]" => $monitoring->actualizations[$index]->actualization_plan_progress,
+                    "actualization_plan_progress[{$monitoring->residual->quarter}]" => $monitoring->actualizations[$index]->actualization_plan_progress,
                     'actualization_plan_status' => $monitoring->actualizations[$index]->actualization_plan_status,
                     'actualization_plan_explanation' => $monitoring->actualizations[$index]->actualization_plan_explanation,
                     'actualization_pic' => $actualization->mitigation->mitigation_pic,
@@ -470,7 +431,7 @@ class MonitoringController extends Controller
                         'risk_level' => $worksheet->identification->inherent_risk_level,
                         'risk_scale' => $worksheet->identification->inherent_risk_scale,
                     ],
-                    'residuals' => $residuals,
+                    'residual' => $residual,
                     'actualizations' => $actualizations,
                     'alteration' => $alteration,
                     'incident' => $incident,
@@ -501,75 +462,21 @@ class MonitoringController extends Controller
         $user = auth()->user();
         $monitoring = Monitoring::findByEncryptedIdOrFail($monitoring_id);
         $monitoring->load('last_history');
-        // $monitoring->load(['alteration', 'incident']);
         try {
             DB::beginTransaction();
-            $monitoring->update(['period_date' => $request->residuals[0]['period_date']]);
-            $residuals = [];
-            $residuals_new  = [];
-            foreach ($request->residuals as $residual) {
-                $_residual = [
-                    'worksheet_incident_id' => $residual['incident_id'],
-                    'quarter' => $residual['quarter'],
-                    'risk_mitigation_effectiveness' => (bool) $residual['risk_mitigation_effectiveness'],
-                ];
-
-                if (array_key_exists('residual', $residual)) {
-                    foreach ($residual['residual'] as $key => $item) {
-                        if ($item) {
-                            foreach ($item as $key => $value) {
-                                if ($key == 'impact_scale' || $key == 'impact_probability_scale') {
-                                    $_residual[$key . '_id'] = $value == 'Pilih' ? null : $value;
-                                } else {
-                                    $_residual[$key] = $value ?: '';
-                                }
-                            }
-                            break;
-                        }
-                    }
-                }
-
-                if ($residual['id']) {
-                    $monitoring->residuals()->where('id', $residual['id'])->update($_residual);
-                    $residuals[] = $_residual;
-                } else {
-                    $residuals_new[] = $_residual;
-                }
-            }
-
-            $monitoring->residuals()->createMany($residuals_new);
-
-            foreach ($request->alteration as $key => $value) {
-                $alteration[str_replace('alteration_', '', $key)] = $value ?: '';
-            }
-            $monitoring->alteration()->update($alteration);
-
-            $incident = [];
-            foreach ($request->incident as $key => $value) {
-                if (str_contains($key, 'category') || $key == 'incident_frequency') {
-                    $incident[$key . '_id'] = $value == 'Pilih' ? null : $value;
-                } else if ($key == 'incident_repetitive' || $key == 'insurance_status') {
-                    $incident[$key] = $value == 'Pilih' || $value == '0' ? false : $value;
-                } else {
-                    $incident[$key] = $value ?: '';
-                }
-            }
-            $monitoring->incident()->update($incident);
+            $monitoring->update(['period_date' => $request->residual['period_date']]);
+            $monitoring->residual()->create($this->residualRequestMapping($request->residual));
+            $monitoring->alteration()->update([
+                'body' => $request->alteration['alteration_body'] ?? '',
+                'impact' => $request->alteration['alteration_impact'] ?? '',
+                'description' => $request->alteration['alteration_description'] ?? '',
+            ]);
+            $monitoring->incident()->update($this->incidentRequestMapping($request->incident));
 
             $actualizations = [];
             $actualizations_new = [];
             foreach ($request->actualizations as $actual) {
-                $actualization = [];
-                foreach ($actual as $key => $value) {
-                    if (str_contains($key, 'kri')) {
-                        $actualization[str_replace('actualization_', '', $key)] = $value ?: '';
-                    } else if ($key == 'actualization_mitigation_id') {
-                        $actualization['worksheet_mitigation_id'] = $value ?: null;
-                    } else {
-                        $actualization[$key] = $value ?: '';
-                    }
-                }
-
+                $actualization = $this->actualizationRequestMapping($actual);
                 unset(
                     $actualization['actualization_documents'],
                     $actualization['key'],
@@ -581,8 +488,9 @@ class MonitoringController extends Controller
                 );
 
                 if ($actual['id']) {
-                    $monitoring->actualizations()->where('id', $actual['id'])->update($actualization);
-                    $actualizations[] = $actualization;
+                    $actualization = $monitoring->actualizations->where('id', $actual['id'])->first();
+                    $actualizations[] = $actualization->toArray();
+                    $actualization->update($this->actualizationRequestMapping($actual));
                 } else {
                     $actualizations_new[] = $actualization;
                 }
@@ -593,22 +501,19 @@ class MonitoringController extends Controller
             foreach ($request->actualizations as $key => $item) {
                 $directory = $user->sub_unit_code
                     . '/risk_monitoring/'
-                    . $monitoring->period_date_format->translatedFormat('F')
-                    . '/'
-                    . $item['actualization_mitigation_id'];
+                    . $monitoring->period_date_format->translatedFormat('F');
 
                 if (!Storage::disk('local')->exists($directory)) {
                     Storage::disk('local')->makeDirectory($directory);
                 }
 
                 $documents = [];
+
                 if ($request->hasFile("actualizations.{$item['key']}.actualization_documents")) {
-                    $files = $request->actualizations[$item['key']]['actualization_documents'];
+                    $files = $request->file("actualizations.{$item['key']}.actualization_documents");
                     if ($files) {
-                        foreach ($files as $file) {
-                            if (is_array($file)) {
-                                $documents[] = $file;
-                            } else if ($file) {
+                        foreach ($files as $key => $file) {
+                            if ($file->isValid()) {
                                 $id = Str::uuid();
 
                                 $file->storeAs($directory, $id . '.' . $file->getClientOriginalExtension());
@@ -625,10 +530,21 @@ class MonitoringController extends Controller
                                         ])
                                     )
                                 ];
+                                continue;
                             }
                         }
                     }
                 }
+
+                $files = $request->actualizations[$item['key']]['actualization_documents'];
+                if ($files) {
+                    foreach ($files as $key => $file) {
+                        if (is_array($file)) {
+                            $documents[] = $file;
+                        }
+                    }
+                }
+
                 if ($documents) {
                     if (array_key_exists($item['key'], $actualizations_new) && !$item['id']) {
                         $monitoring
@@ -800,5 +716,70 @@ class MonitoringController extends Controller
 
         $monitoring->update(['status' => $status->value]);
         return $monitoring->histories()->create($history);
+    }
+
+    protected function residualRequestMapping(?array $data = []): array
+    {
+        return [
+            'quarter' => $data['quarter'],
+            'impact_scale_id' => $data['impact_scale'] ?? null,
+            'impact_probability_scale_id' => $data['impact_probability_scale'] ?? null,
+            'impact_probability' => $data['impact_probability'] ?? 0,
+            'impact_value' => $data['impact_value'] ?? 0,
+            'risk_exposure' => $data['risk_exposure'] ?? 0,
+            'risk_level' => $data['risk_level'] ?? 0,
+            'risk_scale' => $data['risk_scale'] ?? 0,
+            'risk_mitigation_effectiveness' => string_to_bool($data['risk_mitigation_effectiveness']),
+        ];
+    }
+
+    protected function actualizationRequestMapping(?array $data = []): array
+    {
+        return [
+            'worksheet_mitigation_id' => $data['actualization_mitigation_id'] ?? null,
+            'actualization_mitigation_plan' => $data['actualization_mitigation_plan'] ?? '',
+            'actualization_cost' => $data['actualization_cost'] ?? '',
+            'actualization_cost_absorption' => $data['actualization_cost_absorption'] ?? '',
+            'quarter' => $data['quarter'] ?? '',
+            'documents' => '',
+            'kri_unit_id' => null,
+            'kri_threshold' => $data['actualization_kri_threshold'] ?? '',
+            'kri_threshold_score' => $data['actualization_kri_threshold_score'] ?? '',
+            'actualization_plan_body' => $data['actualization_plan_body'] ?? '',
+            'actualization_plan_output' => $data['actualization_plan_output'] ?? '',
+            'actualization_plan_status' => $data['actualization_plan_status'] ?? '',
+            'actualization_plan_explanation' => $data['actualization_plan_explanation'] ?? '',
+            'actualization_plan_progress' => $data['actualization_plan_progress'] ?? '',
+            'unit_code' => $data['unit_code'] ?? '',
+            'unit_name' => $data['unit_name'] ?? '',
+            'personnel_area_code' => $data['personnel_area_code'] ?? '',
+            'position_name' => $data['position_name'] ?? '',
+        ];
+    }
+
+    protected function incidentRequestMapping(?array $data = []): array
+    {
+        return [
+            'incident_body' => $data['incident_body'] ?? '',
+            'incident_identification' => $data['incident_identification'] ?? '',
+            'incident_category_id' => check_select_option_value($data['incident_category'] ?? ''),
+            'incident_source' => check_select_option_value($data['incident_source'] ?? ''),
+            'incident_cause' => $data['incident_cause'] ?? '',
+            'incident_handling' => $data['incident_handling'] ?? '',
+            'incident_description' => $data['incident_description'] ?? '',
+            'risk_category_t2_id' => check_select_option_value($data['risk_category_t2'] ?? ''),
+            'risk_category_t3_id' => check_select_option_value($data['risk_category_t3'] ?? ''),
+            'loss_description' => $data['loss_description'] ?? '',
+            'loss_value' => $data['loss_value'] ?? '',
+            'incident_repetitive' => string_to_bool($data['incident_repetitive'] ?? ''),
+            'incident_frequency_id' => check_select_option_value($data['incident_frequency'] ?? ''),
+            'mitigation_plan' => $data['mitigation_plan'] ?? '',
+            'actualization_plan' => $data['actualization_plan'] ?? '',
+            'follow_up_plan' => $data['follow_up_plan'] ?? '',
+            'related_party' => $data['related_party'] ?? '',
+            'insurance_status' => string_to_bool($data['insurance_status'] ?? ''),
+            'insurance_permit' => $data['insurance_permit'] ?? '',
+            'insurance_claim' => $data['insurance_claim'] ?? '',
+        ];
     }
 }

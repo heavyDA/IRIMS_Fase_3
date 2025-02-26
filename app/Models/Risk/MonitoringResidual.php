@@ -12,7 +12,6 @@ class MonitoringResidual extends Model
 
     protected $fillable = [
         'monitoring_id',
-        'worksheet_incident_id',
         'quarter',
         'impact_scale_id',
         'impact_probability_scale_id',

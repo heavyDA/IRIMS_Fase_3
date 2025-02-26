@@ -2,102 +2,100 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Master\Position;
 use App\Models\RBAC\Role;
 use App\Models\Risk\Monitoring;
+use App\Models\Risk\Worksheet;
 use App\Models\Risk\WorksheetIdentification;
 use App\Models\Risk\WorksheetMitigation;
+use App\Services\RoleService;
 use Illuminate\Support\Facades\DB;
+use Yajra\DataTables\Facades\DataTables;
 
 class DashboardController extends Controller
 {
+    public function __construct(private RoleService $roleService) {}
+
     public function index()
     {
         $user = auth()->user();
-        $current_role = session()?->get('current_role') ?? $user->roles()->first();
-        if (Role::hasLookUpUnitHierarchy()) {
-            $unit = request('unit') ? request('unit') . '%' : Role::getDefaultSubUnit();
-        } else {
-            $unit = Role::getDefaultSubUnit();
-        }
+        $currentRole = session()?->get('current_role', $user->roles()->first());
+        $currentUnit = session()?->get('current_unit', $user);
+        $level = get_unit_level($currentUnit->sub_unit_code);
+        $levels = $currentRole->name == 'risk admin' ? [$level, $level] : [$level, $level + 1];
 
-        $count_worksheet = DB::table('ra_worksheets')
-            ->where(function ($q) use ($unit, $current_role) {
-                $q->whereLike('ra_worksheets.sub_unit_code', $unit)
-                    ->orWhereLike('ra_worksheets.sub_unit_code', str_replace('.%', '', $unit));
-            })
-            ->when($current_role?->name == 'risk admin', fn($q) => $q->where('ra_worksheets.created_by', $user->employee_id))
-            ->selectRaw("
-                COALESCE(COUNT(IF(ra_worksheets.status = 'draft', 1, NULL))) as draft,
-                COALESCE(COUNT(IF(ra_worksheets.status != 'draft' and ra_worksheets.status != 'approved', 1, NULL))) as progress,
-                COALESCE(COUNT(IF(ra_worksheets.status = 'approved', 1, NULL))) as approved
-            ")
+        $count_worksheet = Worksheet::getCountByStatus($currentUnit?->sub_unit_code, $currentRole?->name == 'risk owner')
+            ->withExpression(
+                'position_hierarchy',
+                Position::hierarchyQuery(
+                    $currentUnit?->sub_unit_code,
+                    $currentRole?->name == 'risk owner'
+                )
+            )
+            ->join('position_hierarchy as ph', 'ra_worksheets.sub_unit_code', 'ph.sub_unit_code')
+            ->when(
+                $currentRole?->name == 'risk admin',
+                fn($q) => $q->where('ra_worksheets.created_by', $user->employee_id)
+                    ->whereBetween('ph.level', $levels)
+            )
             ->whereYear('ra_worksheets.created_at', request('year', date('Y')))
             ->first();
 
         $count_mitigation = WorksheetMitigation::whereHas(
             'worksheet',
             fn($q) => $q
-                ->where(function ($q) use ($unit, $current_role) {
-                    $q->whereLike('ra_worksheets.sub_unit_code', $unit)
-                        ->orWhereLike('ra_worksheets.sub_unit_code', str_replace('.%', '', $unit));
-                })
-                ->when($current_role?->name == 'risk admin', fn($q) => $q->where('ra_worksheets.created_by', $user->employee_id))
+                ->withExpression(
+                    'position_hierarchy',
+                    Position::hierarchyQuery(
+                        $currentUnit?->sub_unit_code,
+                        $currentRole?->name == 'risk owner'
+                    )
+                )
+                ->join('position_hierarchy as ph', 'ra_worksheets.sub_unit_code', 'ph.sub_unit_code')
+                ->when(
+                    $currentRole?->name == 'risk admin',
+                    fn($q) => $q->where('ra_worksheets.created_by', $user->employee_id)
+                        ->whereBetween('ph.level', $levels)
+                )
                 ->whereYear('ra_worksheets.created_at', request('year', date('Y')))
         )
             ->count();
 
-        $count_mitigation_monitoring = DB::table('ra_monitorings as m')
-            ->selectRaw('
-                COUNT(IF(ma.actualization_plan_status <> "discontinue", 1, NULL)) as progress,
-                COUNT(IF(ma.actualization_plan_status = "discontinue", 1, NULL)) as finished
-            ')
-            ->joinSub(
-                DB::table('ra_monitorings')
-                    ->select('worksheet_id', DB::raw('MAX(period_date) as period_date'))
-                    ->groupBy('worksheet_id'),
-                'latest',
-                function ($join) {
-                    $join->on('m.worksheet_id', '=', 'latest.worksheet_id');
-                    $join->on('m.period_date', '=', 'latest.period_date');
-                }
+        $count_mitigation_monitoring = Monitoring::getMonitoringByStatus()
+            ->withExpression(
+                'position_hierarchy',
+                Position::hierarchyQuery(
+                    $currentUnit?->sub_unit_code,
+                    $currentRole?->name == 'risk owner'
+                )
             )
-            ->leftJoin('ra_worksheets as w', 'w.id', '=', 'm.worksheet_id')
-            ->leftJoin('ra_monitoring_actualizations as ma', 'ma.monitoring_id', '=', 'm.id')
-            ->where(function ($q) use ($unit, $current_role) {
-                $q->whereLike('w.sub_unit_code', $unit)
-                    ->orWhereLike('w.sub_unit_code', str_replace('.%', '', $unit));
-            })
-            ->whereNotLike('w.personnel_area_code', 'Reg %')
-            ->when($current_role?->name == 'risk admin', fn($q) => $q->where('w.created_by', $user->employee_id))
+            ->join('position_hierarchy as ph', 'w.sub_unit_code', 'ph.sub_unit_code')
+            ->when(
+                $currentRole?->name == 'risk admin',
+                fn($q) => $q->where('w.created_by', $user->employee_id)
+                    ->whereBetween('ph.level', $levels)
+            )
             ->whereYear('w.created_at', request('year', date('Y')))
-            ->groupBy('m.id')
             ->first();
 
-        $level = Role::getTraverseLevel();
+        return view('dashboard.index', compact('count_worksheet', 'count_mitigation', 'count_mitigation_monitoring'));
+    }
 
-        $monitoring_progress = Monitoring::monitoring_progress_each_unit_query($unit, $level, request('year', date('Y')))
-            ->get()
-            ->map(function ($monitoring) {
-                $months = collect($monitoring)->flatten()->toArray();
+    public function get_monitoring_progress()
+    {
+        $monitorings = Worksheet::progressMonitoringQuery($this->roleService->getCurrentUnit()->sub_unit_code, request('year', date('Y')));
 
-                return (object) [
-                    'sub_unit_code' => $monitoring->sub_unit_code,
-                    'personnel_area_code' => $monitoring->personnel_area_code,
-                    'name' => "[{$monitoring->personnel_area_code}] {$monitoring->sub_unit_name}",
-                    'month' => array_splice($months, 4)
-                ];
-            })
-            ->sortBy('sub_unit_code');
-
-        return view('dashboard.index', compact('count_worksheet', 'count_mitigation', 'count_mitigation_monitoring', 'monitoring_progress'));
+        return DataTables::of($monitorings)
+            ->make(true);
     }
 
     public function inherent_risk_scale()
     {
-        $unit = Role::getDefaultSubUnit();
-        if (Role::hasLookUpUnitHierarchy()) {
-            $unit = request('unit') ? request('unit') . '%' : Role::getDefaultSubUnit();
-        }
+        $user = auth()->user();
+        $currentRole = session()?->get('current_role', $user->roles()->first());
+        $currentUnit = session()?->get('current_unit', $user);
+        $level = get_unit_level($currentUnit->sub_unit_code);
+        $levels = $currentRole->name == 'risk admin' ? [$level, $level] : [$level, $level + 1];
 
         $inherent_scales = DB::table('m_heatmaps')
             ->withExpression(
@@ -107,11 +105,19 @@ class DashboardController extends Controller
                     ->whereHas(
                         'worksheet',
                         fn($q) => $q
-                            ->where(
-                                fn($q) => $q->where('sub_unit_code', 'like', $unit)
-                                    ->orWhereLike('sub_unit_code', str_replace('.%', '', $unit))
+                            ->withExpression(
+                                'position_hierarchy',
+                                Position::hierarchyQuery(
+                                    $currentUnit?->sub_unit_code,
+                                    $currentRole?->name == 'risk owner'
+                                )
                             )
-                            ->when(session()->get('current_role')->name == 'risk admin', fn($q) => $q->where('created_by', auth()->user()->employee_id))
+                            ->join('position_hierarchy as ph', 'ra_worksheets.sub_unit_code', 'ph.sub_unit_code')
+                            ->when(
+                                $currentRole?->name == 'risk admin',
+                                fn($q) => $q->where('created_by', $user->employee_id)
+                                    ->whereBetween('ph.level', $levels)
+                            )
                             ->whereYear('created_at', request('year', date('Y')))
                     )
             )
@@ -126,12 +132,13 @@ class DashboardController extends Controller
         ]);
     }
 
-    public function residual_risk_scale()
+    public function target_residual_risk_scale()
     {
-        $unit = Role::getDefaultSubUnit();
-        if (Role::hasLookUpUnitHierarchy()) {
-            $unit = request('unit') ? request('unit') . '%' : Role::getDefaultSubUnit();
-        }
+        $user = auth()->user();
+        $currentRole = session()?->get('current_role', $user->roles()->first());
+        $currentUnit = session()?->get('current_unit', $user);
+        $level = get_unit_level($currentUnit->sub_unit_code);
+        $levels = $currentRole->name == 'risk admin' ? [$level, $level] : [$level, $level + 1];
 
         $residual_scales = DB::table('m_heatmaps')
             ->withExpression(
@@ -145,11 +152,65 @@ class DashboardController extends Controller
                         'i.risk_chronology_body'
                     )
                     ->leftJoin('ra_worksheet_identifications as i', 'w.id', '=', 'i.worksheet_id')
-                    ->where(
-                        fn($q) => $q->where('sub_unit_code', 'like', $unit)
-                            ->orWhereLike('sub_unit_code', str_replace('.%', '', $unit))
+                    ->withExpression(
+                        'position_hierarchy',
+                        Position::hierarchyQuery(
+                            $currentUnit?->sub_unit_code,
+                            $currentRole?->name == 'risk owner'
+                        )
                     )
-                    ->when(session()->get('current_role')->name == 'risk admin', fn($q) => $q->where('created_by', auth()->user()->employee_id))
+                    ->join('position_hierarchy as ph', 'w.sub_unit_code', 'ph.sub_unit_code')
+                    ->when(
+                        $currentRole?->name == 'risk admin',
+                        fn($q) => $q->where('created_by', $user->employee_id)
+                            ->whereBetween('ph.level', $levels)
+                    )
+                    ->whereYear('w.created_at', request('year', date('Y')))
+            )
+            ->selectRaw('m_heatmaps.risk_scale, m_heatmaps.risk_level, color, COUNT(m.worksheet_incident_id) as total')
+            ->leftJoin('monitorings as m', 'm.risk_scale', '=', 'm_heatmaps.risk_scale')
+            ->groupBy('risk_scale', 'risk_level')
+            ->get();
+
+        return response()->json([
+            'data' => $residual_scales,
+            'message' => 'success'
+        ]);
+    }
+
+    public function residual_risk_scale()
+    {
+        $user = auth()->user();
+        $currentRole = session()?->get('current_role', $user->roles()->first());
+        $currentUnit = session()?->get('current_unit', $user);
+        $level = get_unit_level($currentUnit->sub_unit_code);
+        $levels = $currentRole->name == 'risk admin' ? [$level, $level] : [$level, $level + 1];
+
+        $residual_scales = DB::table('m_heatmaps')
+            ->withExpression(
+                'worksheets',
+                DB::table('ra_worksheets as w')
+                    ->select(
+                        'w.id',
+                        'w.sub_unit_code',
+                        'w.sub_unit_name',
+                        'w.personnel_area_code',
+                        'i.risk_chronology_body'
+                    )
+                    ->leftJoin('ra_worksheet_identifications as i', 'w.id', '=', 'i.worksheet_id')
+                    ->withExpression(
+                        'position_hierarchy',
+                        Position::hierarchyQuery(
+                            $currentUnit?->sub_unit_code,
+                            $currentRole?->name == 'risk owner'
+                        )
+                    )
+                    ->join('position_hierarchy as ph', 'w.sub_unit_code', 'ph.sub_unit_code')
+                    ->when(
+                        $currentRole?->name == 'risk admin',
+                        fn($q) => $q->where('created_by', $user->employee_id)
+                            ->whereBetween('ph.level', $levels)
+                    )
                     ->whereYear('w.created_at', request('year', date('Y')))
             )
             ->withExpression(

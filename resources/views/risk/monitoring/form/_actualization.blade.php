@@ -133,9 +133,9 @@
                             <div class="col-3">
                                 Dokumen Pendukung<span class="text-danger">*</span>
                             </div>
-                            <div class="col">
+                            <div class="col-9 d-flex flex-column gap-1">
                                 <input type="file" class="form-control" name="actualization_document">
-                                <div id="actualization_document_wrapper" class="row d-none gap-2 mt-1 px-4"></div>
+                                <div id="actualization_document_wrapper" class="row d-none gap-2 mt-1 px-2"></div>
                             </div>
                         </div>
                         <div class="row mb-2">

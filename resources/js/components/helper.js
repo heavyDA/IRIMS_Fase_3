@@ -200,6 +200,10 @@ function generateRandomKey() {
     return Math.random().toString(12).replace('0.', '')
 }
 
+const renderHeatmapBadge = (value, color) => {
+    return `<div class="d-flex justify-content-center align-items-center"><span style="background-color: ${color};color: #212020" class="badge text-capitalize">${value}</span></div>`
+}
+
 export {
     defaultConfigFormatNumeral,
     defaultConfigQuill,
@@ -212,5 +216,6 @@ export {
     convertFileSize,
     buildFormData,
     jsonToFormData,
-    generateRandomKey
+    generateRandomKey,
+    renderHeatmapBadge
 }

@@ -35,7 +35,8 @@ class OfficialJob
             foreach ($officials as $official) {
                 $official = Official::updateOrCreate(
                     [
-                        'employee_id' => $official->employee_id
+                        'employee_id' => $official->employee_id,
+                        'sub_unit_code' => $official->sub_unit_code
                     ],
                     (array) $official
                 );
@@ -47,7 +48,7 @@ class OfficialJob
                 }
             }
 
-            logger()->info("[Official Job] successfully fetched data number of fetched {$count}");
+            logger()->info("[Official Job] successfully fetched data number of created {$created} and updated {$updated}");
         } catch (Exception $e) {
             DB::rollBack();
             logger()->error('[Official Job] ' . $e->getMessage());

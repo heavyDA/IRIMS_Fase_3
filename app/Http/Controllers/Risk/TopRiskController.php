@@ -5,10 +5,13 @@ namespace App\Http\Controllers\Risk;
 use App\Enums\DocumentStatus;
 use App\Enums\State;
 use App\Http\Controllers\Controller;
+use App\Models\Master\Position;
 use App\Models\RBAC\Role;
 use App\Models\Risk\Worksheet;
 use App\Models\Risk\WorksheetIncident;
 use App\Models\Risk\WorksheetTopRisk;
+use App\Services\PositionService;
+use App\Services\RoleService;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
@@ -18,36 +21,53 @@ use Yajra\DataTables\Facades\DataTables;
 
 class TopRiskController extends Controller
 {
+    public function __construct(
+        private RoleService $roleService,
+        private PositionService $positionService
+    ) {}
+
     public function index()
     {
-        if (Role::hasLookUpUnitHierarchy()) {
-            $unit = request('unit') ? request('unit') . '%' : Role::getDefaultSubUnit();
-        } else {
-            $unit = Role::getDefaultSubUnit();
-        }
-
         if (request()->ajax()) {
-            $risk_otorisator_permission = Role::risk_otorisator_top_risk_approval();
-            $level = Role::getLevel();
-            $source_unit = '';
-            if ($level == 0) {
-                $worksheets = Worksheet::top_risk_upper_query(str_replace('.%', '%', $unit))
-                    ->whereLike('wtr.sub_unit_code', str_replace('.%', '', $unit))
-                    ->whereYear('w.created_at', request('year', date('Y')))
-                    ->where('w.status', DocumentStatus::APPROVED->value);
-            } else if ($level == 1) {
-                $worksheets = Worksheet::top_risk_upper_query(str_replace('.%', '%', $unit))
-                    ->whereLike('wtr.sub_unit_code', str_replace('.%', '', $unit))
+            $unit = $this->roleService->getCurrentUnit();
+            $currentUnit = $this->roleService->getCurrentUnit();
+            $currentLevel = $this->roleService->getUnitLevel();
+
+            if (request('unit')) {
+                $unit = $this->positionService->getUnitBelow(
+                    $unit?->sub_unit_code,
+                    request('unit'),
+                    $this->roleService->isRiskOwner()
+                ) ?: $unit;
+            }
+
+            if ($currentLevel < 2) {
+                $worksheets = Worksheet::topRiskUpperQuery(
+                    $currentUnit->sub_unit_code,
+                    $currentUnit->sub_unit_code
+                )
+                    ->withExpression(
+                        'position_hierarchy',
+                        Position::hierarchyQuery(
+                            $unit?->sub_unit_code ?? '-',
+                            true
+                        )
+                    )
+                    ->join('position_hierarchy as ph', 'ph.sub_unit_code', 'w.sub_unit_code')
                     ->whereYear('w.created_at', request('year', date('Y')))
                     ->where('w.status', DocumentStatus::APPROVED->value);
             } else {
-                if (!$risk_otorisator_permission) {
-                    $source_unit = explode('.', str_replace('.%', '', $unit));
-                    $source_unit = implode('.', array_slice($source_unit, 0, 3)) . '%';
-                }
-
-                $worksheets = Worksheet::top_risk_lower_query($source_unit ?: str_replace('.%', '%', $unit))
-                    ->whereLike('w.sub_unit_code', str_replace('.%', '%', $unit))
+                $worksheets = Worksheet::topRiskLowerQuery(
+                    $currentLevel > 2 ? get_unit_manager($currentUnit->sub_unit_code) : $currentUnit->sub_unit_code
+                )
+                    ->withExpression(
+                        'position_hierarchy',
+                        Position::hierarchyQuery(
+                            $unit?->sub_unit_code ?? '-',
+                            $this->roleService->isRiskOwner()
+                        )
+                    )
+                    ->join('position_hierarchy as ph', 'ph.sub_unit_code', 'w.sub_unit_code')
                     ->whereYear('w.created_at', request('year', date('Y')))
                     ->where('w.status', DocumentStatus::APPROVED->value);
             }
@@ -85,29 +105,25 @@ class TopRiskController extends Controller
 
                     return view('risk.top_risk._table_status', compact('status', 'class', 'worksheet_number', 'route'))->render();
                 })
-                ->editColumn('top_risk_action', function ($worksheet) use ($risk_otorisator_permission, $source_unit, $unit, $level) {
-                    if ($level < 2) {
-                        if (
-                            $worksheet->submit_source_sub_unit_code == str_replace('.%', '', $unit)
-                        ) {
-                            return '<button type="button" class="btn btn-sm btn-success"><i class="ti ti-check"></i></button>';
-                        }
-                    } else {
-                        if (
-                            $worksheet->source_sub_unit_code == str_replace('.%', '', $unit) ||
-                            ($source_unit && $worksheet->source_sub_unit_code == str_replace('%', '', $source_unit))
-                        ) {
-                            return '<button type="button" class="btn btn-sm btn-success"><i class="ti ti-check"></i></button>';
-                        }
+                ->editColumn('top_risk_action', function ($worksheet) use ($currentLevel) {
+                    if (
+                        $currentLevel >= 2 && $worksheet->source_sub_unit_code
+                    ) {
+                        return view('risk.top_risk._table_checked');
+                    } else if ($currentLevel < 2 && $worksheet->top_risk_submit_id) {
+                        return view('risk.top_risk._table_checked');
                     }
 
-                    if ($level > 2 && !$risk_otorisator_permission) {
-                        return '';
+                    if (
+                        $this->roleService->isRiskOtorisatorTopRiskApproval() ||
+                        ($this->roleService->isRiskAnalis() && $currentLevel <= 2)
+                    ) {
+                        return view('risk.top_risk._table_checkbox', ['id' => $worksheet->id]);
                     }
 
-                    return '<input class="worksheet-selects" type="checkbox" name="worksheets[' . $worksheet->id . ']" value="' . $worksheet->id . '">';
+                    return '';
                 })
-                ->rawColumns(['status'])
+                ->rawColumns(['status', 'top_risk_action'])
                 ->make(true);
         }
 
@@ -118,39 +134,48 @@ class TopRiskController extends Controller
 
     public function get_for_dashboard()
     {
-        if (Role::hasLookUpUnitHierarchy()) {
-            $unit = request('unit') ? request('unit') . '%' : Role::getDefaultSubUnit();
-        } else {
-            $unit = Role::getDefaultSubUnit();
+        $unit = $this->roleService->getCurrentUnit();
+        $currentUnit = $this->roleService->getCurrentUnit();
+        $currentLevel = $this->roleService->getUnitLevel();
+
+        if (request('unit')) {
+            $unit = $this->positionService->getUnitBelow(
+                $unit?->sub_unit_code,
+                request('unit'),
+                $this->roleService->isRiskOwner()
+            ) ?: $unit;
         }
 
-        $level = Role::getLevel();
-        $risk_otorisator_permission = Role::risk_otorisator_top_risk_approval();
-        $source_unit = '';
-        if (!$risk_otorisator_permission) {
-            $source_unit = explode('.', str_replace('.%', '', $unit));
-            $source_unit = implode('.', array_slice($source_unit, 0, 3)) . '%';
-        }
-
-        if ($level == 0) {
-            $worksheets = Worksheet::top_risk_upper_dashboard_query(str_replace('.%', '', $unit))
-                ->whereLike('wtr.source_sub_unit_code', str_replace('.%', '', $unit))
-                ->where('w.status', DocumentStatus::APPROVED->value)
-                ->whereYear('w.created_at', request('year', date('Y')))
-                ->whereNotNull('wtr.id')
-                ->orderBy('w.id', 'desc')
-                ->groupBy('winc.id', 'wim.id');
-        } else if ($level == 1) {
-            $worksheets = Worksheet::top_risk_upper_dashboard_query(str_replace('.%', '%', $unit))
-                ->whereLike('wtr.sub_unit_code', str_replace('.%', '', $unit))
+        if ($currentLevel < 2) {
+            $worksheets = Worksheet::topRiskUpperDashboardQuery(
+                $currentUnit->sub_unit_code,
+                $currentUnit->sub_unit_code
+            )
+                ->withExpression(
+                    'position_hierarchy',
+                    Position::hierarchyQuery(
+                        $unit?->sub_unit_code ?? '-',
+                        true
+                    )
+                )
+                ->join('position_hierarchy as ph', 'ph.sub_unit_code', 'w.sub_unit_code')
                 ->where('w.status', DocumentStatus::APPROVED->value)
                 ->whereYear('w.created_at', request('year', date('Y')))
                 ->whereNotNull('wtr_submit.id')
                 ->orderBy('w.id', 'desc')
                 ->groupBy('winc.id', 'wim.id');
         } else {
-            $worksheets = Worksheet::top_risk_lower_dashboard_query($source_unit ?: str_replace('.%', '', $unit))
-                ->whereLike('w.sub_unit_code', str_replace('.%', '%', $unit))
+            $worksheets = Worksheet::topRiskLowerDashboardQuery(
+                $currentLevel > 2 ? get_unit_manager($currentUnit->sub_unit_code) : $currentUnit->sub_unit_code
+            )
+                ->withExpression(
+                    'position_hierarchy',
+                    Position::hierarchyQuery(
+                        $unit?->sub_unit_code ?? '-',
+                        true
+                    )
+                )
+                ->join('position_hierarchy as ph', 'ph.sub_unit_code', 'w.sub_unit_code')
                 ->where('w.status', DocumentStatus::APPROVED->value)
                 ->whereYear('w.created_at', request('year', date('Y')))
                 ->whereNotNull('wtr.id')
@@ -191,24 +216,16 @@ class TopRiskController extends Controller
 
                 return view('risk.top_risk._table_status', compact('status', 'class', 'worksheet_number', 'route'))->render();
             })
-            ->editColumn('top_risk_action', function ($worksheet) use ($unit, $source_unit, $level) {
-                if ($level < 2) {
-                    if (
-                        $worksheet->submit_source_sub_unit_code == str_replace('%', '', $unit)
-                    ) {
-                        return '<button type="button" class="btn btn-sm btn-success"><i class="ti ti-check"></i></button>';
-                    }
-                } else {
-                    if (
-                        $worksheet->source_sub_unit_code == str_replace('%', '', $unit) ||
-                        ($source_unit && $worksheet->source_sub_unit_code == $source_unit)
-                    ) {
-                        return '<button type="button" class="btn btn-sm btn-success"><i class="ti ti-check"></i></button>';
-                    }
+            ->editColumn('top_risk_action', function ($worksheet) use ($currentLevel) {
+                if (
+                    $currentLevel >= 2 && $worksheet->source_sub_unit_code
+                ) {
+                    return view('risk.top_risk._table_checked');
+                } else if ($currentLevel < 2 && $worksheet->top_risk_submit_id) {
+                    return view('risk.top_risk._table_checked');
                 }
 
-
-                return '<input class="worksheet-selects" type="checkbox" name="worksheets[' . $worksheet->id . ']" value="' . $worksheet->id . '">';
+                return '';
             })
             ->rawColumns(['status'])
             ->make(true);
@@ -233,7 +250,7 @@ class TopRiskController extends Controller
 
                     return [
                         'worksheet_id' => $worksheet->id,
-                        'sub_unit_code' => $user->sub_unit_code == 'ap' ? '' : $user->unit_code,
+                        'sub_unit_code' => $user->sub_unit_code == 'ap' ? 'root' : $user->unit_code,
                         'source_sub_unit_code' => $user->sub_unit_code,
                         'created_at' => now(),
                         'updated_at' => now(),

@@ -42,24 +42,26 @@
                 </div>
 
             </div>
-            <table id="worksheet-table" class="table table-bordered table-stripped display nowrap" style="width: 100%;">
+            <table id="worksheet-table" class="table table-bordered table-stripped display"
+                style="width: 100%;table-layout: fixed;border-collapse: collapse;">
                 <thead class="table-dark">
                     <tr>
-                        <th rowspan="2">No.</th>
-                        <th rowspan="2">Status</th>
-                        <th rowspan="2">Organisasi</th>
-                        <th rowspan="2">Pilihan Sasaran</th>
-                        <th rowspan="2">Peristiwa Risiko</th>
-                        <th rowspan="2">Rencana Pengendalian</th>
-                        <th rowspan="2">Realisasi Rencana Perlakuan</th>
-                        <th colspan="2">Risiko Inheren</th>
-                        <th colspan="2">Risiko Residual</th>
+                        <th class="table-dark-custom" rowspan="2">No.</th>
+                        <th class="table-dark-custom" rowspan="2">Status</th>
+                        <th class="table-dark-custom" rowspan="2">Organisasi</th>
+                        <th class="table-dark-custom" rowspan="2">Pilihan Sasaran</th>
+                        <th class="table-dark-custom" rowspan="2">Peristiwa Risiko</th>
+                        <th class="table-dark-custom" rowspan="2">Rencana Pengendalian</th>
+                        <th class="table-dark-custom" rowspan="2">Realisasi Rencana Perlakuan</th>
+                        <th class="table-dark-custom" colspan="2">Inheren</th>
+                        <th class="table-dark-custom" style="text-align: center !important;" colspan="2">Target Residual
+                        </th>
                     </tr>
                     <tr>
-                        <th>Level</th>
-                        <th>Skala Risiko</th>
-                        <th>Level</th>
-                        <th>Skala Risiko</th>
+                        <th class="table-dark-custom" style="text-align: center !important;">Level</th>
+                        <th class="table-dark-custom" style="text-align: center !important;">Skala Risiko</th>
+                        <th class="table-dark-custom" style="text-align: center !important;">Level</th>
+                        <th class="table-dark-custom" style="text-align: center !important;">Skala Risiko</th>
                     </tr>
                 </thead>
             </table>
@@ -105,7 +107,7 @@
                             @endif
                             @foreach ($units as $unit)
                                 <option value="{{ $unit->sub_unit_code }}">
-                                    [{{ $unit->personnel_area_code }}] {{ $unit->sub_unit_name }}</option>
+                                    [{{ $unit->branch_code }}] {{ $unit->sub_unit_name }}</option>
                             @endforeach
                         </select>
                     </div>

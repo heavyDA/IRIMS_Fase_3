@@ -9,7 +9,7 @@ import debounce from "js/utils/debounce";
 import axios from "axios";
 import dayjs from "dayjs";
 import 'dayjs/locale/id';
-import { convertFileSize, decodeHtml, defaultConfigChoices, defaultConfigFormatNumeral, defaultConfigQuill, defaultLocaleFlatpickr, formatDataToStructuredObject, jsonToFormData } from "js/components/helper";
+import { convertFileSize, decodeHtml, defaultConfigChoices, defaultConfigFormatNumeral, defaultConfigQuill, defaultLocaleFlatpickr, formatDataToStructuredObject, generateRandomKey, jsonToFormData } from "js/components/helper";
 import Swal from "sweetalert2";
 
 dayjs.locale('id');
@@ -17,7 +17,7 @@ dayjs.locale('id');
 let currentStep = 0;
 const totalStep = 6;
 const monitoring = {
-    residuals: {},
+    residual: {},
     actualizations: [],
     alteration: {},
     incident: {},
@@ -139,7 +139,7 @@ const fetchData = async () => {
                 const data = response.data.data
 
                 inherent = data.inherent
-                monitoring.residuals = data.residuals
+                monitoring.residual = data.residual
                 monitoring.actualizations = data.actualizations
                 monitoring.alteration = data.alteration
                 monitoring.incident = data.incident
@@ -162,16 +162,12 @@ const residualBlockOnMap = () => {
         circle.remove()
     }
 
-    monitoring.residuals.forEach((item, index) => {
-        const residual = item.residual[currentQuarter]
-        if (!residual) return
-
-
-        const block = document.querySelector(`#inherent-${residual.risk_scale}`)
+    if (monitoring.residual) {
+        const block = document.querySelector(`#inherent-${monitoring.residual?.residual[currentQuarter]?.risk_scale}`)
         if (block) {
             let [x, y] = [6, -4]
 
-            if (residual.risk_scale == inherent.risk_scale) {
+            if (monitoring.residual?.residual[currentQuarter]?.risk_scale == inherent?.risk_scale) {
                 x += parseInt(block.x.baseVal[0].value) + 14
                 y += parseInt(block.y.baseVal[0].value)
             } else {
@@ -181,21 +177,11 @@ const residualBlockOnMap = () => {
 
             block.parentNode.insertAdjacentHTML(`beforeend`, `<circle fill="#9A9B9D" r="6" cx="${x}" cy="${y}"/>`);
         }
-    })
-
+    }
 }
 
-let currentQuarter = 1;
+let currentQuarter = monitoring?.residual?.quarter ?? 1;
 const residualForm = document.querySelector('#residualForm');
-const residualFormButton = residualForm.querySelector('#residualFormButton');
-residualFormButton.addEventListener('click', e => {
-    residualFormSubmit(currentResidual)
-    Swal.fire({
-        icon: 'success',
-        title: 'Berhasil',
-        text: 'Realisasi Risiko Residual berhasil disimpan',
-    })
-});
 const residualRiskImpactCategory = residualForm.querySelector('[name="risk_impact_category"]');
 const residualTextareas = {};
 const residualQuills = {};
@@ -207,6 +193,7 @@ for (const textarea of residualForm.querySelectorAll('textarea')) {
 }
 
 const monitoringPeriodDate = residualForm.querySelector('[name="period_date"]')
+monitoringPeriodDate.value = monitoring.residual.period_date
 const monitoringPeriodPicker = flatpickr(monitoringPeriodDate, {
     enableTime: false,
     dateFormat: 'Y-m-d',
@@ -217,59 +204,18 @@ const monitoringPeriodPicker = flatpickr(monitoringPeriodDate, {
         const value = dayjs(dateStr)
         currentQuarter = Math.ceil((value.month() + 1) / 3)
 
-        monitoring.residuals.forEach((index, residual) => {
-            residualFormSubmit(index)
-        })
+        monitoring.residual.period_date = value.format('YYYY-MM-DD')
+        monitoring.residual.quarter = currentQuarter
         monitoringEnableQuarter(currentQuarter)
         calculateRisk(currentQuarter)
     }
 });
 
-const residualRiskCauseNumber = residualForm.querySelector('[name="risk_cause_number"]');
-const residualRiskCauseNumberChoices = new Choices(residualRiskCauseNumber, defaultConfigChoices);
 const residualRiskMitigationEffectiveness = residualForm.querySelector('[name="risk_mitigation_effectiveness"]');
-const riskNumbers = [];
-for (const [key, residual] of monitoring.residuals.entries()) {
-    riskNumbers.push({
-        value: key,
-        label: residual.risk_cause_number,
-        customProperties: residual,
-        selected: key == 0
-    })
-}
-
-residualRiskCauseNumberChoices.clearChoices().setChoices(riskNumbers);
-let currentResidual = 0;
-residualRiskCauseNumber.addEventListener('change', (e) => {
-
-    const selected = residualRiskCauseNumberChoices.getValue(false)
-    if (!selected) return
-    const item = selected.customProperties
-
-    currentResidual = selected.value
-    residualRiskImpactCategory.value = item.risk_impact_category
-
-    residualTextareas['risk_chronology_body'].value = item.risk_chronology_body
-    const decodeData = decodeHtml(decodeHtml(item.risk_chronology_body))
-    const parsedData = new DOMParser().parseFromString(decodeData, 'text/html')
-
-    residualQuills['risk_chronology_body'].root.innerHTML = parsedData.body ? parsedData.body.innerHTML : ''
-    residualQuills['risk_chronology_body'].emitter.emit('text-change')
-    let current = monitoring.residuals[currentResidual]
-    currentQuarter = current.quarter
-    let residual = {}
-    current?.residual?.forEach((item, key) => {
-        if (key == currentQuarter) {
-            residual = item
-        }
-    })
-
-    residualImpactValue[`residual[${currentQuarter}][impact_value]`].value = residual?.impact_value ? formatNumeral(residual.impact_value.replaceAll('.', ','), defaultConfigFormatNumeral) : ''
-    residualImpactScaleSelects[`residual[${currentQuarter}][impact_scale]`].setChoiceByValue(residual?.impact_scale?.toString() ?? 'Pilih')
-    residualImpactProbability[`residual[${currentQuarter}][impact_probability]`].value = residual?.impact_probability ?? ''
-    residualRiskMitigationEffectiveness.value = current?.risk_mitigation_effectiveness ?? ''
-
-    calculateRisk(currentQuarter)
+residualRiskMitigationEffectiveness.value = monitoring.residual.risk_mitigation_effectiveness
+new Choices(residualRiskMitigationEffectiveness, { ...defaultConfigChoices, searchEnabled: false })
+residualRiskMitigationEffectiveness.addEventListener('change', e => {
+    monitoring.residual.risk_mitigation_effectiveness = e.target.value
 })
 
 const residualImpactValue = {}
@@ -397,38 +343,19 @@ const calculateRisk = (quarter) => {
 
 }
 
-const residualFormSubmit = (index) => {
-    const data = {
-        'period_date': dayjs(monitoringPeriodPicker.selectedDates[0]).format('YYYY-MM-DD'),
-        'quarter': currentQuarter,
+let residual = {}
+monitoring?.residual?.residual.forEach((item, key) => {
+    if (key == currentQuarter) {
+        residual = item
     }
+})
 
-    for (const key of Object.keys(residualTextareas)) {
-        data[key] = residualTextareas[key].value
-    }
+residualImpactValue[`residual[${currentQuarter}][impact_value]`].value = residual?.impact_value ? formatNumeral(residual.impact_value.replaceAll('.', ','), defaultConfigFormatNumeral) : ''
+residualImpactScaleSelects[`residual[${currentQuarter}][impact_scale]`].setChoiceByValue(residual?.impact_scale?.toString() ?? 'Pilih')
+residualImpactProbability[`residual[${currentQuarter}][impact_probability]`].value = residual?.impact_probability ?? ''
 
-    for (let element of residualForm.querySelectorAll('input, select')) {
-        if (element.name.includes(`[${currentQuarter}]`)) {
-            if (element.name.includes('impact_probability_scale') || element.name.includes('impact_scale')) {
-                data[element.name] = element.value == 'Pilih' ? '' : element.value
-            } else if (element.name.includes('impact_value') || element.name.includes('risk_exposure')) {
-                data[element.name] = unformatNumeral(element.value, defaultConfigFormatNumeral)
-            } else {
-                data[element.name] = element.value
-            }
-        } else if (element.name == 'risk_mitigation_effectiveness') {
-            data[element.name] = element.value
-        }
-    }
+calculateRisk(currentQuarter)
 
-    monitoring.residuals[index] = {
-        ...monitoring.residuals[index],
-        ...formatDataToStructuredObject(data)
-    }
-}
-
-residualRiskCauseNumber.dispatchEvent(new Event('change'))
-const actualizationData = [];
 const actualizationFormTable = document.querySelector('#actualizationFormTable')
 const actualizationFormTableBody = actualizationFormTable.querySelector('tbody')
 
@@ -460,7 +387,7 @@ const actualizationPICRelatedChoice = new Choices(actualizationPICRelated, defau
 actualizationPICRelatedChoice.setChoices(
     fetchers.pics.reduce((pics, pic) => {
         pics.push({
-            value: pic.id.toString(),
+            value: pic.unit_code,
             label: `[${pic.personnel_area_code}] ${pic.position_name}`,
             customProperties: pic
         })
@@ -482,22 +409,28 @@ for (const input of actualizationForm.querySelectorAll('input, select')) {
             const files = e.target.files
             if (files.length != 0) {
                 for (const file of files) {
-                    const index = temporaryDocuments.length
-                    const item = document.createElement('div')
+                    file.id = generateRandomKey()
+                    file.url = URL.createObjectURL(file)
+
+                    const item = document.createElement('a')
+                    item.href = file.url
+                    item.target = '_blank'
+                    item.id = `actualization-document-items-${file.id}`
+                    item.classList.add('col-12', 'd-flex', 'align-items-center', 'justify-content-between', 'badge', 'bg-outline-dark', 'p-2')
+                    item.innerHTML = `<div style="max-width: '70%';" class="text-truncate">(${convertFileSize(file.size)}) ${file.name}</div>`
+
                     const button = document.createElement('button')
                     button.type = 'button'
                     button.classList.add('btn', 'btn-sm', 'btn-danger-light')
                     button.innerHTML = `<span><i class="ti ti-x"></i></span>`
-                    button.addEventListener('click', () => {
-                        temporaryDocuments = temporaryDocuments.filter((document, key) => key == index)
-                        actualizationDocumentWrapper.querySelector(`#actualization-document-items-${index}`).remove()
+                    button.addEventListener('click', e => {
+                        e.preventDefault()
+                        temporaryDocuments = temporaryDocuments.filter((document) => document.id != file.id)
+                        URL.revokeObjectURL(item.href)
+                        actualizationDocumentWrapper.querySelector(`#actualization-document-items-${file.id}`).remove()
                     })
 
-                    item.id = `actualization-document-items-${index}`
-                    item.classList.add('col-12', 'd-flex', 'align-items-center', 'justify-content-between', 'badge', 'bg-outline-dark', 'p-2')
-                    item.innerHTML = `<span>${file.name} (${convertFileSize(file.size)})</span>`
                     item.append(button)
-
                     actualizationDocumentWrapper.append(item)
                     temporaryDocuments.push(file)
                 }
@@ -508,6 +441,8 @@ for (const input of actualizationForm.querySelectorAll('input, select')) {
                     actualizationDocumentWrapper.classList.add('d-none')
                 }
             }
+
+            e.target.value = null
         })
 
         continue
@@ -522,7 +457,7 @@ const onActualizationSave = (data) => {
     editButton.classList.add('btn', 'btn-sm', 'btn-info-light')
     editButton.innerHTML = `<span><i class="ti ti-edit"></i></span>`
 
-    const picRelated = fetchers.pics.find(pic => pic.id.toString() == data.actualization_pic_related)
+    const picRelated = fetchers.pics.find(pic => pic.unit_code == data.actualization_pic_related)
     let picRelatedLabel = ''
     if (picRelated) {
         picRelatedLabel = `[${picRelated.personnel_area_code}] ${picRelated.position_name}`
@@ -552,6 +487,11 @@ const onActualizationSave = (data) => {
         actualizationEdit(data.key, data)
     })
     actualizationModal.hide()
+    Swal.fire({
+        icon: 'success',
+        title: 'Berhasil',
+        text: 'Realisasi Pelaksanaan Perlakuan Risiko dan Biaya berhasil disimpan',
+    })
 }
 
 monitoring.actualizations.forEach((actualization, index) => {
@@ -599,9 +539,9 @@ monitoring.actualizations.forEach((actualization, index) => {
 const actualizationEdit = (index, data) => {
     for (let key of Object.keys(data)) {
         if (key == 'actualization_pic_related') {
-            const pic = fetchers.pics.find(pic => pic.id.toString() == data[key] || pic.unit_code == data[key])
+            const pic = fetchers.pics.find(pic => pic.unit_code == data[key] || pic.unit_code == data[key])
             if (pic) {
-                actualizationPICRelatedChoice.setChoiceByValue(pic.id.toString());
+                actualizationPICRelatedChoice.setChoiceByValue(pic.unit_code);
             }
             continue;
         }
@@ -625,24 +565,26 @@ const actualizationEdit = (index, data) => {
 
     if (data?.actualization_documents?.length > 0) {
         for (const file of data.actualization_documents) {
-            const index = temporaryDocuments.length
             const item = document.createElement('a')
+            item.id = `actualization-document-items-${file.id}`
+            item.classList.add('col-12', 'd-flex', 'align-items-center', 'justify-content-between', 'badge', 'bg-outline-dark', 'p-2')
+            item.innerHTML = `<div style="max-width: '70%';" class="text-truncate">(${convertFileSize(file.size)}) ${file.name}</div>`
+            item.href = file instanceof File ? file.url : `/file/${file.url}`
+            item.target = '_blank'
+
+
             const button = document.createElement('button')
             button.type = 'button'
             button.classList.add('btn', 'btn-sm', 'btn-danger-light')
             button.innerHTML = `<span><i class="ti ti-x"></i></span>`
-            button.addEventListener('click', () => {
-                temporaryDocuments = temporaryDocuments.filter((document, key) => key == index)
-                actualizationDocumentWrapper.querySelector(`#actualization-document-items-${index}`).remove()
+            button.addEventListener('click', e => {
+                e.preventDefault();
+                temporaryDocuments = temporaryDocuments.filter((document) => document.id != file.id)
+                URL.revokeObjectURL(item.href)
+                actualizationDocumentWrapper.querySelector(`#actualization-document-items-${file.id}`).remove()
             })
 
-            item.id = `actualization-document-items-${index}`
-            item.classList.add('col-12', 'd-flex', 'align-items-center', 'justify-content-between', 'badge', 'bg-outline-dark', 'p-2')
-            item.innerHTML = `<span>${file.name} (${convertFileSize(file.size)})</span>`
-            item.href = `/file/${file.url}`
-            item.target = '_blank'
             item.append(button)
-
             actualizationDocumentWrapper.append(item)
             temporaryDocuments.push(file)
         }
@@ -680,7 +622,7 @@ actualizationModalElement.addEventListener('hidden.bs.modal', (e) => {
     actualizationPICRelatedChoice.setChoices(
         fetchers.pics.reduce((pics, pic) => {
             pics.push({
-                value: pic.id.toString(),
+                value: pic.unit_code,
                 label: `[${pic.personnel_area_code}] ${pic.position_name}`,
                 customProperties: pic
             })
@@ -719,7 +661,7 @@ const enableQuarterQualitative = (quarter) => {
 
             monitoring.actualizations.map(actualization => {
                 if (!actualization.hasOwnProperty(`actualization_plan_progress[${q}]`)) {
-                    actualization[`actualization_plan_progress[${q}]`] = q
+                    actualization[`actualization_plan_progress[${q}]`] = null
                 }
 
                 actualization.quarter = q
@@ -788,7 +730,7 @@ const enableQuarterQuantitative = (quarter) => {
 
             monitoring.actualizations.map(actualization => {
                 if (!actualization.hasOwnProperty(`actualization_plan_progress[${q}]`)) {
-                    actualization[`actualization_plan_progress[${q}]`] = q
+                    actualization[`actualization_plan_progress[${q}]`] = null
                 }
 
                 actualization.quarter = q
@@ -928,11 +870,9 @@ const save = async () => {
     const data = { ...monitoring }
     data.actualizations = data.actualizations.map(actualization => {
         actualization.actualization_plan_progress = actualization[`actualization_plan_progress[${currentQuarter}]`]
-        delete actualization[`actualization_plan_progress[${currentQuarter}]`]
 
-        const picRelated = fetchers.pics.find(pic => pic?.id?.toString() == actualization.actualization_pic_related)
+        const picRelated = fetchers.pics.find(pic => pic.unit_code == actualization.actualization_pic_related)
         if (picRelated) {
-            delete picRelated.id
             actualization = { ...actualization, ...picRelated }
         }
 
@@ -940,25 +880,26 @@ const save = async () => {
     })
 
     const formData = jsonToFormData(data)
-    formData.set('_method', 'PUT')
-
-    const response = await axios.post(window.location.href, formData);
-    const body = response.data
-    let redirect = false;
-
-    if (response.status == 200) {
-        redirect = body.data.redirect
-    }
-
-    Swal.fire({
-        icon: response.status == 200 ? 'success' : 'error',
-        title: response.status == 200 ? 'Berhasil' : 'Gagal',
-        text: body.message,
-    }).then(() => {
-        setTimeout(() => {
-            if (redirect) {
-                window.location.replace(redirect)
+    formData.append('_method', 'PUT')
+    axios.post(window.location.href, formData)
+        .then(
+            response => {
+                if (response.status == 200) {
+                    Swal.fire({
+                        icon: 'success',
+                        text: response.data.message,
+                    }).then(() => {
+                        setTimeout(() => {
+                            window.location.replace(response.data.data.redirect)
+                        }, 325);
+                    })
+                }
             }
-        }, 375);
-    })
+        )
+        .catch(error => {
+            Swal.fire({
+                icon: 'error',
+                text: error.response.data?.message ?? error?.message,
+            })
+        })
 }

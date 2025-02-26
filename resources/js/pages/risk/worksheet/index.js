@@ -280,6 +280,7 @@ const fetchers = {
     heat_maps: [],
     unit_head: { pic_name: '', pic_position_name: '', pic_personnel_area_code: '', pic_personnel_area_name: '', pic_organization_code: '', pic_organization_name: '', pic_unit_code: '', pic_unit_name: '', pic_sub_unit_code: '', pic_sub_unit_name: '' },
     risk_metric: {},
+    risk_categories: [],
 }
 
 const fetchData = async () => {
@@ -288,6 +289,7 @@ const fetchData = async () => {
         axios.get('/master/data/heatmaps'),
         axios.get('/profile/unit_head'),
         axios.get('/profile/risk_metric'),
+        axios.get('/master/data/risk-categories'),
     ]).then(res => {
         for (let [index, key] of Object.keys(fetchers).entries()) {
             if (res[index].status == 'fulfilled') {
@@ -517,6 +519,37 @@ const identificationRiskImpact = identificationForm.querySelector('[name="risk_i
 
 const identificationRiskCategoryT2Choices = new Choices(identificationRiskCategoryT2, defaultConfigChoices);
 const identificationRiskCategoryT3Choices = new Choices(identificationRiskCategoryT3, defaultConfigChoices);
+identificationRiskCategoryT2Choices.setChoices(
+    fetchers.risk_categories
+        .filter(item => item.type == 'T2')
+        .map(item => ({
+            value: item.id,
+            label: item.name,
+            customProperties: item
+        }))
+)
+identificationRiskCategoryT2.addEventListener('change', e => {
+    const current = identificationRiskCategoryT2Choices.getValue()
+
+    if (current?.value?.toString()?.toLowerCase() != 'pilih') {
+        identificationRiskCategoryT3Choices
+            .clearChoices()
+            .setChoices(
+                fetchers.risk_categories
+                    .filter(item => item.parent_id == current.customProperties.id)
+                    .map(item => ({
+                        value: item.id,
+                        label: item.name,
+                        customProperties: item
+                    }))
+            )
+            .enable()
+    } else {
+        identificationRiskCategoryT3Choices.clearChoices().disable();
+    }
+})
+identificationRiskCategoryT3Choices.disable();
+
 const identificationExistingControlTypeChoices = new Choices(identificationExistingControlType, defaultConfigChoices);
 const identificationControlEffectivenessAssessmentChoices = new Choices(identificationControlEffectivenessAssessment, defaultConfigChoices);
 const identificationRiskImpactChoices = new Choices(identificationRiskImpact, defaultConfigChoices);
@@ -1073,7 +1106,6 @@ const addIncidentRow = (data) => {
         data.key,
         (data) => onIncidentEdit(data),
         (data) => {
-            console.log(data)
             worksheet.incidents = worksheet.incidents
                 .filter(item => item.key != data.key)
                 .map((item, key) => {
@@ -1231,7 +1263,6 @@ const addTreatmentRow = (data) => {
     const buttonCell = document.createElement('td');
     buttonCell.appendChild(editButton);
     buttonCell.appendChild(removeButton);
-    console.log(data)
     row.id = `treatment-${data.key}`;
     row.innerHTML = `
         <td>${data.risk_cause_number}</td>

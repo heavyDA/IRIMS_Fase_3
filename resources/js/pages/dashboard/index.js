@@ -3,7 +3,7 @@ import ApexCharts from "apexcharts"
 import Swal from "sweetalert2"
 import Choices from "choices.js"
 import { formatNumeral } from "cleave-zen"
-import { decodeHtml, defaultConfigChoices, defaultConfigFormatNumeral } from "js/components/helper"
+import { decodeHtml, defaultConfigChoices, defaultConfigFormatNumeral, renderHeatmapBadge } from "js/components/helper"
 import createDatatable from "js/components/datatable"
 
 const dashboardFilter = document.querySelector('#dashboard-filter')
@@ -23,13 +23,13 @@ selectYear.addEventListener('change', e => dashboardFilter.submit());
 
 let fetchers = {
     inherent_scales: [],
-    residual_scales: []
+    residual_scales: [],
 }
 
 const fetchData = async () => {
     await Promise.allSettled([
-        axios.get('/analytics/inherent-risk-scale'),
-        axios.get('/analytics/residual-risk-scale'),
+        axios.get(`/analytics/inherent-risk-scale?year=${selectYear.value}`),
+        axios.get(`/analytics/residual-risk-scale?year=${selectYear.value}`),
     ]).then(res => {
         for (let [index, key] of Object.keys(fetchers).entries()) {
             if (res[index].status == 'fulfilled') {
@@ -65,25 +65,29 @@ fetchers?.inherent_scales?.forEach((inherent_scale) => {
 
 });
 
-fetchers?.residual_scales?.forEach((residual_scale) => {
-    let riskText = document.querySelector(`#residual-${residual_scale.risk_scale}`)
-    riskText.innerHTML = residual_scale.total ? residual_scale.total : ''
+const setResidualRiskMap = () => {
+    fetchers?.residual_scales?.forEach((residual_scale) => {
+        let riskText = document.querySelector(`#residual-${residual_scale.risk_scale}`)
+        riskText.innerHTML = residual_scale.total ? residual_scale.total : ''
 
 
-    riskText.parentNode.addEventListener('click', e => {
-        if (residual_scale.total == 0) {
-            Swal.fire({
-                icon: 'info',
-                html: `Tidak terdapat data pada <strong class="text-capitalize">Skala ${residual_scale.risk_level}</strong>`,
-            })
-            return
-        }
+        riskText.parentNode.addEventListener('click', e => {
+            if (residual_scale.total == 0) {
+                Swal.fire({
+                    icon: 'info',
+                    html: `Tidak terdapat data pada <strong class="text-capitalize">Skala ${residual_scale.risk_level}</strong>`,
+                })
+                return
+            }
 
-        openModalResidual(residual_scale.risk_scale)
-    })
+            openModalResidual(residual_scale.risk_scale)
+        })
 
 
-});
+    });
+}
+
+setResidualRiskMap()
 
 const openModalInherent = (inherentScale) => {
     riskMapInherentModal.show()
@@ -96,15 +100,17 @@ const openModalInherent = (inherentScale) => {
 
         table.innerHTML = `<thead class="table-dark">
                             <tr>
-                                <th class="text-center" rowspan="2">No. Risiko</th>
-                                <th class="text-center" rowspan="2">Organisasi</th>
-                                <th class="text-center" rowspan="2">Peristiwa Risiko</th>
-                                <th class="text-center" rowspan="2">Kategori Risiko T2 & T3</th>
-                                <th class="text-center" colspan="2">Risiko Inheren</th>
+                                <th class="table-dark-custom" rowspan="2">No. Risiko</th>
+                                <th class="table-dark-custom" rowspan="2">Organisasi</th>
+                                <th class="table-dark-custom" rowspan="2">Peristiwa Risiko</th>
+                                <th class="table-dark-custom" rowspan="2">Kategori Risiko T2 & T3</th>
+                                <th class="table-dark-custom" style="text-align: center !important;" colspan="3">Inheren</th>
+                                <th class="table-dark-custom" rowspan="2">Tanggal</th>
                             </tr>
                             <tr>
-                                <th class="text-center">Level Risiko</th>
-                                <th class="text-center">Eksposur Risiko</th>
+                                <th class="table-dark-custom" style="text-align: center !important;">Level Risiko</th>
+                                <th class="table-dark-custom" style="text-align: center !important;">Skala Risiko</th>
+                                <th class="table-dark-custom" style="text-align: center !important;">Eksposur Risiko</th>
                             </tr>
                         </thead>`
 
@@ -119,93 +125,201 @@ const openModalInherent = (inherentScale) => {
 
         setTimeout(
             () => {
+                const columns = [
+                    {
+                        sortable: false,
+                        data: 'worksheet_number',
+                        name: 'worksheet_number',
+                        width: '120px',
+                    },
+                    {
+                        sortable: false,
+                        data: 'sub_unit_name',
+                        name: 'sub_unit_name',
+                        width: '256px',
+                        render: function (data, type, row) {
+                            if (type !== 'display') {
+                                return data
+                            }
+
+                            return `[${row.personnel_area_code}] ${row.sub_unit_name}`
+                        }
+                    },
+                    {
+                        sortable: false,
+                        data: 'risk_chronology_body',
+                        name: 'risk_chronology_body',
+                        width: '256px',
+                        render: function (data, type, row) {
+                            if (type !== 'display') {
+                                return data
+                            }
+
+                            if (!data) {
+                                return ''
+                            }
+
+                            const decodeData = decodeHtml(decodeHtml(data))
+                            const parsedData = new DOMParser().parseFromString(decodeData, 'text/html')
+
+                            return parsedData.body ? parsedData.body.innerHTML : ''
+                        }
+                    },
+                    {
+                        sortable: false,
+                        data: 'risk_category_t2_name',
+                        name: 'risk_category_t2_name',
+                        width: '100px',
+                        render: function (data, type, row) {
+                            if (type !== 'display') {
+                                return data
+                            }
+
+                            return `${data} & ${row.risk_category_t3_name}`
+                        }
+                    },
+                    {
+                        sortable: false,
+                        data: 'inherent_impact_probability_level',
+                        name: 'inherent_impact_probability_level',
+                        width: '100px',
+                        render: (data, type, row) => {
+                            if (type !== 'display') {
+                                return data
+                            }
+
+                            if (!data) {
+                                return data
+                            }
+
+                            return renderHeatmapBadge(data, row.inherent_impact_probability_color)
+                        }
+                    },
+                    {
+                        sortable: false,
+                        data: 'inherent_impact_probability_scale',
+                        name: 'inherent_impact_probability_scale',
+                        width: '100px',
+                    },
+                    {
+                        sortable: false,
+                        data: 'inherent_risk_exposure',
+                        name: 'inherent_risk_exposure',
+                        width: '100px',
+                        render: function (data, type, row) {
+                            if (type !== 'display') {
+                                return data
+                            }
+
+                            return formatNumeral(data.replaceAll('.', ','), defaultConfigFormatNumeral)
+                        }
+                    },
+                    {
+                        orderable: true,
+                        data: 'created_at',
+                        name: 'created_at',
+                        visible: false
+                    }
+                ]
                 datatableInherent = createDatatable(table, {
                     handleColumnSearchField: false,
                     responsive: true,
                     serverSide: true,
                     ordering: false,
                     processing: true,
-                    ajax: `/risk-process/worksheet/get-by-inherent-risk-scale/${inherentScale}`,
+                    ajax: {
+                        url: `/risk-process/worksheet/get-by-inherent-risk-scale/${inherentScale}`,
+                        data: function (d) {
+                            d.year = selectYear.value
+                        }
+                    },
                     scrollX: true,
-                    fixedColumns: true,
+                    fixedColumns: {
+                        start: 2
+                    },
                     lengthChange: false,
-                    pageLength: -1,
-                    paging: false,
+                    pageLength: 10,
+                    paging: true,
                     scrollCollapse: true,
                     scrollY: '74vh',
-                    columns: [
-                        {
-                            sortable: false,
-                            data: 'worksheet_number',
-                            name: 'worksheet_number',
-                            width: '120px',
-                        },
-                        {
-                            sortable: false,
-                            data: 'sub_unit_name',
-                            name: 'sub_unit_name',
-                            width: '256px',
-                            render: function (data, type, row) {
-                                if (type !== 'display') {
-                                    return data
-                                }
+                    columns: columns,
+                    order: [[columns.length - 1, 'desc']],
+                    drawCallback: function (settings) {
+                        const api = this.api();
+                        const columnsToMerge = [0, 1, 2, 3, 4, 5, 6];
 
-                                return `[${row.personnel_area_code}] ${row.sub_unit_name}`
+                        // Reset all cells visibility first
+                        api.cells().every(function () {
+                            const node = this.node();
+                            if (node) {
+                                node.style.display = '';
+                                node.setAttribute('rowspan', 1);
                             }
-                        },
-                        {
-                            sortable: false,
-                            data: 'identification.risk_chronology_body',
-                            name: 'identification.risk_chronology_body',
-                            width: '256px',
-                            render: function (data, type, row) {
-                                if (type !== 'display') {
-                                    return data
-                                }
+                        });
 
-                                if (!data) {
-                                    return ''
-                                }
-
-                                const decodeData = decodeHtml(decodeHtml(data))
-                                const parsedData = new DOMParser().parseFromString(decodeData, 'text/html')
-
-                                return parsedData.body ? parsedData.body.innerHTML : ''
+                        // Group rows by worksheet ID
+                        const groups = {};
+                        api.rows({ page: 'current' }).every(function (rowIdx) {
+                            const data = this.data();
+                            const worksheetNumber = data.worksheet_number;
+                            if (!groups[worksheetNumber]) {
+                                groups[worksheetNumber] = [];
                             }
-                        },
-                        {
-                            sortable: false,
-                            data: 'identification.risk_category_t2',
-                            name: 'identification.risk_category_t2',
-                            width: '100px',
-                            render: function (data, type, row) {
-                                if (type !== 'display') {
-                                    return data
-                                }
+                            groups[worksheetNumber].push(rowIdx);
+                        });
 
-                                return `${row.identification.risk_category_t2.name} & ${row.identification.risk_category_t3.name}`
-                            }
-                        },
-                        {
-                            sortable: false,
-                            data: 'identification.inherent_risk_level',
-                            name: 'identification.inherent_risk_level',
-                            width: '100px',
-                        },
-                        {
-                            sortable: false,
-                            data: 'identification.inherent_risk_exposure',
-                            name: 'identification.inherent_risk_exposure',
-                            width: '100px',
-                            render: function (data, type, row) {
-                                if (type !== 'display') {
-                                    return data
-                                }
+                        // Process each column for each worksheet group separately
+                        Object.values(groups).forEach(groupRows => {
+                            columnsToMerge.forEach(colIdx => {
+                                let lastValue = null;
+                                let rowsToMerge = 1;
+                                let firstRow = null;
 
-                                return formatNumeral(data.replaceAll('.', ','), defaultConfigFormatNumeral)
-                            }
-                        }
-                    ]
+                                groupRows.forEach(rowIdx => {
+                                    const value = api.cell(rowIdx, colIdx).data();
+                                    const currentCell = api.cell(rowIdx, colIdx).node();
+
+                                    let equalStatusButton = false;
+
+                                    if (lastValue === null) {
+                                        lastValue = value;
+                                        firstRow = rowIdx;
+                                        return;
+                                    }
+
+                                    if (colIdx == 1) {
+                                        equalStatusButton = value.includes(`key="${currentCell.children[0]?.dataset.key ?? 'x'}"`)
+                                    }
+
+                                    // Strict comparison for values
+                                    if (JSON.stringify(lastValue) === JSON.stringify(value) || equalStatusButton) {
+                                        rowsToMerge++;
+                                        if (currentCell) {
+                                            currentCell.style.display = 'none';
+                                        }
+                                    } else {
+                                        if (rowsToMerge > 1) {
+                                            const firstCell = api.cell(firstRow, colIdx).node();
+                                            if (firstCell) {
+                                                firstCell.setAttribute('rowspan', rowsToMerge);
+                                            }
+                                        }
+                                        lastValue = value;
+                                        firstRow = rowIdx;
+                                        rowsToMerge = 1;
+                                    }
+                                });
+
+                                // Handle the last group
+                                if (rowsToMerge > 1) {
+                                    const firstCell = api.cell(firstRow, colIdx).node();
+                                    if (firstCell) {
+                                        firstCell.setAttribute('rowspan', rowsToMerge);
+                                    }
+                                }
+                            });
+                        });
+                    }
                 })
             }, 275
         )
@@ -228,233 +342,192 @@ const openModalResidual = (residualScale) => {
         table.classList.add('table', 'table-bordered', 'table-striped', 'display', 'nowrap')
         table.style.width = '100%'
 
-        table.innerHTML = `<thead class="table-dark">
+        table.innerHTML = `<thead>
                             <tr>
-                                <th class="text-center" rowspan="2">No. Risiko</th>
-                                <th class="text-center" rowspan="2">Organisasi</th>
-                                <th class="text-center" rowspan="2">Peristiwa Risiko</th>
-                                <th class="text-center" rowspan="2">Penyebab Risiko</th>
-                                <th class="text-center" rowspan="2">Kategori Risiko T2 & T3</th>
-                                <th class="text-center" colspan="2">Risiko Inheren</th>
-                                <th class="text-center" colspan="2">Risiko Residual</th>
-                            </tr>
+                                <th class="table-dark-custom" rowspan="2">No. Risiko</th>
+                                <th class="table-dark-custom" rowspan="2">Organisasi</th>
+                                <th class="table-dark-custom" rowspan="2">Peristiwa Risiko</th>
+                                <th class="table-dark-custom" rowspan="2">Kategori Risiko T2 & T3</th>
+                                <th class="table-dark-custom" style="text-align: center !important;" colspan="3">Inheren</th>
+                                <th class="table-dark-custom" style="text-align: center !important;" colspan="3">Residual</th>
+                                <th class="table-dark-custom" rowspan="2">Tanggal</th>
+                                </tr>
                             <tr>
-                                <th class="text-center">Level Risiko</th>
-                                <th class="text-center">Eksposur Risiko</th>
-                                <th class="text-center">Level Risiko</th>
-                                <th class="text-center">Eksposur Risiko</th>
+                                <th class="table-dark-custom" style="text-align: center !important;">Level Risiko</th>
+                                <th class="table-dark-custom" style="text-align: center !important;">Skala Risiko</th>
+                                <th class="table-dark-custom" style="text-align: center !important;">Eksposur Risiko</th>
+                                <th class="table-dark-custom" style="text-align: center !important;">Level Risiko</th>
+                                <th class="table-dark-custom" style="text-align: center !important;">Skala Risiko</th>
+                                <th class="table-dark-custom" style="text-align: center !important;">Eksposur Risiko</th>
                             </tr>
                         </thead>`
 
         riskMapResidualTableWrapper.innerHTML = ''
         riskMapResidualTableWrapper.append(table)
-
         if (datatableResidual) {
             datatableResidual.clear()
             datatableResidual.destroy()
             datatableResidual = null
         }
-
         setTimeout(
             () => {
+                const columns = [
+                    {
+                        sortable: false,
+                        data: 'worksheet_number',
+                        name: 'worksheet_number',
+                        width: '120px',
+                    },
+                    {
+                        sortable: false,
+                        data: 'sub_unit_name',
+                        name: 'sub_unit_name',
+                        width: '256px',
+                        render: function (data, type, row) {
+                            if (type !== 'display') {
+                                return data
+                            }
+
+                            return `[${row.personnel_area_code}] ${data}`
+                        }
+                    },
+                    {
+                        sortable: false,
+                        data: 'risk_chronology_body',
+                        name: 'risk_chronology_body',
+                        width: '256px',
+                        render: function (data, type, row) {
+                            if (type !== 'display') {
+                                return data
+                            }
+
+                            if (!data) {
+                                return ''
+                            }
+
+                            const decodeData = decodeHtml(decodeHtml(data))
+                            const parsedData = new DOMParser().parseFromString(decodeData, 'text/html')
+
+                            return parsedData.body ? parsedData.body.innerHTML : ''
+                        }
+                    },
+                    {
+                        sortable: false,
+                        data: 'risk_category_t2_name',
+                        name: 'risk_category_t2_name',
+                        defaultContent: '',
+                        width: '100px',
+                        render: function (data, type, row) {
+                            if (type !== 'display') {
+                                return data
+                            }
+
+                            return `${data} & ${row.risk_category_t3_name}`
+                        }
+                    },
+                    {
+                        sortable: false,
+                        data: 'inherent_risk_level',
+                        name: 'inherent_risk_level',
+                        width: '100px',
+                        render: function (data, type, row) {
+                            if (type !== 'display') {
+                                return data
+                            }
+
+                            if (!data) {
+                                return data
+                            }
+
+                            return renderHeatmapBadge(data, row.inherent_risk_color)
+                        }
+                    },
+                    {
+                        sortable: false,
+                        data: 'inherent_risk_scale',
+                        name: 'inherent_risk_scale',
+                        width: '100px',
+                    },
+                    {
+                        sortable: false,
+                        data: 'inherent_risk_exposure',
+                        name: 'inherent_risk_exposure',
+                        width: '100px',
+                        render: function (data, type, row) {
+                            if (type !== 'display') {
+                                return data
+                            }
+
+                            return formatNumeral(data.replaceAll('.', ','), defaultConfigFormatNumeral)
+                        }
+                    },
+                    {
+                        sortable: false,
+                        data: 'residual_risk_level',
+                        name: 'residual_risk_level',
+                        width: '100px',
+                        render: function (data, type, row) {
+                            if (type !== 'display') {
+                                return data
+                            }
+
+                            if (!data) {
+                                return data
+                            }
+
+                            return renderHeatmapBadge(data, row.residual_risk_color)
+                        }
+                    },
+                    {
+                        sortable: false,
+                        data: 'residual_risk_scale',
+                        name: 'residual_risk_scale',
+                        width: '100px',
+                    },
+                    {
+                        sortable: false,
+                        data: 'residual_risk_exposure',
+                        name: 'residual_risk_exposure',
+                        width: '100px',
+                        render: function (data, type, row) {
+                            if (type !== 'display') {
+                                return data
+                            }
+
+                            return formatNumeral(data.replaceAll('.', ','), defaultConfigFormatNumeral)
+                        }
+                    },
+                    {
+                        orderable: true,
+                        name: 'created_at',
+                        data: 'created_at',
+                        visible: false
+                    }
+                ];
+
                 datatableResidual = createDatatable(table, {
                     handleColumnSearchField: false,
-                    responsive: true,
+                    responsive: false,
                     serverSide: true,
                     ordering: false,
                     processing: true,
-                    ajax: `/risk-process/worksheet/get-by-actualization-risk-scale/${residualScale}`,
+                    ajax: {
+                        url: `/risk-process/worksheet/get-by-actualization-risk-scale/${residualScale}`,
+                        data: function (d) {
+                            d.year = selectYear.value
+                        }
+                    },
                     scrollX: true,
-                    fixedColumns: true,
+                    fixedColumns: {
+                        start: 2
+                    },
                     lengthChange: false,
-                    pageLength: -1,
-                    paging: false,
+                    pageLength: 10,
+                    paging: true,
                     scrollCollapse: true,
                     scrollY: '74vh',
-                    drawCallback: function (settings) {
-                        const api = this.api()
-                        const columnsToMerge = [0, 1, 2, 3, 5, 6]
-
-                        // Reset all cells visibility first
-                        api.cells().every(function () {
-                            const node = this.node()
-                            if (node) {
-                                node.style.display = ''
-                                node.setAttribute('rowspan', 1)
-                            }
-                        })
-
-                        // Group rows by worksheet ID
-                        const groups = {}
-                        api.rows({ page: 'current' }).every(function (rowIdx) {
-                            const data = this.data()
-                            const worksheetNumber = data.monitoring.worksheet.worksheet_number
-                            if (!groups[worksheetNumber]) {
-                                groups[worksheetNumber] = []
-                            }
-                            groups[worksheetNumber].push(rowIdx)
-                        })
-
-                        // Process each column for each worksheet group separately
-                        Object.values(groups).forEach(groupRows => {
-                            columnsToMerge.forEach(colIdx => {
-                                let lastValue = null
-                                let rowsToMerge = 1
-                                let firstRow = null
-
-                                groupRows.forEach(rowIdx => {
-                                    const value = api.cell(rowIdx, colIdx).data()
-                                    const currentCell = api.cell(rowIdx, colIdx).node()
-
-                                    let equalStatusButton = false
-
-                                    if (lastValue === null) {
-                                        lastValue = value
-                                        firstRow = rowIdx
-                                        return
-                                    }
-
-                                    // Strict comparison for values
-                                    if (JSON.stringify(lastValue) === JSON.stringify(value) || equalStatusButton) {
-                                        rowsToMerge++
-                                        if (currentCell) {
-                                            currentCell.style.display = 'none'
-                                        }
-                                    } else {
-                                        if (rowsToMerge > 1) {
-                                            const firstCell = api.cell(firstRow, colIdx).node()
-                                            if (firstCell) {
-                                                firstCell.setAttribute('rowspan', rowsToMerge)
-                                            }
-                                        }
-                                        lastValue = value
-                                        firstRow = rowIdx
-                                        rowsToMerge = 1
-                                    }
-                                })
-
-                                // Handle the last group
-                                if (rowsToMerge > 1) {
-                                    const firstCell = api.cell(firstRow, colIdx).node()
-                                    if (firstCell) {
-                                        firstCell.setAttribute('rowspan', rowsToMerge)
-                                    }
-                                }
-                            })
-                        })
-                    },
-                    columns: [
-                        {
-                            sortable: false,
-                            data: 'monitoring.worksheet.worksheet_number',
-                            name: 'monitoring.worksheet.worksheet_number',
-                            width: '120px',
-                        },
-                        {
-                            sortable: false,
-                            data: 'monitoring.worksheet.sub_unit_name',
-                            name: 'monitoring.worksheet.sub_unit_name',
-                            width: '256px',
-                            render: function (data, type, row) {
-                                if (type !== 'display') {
-                                    return data
-                                }
-
-                                return `[${row.monitoring.worksheet.personnel_area_code}] ${row.monitoring.worksheet.sub_unit_name}`
-                            }
-                        },
-                        {
-                            sortable: false,
-                            data: 'monitoring.worksheet.identification.risk_chronology_body',
-                            name: 'monitoring.worksheet.identification.risk_chronology_body',
-                            width: '256px',
-                            render: function (data, type, row) {
-                                if (type !== 'display') {
-                                    return data
-                                }
-
-                                if (!data) {
-                                    return ''
-                                }
-
-                                const decodeData = decodeHtml(decodeHtml(data))
-                                const parsedData = new DOMParser().parseFromString(decodeData, 'text/html')
-
-                                return parsedData.body ? parsedData.body.innerHTML : ''
-                            }
-                        },
-                        {
-                            sortable: false,
-                            data: 'incident.risk_cause_body',
-                            name: 'incident.risk_cause_body',
-                            width: '256px',
-                            render: function (data, type, row) {
-                                if (type !== 'display') {
-                                    return data
-                                }
-
-                                if (!data) {
-                                    return ''
-                                }
-
-                                const decodeData = decodeHtml(decodeHtml(data))
-                                const parsedData = new DOMParser().parseFromString(decodeData, 'text/html')
-
-                                return parsedData.body ? parsedData.body.innerHTML : ''
-                            }
-                        },
-                        {
-                            sortable: false,
-                            data: 'monitoring.worksheet.identification.risk_category_t2',
-                            name: 'monitoring.worksheet.identification.risk_category_t2',
-                            width: '100px',
-                            render: function (data, type, row) {
-                                if (type !== 'display') {
-                                    return data
-                                }
-
-                                return `${row.monitoring.worksheet.identification.risk_category_t2.name} & ${row.monitoring.worksheet.identification.risk_category_t3.name}`
-                            }
-                        },
-                        {
-                            sortable: false,
-                            data: 'monitoring.worksheet.identification.inherent_risk_level',
-                            name: 'monitoring.worksheet.identification.inherent_risk_level',
-                            width: '100px',
-                        },
-                        {
-                            sortable: false,
-                            data: 'monitoring.worksheet.identification.inherent_risk_exposure',
-                            name: 'monitoring.worksheet.identification.inherent_risk_exposure',
-                            width: '100px',
-                            render: function (data, type, row) {
-                                if (type !== 'display') {
-                                    return data
-                                }
-
-                                return formatNumeral(data.replaceAll('.', ','), defaultConfigFormatNumeral)
-                            }
-                        },
-                        {
-                            sortable: false,
-                            data: 'risk_level',
-                            name: 'risk_level',
-                            width: '100px',
-                        },
-                        {
-                            sortable: false,
-                            data: 'risk_exposure',
-                            name: 'risk_exposure',
-                            width: '100px',
-                            render: function (data, type, row) {
-                                if (type !== 'display') {
-                                    return data
-                                }
-
-                                return formatNumeral(data.replaceAll('.', ','), defaultConfigFormatNumeral)
-                            }
-                        }
-                    ]
+                    columns: columns,
+                    order: [[columns.length - 1, 'desc']]
                 })
             }, 275
         )
@@ -518,25 +591,29 @@ const inherentRiskLevelChart = new ApexCharts(
 )
 inherentRiskLevelChart.render()
 
-let actualRiskLevelData = []
-riskLevels.forEach((level, index) => {
-    fetchers.residual_scales.filter(x => x.risk_level == level).forEach(
-        item => {
-            if (typeof actualRiskLevelData[index] === 'undefined') {
-                actualRiskLevelData[index] = item.total
-                return
+let riskLevelData = []
+const mapRiskLevelData = () => {
+    riskLevels.forEach((level, index) => {
+        fetchers.residual_scales.filter(x => x.risk_level == level).forEach(
+            item => {
+                if (typeof riskLevelData[index] === 'undefined') {
+                    riskLevelData[index] = item.total
+                    return
+                }
+
+                riskLevelData[index] += item.total
             }
+        )
+    })
+}
 
-            actualRiskLevelData[index] += item.total
-        }
-    )
-})
+mapRiskLevelData()
 
-const actualRiskLevelChart = new ApexCharts(
-    document.querySelector('#actual-risk-level-chart'),
+const riskLevelChart = new ApexCharts(
+    document.querySelector('#risk-level-chart'),
     {
         series: [
-            { data: actualRiskLevelData }
+            { data: riskLevelData }
         ],
         chart: {
             type: 'bar',
@@ -558,4 +635,22 @@ const actualRiskLevelChart = new ApexCharts(
         colors: riskLevelColors
     }
 )
-actualRiskLevelChart.render()
+riskLevelChart.render()
+
+const riskLevelSelect = document.querySelector('#risk-level-select')
+new Choices(riskLevelSelect, { ...defaultConfigChoices, ...{ searchEnabled: false } })
+
+riskLevelSelect.addEventListener('change', async e => {
+    if (['residual', 'target-residual'].includes(e.target.value)) {
+        const response = await axios.get(`/analytics/${e.target.value}-risk-scale`)
+
+        if (response.status == 200) {
+            fetchers.residual_scales = response.data.data
+            riskLevelData = []
+            mapRiskLevelData()
+            riskLevelChart.updateSeries([
+                { data: riskLevelData }
+            ])
+        }
+    }
+});

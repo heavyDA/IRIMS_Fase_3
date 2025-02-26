@@ -73,29 +73,29 @@ function switcherClick() {
     loaderDisable = document.querySelector('#switcher-loader-disable');
 
     // primary theme
-    let primaryColor1Var = primaryDefaultColor1Btn.addEventListener('click', () => {
+    let primaryColor1Var = primaryDefaultColor1Btn?.addEventListener('click', () => {
         localStorage.setItem("primaryRGB", "130, 111, 255");
         html.style.setProperty('--primary-rgb', `130, 111, 255`);
     })
-    let primaryColor2Var = primaryDefaultColor2Btn.addEventListener('click', () => {
+    let primaryColor2Var = primaryDefaultColor2Btn?.addEventListener('click', () => {
         localStorage.setItem("primaryRGB", "48, 139, 211");
         html.style.setProperty('--primary-rgb', `48, 139, 211`);
     })
-    let primaryColor3Var = primaryDefaultColor3Btn.addEventListener('click', () => {
+    let primaryColor3Var = primaryDefaultColor3Btn?.addEventListener('click', () => {
         localStorage.setItem("primaryRGB", "0, 149, 140");
         html.style.setProperty('--primary-rgb', `0, 149, 140`);
     })
-    let primaryColor4Var = primaryDefaultColor4Btn.addEventListener('click', () => {
+    let primaryColor4Var = primaryDefaultColor4Btn?.addEventListener('click', () => {
         localStorage.setItem("primaryRGB", "138, 59, 203");
         html.style.setProperty('--primary-rgb', `138, 59, 203`);
     })
-    let primaryColor5Var = primaryDefaultColor5Btn.addEventListener('click', () => {
+    let primaryColor5Var = primaryDefaultColor5Btn?.addEventListener('click', () => {
         localStorage.setItem("primaryRGB", "97, 110, 7");
         html.style.setProperty('--primary-rgb', `97, 110, 7`);
     })
 
     // Background theme
-    let backgroundColor1Var = bgDefaultColor1Btn.addEventListener('click', () => {
+    let backgroundColor1Var = bgDefaultColor1Btn?.addEventListener('click', () => {
         localStorage.setItem('bodyBgRGB', "53, 3, 141");
         localStorage.setItem('bodylightRGB', "67, 19, 151");
         html.setAttribute('data-theme-mode', 'dark');
@@ -113,7 +113,7 @@ function switcherClick() {
         localStorage.setItem("zynixMenu", "dark");
         localStorage.setItem("zynixHeader", "dark");
     })
-    let backgroundColor2Var = bgDefaultColor2Btn.addEventListener('click', () => {
+    let backgroundColor2Var = bgDefaultColor2Btn?.addEventListener('click', () => {
         localStorage.setItem('bodyBgRGB', "0, 84, 151");
         localStorage.setItem('bodylightRGB', "22, 92, 149");
         html.setAttribute('data-theme-mode', 'dark');
@@ -131,7 +131,7 @@ function switcherClick() {
         localStorage.setItem("zynixMenu", "dark");
         localStorage.setItem("zynixHeader", "dark");
     })
-    let backgroundColor3Var = bgDefaultColor3Btn.addEventListener('click', () => {
+    let backgroundColor3Var = bgDefaultColor3Btn?.addEventListener('click', () => {
         localStorage.setItem('bodyBgRGB', "0, 86, 81");
         localStorage.setItem('bodylightRGB', "0, 96, 91");
         html.setAttribute('data-theme-mode', 'dark');
@@ -149,7 +149,7 @@ function switcherClick() {
         localStorage.setItem("zynixMenu", "dark");
         localStorage.setItem("zynixHeader", "dark");
     })
-    let backgroundColor4Var = bgDefaultColor4Btn.addEventListener('click', () => {
+    let backgroundColor4Var = bgDefaultColor4Btn?.addEventListener('click', () => {
         localStorage.setItem('bodyBgRGB', "73, 0, 133");
         localStorage.setItem('bodylightRGB', "84, 16, 141");
         html.setAttribute('data-theme-mode', 'dark');
@@ -167,7 +167,7 @@ function switcherClick() {
         localStorage.setItem("zynixMenu", "dark");
         localStorage.setItem("zynixHeader", "dark");
     })
-    let backgroundColor5Var = bgDefaultColor5Btn.addEventListener('click', () => {
+    let backgroundColor5Var = bgDefaultColor5Btn?.addEventListener('click', () => {
         localStorage.setItem('bodyBgRGB', "45, 52, 0");
         localStorage.setItem('bodylightRGB', "54, 62, 0");
         html.setAttribute('data-theme-mode', 'dark');
@@ -187,29 +187,29 @@ function switcherClick() {
     })
 
     // Bg image
-    let bgImg1Var = bgImage1Btn.addEventListener('click', () => {
+    let bgImg1Var = bgImage1Btn?.addEventListener('click', () => {
         html.setAttribute('data-bg-img', 'bgimg1')
         localStorage.setItem("bgimg", "bgimg1")
     })
-    let bgImg2Var = bgImage2Btn.addEventListener('click', () => {
+    let bgImg2Var = bgImage2Btn?.addEventListener('click', () => {
         html.setAttribute('data-bg-img', 'bgimg2')
         localStorage.setItem("bgimg", "bgimg2")
     })
-    let bgImg3Var = bgImage3Btn.addEventListener('click', () => {
+    let bgImg3Var = bgImage3Btn?.addEventListener('click', () => {
         html.setAttribute('data-bg-img', 'bgimg3')
         localStorage.setItem("bgimg", "bgimg3")
     })
-    let bgImg4Var = bgImage4Btn.addEventListener('click', () => {
+    let bgImg4Var = bgImage4Btn?.addEventListener('click', () => {
         html.setAttribute('data-bg-img', 'bgimg4')
         localStorage.setItem("bgimg", "bgimg4")
     })
-    let bgImg5Var = bgImage5Btn.addEventListener('click', () => {
+    let bgImg5Var = bgImage5Btn?.addEventListener('click', () => {
         html.setAttribute('data-bg-img', 'bgimg5')
         localStorage.setItem("bgimg", "bgimg5")
     })
 
     /* Light Layout Start */
-    let lightThemeVar = lightBtn.addEventListener('click', () => {
+    let lightThemeVar = lightBtn?.addEventListener('click', () => {
         lightFn();
         localStorage.setItem("zynixHeader", 'light');
         localStorage.removeItem("bodylightRGB")
@@ -222,7 +222,7 @@ function switcherClick() {
     /* Light Layout End */
 
     /* Dark Layout Start */
-    let darkThemeVar = darkBtn.addEventListener('click', () => {
+    let darkThemeVar = darkBtn?.addEventListener('click', () => {
         darkFn();
         localStorage.setItem("zynixMenu", 'dark');
         localStorage.setItem("zynixHeader", 'dark');
@@ -233,77 +233,77 @@ function switcherClick() {
     /* Dark Layout End */
 
     /* Light Menu Start */
-    let lightMenuVar = lightMenuBtn.addEventListener('click', () => {
+    let lightMenuVar = lightMenuBtn?.addEventListener('click', () => {
         html.setAttribute('data-menu-styles', 'light');
         localStorage.setItem("zynixMenu", 'light');
     });
     /* Light Menu End */
 
     /* Color Menu Start */
-    let colorMenuVar = colorMenuBtn.addEventListener('click', () => {
+    let colorMenuVar = colorMenuBtn?.addEventListener('click', () => {
         html.setAttribute('data-menu-styles', 'color');
         localStorage.setItem("zynixMenu", 'color');
     });
     /* Color Menu End */
 
     /* Dark Menu Start */
-    let darkMenuVar = darkMenuBtn.addEventListener('click', () => {
+    let darkMenuVar = darkMenuBtn?.addEventListener('click', () => {
         html.setAttribute('data-menu-styles', 'dark');
         localStorage.setItem("zynixMenu", 'dark');
     });
     /* Dark Menu End */
 
     /* Gradient Menu Start */
-    let gradientMenuVar = gradientMenuBtn.addEventListener('click', () => {
+    let gradientMenuVar = gradientMenuBtn?.addEventListener('click', () => {
         html.setAttribute('data-menu-styles', 'gradient');
         localStorage.setItem("zynixMenu", 'gradient');
     });
     /* Gradient Menu End */
 
     /* Transparent Menu Start */
-    let transparentMenuVar = transparentMenuBtn.addEventListener('click', () => {
+    let transparentMenuVar = transparentMenuBtn?.addEventListener('click', () => {
         html.setAttribute('data-menu-styles', 'transparent');
         localStorage.setItem("zynixMenu", 'transparent');
     });
     /* Transparent Menu End */
 
     /* Light Header Start */
-    let lightHeaderVar = lightHeaderBtn.addEventListener('click', () => {
+    let lightHeaderVar = lightHeaderBtn?.addEventListener('click', () => {
         html.setAttribute('data-header-styles', 'light');
         localStorage.setItem("zynixHeader", 'light');
     });
     /* Light Header End */
 
     /* Color Header Start */
-    let colorHeaderVar = colorHeaderBtn.addEventListener('click', () => {
+    let colorHeaderVar = colorHeaderBtn?.addEventListener('click', () => {
         html.setAttribute('data-header-styles', 'color');
         localStorage.setItem("zynixHeader", 'color');
     });
     /* Color Header End */
 
     /* Dark Header Start */
-    let darkHeaderVar = darkHeaderBtn.addEventListener('click', () => {
+    let darkHeaderVar = darkHeaderBtn?.addEventListener('click', () => {
         html.setAttribute('data-header-styles', 'dark');
         localStorage.setItem("zynixHeader", 'dark');
     });
     /* Dark Header End */
 
     /* Gradient Header Start */
-    let gradientHeaderVar = gradientHeaderBtn.addEventListener('click', () => {
+    let gradientHeaderVar = gradientHeaderBtn?.addEventListener('click', () => {
         html.setAttribute('data-header-styles', 'gradient');
         localStorage.setItem("zynixHeader", 'gradient');
     });
     /* Gradient Header End */
 
     /* Transparent Header Start */
-    let transparentHeaderVar = transparentHeaderBtn.addEventListener('click', () => {
+    let transparentHeaderVar = transparentHeaderBtn?.addEventListener('click', () => {
         html.setAttribute('data-header-styles', 'transparent');
         localStorage.setItem("zynixHeader", 'transparent');
     });
     /* Transparent Header End */
 
     /* Default Width Layout Start */
-    let defaultwidthVar = defaultwidthBtn.addEventListener('click', () => {
+    let defaultwidthVar = defaultwidthBtn?.addEventListener('click', () => {
         html.setAttribute('data-width', 'default');
         localStorage.setItem("zynixdefaultwidth", true);
         localStorage.removeItem("zynixboxed");
@@ -312,7 +312,7 @@ function switcherClick() {
     /* Default Width Layout End */
 
     /* Full Width Layout Start */
-    let fullwidthVar = fullwidthBtn.addEventListener('click', () => {
+    let fullwidthVar = fullwidthBtn?.addEventListener('click', () => {
         html.setAttribute('data-width', 'fullwidth');
         localStorage.setItem("zynixfullwidth", true);
         localStorage.removeItem("zynixboxed");
@@ -321,7 +321,7 @@ function switcherClick() {
     /* Full Width Layout End */
 
     /* Boxed Layout Start */
-    let boxedVar = boxedBtn.addEventListener('click', () => {
+    let boxedVar = boxedBtn?.addEventListener('click', () => {
         html.setAttribute('data-width', 'boxed');
         localStorage.setItem("zynixboxed", true);
         localStorage.removeItem("zynixfullwidth");
@@ -331,7 +331,7 @@ function switcherClick() {
     /* Boxed Layout End */
 
     /* Regular page style Start */
-    let shadowVar = regular.addEventListener('click', () => {
+    let shadowVar = regular?.addEventListener('click', () => {
         html.setAttribute('data-page-style', 'regular');
         localStorage.setItem("zynixregular", true);
         localStorage.removeItem("zynixclassic");
@@ -340,7 +340,7 @@ function switcherClick() {
     /* Regular page style End */
 
     /* Classic page style Start */
-    let noShadowVar = classic.addEventListener('click', () => {
+    let noShadowVar = classic?.addEventListener('click', () => {
         html.setAttribute('data-page-style', 'classic');
         localStorage.setItem("zynixclassic", true);
         localStorage.removeItem("zynixregular");
@@ -349,7 +349,7 @@ function switcherClick() {
     /* Classic page style End */
 
     /* modern page style Start */
-    let modernVar = modern.addEventListener('click', () => {
+    let modernVar = modern?.addEventListener('click', () => {
         html.setAttribute('data-page-style', 'modern');
         localStorage.setItem("zynixmodern", true);
         localStorage.removeItem("zynixregular");
@@ -358,13 +358,13 @@ function switcherClick() {
     /* modern page style End */
 
     /* Header-Position Styles Start */
-    let fixedHeaderVar = fixedHeaderBtn.addEventListener('click', () => {
+    let fixedHeaderVar = fixedHeaderBtn?.addEventListener('click', () => {
         html.setAttribute('data-header-position', 'fixed');
         localStorage.setItem("zynixheaderfixed", true);
         localStorage.removeItem("zynixheaderscrollable");
     });
 
-    let scrollHeaderVar = scrollHeaderBtn.addEventListener('click', () => {
+    let scrollHeaderVar = scrollHeaderBtn?.addEventListener('click', () => {
         html.setAttribute('data-header-position', 'scrollable');
         localStorage.setItem("zynixheaderscrollable", true);
         localStorage.removeItem("zynixheaderfixed");
@@ -372,13 +372,13 @@ function switcherClick() {
     /* Header-Position Styles End */
 
     /* Menu-Position Styles Start */
-    let fixedMenuVar = fixedMenuBtn.addEventListener('click', () => {
+    let fixedMenuVar = fixedMenuBtn?.addEventListener('click', () => {
         html.setAttribute('data-menu-position', 'fixed');
         localStorage.setItem("zynixmenufixed", true);
         localStorage.removeItem("zynixmenuscrollable");
     });
 
-    let scrollMenuVar = scrollMenuBtn.addEventListener('click', () => {
+    let scrollMenuVar = scrollMenuBtn?.addEventListener('click', () => {
         html.setAttribute('data-menu-position', 'scrollable');
         localStorage.setItem("zynixmenuscrollable", true);
         localStorage.removeItem("zynixmenufixed");
@@ -386,7 +386,7 @@ function switcherClick() {
     /* Menu-Position Styles End */
 
     /* Default Sidemenu Start */
-    let defaultVar = defaultBtn.addEventListener('click', () => {
+    let defaultVar = defaultBtn?.addEventListener('click', () => {
         html.setAttribute('data-vertical-style', 'fullwidth');
         html.setAttribute('data-nav-layout', 'vertical')
         toggleSidemenu();
@@ -402,7 +402,7 @@ function switcherClick() {
     /* Default Sidemenu End */
 
     /* Closed Sidemenu Start */
-    let closedVar = closedBtn.addEventListener('click', () => {
+    let closedVar = closedBtn?.addEventListener('click', () => {
         closedSidemenuFn();
         localStorage.setItem("zynixverticalstyles", 'closed');
         document.querySelectorAll(".main-menu>li.open").forEach((ele) => {
@@ -415,21 +415,21 @@ function switcherClick() {
     /* Closed Sidemenu End */
 
     /* Hover Submenu Start */
-    let detachedVar = detachedBtn.addEventListener('click', () => {
+    let detachedVar = detachedBtn?.addEventListener('click', () => {
         detachedFn();
         localStorage.setItem("zynixverticalstyles", 'detached');
     });
     /* Hover Submenu End */
 
     /* Icon Text Sidemenu Start */
-    let iconTextVar = iconTextBtn.addEventListener('click', () => {
+    let iconTextVar = iconTextBtn?.addEventListener('click', () => {
         iconTextFn();
         localStorage.setItem("zynixverticalstyles", 'icontext');
     });
     /* Icon Text Sidemenu End */
 
     /* Icon Overlay Sidemenu Start */
-    let overlayVar = overlayBtn.addEventListener('click', () => {
+    let overlayVar = overlayBtn?.addEventListener('click', () => {
         iconOverayFn();
         localStorage.setItem("zynixverticalstyles", 'overlay');
         document.querySelectorAll(".main-menu>li.open").forEach((ele) => {
@@ -442,14 +442,14 @@ function switcherClick() {
     /* Icon Overlay Sidemenu End */
 
     /* doublemenu Sidemenu Start */
-    let doubleVar = doubleBtn.addEventListener('click', () => {
+    let doubleVar = doubleBtn?.addEventListener('click', () => {
         doubletFn();
         localStorage.setItem("zynixverticalstyles", 'doublemenu');
     });
     /* doublemenu Sidemenu End */
 
     /* Menu Click Sidemenu Start */
-    let menuClickVar = menuClickBtn.addEventListener('click', () => {
+    let menuClickVar = menuClickBtn?.addEventListener('click', () => {
         html.removeAttribute('data-vertical-style');
         menuClickFn();
         localStorage.setItem("zynixnavstyles", 'menu-click');
@@ -469,7 +469,7 @@ function switcherClick() {
     /* Menu Click Sidemenu End */
 
     /* Menu Hover Sidemenu Start */
-    let menuhoverVar = menuHoverBtn.addEventListener('click', () => {
+    let menuhoverVar = menuHoverBtn?.addEventListener('click', () => {
         html.removeAttribute('data-vertical-style');
         menuhoverFn();
         localStorage.setItem("zynixnavstyles", 'menu-hover');
@@ -484,7 +484,7 @@ function switcherClick() {
     /* Menu Hover Sidemenu End */
 
     /* icon Click Sidemenu Start */
-    let iconClickVar = iconClickBtn.addEventListener('click', () => {
+    let iconClickVar = iconClickBtn?.addEventListener('click', () => {
         html.removeAttribute('data-vertical-style');
         iconClickFn();
         localStorage.setItem("zynixnavstyles", 'icon-click');
@@ -506,7 +506,7 @@ function switcherClick() {
     /* icon Click Sidemenu End */
 
     /* icon hover Sidemenu Start */
-    let iconhoverVar = iconHoverBtn.addEventListener('click', () => {
+    let iconhoverVar = iconHoverBtn?.addEventListener('click', () => {
         html.removeAttribute('data-vertical-style');
         iconHoverFn();
         localStorage.setItem("zynixnavstyles", 'icon-hover');
@@ -522,7 +522,7 @@ function switcherClick() {
     /* icon hover Sidemenu End */
 
     /* Sidemenu start*/
-    let verticalVar = verticalBtn.addEventListener('click', () => {
+    let verticalVar = verticalBtn?.addEventListener('click', () => {
         let mainContent = document.querySelector('.main-content');
         // local storage
         localStorage.removeItem("zynixlayout");
@@ -547,7 +547,7 @@ function switcherClick() {
     /* Sidemenu end */
 
     /* horizontal start*/
-    let horiVar = horiBtn.addEventListener('click', () => {
+    let horiVar = horiBtn?.addEventListener('click', () => {
         let mainContent = document.querySelector('.main-content');
         html.removeAttribute('data-vertical-style');
         //    local storage
@@ -563,12 +563,12 @@ function switcherClick() {
         }
         horizontalClickFn();
         clearNavDropdown();
-        mainContent.addEventListener('click', clearNavDropdown);
+        mainContent?.addEventListener('click', clearNavDropdown);
     });
     /* horizontal end*/
 
     // reset all start
-    let resetVar = ResetAll.addEventListener('click', () => {
+    let resetVar = ResetAll?.addEventListener('click', () => {
         ResetAllFn();
         setNavActive();
         document.querySelector("html").setAttribute("data-menu-styles", "light");
@@ -586,14 +586,18 @@ function switcherClick() {
     // reset all end
 
     /* loader start */
-    loaderEnable.onclick = () => {
-        document.querySelector("html").setAttribute("loader", "enable");
-        localStorage.setItem("loaderEnable", "true")
+    if (loaderEnable) {
+        loaderEnable.onclick = () => {
+            document.querySelector("html").setAttribute("loader", "enable");
+            localStorage.setItem("loaderEnable", "true")
+        }
     }
 
-    loaderDisable.onclick = () => {
-        document.querySelector("html").setAttribute("loader", "disable");
-        localStorage.setItem("loaderEnable", "false")
+    if (loaderDisable) {
+        loaderDisable.onclick = () => {
+            document.querySelector("html").setAttribute("loader", "disable");
+            localStorage.setItem("loaderEnable", "false")
+        }
     }
     /* loader end */
 }
@@ -752,7 +756,7 @@ function ResetAllFn() {
 
     // reseting layout width styles
     document.querySelector('#switcher-default-width').checked = false;
-    document.querySelector('#switcher-full-width').checked =  true;
+    document.querySelector('#switcher-full-width').checked = true;
     document.querySelector('#switcher-boxed').checked = false;
 
     // reseting menu position styles
@@ -803,105 +807,105 @@ function checkOptions() {
 
     // dark
     if (localStorage.getItem('zynixdarktheme')) {
-        document.querySelector('#switcher-dark-theme').checked = true;
+        document.querySelector('#switcher-dark-theme')?.setAttribute('checked', true);
     }
 
     // horizontal
     if (localStorage.getItem('zynixlayout') === "horizontal") {
-        document.querySelector('#switcher-horizontal').checked = true;
-        document.querySelector('#switcher-menu-click').checked = true;
+        document.querySelector('#switcher-horizontal')?.setAttribute('checked', true);
+        document.querySelector('#switcher-menu-click')?.setAttribute('checked', true);
     }
     else {
-        document.querySelector('#switcher-vertical').checked = true;
+        document.querySelector('#switcher-vertical')?.setAttribute('checked', true);
     }
 
     // light header
     if (localStorage.getItem('zynixHeader') === "light") {
-        document.querySelector('#switcher-header-light').checked = true;
+        document.querySelector('#switcher-header-light')?.setAttribute('checked', true);
     }
 
     // color header
     if (localStorage.getItem('zynixHeader') === "color") {
-        document.querySelector('#switcher-header-primary').checked = true;
+        document.querySelector('#switcher-header-primary')?.setAttribute('checked', true);
     }
 
     // gradient header
     if (localStorage.getItem('zynixHeader') === "gradient") {
-        document.querySelector('#switcher-header-gradient').checked = true;
+        document.querySelector('#switcher-header-gradient')?.setAttribute('checked', true);
     }
 
     // dark header
     if (localStorage.getItem('zynixHeader') === "dark") {
-        document.querySelector('#switcher-header-dark').checked = true;
+        document.querySelector('#switcher-header-dark')?.setAttribute('checked', true);
     }
     // transparent header
     if (localStorage.getItem('zynixHeader') === "transparent") {
-        document.querySelector('#switcher-header-transparent').checked = true;
+        document.querySelector('#switcher-header-transparent')?.setAttribute('checked', true);
     }
 
     // light menu
     if (localStorage.getItem('zynixMenu') === 'light') {
-        document.querySelector('#switcher-menu-light').checked = true;
+        document.querySelector('#switcher-menu-light')?.setAttribute('checked', true);
     }
 
     // color menu
     if (localStorage.getItem('zynixMenu') === 'color') {
-        document.querySelector('#switcher-menu-primary').checked = true;
+        document.querySelector('#switcher-menu-primary')?.setAttribute('checked', true);
     }
 
     // gradient menu
     if (localStorage.getItem('zynixMenu') === 'gradient') {
-        document.querySelector('#switcher-menu-gradient').checked = true;
+        document.querySelector('#switcher-menu-gradient')?.setAttribute('checked', true);
     }
 
     // dark menu
     if (localStorage.getItem('zynixMenu') === 'dark') {
-        document.querySelector('#switcher-menu-dark').checked = true;
+        document.querySelector('#switcher-menu-dark')?.setAttribute('checked', true);
     }
     // transparent menu
     if (localStorage.getItem('zynixMenu') === 'transparent') {
-        document.querySelector('#switcher-menu-transparent').checked = true;
+        document.querySelector('#switcher-menu-transparent')?.setAttribute('checked', true);
     }
 
     //default width
     if (localStorage.getItem('zynixdefaultwidth')) {
-        document.querySelector('#switcher-default-width').checked = true;
+        document.querySelector('#switcher-default-width')?.setAttribute('checked', true);
     }
 
     //full width
     if (localStorage.getItem('zynixfullwidth')) {
-        document.querySelector('#switcher-full-width').checked = true;
+        document.querySelector('#switcher-full-width')?.setAttribute('checked', true);
     }
 
     //boxed
     if (localStorage.getItem('zynixboxed')) {
-        document.querySelector('#switcher-boxed').checked = true;
+        document.querySelector('#switcher-boxed')?.setAttribute('checked', true);
     }
 
     //scrollable
     if (localStorage.getItem('zynixheaderscrollable')) {
-        document.querySelector('#switcher-header-scroll').checked = true;
+        document.querySelector('#switcher-header-scroll')?.setAttribute('checked', true);
     }
     if (localStorage.getItem('zynixmenuscrollable')) {
-        document.querySelector('#switcher-menu-scroll').checked = true;
+        document.querySelector('#switcher-menu-scroll')?.setAttribute('checked', true);
     }
 
     //fixed
     if (localStorage.getItem('zynixheaderfixed')) {
-        document.querySelector('#switcher-header-fixed').checked = true;
+        document.querySelector('#switcher-header-fixed')?.setAttribute('checked', true);
     }
     if (localStorage.getItem('zynixmenufixed')) {
-        document.querySelector('#switcher-menu-fixed').checked = true;
+        document.querySelector('#switcher-menu-fixed')?.setAttribute('checked', true);
     }
 
     //classic
     if (localStorage.getItem('zynixclassic')) {
-        document.querySelector('#switcher-classic').checked = true;
+        document.querySelector('#switcher-classic')?.setAttribute('checked', true);
     }
 
     //modern
     if (localStorage.getItem('zynixmodern')) {
-        document.querySelector('#switcher-modern').checked = true;
+        document.querySelector('#switcher-modern')?.setAttribute('checked', true);
     }
 
     // sidemenu layout style
@@ -952,7 +956,7 @@ function checkOptions() {
 
     // loader
     if (localStorage.loaderEnable != "true") {
-        document.querySelector("#switcher-loader-disable").checked = true
+        document.querySelector("#switcher-loader-disable")?.setAttribute('checked', true)
     }
 }
 
@@ -1000,10 +1004,10 @@ function localStorageBackup2() {
     }
 
     if (localStorage.loaderEnable == "true") {
-        document.querySelector("#switcher-loader-enable").checked = true
+        document.querySelector("#switcher-loader-enable")?.setAttribute('checked', true)
     }
 }
 
 
 
-export {checkOptions}
+export { checkOptions }

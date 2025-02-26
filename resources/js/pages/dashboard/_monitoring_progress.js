@@ -1,6 +1,10 @@
 import axios from 'axios';
 import { Modal } from 'bootstrap';
+import createDatatable from 'js/components/datatable';
 import Swal from 'sweetalert2';
+
+const dashboardFilter = document.querySelector('#dashboard-filter')
+const selectYear = dashboardFilter.querySelector('select[name="year"]')
 
 const monitoringProgressTable = document.querySelector('#progress-monitoring-table')
 const monitoringProgressChildModalElement = document.querySelector('#monitoring-progress-chid-modal');
@@ -29,63 +33,199 @@ const fetch = async (unit, year) => {
 }
 
 if (monitoringProgressTable) {
-    const unitsColumn = monitoringProgressTable.querySelectorAll('.units');
-    unitsColumn.forEach(column => {
-        if (column.hasAttribute('data-unit')) {
-            column.addEventListener('click', async e => {
-                Swal.fire({
-                    title: 'Sedang memproses...',
-                    allowOutsideClick: false,
-                    didOpen: async () => {
-                        Swal.showLoading(); // Show loading indicator
-                        const param = new URLSearchParams()
-                        param.append('unit', column.getAttribute('data-unit'));
+    const columns = [
+        {
+            sortable: false,
+            data: 'sub_unit_name',
+            name: 'sub_unit_name',
+            width: '164px',
+            render: (data, type, row) => {
+                if (type !== 'display') {
+                    return data
+                }
 
-                        const response = await axios.get(new URL('/analytics/monitoring-progress-child', window.location.origin).href + '?' + param.toString());
-                        const data = response.data;
+                return `[${row.sub_unit_code_doc}] ${data}`
+            }
+        },
+        {
+            sortable: false,
+            data: 'm1',
+            name: 'm1',
+            width: '80px'
+        },
+        {
+            sortable: false,
+            data: 'm2',
+            name: 'm2',
+            width: '80px'
+        },
+        {
+            sortable: false,
+            data: 'm3',
+            name: 'm3',
+            width: '80px'
+        },
+        {
+            sortable: false,
+            data: 'm4',
+            name: 'm4',
+            width: '80px'
+        },
+        {
+            sortable: false,
+            data: 'm5',
+            name: 'm5',
+            width: '80px'
+        },
+        {
+            sortable: false,
+            data: 'm6',
+            name: 'm6',
+            width: '80px'
+        },
+        {
+            sortable: false,
+            data: 'm7',
+            name: 'm7',
+            width: '80px'
+        },
+        {
+            sortable: false,
+            data: 'm8',
+            name: 'm8',
+            width: '80px'
+        },
+        {
+            sortable: false,
+            data: 'm9',
+            name: 'm9',
+            width: '80px'
+        },
+        {
+            sortable: false,
+            data: 'm10',
+            name: 'm10',
+            width: '80px'
+        },
+        {
+            sortable: false,
+            data: 'm11',
+            name: 'm11',
+            width: '80px'
+        },
+        {
+            sortable: false,
+            data: 'm12',
+            name: 'm12',
+            width: '80px'
+        }
+    ];
 
-                        if (response.status == 200) {
-                            setTimeout(() => {
-                                Swal.close()
-
-                                data.data.forEach(item => {
-                                    const row = document.createElement('tr')
-                                    const column = document.createElement('td')
-                                    column.innerHTML = item.name
-                                    row.append(column)
-
-                                    item.month.forEach(value => {
-                                        const column = document.createElement('td')
-                                        column.innerHTML = value ? parseInt(value) + '%' : '0%'
-
-                                        if (value >= 75) {
-                                            column.classList.add('bg-success-transparent')
-                                        } else if (value >= 40) {
-                                            column.classList.add('bg-warning-transparent')
-                                        }
-
-                                        row.append(column)
-                                    })
-
-                                    monitoringProgressChildTableBody.append(row)
-                                })
-
-                                monitoringProgressChildModal.show()
-                                monitoringProgressChildModalTitle.textContent = 'Monitoring Progress ' + column.textContent
-                            }, 575)
-                        } else {
-                            Swal.fire({
-                                icon: 'error',
-                                text: data.message
-                            })
+    const datatable = createDatatable(monitoringProgressTable, {
+        handleColumnSearchField: false,
+        responsive: false,
+        serverSide: true,
+        ordering: false,
+        processing: true,
+        paging: false,
+        ajax: {
+            url: '/analytics/get-monitoring-progress',
+            data: function (d) {
+                d.year = selectYear.value
+            }
+        },
+        scrollX: true,
+        fixedColumns: true,
+        lengthChange: false,
+        pageLength: -1,
+        scrollY: '36vh',
+        columns: columns,
+        columnDefs: [
+            {
+                targets: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+                createdCell: (td, data, rowData, row, col) => {
+                    if (data) {
+                        data = parseInt(data)
+                        if (data) {
+                            let color = 'bg-danger-transparent'
+                            if (data > 30 && data <= 70) {
+                                color = 'bg-warning-transparent'
+                            } else if (data > 70) {
+                                color = 'bg-success-transparent'
+                            }
+                            td.classList.add(color)
                         }
                     }
-                });
-            })
-        }
+                },
+                render: (data, type, row) => {
+                    data = data ? data : 0;
+                    if (type !== 'display') {
+                        return data
+                    }
+
+                    return `${data ? parseInt(data) : 0}%`
+                }
+            }
+        ]
     })
 
-    monitoringProgressChildModalElement.addEventListener('hide.bs.modal', () => {
-        monitoringProgressChildTableBody.innerHTML = ''
-    })
+    // const unitsColumn = monitoringProgressTable.querySelectorAll('.units');
+    // unitsColumn.forEach(column => {
+    //     if (column.hasAttribute('data-unit')) {
+    //         column.addEventListener('click', async e => {
+    //             Swal.fire({
+    //                 title: 'Sedang memproses...',
+    //                 allowOutsideClick: false,
+    //                 didOpen: async () => {
+    //                     Swal.showLoading(); // Show loading indicator
+    //                     const param = new URLSearchParams()
+    //                     param.append('unit', column.getAttribute('data-unit'));
+
+    //                     const response = await axios.get(new URL('/analytics/monitoring-progress-child', window.location.origin).href + '?' + param.toString());
+    //                     const data = response.data;
+
+    //                     if (response.status == 200) {
+    //                         setTimeout(() => {
+    //                             Swal.close()
+
+    //                             data.data.forEach(item => {
+    //                                 const row = document.createElement('tr')
+    //                                 const column = document.createElement('td')
+    //                                 column.innerHTML = item.name
+    //                                 row.append(column)
+
+    //                                 item.month.forEach(value => {
+    //                                     const column = document.createElement('td')
+    //                                     column.innerHTML = value ? parseInt(value) + '%' : '0%'
+
+    //                                     if (value >= 75) {
+    //                                         column.classList.add('bg-success-transparent')
+    //                                     } else if (value >= 40) {
+    //                                         column.classList.add('bg-warning-transparent')
+    //                                     }
+
+    //                                     row.append(column)
+    //                                 })
+
+    //                                 monitoringProgressChildTableBody.append(row)
+    //                             })
+
+    //                             monitoringProgressChildModal.show()
+    //                             monitoringProgressChildModalTitle.textContent = 'Monitoring Progress ' + column.textContent
+    //                         }, 575)
+    //                     } else {
+    //                         Swal.fire({
+    //                             icon: 'error',
+    //                             text: data.message
+    //                         })
+    //                     }
+    //                 }
+    //             });
+    //         })
+    //     }
+    // })
+
+    // monitoringProgressChildModalElement.addEventListener('hide.bs.modal', () => {
+    //     monitoringProgressChildTableBody.innerHTML = ''
+    // })
 }

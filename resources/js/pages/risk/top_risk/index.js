@@ -1,7 +1,7 @@
 import { Offcanvas } from "bootstrap"
 import Choices from "choices.js"
 import createDatatable from "js/components/datatable"
-import { decodeHtml, defaultConfigFormatNumeral, defaultConfigChoices } from "js/components/helper"
+import { decodeHtml, defaultConfigFormatNumeral, defaultConfigChoices, renderHeatmapBadge } from "js/components/helper"
 import Swal from "sweetalert2"
 import debounce from "js/utils/debounce";
 
@@ -26,6 +26,235 @@ const selectLengthChoices = new Choices(selectLength, defaultConfigChoices)
 const selectYearChoices = new Choices(selectYear, defaultConfigChoices)
 const selectUnitChoices = new Choices(selectUnit, defaultConfigChoices)
 
+const columns = [
+    {
+        orderable: true,
+        data: 'worksheet_number',
+        name: 'worksheet_number',
+        width: '64px'
+    },
+    {
+        orderable: true,
+        data: 'sub_unit_name',
+        name: 'sub_unit_name',
+        width: '256px',
+        render: function (data, type, row) {
+            if (type !== 'display') {
+                return data
+            }
+
+            return `[${row.personnel_area_code}] ${row.sub_unit_name}`
+        }
+    },
+    {
+        orderable: true,
+        data: 'target_body',
+        name: 'target_body',
+        width: '256px',
+        render: function (data, type, row) {
+            if (type !== 'display') {
+                return data
+            }
+
+            if (!data) {
+                return ''
+            }
+
+            const decodeData = decodeHtml(decodeHtml(data))
+            const parsedData = new DOMParser().parseFromString(decodeData, 'text/html')
+
+            return parsedData.body ? parsedData.body.innerHTML : ''
+        }
+    },
+    {
+        orderable: true,
+        data: 'risk_chronology_body',
+        name: 'risk_chronology_body',
+        width: '256px',
+        render: function (data, type, row) {
+            if (type !== 'display') {
+                return data
+            }
+
+            if (!data) {
+                return ''
+            }
+
+            const decodeData = decodeHtml(decodeHtml(data))
+            const parsedData = new DOMParser().parseFromString(decodeData, 'text/html')
+
+            return parsedData.body ? parsedData.body.innerHTML : ''
+        }
+    },
+    {
+        orderable: true,
+        data: 'risk_cause_body',
+        name: 'risk_cause_body',
+        width: '256px',
+        render: function (data, type, row) {
+            if (type !== 'display') {
+                return data
+            }
+
+            if (!data) {
+                return ''
+            }
+
+            const decodeData = decodeHtml(decodeHtml(data))
+            const parsedData = new DOMParser().parseFromString(decodeData, 'text/html')
+
+            return parsedData.body ? parsedData.body.innerHTML : ''
+        }
+    },
+    {
+        orderable: true,
+        data: 'risk_impact_body',
+        name: 'risk_impact_body',
+        width: '256px',
+        render: function (data, type, row) {
+            if (type !== 'display') {
+                return data
+            }
+
+            if (!data) {
+                return ''
+            }
+
+            const decodeData = decodeHtml(decodeHtml(data))
+            const parsedData = new DOMParser().parseFromString(decodeData, 'text/html')
+
+            return parsedData.body ? parsedData.body.innerHTML : ''
+        }
+    },
+    {
+        orderable: true,
+        data: 'inherent_risk_level',
+        name: 'inherent_risk_level',
+        width: '100px',
+        render: function (data, type, row) {
+            if (type != 'display') {
+                return data;
+            }
+
+            if (!data) {
+                return '';
+            }
+
+            return renderHeatmapBadge(data, row.inherent_impact_probability_color)
+        }
+    },
+    {
+        orderable: true,
+        data: 'inherent_risk_scale',
+        name: 'inherent_risk_scale',
+        width: '100px',
+    },
+    {
+        orderable: true,
+        data: 'residual_1_risk_level',
+        name: 'residual_1_risk_level',
+        width: '100px',
+        render: function (data, type, row) {
+            if (type != 'display') {
+                return data;
+            }
+
+            if (!data) {
+                return '';
+            }
+
+            return renderHeatmapBadge(data, row.residual_1_impact_probability_color)
+        }
+    },
+    {
+        orderable: true,
+        data: 'residual_2_risk_level',
+        name: 'residual_2_risk_level',
+        width: '100px',
+        render: function (data, type, row) {
+            if (type != 'display') {
+                return data;
+            }
+
+            if (!data) {
+                return '';
+            }
+
+            return renderHeatmapBadge(data, row.residual_2_impact_probability_color)
+        }
+    },
+    {
+        orderable: true,
+        data: 'residual_3_risk_level',
+        name: 'residual_3_risk_level',
+        width: '100px',
+        render: function (data, type, row) {
+            if (type != 'display') {
+                return data;
+            }
+
+            if (!data) {
+                return '';
+            }
+
+            return renderHeatmapBadge(data, row.residual_3_impact_probability_color)
+        }
+    },
+    {
+        orderable: true,
+        data: 'residual_4_risk_level',
+        name: 'residual_4_risk_level',
+        width: '100px',
+        render: function (data, type, row) {
+            if (type != 'display') {
+                return data;
+            }
+
+            if (!data) {
+                return '';
+            }
+
+            return renderHeatmapBadge(data, row.residual_4_impact_probability_color)
+        }
+    },
+    {
+        orderable: true,
+        data: 'residual_1_risk_scale',
+        name: 'residual_1_risk_scale',
+        width: '100px',
+    },
+    {
+        orderable: true,
+        data: 'residual_2_risk_scale',
+        name: 'residual_2_risk_scale',
+        width: '100px',
+    },
+    {
+        orderable: true,
+        data: 'residual_3_risk_scale',
+        name: 'residual_3_risk_scale',
+        width: '100px',
+    },
+    {
+        orderable: true,
+        data: 'residual_4_risk_scale',
+        name: 'residual_4_risk_scale',
+        width: '100px',
+    },
+    {
+        orderable: true,
+        data: 'top_risk_action',
+        name: 'top_risk_action',
+        width: '96px'
+    },
+    {
+        orderable: true,
+        data: 'created_at',
+        name: 'created_at',
+        defaultContent: '',
+        visible: false,
+    }
+]
 const datatable = createDatatable('#worksheet-table', {
     handleColumnSearchField: false,
     responsive: false,
@@ -40,9 +269,11 @@ const datatable = createDatatable('#worksheet-table', {
         }
     },
     scrollX: true,
-    fixedColumns: true,
+    fixedColumns: {
+        start: 2
+    },
     lengthChange: false,
-    pageLength: -1,
+    pageLength: 10,
     drawCallback: function (settings) {
         const api = this.api()
         const columnsToMerge = [0, 1, 2, 3, 6, 16]
@@ -120,187 +351,8 @@ const datatable = createDatatable('#worksheet-table', {
         })
     },
     scrollY: '48vh',
-    columns: [
-        {
-            sortable: true,
-            data: 'worksheet_number',
-            name: 'worksheet_number',
-            width: '64px'
-        },
-        {
-            sortable: true,
-            data: 'sub_unit_name',
-            name: 'sub_unit_name',
-            width: '256px',
-            render: function (data, type, row) {
-                if (type !== 'display') {
-                    return data
-                }
-
-                return `[${row.personnel_area_code}] ${row.sub_unit_name}`
-            }
-        },
-        {
-            sortable: true,
-            data: 'target_body',
-            name: 'target_body',
-            width: '256px',
-            render: function (data, type, row) {
-                if (type !== 'display') {
-                    return data
-                }
-
-                if (!data) {
-                    return ''
-                }
-
-                const decodeData = decodeHtml(decodeHtml(data))
-                const parsedData = new DOMParser().parseFromString(decodeData, 'text/html')
-
-                return parsedData.body ? parsedData.body.innerHTML : ''
-            }
-        },
-        {
-            sortable: true,
-            data: 'risk_chronology_body',
-            name: 'risk_chronology_body',
-            width: '256px',
-            render: function (data, type, row) {
-                if (type !== 'display') {
-                    return data
-                }
-
-                if (!data) {
-                    return ''
-                }
-
-                const decodeData = decodeHtml(decodeHtml(data))
-                const parsedData = new DOMParser().parseFromString(decodeData, 'text/html')
-
-                return parsedData.body ? parsedData.body.innerHTML : ''
-            }
-        },
-        {
-            sortable: true,
-            data: 'risk_cause_body',
-            name: 'risk_cause_body',
-            width: '256px',
-            render: function (data, type, row) {
-                if (type !== 'display') {
-                    return data
-                }
-
-                if (!data) {
-                    return ''
-                }
-
-                const decodeData = decodeHtml(decodeHtml(data))
-                const parsedData = new DOMParser().parseFromString(decodeData, 'text/html')
-
-                return parsedData.body ? parsedData.body.innerHTML : ''
-            }
-        },
-        {
-            sortable: true,
-            data: 'risk_impact_body',
-            name: 'risk_impact_body',
-            width: '256px',
-            render: function (data, type, row) {
-                if (type !== 'display') {
-                    return data
-                }
-
-                if (!data) {
-                    return ''
-                }
-
-                const decodeData = decodeHtml(decodeHtml(data))
-                const parsedData = new DOMParser().parseFromString(decodeData, 'text/html')
-
-                return parsedData.body ? parsedData.body.innerHTML : ''
-            }
-        },
-        {
-            sortable: true,
-            data: 'inherent_risk_level',
-            name: 'inherent_risk_level',
-            width: '100px',
-        },
-        {
-            sortable: true,
-            data: 'inherent_risk_scale',
-            name: 'inherent_risk_scale',
-            width: '100px',
-        },
-        {
-            sortable: true,
-            data: 'residual_1_risk_level',
-            name: 'residual_1_risk_level',
-            width: '100px',
-        },
-        {
-            sortable: true,
-            data: 'residual_2_risk_level',
-            name: 'residual_2_risk_level',
-            width: '100px',
-        },
-        {
-            sortable: true,
-            data: 'residual_3_risk_level',
-            name: 'residual_3_risk_level',
-            width: '100px',
-        },
-        {
-            sortable: true,
-            data: 'residual_4_risk_level',
-            name: 'residual_4_risk_level',
-            width: '100px',
-        },
-        {
-            sortable: true,
-            data: 'residual_1_risk_scale',
-            name: 'residual_1_risk_scale',
-            width: '100px',
-        },
-        {
-            sortable: true,
-            data: 'residual_2_risk_scale',
-            name: 'residual_2_risk_scale',
-            width: '100px',
-        },
-        {
-            sortable: true,
-            data: 'residual_3_risk_scale',
-            name: 'residual_3_risk_scale',
-            width: '100px',
-        },
-        {
-            sortable: true,
-            data: 'residual_4_risk_scale',
-            name: 'residual_4_risk_scale',
-            width: '100px',
-        },
-        {
-            sortable: true,
-            data: 'top_risk_action',
-            name: 'top_risk_action',
-            width: '96px',
-            render: function (data, type, row) {
-                if (type !== 'display') {
-                    return data
-                }
-
-                if (!data) {
-                    return ''
-                }
-
-                const decodeData = decodeHtml(decodeHtml(data))
-                const parsedData = new DOMParser().parseFromString(decodeData, 'text/html')
-
-                return parsedData.body ? parsedData.body.innerHTML : ''
-            }
-        },
-    ],
+    columns: columns,
+    order: [[columns.length - 1, 'desc']],
 })
 
 worksheetTableFilter.addEventListener('submit', e => {
@@ -329,7 +381,10 @@ worksheetTableFilter.addEventListener('reset', e => {
     selectUnitChoices.destroy()
     selectUnitChoices.init()
 
-    datatable.page.len(selectLength.value).search('').draw();
+    inputCheckAll.checked = false;
+    inputCheckAll.dispatchEvent(new Event('change'))
+
+    datatable.page.len(selectLength.value).search('').order([columns.length - 1, 'desc']).draw();
 })
 
 let worksheetChecks = []
@@ -354,6 +409,7 @@ datatable.on('draw.dt', () => {
 
     worksheetChecks.forEach(checkbox => {
         checkbox.addEventListener('change', e => {
+            console.log(e.target)
             if (e.target.checked) {
                 worksheetChecksCount += 1
             } else {

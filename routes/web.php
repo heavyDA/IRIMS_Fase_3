@@ -22,25 +22,28 @@ use App\Http\Controllers\Risk\MonitoringController;
 use App\Http\Controllers\Risk\TopRiskController;
 use App\Http\Controllers\Risk\WorksheetController;
 use App\Http\Controllers\Setting\PositionController;
+use App\Models\Risk\Worksheet;
 use Illuminate\Support\Facades\Route;
 
-Route::group(['prefix' => 'login', 'as' => 'auth.'], function () {
+Route::group(['prefix' => 'login', 'as' => 'auth.', 'middleware' => 'guest'], function () {
     Route::get('', fn() => view('auth.index'))->name('login');
     Route::post('', [AuthController::class, 'authenticate'])->name('authenticate');
-    Route::delete('', [AuthController::class, 'unauthenticate'])->name('unauthenticate');
 });
-
+Route::get('test', function () {
+    return Worksheet::progressMonitoringQuery('ap.52.9')->get();
+});
 Route::group(['middleware' => 'auth'], function () {
     Route::post('', [AuthController::class, 'change_role'])->name('change-role');
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard.index');
+    Route::delete('', [AuthController::class, 'unauthenticate'])->name('auth.unauthenticate');
 
-    Route::get('dashboard/worksheet-by-inherent-risk-scale/{riskScale}', [DashboardController::class, 'worksheet_by_inherent_risk_scale'])
-        ->name('dashboard.worksheet_by_inherent_risk_scale');
 
     Route::group(['prefix' => 'analytics', 'as' => 'analytics.'], function () {
-        Route::get('inherent-risk-scale', [DashboardController::class, 'inherent_risk_scale'])->name('analytics.inherent_risk_scale');
-        Route::get('residual-risk-scale', [DashboardController::class, 'residual_risk_scale'])->name('analytics.residual_risk_scale');
-        Route::get('monitoring-progress-child', [DashboardController::class, 'monitoring_progress_child'])->name('analytics.monitoring_progress_child');
+        Route::get('get-monitoring-progress', [DashboardController::class, 'get_monitoring_progress'])->name('get_monitoring_progress');
+        Route::get('inherent-risk-scale', [DashboardController::class, 'inherent_risk_scale'])->name('inherent_risk_scale');
+        Route::get('target-residual-risk-scale', [DashboardController::class, 'target_residual_risk_scale'])->name('target_residual_risk_scale');
+        Route::get('residual-risk-scale', [DashboardController::class, 'residual_risk_scale'])->name('residual_risk_scale');
+        Route::get('monitoring-progress-child', [DashboardController::class, 'monitoring_progress_child'])->name('monitoring_progress_child');
     });
 
     Route::get('profile/unit_head', [AuthController::class, 'get_unit_head'])->name('profile.get_unit_head');
@@ -153,6 +156,7 @@ Route::group(['middleware' => 'auth'], function () {
             ]
         );
 
+        Route::get('data/risk-categories', [KBUMNRiskCategoryController::class, 'get_all']);
         Route::get('data/bumn-scales', [BUMNScaleController::class, 'get_all']);
         Route::get('data/heatmaps', [HeatmapController::class, 'get_all']);
         Route::get('data/pics', [PICController::class, 'get_all']);

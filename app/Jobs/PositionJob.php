@@ -8,6 +8,7 @@ use Exception;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 
 class PositionJob
 {
@@ -34,20 +35,13 @@ class PositionJob
             $created = 0;
             $updated = 0;
             if ($data->isNotEmpty()) {
+                DB::beginTransaction();
                 foreach ($data as $item) {
-                    if (!$item->sub_unit_code) continue;
-
                     $position = Position::updateOrCreate(
                         [
-                            'personnel_area_code' => $item->personnel_area_code,
-                            'unit_code' => $item->sub_unit_code,
+                            'sub_unit_code' => $item->sub_unit_code
                         ],
-                        [
-                            'unit_code_doc' => $item->sub_unit_code_doc,
-                            'unit_name' => $item->sub_unit_name,
-                            'position_name' => $item->position_name,
-                            'assigned_roles' => 'risk admin',
-                        ]
+                        (array) $item
                     );
 
                     if ($position->wasRecentlyCreated) {
@@ -59,7 +53,9 @@ class PositionJob
 
                 logger("[Position Job] successfully fetched data number of created: $created, updated: $updated");
                 Cache::put('master.positions', Position::all());
-                Cache::put('master.position_pics', Position::distinct()->select('id', 'personnel_area_code', 'unit_code', 'unit_name', 'position_name')->get());
+                Cache::put('master.position_pics', Position::distinct()->select('branch_code', 'unit_code', 'unit_name', 'unit_position_name')->get());
+
+                DB::commit();
 
                 Artisan::call('db:seed --class=PositionSeeder');
             }

@@ -6,47 +6,29 @@
                 <div class="card-title">
                     Progress Monitoring
                 </div>
-                <a href="javascript:void(0);" data-bs-toggle="collapse" data-bs-target="#collapseExample2"
+                <a href="javascript:void(0);" data-bs-toggle="collapse" data-bs-target="#progress-monitoring-collapse"
                     aria-expanded="false" aria-controls="collapseExample">
                     <i class="ri-arrow-down-s-line fs-18 collapse-open"></i>
                     <i class="ri-arrow-up-s-line collapse-close fs-18"></i>
                 </a>
             </div>
-            <div class="collapse show border-top" id="collapseExample2">
-                <div class="card-body" style="max-height: 32vh;overflow-y: scroll; overflow-x: scroll;">
-                    <table id="progress-monitoring-table" class="table text-nowrap table-striped table-hover">
+            <div class="collapse show border-top" id="progress-monitoring-collapse">
+                <div class="card-body">
+                    <table id="progress-monitoring-table" class="table text-nowrap table-bordered table-hover">
                         <thead>
                             <tr>
-                                <th rowspan="2" style="width: 256px;"></th>
-                                <th colspan="12" class="text-center">Timeline</th>
+                                <th class="table-dark-custom" rowspan="2" style="width: 256px;">Unit</th>
+                                <th colspan="12" class="table-dark-custom" style="text-align: center !important;">
+                                    Timeline</th>
                             </tr>
                             <tr>
                                 @for ($i = 1; $i <= 12; $i++)
-                                    <th class="text-center">
+                                    <th style="text-align: center !important;">
                                         {{ format_date(request('year', date('Y') . sprintf('-%02d', $i) . '-01'))->translatedFormat('M') }}
                                     </th>
                                 @endfor
                             </tr>
                         </thead>
-                        <tbody>
-                            @foreach ($monitoring_progress as $key => $monitoring)
-                                <tr>
-                                    <td class="units" style="cursor: pointer;"
-                                        data-unit="{{ $monitoring->sub_unit_code }}">
-                                        <span class="fw-bold">{{ $monitoring->name }}</span>
-                                    </td>
-                                    @foreach ($monitoring->month as $value)
-                                        @if ($value >= 75)
-                                            <td class="bg-success-transparent">{{ (int) ceil($value) }}%</td>
-                                        @elseif($value >= 40)
-                                            <td class="bg-warning-transparent">{{ (int) ceil($value) }}%</td>
-                                        @else
-                                            <td>{{ (int) ceil($value) }}%</td>
-                                        @endif
-                                    @endforeach
-                                </tr>
-                            @endforeach
-                        </tbody>
                     </table>
                 </div>
             </div>

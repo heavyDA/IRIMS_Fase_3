@@ -106,10 +106,20 @@ class WorksheetIdentification extends Model
                 'r3.scale as residual_3_impact_scale',
                 'r4.scale as residual_4_impact_scale',
                 'h_i.risk_scale as inherent_impact_probability_scale',
+                'h_i.risk_level as inherent_impact_probability_level',
+                'h_i.color as inherent_impact_probability_color',
                 'h_r1.risk_scale as residual_1_impact_probability_scale',
+                'h_r1.risk_level as residual_1_impact_probability_level',
+                'h_r1.color as residual_1_impact_probability_color',
                 'h_r2.risk_scale as residual_2_impact_probability_scale',
+                'h_r2.risk_level as residual_2_impact_probability_level',
+                'h_r2.color as residual_2_impact_probability_color',
                 'h_r3.risk_scale as residual_3_impact_probability_scale',
+                'h_r3.risk_level as residual_3_impact_probability_level',
+                'h_r3.color as residual_3_impact_probability_color',
                 'h_r4.risk_scale as residual_4_impact_probability_scale',
+                'h_r4.risk_level as residual_4_impact_probability_level',
+                'h_r4.color as residual_4_impact_probability_color',
             )
             ->withExpression('scales', DB::table('m_bumn_scales'))
             ->withExpression('heatmaps', DB::table('m_heatmaps'))

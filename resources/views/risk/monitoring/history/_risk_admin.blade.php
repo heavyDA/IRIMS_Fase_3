@@ -2,7 +2,7 @@
     <span><i class="ti ti-send-2"></i></span>&nbsp;Submit
 </button>
 @push('element')
-    <div class="modal fade" id="submitModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+    <div class="modal fade modal-status" id="submitModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
         aria-labelledby="staticBackdropLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -21,14 +21,15 @@
                                 Catatan
                             </div>
                             <div>
-                                <div id="note-editor" class="textarea"></div>
-                                <textarea class="form-control" name="note" rows="4"></textarea>
+                                <div id="submit-note-editor" class="textarea"></div>
+                                <textarea class="form-control" id="submit-note" name="note" rows="4"></textarea>
                             </div>
                         </div>
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="reset" class="btn btn-secondary" form="submitForm">Batal</button>
+                    <button onclick="this.form.reset()" data-bs-dismiss="modal" data-bs-target="#submitModal" type="button"
+                        class="btn btn-secondary" form="submitForm">Batal</button>
                     <button type="submit" form="submitForm" class="btn btn-primary">Simpan</button>
                 </div>
             </div>
