@@ -14,16 +14,16 @@ return new class extends Migration
         Schema::create('ra_monitoring_incidents', function (Blueprint $table) {
             $table->id();
             $table->foreignId('monitoring_id')->cosnstrained('ra_monitorings', null, 'monitoring_incidents_idx')->cascadeOnDelete();
-            $table->text('incident_body')->default('');
-            $table->text('incident_identification')->default('');
+            $table->text('incident_body')->nullable()->default('');
+            $table->text('incident_identification')->nullable()->default('');
             $table->foreignId('incident_category_id')
                 ->nullable()
                 ->constrained('m_incident_categories', null, 'monitoring_incidents_category_idx')
                 ->nullOnDelete();
-            $table->string('incident_source')->default('');
-            $table->text('incident_cause')->default('');
-            $table->text('incident_handling')->default('');
-            $table->text('incident_description')->default('');
+            $table->string('incident_source')->nullable()->default('');
+            $table->text('incident_cause')->nullable()->default('');
+            $table->text('incident_handling')->nullable()->default('');
+            $table->text('incident_description')->nullable()->default('');
 
             $table->foreignId('risk_category_t2_id')
                 ->nullable()
@@ -34,8 +34,8 @@ return new class extends Migration
                 ->constrained('m_kbumn_risk_categories', 'id', 'monitoring_incidents_risk_category_t3_idx')
                 ->nullOnDelete();
 
-            $table->text('loss_description')->default('');
-            $table->string('loss_value')->default('');
+            $table->text('loss_description')->nullable()->default('');
+            $table->string('loss_value')->nullable()->default('');
 
             $table->boolean('incident_repetitive')->nullable();
             $table->foreignId('incident_frequency_id')
@@ -43,14 +43,14 @@ return new class extends Migration
                 ->constrained('m_incident_frequencies', null, 'monitoring_incidents_frequency_idx')
                 ->nullOnDelete();
 
-            $table->text('mitigation_plan')->default('');
-            $table->text('actualization_plan')->default('');
-            $table->text('follow_up_plan')->default('');
-            $table->text('related_party')->default('');
+            $table->text('mitigation_plan')->nullable()->default('');
+            $table->text('actualization_plan')->nullable()->default('');
+            $table->text('follow_up_plan')->nullable()->default('');
+            $table->text('related_party')->nullable()->default('');
 
             $table->boolean('insurance_status')->nullable();
-            $table->string('insurance_permit')->default('');
-            $table->string('insurance_claim')->default('');
+            $table->string('insurance_permit')->nullable()->default('');
+            $table->string('insurance_claim')->nullable()->default('');
 
             $table->timestamps();
         });

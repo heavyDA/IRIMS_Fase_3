@@ -1,3 +1,6 @@
+@push('top-script')
+    @vite('resources/js/pages/dashboard/_monitoring_progress.js')
+@endpush
 <!-- Top Risk -->
 <div class="row">
     <div class="col-xl-12">
@@ -45,24 +48,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <div id="monitoring-progress-chid-table-wrapper"
-                    style="max-height: 72vh;overflow-y: scroll; overflow-x: scroll;">
-                    <table id="monitoring-progress-chid-table" class="table text-nowrap table-striped w-100">
-                        <thead>
-                            <tr>
-                                <th rowspan="2" style="width: 256px;"></th>
-                                <th colspan="12" class="text-center">Timeline</th>
-                            </tr>
-                            <tr>
-                                @for ($i = 1; $i <= 12; $i++)
-                                    <th class="text-center">
-                                        {{ format_date(request('year', date('Y') . sprintf('-%02d', $i) . '-01'))->translatedFormat('M') }}
-                                    </th>
-                                @endfor
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
+                <div id="monitoring-progress-chid-table-wrapper" style="max-height: 72vh;">
                 </div>
             </div>
         </div>

@@ -876,6 +876,7 @@ class WorksheetController extends Controller
             )
             ->when(request('document_status'), fn($q) => $q->where('w.status_monitoring', request('document_status')))
             ->where('worksheet_year', request('year', date('Y')))
+            ->where('hr.risk_scale', $riskScale)
             ->groupBy('lm.id');
 
         return DataTables::query($worksheets)

@@ -32,7 +32,7 @@
                 </div>
                 <div class="modal-footer">
                     <button onclick="this.form.reset()" data-bs-dismiss="modal" data-bs-target="#reviseModal" type="button"
-                        form="reviseForm">Batal</button>
+                        form="reviseForm" class="btn btn-secondary">Batal</button>
                     <button type="submit" form="reviseForm" class="btn btn-primary">Simpan</button>
                 </div>
             </div>
@@ -65,7 +65,7 @@
                 </div>
                 <div class="modal-footer">
                     <button onclick="this.form.reset()" data-bs-dismiss="modal" data-bs-target="#approveModal"
-                        type="button" form="approveForm">Batal</button>
+                        type="button" class="btn btn-secondary" form="approveForm">Batal</button>
                     <button type="submit" form="approveForm" class="btn btn-primary">Simpan</button>
                 </div>
             </div>

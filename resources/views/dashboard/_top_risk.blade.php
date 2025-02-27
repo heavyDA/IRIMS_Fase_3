@@ -1,3 +1,6 @@
+@push('top-script')
+    @vite('resources/js/pages/dashboard/_top_risk.js')
+@endpush
 <!-- Top Risk -->
 <div class="row">
     <div class="col-xl-12">
