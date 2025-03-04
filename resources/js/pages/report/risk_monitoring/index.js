@@ -210,7 +210,7 @@ const datatable = createDatatable('table', {
     },
     columnDefs: [{ targets: [3], width: 128 }],
     fixedColumns: {
-        start: 4
+        start: 2
     },
     scrollX: true,
     scrollY: '48vh',

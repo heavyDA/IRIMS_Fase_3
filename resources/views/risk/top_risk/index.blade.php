@@ -54,14 +54,19 @@
                 style="width: 100%;table-layout: fixed;border-collapse: collapse;">
                 <thead>
                     <tr>
-                        <th class="table-dark-custom" rowspan="3">No.</th>
-                        <th class="table-dark-custom" rowspan="3">Organisasi</th>
-                        <th class="table-dark-custom" rowspan="3">Pilihan Sasaran</th>
-                        <th class="table-dark-custom" rowspan="3">Peristiwa Risiko</th>
-                        <th class="table-dark-custom" rowspan="3">Penyebab Risiko</th>
-                        <th class="table-dark-custom" rowspan="3">Dampak</th>
-                        <th class="table-dark-custom" colspan="2">Risiko Inheren</th>
-                        <th class="table-dark-custom" colspan="8">Target Residual</th>
+                        <th class="table-dark-custom" style="text-align: center !important;" rowspan="3">No.</th>
+                        <th class="table-dark-custom" style="text-align: center !important;" rowspan="3">Organisasi</th>
+                        <th class="table-dark-custom" style="text-align: center !important;" rowspan="3">Pilihan Sasaran
+                        </th>
+                        <th class="table-dark-custom" style="text-align: center !important;" rowspan="3">Peristiwa Risiko
+                        </th>
+                        <th class="table-dark-custom" style="text-align: center !important;" rowspan="3">Penyebab Risiko
+                        </th>
+                        <th class="table-dark-custom" style="text-align: center !important;" rowspan="3">Dampak</th>
+                        <th class="table-dark-custom" style="text-align: center !important;" colspan="2">Risiko Inheren
+                        </th>
+                        <th class="table-dark-custom" style="text-align: center !important;" colspan="8">Target Residual
+                        </th>
                         <th class="table-dark-custom" style="text-align: center !important;" rowspan="3">
                             <input type="checkbox" id="worksheet-check-all">
                         </th>

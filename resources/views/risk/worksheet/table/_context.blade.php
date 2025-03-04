@@ -1,14 +1,14 @@
-<div class="table-container" style="height: 40vh;">
+<div style="height: 40vh;">
     <table id="contextTable" class="table table-bordered table-hover">
         <thead class="table-dark" style="position: sticky; top: 0;">
             <tr>
-                <th>Pilihan Sasaran</th>
-                <th>Pilihan Strategi</th>
-                <th>Hasil yang diharapkan dapat diterima perusahaan</th>
-                <th>Nilai Risiko Yang Akan Timbul</th>
-                <th>Nilai limit risiko sesuai dengan parameter risiko dalam Metrik
+                <th class="table-dark-custom">Pilihan Sasaran</th>
+                <th class="table-dark-custom">Pilihan Strategi</th>
+                <th class="table-dark-custom">Hasil yang diharapkan dapat diterima perusahaan</th>
+                <th class="table-dark-custom">Nilai Risiko Yang Akan Timbul</th>
+                <th class="table-dark-custom">Nilai limit risiko sesuai dengan parameter risiko dalam Metrik
                     Strategi Risiko</th>
-                <th>Keputusan Penetapan</th>
+                <th class="table-dark-custom">Keputusan Penetapan</th>
             </tr>
         </thead>
         <tbody>

@@ -273,8 +273,8 @@
                     <div class="row mb-3">
                         <div class="col-3">Skala Dampak Inheren <span
                                 class="label-category-risk text-capitalize"></span><span class="text-danger">*</span>
-                            <a tabindex="0"
-                                class="link-secondary link-offset-2 link-underline-opacity-0 link-underline-opacity-50-hover text-decoration-underline mx-1"
+                            <a tabindex="0" id="info-category-risk-kuantitatif"
+                                class="d-none info-category-risk link-secondary link-offset-2 link-underline-opacity-0 link-underline-opacity-50-hover text-decoration-underline mx-1"
                                 role="button" data-bs-toggle="popover" data-bs-trigger="focus"
                                 data-bs-placement="right" title="Information" data-bs-html="true"
                                 data-bs-content='
@@ -282,6 +282,25 @@
                                     <p>Diisi dengan penilaian dampak Risiko Inheren dengan skala 1 s.d. 5
                                     <br><strong>Reference to Table Skala KBUMN</strong></p><br>
                                     <img class="w-100" src="{{ asset('assets/images/pendukung/tabel_skala_bumn.png') }}"/>
+                                    <p>
+                                        Keterangan: <br>
+                                        Nilai Batasan Risiko merupakan nilai Risk Limit di level enterprise sebagaimana yang telah ditetapkan dalam Strategi Risiko BUMN.
+                                    </p>
+                                '><i
+                                    class="ti ti-info-circle h5 text-secondary"></i>
+                            </a>
+                            <a tabindex="0" id="info-category-risk-kualitatif"
+                                class="d-none info-category-risk link-secondary link-offset-2 link-underline-opacity-0 link-underline-opacity-50-hover text-decoration-underline mx-1"
+                                role="button" data-bs-toggle="popover" data-bs-trigger="focus"
+                                data-bs-placement="right" title="Information" data-bs-html="true"
+                                data-bs-content='
+                                
+                                    <p>Diisi dengan penilaian dampak Risiko Inheren dengan skala 1 s.d. 5
+                                    <br><strong>Reference to Table Skala KBUMN</strong></p><br>
+                                    <img class="w-100" src="{{ asset('assets/images/pendukung/tabel_skala_kualitatif_bumn.png') }}"/>
+                                    <p>Catatan:<br>
+Apabila acuan kriteria dampak tidak tersedia pada tabel di atas, BUMN dapat menggunakan acuan tabel kriteria dampak 
+kualitatif lainnya sesuai dengan pedoman masing-masing dan menyampaikannya dalam buku RKAP.</p>
                                 '><i
                                     class="ti ti-info-circle h5 text-secondary"></i>
                             </a>
@@ -295,7 +314,16 @@
                     </div>
                     <div class="row mb-3">
                         <div class="col-3">Nilai Probabilitas Inheren <span class="label-category-risk"></span><span
-                                class="text-danger">*</span></div>
+                                class="text-danger">*</span>
+                            <a tabindex="0"
+                                class="link-secondary link-offset-2 link-underline-opacity-0 link-underline-opacity-50-hover text-decoration-underline mx-1"
+                                role="button" data-bs-toggle="popover" data-bs-trigger="focus"
+                                data-bs-placement="right" title="Information" data-bs-html="true"
+                                data-bs-content='<img class="w-100" src="{{ asset('assets/images/pendukung/tabel_probabilitas.png') }}"/>
+                                '><i
+                                    class="ti ti-info-circle h5 text-secondary"></i>
+                            </a>
+                        </div>
                         <div class="col">
                             <div class="input-group">
                                 <input type="text" class="form-control" name="inherent_impact_probability">

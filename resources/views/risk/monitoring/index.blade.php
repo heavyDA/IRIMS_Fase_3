@@ -15,7 +15,7 @@
 @endpush
 
 @push('bottom-script')
-    @vite(['resources/js/pages/risk/monitoring/detail.js'])
+    @vite(['resources/js/pages/risk/monitoring/detail.js', 'resources/js/pages/risk/worksheet/table_view.js'])
 @endpush
 
 @section('header-content')
@@ -65,10 +65,10 @@
                             <table id="riskMonitoringTable" class="table table-bordered table-stripped" style="width:100%">
                                 <thead>
                                     <tr>
-                                        <th>No.</th>
-                                        <th>Status</th>
-                                        <th>Bulan</th>
-                                        <th>Organisasi</th>
+                                        <th class="table-dark-custom">No.</th>
+                                        <th class="table-dark-custom">Status</th>
+                                        <th class="table-dark-custom">Bulan</th>
+                                        <th class="table-dark-custom">Organisasi</th>
                                     </tr>
                                 </thead>
                                 <tbody>

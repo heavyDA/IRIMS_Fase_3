@@ -29,7 +29,7 @@ let fetchers = {
 const fetchData = async () => {
     await Promise.allSettled([
         axios.get(`/analytics/inherent-risk-scale?year=${selectYear.value}`),
-        axios.get(`/analytics/residual-risk-scale?year=${selectYear.value}`),
+        axios.get(`/analytics/target-residual-risk-scale?year=${selectYear.value}`),
     ]).then(res => {
         for (let [index, key] of Object.keys(fetchers).entries()) {
             if (res[index].status == 'fulfilled') {
@@ -45,6 +45,9 @@ const fetchData = async () => {
 await fetchData()
 
 let datatableInherent, datatableResidual
+
+let residualUrl = '/risk-process/worksheet/get-by-target-risk-scale'
+
 fetchers?.inherent_scales?.forEach((inherent_scale) => {
     let riskText = document.querySelector(`#inherent-${inherent_scale.risk_scale}`)
     riskText.innerHTML = inherent_scale.total ? inherent_scale.total : ''
@@ -66,10 +69,14 @@ fetchers?.inherent_scales?.forEach((inherent_scale) => {
 });
 
 const setResidualRiskMap = () => {
+    const map = document.querySelector('#risk-chart-residual')
+    const blockClone = map.querySelector('svg').cloneNode(true)
+    map.innerHTML = ''
+    map.append(blockClone)
+
     fetchers?.residual_scales?.forEach((residual_scale) => {
         let riskText = document.querySelector(`#residual-${residual_scale.risk_scale}`)
         riskText.innerHTML = residual_scale.total ? residual_scale.total : ''
-
 
         riskText.parentNode.addEventListener('click', e => {
             if (residual_scale.total == 0) {
@@ -82,8 +89,6 @@ const setResidualRiskMap = () => {
 
             openModalResidual(residual_scale.risk_scale)
         })
-
-
     });
 }
 
@@ -345,8 +350,16 @@ const openModalInherent = (inherentScale) => {
 }
 
 const openModalResidual = (residualScale) => {
-    riskMapResidualModal.show()
-    riskMapResidualModalEl.addEventListener('shown.bs.modal', e => {
+    function handleCleanup(e) {
+        riskMapResidualTableWrapper.innerHTML = ''
+        if (datatableResidual) {
+            datatableResidual.clear()
+            datatableResidual.destroy()
+            datatableResidual = null
+        }
+    }
+
+    function handleShow(e) {
         // Clear the table's HTML content first
         const table = document.createElement('table')
         table.id = 'risk-map-residual-table'
@@ -354,24 +367,24 @@ const openModalResidual = (residualScale) => {
         table.style.width = '100%'
 
         table.innerHTML = `<thead>
-                            <tr>
-                                <th class="table-dark-custom" rowspan="2">No. Risiko</th>
-                                <th class="table-dark-custom" rowspan="2">Organisasi</th>
-                                <th class="table-dark-custom" rowspan="2">Peristiwa Risiko</th>
-                                <th class="table-dark-custom" rowspan="2">Kategori Risiko T2 & T3</th>
-                                <th class="table-dark-custom" style="text-align: center !important;" colspan="3">Inheren</th>
-                                <th class="table-dark-custom" style="text-align: center !important;" colspan="3">Residual</th>
-                                <th class="table-dark-custom" rowspan="2">Tanggal</th>
+                                <tr>
+                                    <th class="table-dark-custom" rowspan="2">No. Risiko</th>
+                                    <th class="table-dark-custom" rowspan="2">Organisasi</th>
+                                    <th class="table-dark-custom" rowspan="2">Peristiwa Risiko</th>
+                                    <th class="table-dark-custom" rowspan="2">Kategori Risiko T2 & T3</th>
+                                    <th class="table-dark-custom" style="text-align: center !important;" colspan="3">Inheren</th>
+                                    <th class="table-dark-custom" style="text-align: center !important;" colspan="3">Residual</th>
+                                    <th class="table-dark-custom" rowspan="2">Tanggal</th>
+                                    </tr>
+                                <tr>
+                                    <th class="table-dark-custom" style="text-align: center !important;">Level Risiko</th>
+                                    <th class="table-dark-custom" style="text-align: center !important;">Skala Risiko</th>
+                                    <th class="table-dark-custom" style="text-align: center !important;">Eksposur Risiko</th>
+                                    <th class="table-dark-custom" style="text-align: center !important;">Level Risiko</th>
+                                    <th class="table-dark-custom" style="text-align: center !important;">Skala Risiko</th>
+                                    <th class="table-dark-custom" style="text-align: center !important;">Eksposur Risiko</th>
                                 </tr>
-                            <tr>
-                                <th class="table-dark-custom" style="text-align: center !important;">Level Risiko</th>
-                                <th class="table-dark-custom" style="text-align: center !important;">Skala Risiko</th>
-                                <th class="table-dark-custom" style="text-align: center !important;">Eksposur Risiko</th>
-                                <th class="table-dark-custom" style="text-align: center !important;">Level Risiko</th>
-                                <th class="table-dark-custom" style="text-align: center !important;">Skala Risiko</th>
-                                <th class="table-dark-custom" style="text-align: center !important;">Eksposur Risiko</th>
-                            </tr>
-                        </thead>`
+                            </thead>`
 
         riskMapResidualTableWrapper.innerHTML = ''
         riskMapResidualTableWrapper.append(table)
@@ -380,191 +393,192 @@ const openModalResidual = (residualScale) => {
             datatableResidual.destroy()
             datatableResidual = null
         }
-        setTimeout(
-            () => {
-                const columns = [
-                    {
-                        sortable: false,
-                        data: 'worksheet_number',
-                        name: 'worksheet_number',
-                        width: '120px',
-                        render: (data, type, row) => {
-                            if (type !== 'display') {
-                                return data
-                            }
 
-                            return `<a class="link-primary link-offset-2 link-underline-opacity-0 link-underline-opacity-50-hover text-decoration-none" href="${row.worksheet_id}">${data}</a>`
-                        }
-                    },
-                    {
-                        sortable: false,
-                        data: 'sub_unit_name',
-                        name: 'sub_unit_name',
-                        width: '256px',
-                        render: function (data, type, row) {
-                            if (type !== 'display') {
-                                return data
-                            }
-
-                            return `[${row.personnel_area_code}] ${data}`
-                        }
-                    },
-                    {
-                        sortable: false,
-                        data: 'risk_chronology_body',
-                        name: 'risk_chronology_body',
-                        width: '256px',
-                        render: function (data, type, row) {
-                            if (type !== 'display') {
-                                return data
-                            }
-
-                            if (!data) {
-                                return ''
-                            }
-
-                            const decodeData = decodeHtml(decodeHtml(data))
-                            const parsedData = new DOMParser().parseFromString(decodeData, 'text/html')
-
-                            return parsedData.body ? parsedData.body.innerHTML : ''
-                        }
-                    },
-                    {
-                        sortable: false,
-                        data: 'risk_category_t2_name',
-                        name: 'risk_category_t2_name',
-                        defaultContent: '',
-                        width: '100px',
-                        render: function (data, type, row) {
-                            if (type !== 'display') {
-                                return data
-                            }
-
-                            return `${data} & ${row.risk_category_t3_name}`
-                        }
-                    },
-                    {
-                        sortable: false,
-                        data: 'inherent_risk_level',
-                        name: 'inherent_risk_level',
-                        width: '100px',
-                        render: function (data, type, row) {
-                            if (type !== 'display') {
-                                return data
-                            }
-
-                            if (!data) {
-                                return data
-                            }
-
-                            return renderHeatmapBadge(data, row.inherent_risk_color)
-                        }
-                    },
-                    {
-                        sortable: false,
-                        data: 'inherent_risk_scale',
-                        name: 'inherent_risk_scale',
-                        width: '100px',
-                    },
-                    {
-                        sortable: false,
-                        data: 'inherent_risk_exposure',
-                        name: 'inherent_risk_exposure',
-                        width: '100px',
-                        render: function (data, type, row) {
-                            if (type !== 'display') {
-                                return data
-                            }
-
-                            if (!data) {
-                                return ''
-                            }
-
-                            return formatNumeral(data.replaceAll('.', ','), defaultConfigFormatNumeral)
-                        }
-                    },
-                    {
-                        sortable: false,
-                        data: 'residual_risk_level',
-                        name: 'residual_risk_level',
-                        width: '100px',
-                        render: function (data, type, row) {
-                            if (type !== 'display') {
-                                return data
-                            }
-
-                            if (!data) {
-                                return data
-                            }
-
-                            return renderHeatmapBadge(data, row.residual_risk_color)
-                        }
-                    },
-                    {
-                        sortable: false,
-                        data: 'residual_risk_scale',
-                        name: 'residual_risk_scale',
-                        width: '100px',
-                    },
-                    {
-                        sortable: false,
-                        data: 'residual_risk_exposure',
-                        name: 'residual_risk_exposure',
-                        width: '100px',
-                        render: function (data, type, row) {
-                            if (type !== 'display') {
-                                return data
-                            }
-
-                            if (!data) {
-                                return ''
-                            }
-
-                            return formatNumeral(data.replaceAll('.', ','), defaultConfigFormatNumeral)
-                        }
-                    },
-                    {
-                        orderable: true,
-                        name: 'created_at',
-                        data: 'created_at',
-                        visible: false
+        const columns = [
+            {
+                sortable: false,
+                data: 'worksheet_number',
+                name: 'worksheet_number',
+                width: '120px',
+                render: (data, type, row) => {
+                    if (type !== 'display') {
+                        return data
                     }
-                ];
 
-                datatableResidual = createDatatable(table, {
-                    handleColumnSearchField: false,
-                    responsive: false,
-                    serverSide: true,
-                    ordering: false,
-                    processing: true,
-                    ajax: {
-                        url: `/risk-process/worksheet/get-by-actualization-risk-scale/${residualScale}`,
-                        data: function (d) {
-                            d.year = selectYear.value
-                        }
-                    },
-                    scrollX: true,
-                    fixedColumns: {
-                        start: 2
-                    },
-                    lengthChange: false,
-                    pageLength: 10,
-                    paging: true,
-                    scrollCollapse: true,
-                    scrollY: '74vh',
-                    columns: columns,
-                    order: [[columns.length - 1, 'desc']]
-                })
-            }, 275
-        )
-    })
-    riskMapResidualModalEl.addEventListener('hidden.bs.modal', e => {
-        riskMapResidualTableWrapper.innerHTML = ''
-        if (datatableResidual) {
-            datatableResidual.clear()
-            datatableResidual = null
-        }
-    })
+                    return `<a class="link-primary link-offset-2 link-underline-opacity-0 link-underline-opacity-50-hover text-decoration-none" href="${row.worksheet_id}">${data}</a>`
+                }
+            },
+            {
+                sortable: false,
+                data: 'sub_unit_name',
+                name: 'sub_unit_name',
+                width: '256px',
+                render: function (data, type, row) {
+                    if (type !== 'display') {
+                        return data
+                    }
+
+                    return `[${row.personnel_area_code}] ${data}`
+                }
+            },
+            {
+                sortable: false,
+                data: 'risk_chronology_body',
+                name: 'risk_chronology_body',
+                width: '256px',
+                render: function (data, type, row) {
+                    if (type !== 'display') {
+                        return data
+                    }
+
+                    if (!data) {
+                        return ''
+                    }
+
+                    const decodeData = decodeHtml(decodeHtml(data))
+                    const parsedData = new DOMParser().parseFromString(decodeData, 'text/html')
+
+                    return parsedData.body ? parsedData.body.innerHTML : ''
+                }
+            },
+            {
+                sortable: false,
+                data: 'risk_category_t2_name',
+                name: 'risk_category_t2_name',
+                defaultContent: '',
+                width: '100px',
+                render: function (data, type, row) {
+                    if (type !== 'display') {
+                        return data
+                    }
+
+                    return `${data} & ${row.risk_category_t3_name}`
+                }
+            },
+            {
+                sortable: false,
+                data: 'inherent_risk_level',
+                name: 'inherent_risk_level',
+                width: '100px',
+                render: function (data, type, row) {
+                    if (type !== 'display') {
+                        return data
+                    }
+
+                    if (!data) {
+                        return data
+                    }
+
+                    return renderHeatmapBadge(data, row.inherent_risk_color)
+                }
+            },
+            {
+                sortable: false,
+                data: 'inherent_risk_scale',
+                name: 'inherent_risk_scale',
+                width: '100px',
+            },
+            {
+                sortable: false,
+                data: 'inherent_risk_exposure',
+                name: 'inherent_risk_exposure',
+                width: '100px',
+                render: function (data, type, row) {
+                    if (type !== 'display') {
+                        return data
+                    }
+
+                    if (!data) {
+                        return ''
+                    }
+
+                    return formatNumeral(data.replaceAll('.', ','), defaultConfigFormatNumeral)
+                }
+            },
+            {
+                sortable: false,
+                data: 'residual_risk_level',
+                name: 'residual_risk_level',
+                width: '100px',
+                render: function (data, type, row) {
+                    if (type !== 'display') {
+                        return data
+                    }
+
+                    if (!data) {
+                        return data
+                    }
+
+                    return renderHeatmapBadge(data, row.residual_risk_color)
+                }
+            },
+            {
+                sortable: false,
+                data: 'residual_risk_scale',
+                name: 'residual_risk_scale',
+                width: '100px',
+            },
+            {
+                sortable: false,
+                data: 'residual_risk_exposure',
+                name: 'residual_risk_exposure',
+                width: '100px',
+                render: function (data, type, row) {
+                    if (type !== 'display') {
+                        return data
+                    }
+
+                    if (!data) {
+                        return ''
+                    }
+
+                    return formatNumeral(data.replaceAll('.', ','), defaultConfigFormatNumeral)
+                }
+            },
+            {
+                orderable: true,
+                name: 'created_at',
+                data: 'created_at',
+                visible: false
+            }
+        ];
+
+        datatableResidual = createDatatable(table, {
+            handleColumnSearchField: false,
+            responsive: false,
+            serverSide: true,
+            ordering: false,
+            processing: true,
+            ajax: {
+                url: `${residualUrl}/${residualScale}`,
+                data: function (d) {
+                    d.year = selectYear.value
+
+                    if (!riskLevelQuarterSelect.classList.contains('d-none')) {
+                        d.quarter = riskLevelQuarterSelect.value
+                    }
+                }
+            },
+            scrollX: true,
+            fixedColumns: {
+                start: 2
+            },
+            lengthChange: false,
+            pageLength: 10,
+            paging: true,
+            scrollCollapse: true,
+            scrollY: '74vh',
+            columns: columns,
+            order: [[columns.length - 1, 'desc']]
+        })
+    }
+
+    riskMapResidualModal.show()
+    riskMapResidualModalEl.addEventListener('hidden.bs.modal', handleCleanup)
+
+    setTimeout(() => {
+        handleShow()
+    }, 525)
 }
 
 let riskLevels = fetchers.inherent_scales.reduce(
@@ -636,7 +650,7 @@ const mapRiskLevelData = () => {
 mapRiskLevelData()
 
 const riskLevelChart = new ApexCharts(
-    document.querySelector('#risk-level-chart'),
+    document.querySelector('#residual-risk-level-chart'),
     {
         series: [
             { data: riskLevelData }
@@ -663,15 +677,29 @@ const riskLevelChart = new ApexCharts(
 )
 riskLevelChart.render()
 
-const riskLevelSelect = document.querySelector('#risk-level-select')
+const riskLevelSelect = document.querySelector('#residual-risk-level-select')
 new Choices(riskLevelSelect, { ...defaultConfigChoices, ...{ searchEnabled: false } })
-
+const riskLevelQuarterSelect = document.querySelector('#residual-risk-level-quarter')
+const riskLevelQuarterChoices = new Choices(riskLevelQuarterSelect, { ...defaultConfigChoices, ...{ searchEnabled: false } })
+const riskMapResidualTitle = document.querySelector('#risk-map-residual-title')
 riskLevelSelect.addEventListener('change', async e => {
     if (['residual', 'target-residual'].includes(e.target.value)) {
-        const response = await axios.get(`/analytics/${e.target.value}-risk-scale`)
+        riskMapResidualTitle.innerHTML = 'Peta Risiko ' + e.target.value.replaceAll('-', ' ')
+        let url = `/analytics/${e.target.value}-risk-scale?year=${selectYear.value}`
+        if (e.target.value == 'target-residual') {
+            riskLevelQuarterChoices.containerOuter.element.classList.replace('d-none', 'flex-grow-1')
+            url += `&quarter=${riskLevelQuarterSelect.value}`
+            residualUrl = residualUrl.replaceAll('actualization', 'target')
+        } else {
+            residualUrl = residualUrl.replaceAll('target', 'actualization')
+            riskLevelQuarterChoices.containerOuter.element.classList.replace('flex-grow-1', 'd-none')
+        }
+
+        const response = await axios.get(url)
 
         if (response.status == 200) {
             fetchers.residual_scales = response.data.data
+            setResidualRiskMap()
             riskLevelData = []
             mapRiskLevelData()
             riskLevelChart.updateSeries([
@@ -680,3 +708,5 @@ riskLevelSelect.addEventListener('change', async e => {
         }
     }
 });
+
+riskLevelQuarterSelect.addEventListener('change', e => riskLevelSelect.dispatchEvent(new Event('change')))

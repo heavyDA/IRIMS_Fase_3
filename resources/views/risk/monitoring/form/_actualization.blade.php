@@ -3,28 +3,57 @@
         <table id="actualizationFormTable" class="table table-stripped table-bordered w-100">
             <thead class="table-dark">
                 <tr>
-                    <th rowspan="2">Aksi</th>
-                    <th rowspan="2" style="width: 100px;">No. Penyebab Risiko</th>
-                    <th rowspan="2" style="width: 240px;">Rencana Perlakuan Risiko</th>
-                    <th rowspan="2" style="width: 240px;">Realisasi Perlakuan Risiko</th>
-                    <th rowspan="2" style="width: 240px;">Realisasi Output Perlakuan Risiko</th>
-                    <th rowspan="2" style="width: 140px;">Realisasi Biaya Perlakuan Risiko</th>
-                    <th rowspan="2" style="width: 100px;">Presentase Serapan Biaya</th>
-                    <th rowspan="2" style="width: 180px;">PIC</th>
-                    <th rowspan="2" style="width: 180px;">PIC Terkait</th>
-                    <th rowspan="2" style="width: 180px;">Key Risk Indicators</th>
-                    <th colspan="2" style="width: 180px;">Realisasi KRI Threshold</th>
-                    <th rowspan="2" style="width: 100px;">Status Rencana Perlakuan Risiko</th>
-                    <th rowspan="2">Penjelasan Status Rencana Perlakuan Risiko</th>
-                    <th colspan="4">Progress Pelaksanaan Rencana Perlakuan Risiko</th>
+                    <th rowspan="2" style="vertical-align: middle !important; text-align:center !important;">Aksi</th>
+                    <th rowspan="2"
+                        style="vertical-align: middle !important; text-align:center !important; width: 100px;">No.
+                        Penyebab Risiko</th>
+                    <th rowspan="2"
+                        style="vertical-align: middle !important; text-align:center !important; width: 240px;">Rencana
+                        Perlakuan Risiko</th>
+                    <th rowspan="2"
+                        style="vertical-align: middle !important; text-align:center !important; width: 240px;">Realisasi
+                        Perlakuan Risiko
+                    </th>
+                    <th rowspan="2"
+                        style="vertical-align: middle !important; text-align:center !important; width: 240px;">Realisasi
+                        Output Perlakuan
+                        Risiko</th>
+                    <th rowspan="2"
+                        style="vertical-align: middle !important; text-align:center !important; width: 140px;">Realisasi
+                        Biaya Perlakuan
+                        Risiko</th>
+                    <th rowspan="2"
+                        style="vertical-align: middle !important; text-align:center !important; width: 100px;">
+                        Presentase Serapan Biaya</th>
+                    <th rowspan="2"
+                        style="vertical-align: middle !important; text-align:center !important; width: 180px;">PIC</th>
+                    <th rowspan="2"
+                        style="vertical-align: middle !important; text-align:center !important; width: 180px;">PIC
+                        Terkait</th>
+                    <th rowspan="2"
+                        style="vertical-align: middle !important; text-align:center !important; width: 180px;">Key Risk
+                        Indicators</th>
+                    <th colspan="2"
+                        style="vertical-align: middle !important; text-align:center !important; width: 180px;">Realisasi
+                        KRI Threshold</th>
+                    <th rowspan="2"
+                        style="vertical-align: middle !important; text-align:center !important; width: 100px;">Status
+                        Rencana Perlakuan
+                        Risiko</th>
+                    <th rowspan="2" style="vertical-align: middle !important; text-align:center !important;">
+                        Penjelasan Status Rencana Perlakuan Risiko
+                    </th>
+                    <th colspan="4" style="vertical-align: middle !important; text-align:center !important;">Progress
+                        Pelaksanaan Rencana Perlakuan
+                        Risiko</th>
                 </tr>
                 <tr>
-                    <th>Threshold</th>
-                    <th>Skor</th>
-                    <th>Q1</th>
-                    <th>Q2</th>
-                    <th>Q3</th>
-                    <th>Q4</th>
+                    <th style="text-align:center !important;">Threshold</th>
+                    <th style="text-align:center !important;">Skor</th>
+                    <th style="text-align:center !important;">Q1</th>
+                    <th style="text-align:center !important;">Q2</th>
+                    <th style="text-align:center !important;">Q3</th>
+                    <th style="text-align:center !important;">Q4</th>
                 </tr>
             </thead>
             <tbody>
@@ -70,8 +99,8 @@
 @push('element')
     <div class="modal fade" id="actualizationModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
         aria-labelledby="staticBackdropLabel" aria-hidden="true">
-        <div class="modal-dialog" style="max-width: 100% !important;">
-            <div class="modal-content mx-auto" style="width: 80vw !important">
+        <div class="modal-dialog" style="text-align:center !important; max-width: 100% !important;">
+            <div class="modal-content mx-auto" style="text-align:center !important; width: 80vw !important">
                 <div class="modal-header">
                     <h6 class="modal-title" id="staticBackdropLabel">Pilihan Strategi Bisnis</h6>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -85,18 +114,6 @@
                         <div class="row mb-2">
                             <div class="col-3">
                                 <span>No. Penyebab Risiko</span>
-                                <a tabindex="0"
-                                    class="link-secondary link-offset-2 link-underline-opacity-0 link-underline-opacity-50-hover text-decoration-underline mx-1"
-                                    role="button" data-bs-toggle="popover" data-bs-trigger="focus"
-                                    data-bs-placement="right" data-bs-html="true"
-                                    data-bs-content="
-                            <div style=&quot;padding:20px;&quot;>
-                            <ol><li>Penyebab Risiko yang diidentifikasi adalah akar penyebab/root cause dari terjadinya Risiko.</li><li>Penyebab Risiko dapat bersumber dari sisi manusia, proses, jaringan, sistem, atau sumber lain yang berpotensi memicu terjadinya Risiko.</li><li>Apabila terdapat lebih dari satu penyebab Risiko dalam satu sumber Risiko harus dipastikan bahwa penyebab tersebut satu level kedalaman sebagai root cause. Apabila berbeda level kedalaman, maka dapat terjadi tumpang-tindih penyebab yang akan merancukan program perlakuan Risiko.</li><li>Penyebab Risiko merupakan kondisi yang terjadi saat dilakukan identifikasi Risike. ldentifikasi penyebab Risiko dapat mengacu pada Diagram 2 Fault Tree&nbsp;Analysis.</li></ol>
-                        </div>
-                        "
-                                    aria-label="Information" data-bs-original-title="Information">
-                                    <i class="ti ti-info-circle h5 text-secondary"></i>
-                                </a>
                             </div>
                             <div class="col">
                                 <input type="text" disabled class="not-allowed form-control" name="risk_cause_number">
@@ -122,7 +139,18 @@
                         </div>
                         <div class="row mb-2">
                             <div class="col-3">
-                                Realisasi Output Perlakuan Risiko<span class="text-danger">*</span>
+                                <span>Realisasi Output Perlakuan Risiko<span class="text-danger">*</span></span>
+                                <a tabindex="0"
+                                    class="link-secondary link-offset-2 link-underline-opacity-0 link-underline-opacity-50-hover text-decoration-underline mx-1"
+                                    role="button" data-bs-toggle="popover" data-bs-trigger="focus"
+                                    data-bs-placement="right" title="Information" data-bs-html="true"
+                                    data-bs-content='
+                                    <p>
+                                        Agar mengisikan realisasi output atas masing-masing rencana perlakuan risiko yang relevan
+                                    </p>
+                                '><i
+                                        class="ti ti-info-circle h5 text-secondary"></i>
+                                </a>
                             </div>
                             <div class="col">
                                 <div id="actualization_plan_output-editor" class="textarea"></div>
@@ -174,19 +202,7 @@
                         </div>
                         <div class="row mb-2">
                             <div class="col-3">
-                                <span>Key Risk Indicators <span class="text-danger">*</span></span>
-                                <a tabindex="0"
-                                    class="link-secondary link-offset-2 link-underline-opacity-0 link-underline-opacity-50-hover text-decoration-underline mx-1"
-                                    role="button" data-bs-toggle="popover" data-bs-trigger="focus"
-                                    data-bs-placement="right" data-bs-html="true"
-                                    data-bs-content="
-                            <div style=&quot;padding:20px;&quot;>
-                                ldentifikasi KRI:<br><ol><li>Setiap peristiwa Risiko harus memiliki KRI yang menjadi early warning signal sebelum terjadinya suatu peristiwa Risiko.</li><li>ldentifikasi KRI dapat menggunakan Fault Tree Analysis sebagaimana Diagram 2 di alas.</li><li>KRI harus leading indicator dan hindari menetapkan KRI lagging indicator.&nbsp;</li><li>KRI harus dilengkapi dengan batasanlthreshold sebagai alat monitor yang terdiri dari 3 (tiga) threshold yaitu batas bahaya, batas hati-hati, dan batas aman.</li><li>Nilai threshold dapat ditetapkan berdasarkan pertimbangan data historis, benchmarking, dan kebijakan strategi Risiko.</li></ol><div><u></u></div>
-                            </div>
-                        "
-                                    aria-label="Information" data-bs-original-title="Information">
-                                    <i class="ti ti-info-circle h5 text-secondary"></i>
-                                </a>
+                                <span>Key Risk Indicators</span>
                             </div>
                             <div class="col">
                                 <input type="text" class="form-control not-allowed" disabled name="actualization_kri">

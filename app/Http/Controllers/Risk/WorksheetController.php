@@ -224,7 +224,7 @@ class WorksheetController extends Controller
             abort(404, 'Data tidak ditemukan');
         }
 
-        $worksheet->identification = WorksheetIdentification::identification_query()->whereWorksheetId($worksheet->id)->firstOrFail();
+        $worksheet->identification = WorksheetIdentification::identificationQuery()->whereWorksheetId($worksheet->id)->firstOrFail();
         $worksheet->load('strategies', 'incidents.mitigations');
 
         if (request()->ajax()) {
@@ -381,7 +381,7 @@ class WorksheetController extends Controller
         ) {
             abort(404, 'Data tidak ditemukan');
         }
-        $worksheet->identification = WorksheetIdentification::identification_query()->first();
+        $worksheet->identification = WorksheetIdentification::identificationQuery()->first();
         $worksheet->load('incidents.mitigations');
 
         $kbumn_risk_categories = KBUMNRiskCategory::all()->groupBy('type', true);
@@ -836,6 +836,48 @@ class WorksheetController extends Controller
                     ->where('w.sub_unit_code', $unit?->sub_unit_code ?? '')
             )
             ->where('h_i.risk_scale', $riskScale)
+            ->whereYear('w.created_at', request('year', date('Y')));
+
+        return DataTables::of($worksheets)
+            ->editColumn('worksheet_id', function ($worksheet) {
+                return route('risk.worksheet.show', Crypt::encryptString((string) $worksheet->worksheet_id));
+            })
+            ->orderColumn('created_at', 'w.created_at $1')
+            ->make(true);
+    }
+
+    public function get_by_target_risk_scale(int $riskScale)
+    {
+        $unit = $this->roleService->getCurrentUnit();
+        if (request('unit')) {
+            $unit = $this->positionService->getUnitBelow(
+                $unit?->sub_unit_code,
+                request('unit'),
+                $this->roleService->isRiskOwner() || $this->roleService->isRiskAdmin()
+            ) ?: $unit;
+        }
+
+        $quarter = request('quarter', 1);
+        $quarter = in_array($quarter, [1, 2, 3, 4]) ? $quarter : 1;
+
+        $worksheets = Worksheet::residualMapQuery($quarter)
+            ->when(
+                !$this->roleService->isRiskAdmin(),
+                fn($q) => $q->withExpression(
+                    'position_hierarchy',
+                    Position::hierarchyQuery(
+                        $unit?->sub_unit_code ?? '-',
+                        $this->roleService->isRiskOwner() || $this->roleService->isRiskAdmin()
+                    )
+                )
+                    ->join('position_hierarchy as ph', 'ph.sub_unit_code', 'w.sub_unit_code')
+            )
+            ->when(
+                $this->roleService->isRiskAdmin(),
+                fn($q) => $q->where('w.created_by', auth()->user()->employee_id)
+                    ->where('w.sub_unit_code', $unit?->sub_unit_code ?? '')
+            )
+            ->where("h_r{$quarter}.risk_scale", $riskScale)
             ->whereYear('w.created_at', request('year', date('Y')));
 
         return DataTables::of($worksheets)

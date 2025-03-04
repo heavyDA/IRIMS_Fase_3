@@ -184,7 +184,7 @@ class RiskProfileController extends Controller
             ->simplePaginate(request('per_page', 10));
 
         $worksheets = collect($worksheets->items());
-        $identifications = WorksheetIdentification::identification_query()->whereIn('worksheet_id', $worksheets->pluck('id'))->get();
+        $identifications = WorksheetIdentification::identificationQuery()->whereIn('worksheet_id', $worksheets->pluck('id'))->get();
         $worksheets = $worksheets->map(function ($worksheet) use ($identifications) {
             $worksheet->identification = $identifications->firstWhere('worksheet_id', $worksheet->id);
             return $worksheet;

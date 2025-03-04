@@ -18,8 +18,15 @@ class UserController extends Controller
     public function index()
     {
         if (request()->ajax()) {
-            $users = User::query();
+            $users = User::query()->with('roles')
+                ->whereNotIn(
+                    'username',
+                    ['rahasia']
+                );
             return DataTables::eloquent($users)
+                ->addColumn('is_local_user', function ($user) {
+                    return is_null($user->password);
+                })
                 ->addColumn('action', function ($user) {
                     $actions = [
                         ['id' => $user->id, 'route' => route('rbac.user.show', $user->id), 'type' => 'link', 'text' => 'detail', 'permission' => 'rbac.user.detail'],
@@ -29,12 +36,11 @@ class UserController extends Controller
 
                     return view('layouts.partials._table_action', compact('actions'));
                 })
+                ->rawColumns(['action'])
                 ->make(true);
         }
 
-        $title = "Daftar Pengguna";
-
-        return view('RBAC.users.index', compact('title'));
+        return view('RBAC.users.index');
     }
 
     /**
@@ -79,8 +85,7 @@ class UserController extends Controller
     public function edit(User $user)
     {
         $title = 'Edit Pengguna';
-
-        return view('RBAC.users.form', compact('title', 'user'));
+        return view('RBAC.users.form', compact('user', 'title'));
     }
 
     /**

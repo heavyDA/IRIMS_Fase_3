@@ -41,6 +41,7 @@ class ViewServiceProvider extends ServiceProvider
             'risk.top_risk.index',
             'report.risk_monitoring.index',
             'report.risk_profile.index',
+            'RBAC.users.form',
         ], UnitComposer::class);
 
         View::composer([

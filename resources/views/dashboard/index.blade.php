@@ -151,12 +151,12 @@
     </div>
 
     @include('dashboard._risk_chart')
-
     @include('dashboard._risk_map')
-    @includeWhen(session()->get('current_role')?->name != 'risk admin', 'dashboard._monitoring')
+
     @includeWhen(
         !in_array(session()->get('current_role')?->name, ['risk admin', 'risk owner']),
         'dashboard._top_risk')
+    @includeWhen(session()->get('current_role')?->name != 'risk admin', 'dashboard._monitoring')
 @endsection
 
 @push('element')

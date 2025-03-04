@@ -255,18 +255,23 @@ class Worksheet extends Model
                 'r3.scale as residual_3_impact_scale',
                 'r4.scale as residual_4_impact_scale',
                 'h_i.risk_scale as inherent_impact_probability_scale',
+                'h_i.impact_probability as inherent_impact_probability_probability_scale',
                 'h_i.risk_level as inherent_impact_probability_level',
                 'h_i.color as inherent_impact_probability_color',
                 'h_r1.risk_scale as residual_1_impact_probability_scale',
+                'h_r1.impact_probability as residual_1_impact_probability_probability_scale',
                 'h_r1.risk_level as residual_1_impact_probability_level',
                 'h_r1.color as residual_1_impact_probability_color',
                 'h_r2.risk_scale as residual_2_impact_probability_scale',
+                'h_r2.impact_probability as residual_2_impact_probability_probability_scale',
                 'h_r2.risk_level as residual_2_impact_probability_level',
                 'h_r2.color as residual_2_impact_probability_color',
                 'h_r3.risk_scale as residual_3_impact_probability_scale',
+                'h_r3.impact_probability as residual_3_impact_probability_probability_scale',
                 'h_r3.risk_level as residual_3_impact_probability_level',
                 'h_r3.color as residual_3_impact_probability_color',
                 'h_r4.risk_scale as residual_4_impact_probability_scale',
+                'h_r4.impact_probability as residual_4_impact_probability_probability_scale',
                 'h_r4.risk_level as residual_4_impact_probability_level',
                 'h_r4.color as residual_4_impact_probability_color',
 
@@ -389,18 +394,23 @@ class Worksheet extends Model
                 'r3.scale as residual_3_impact_scale',
                 'r4.scale as residual_4_impact_scale',
                 'h_i.risk_scale as inherent_impact_probability_scale',
+                'h_i.impact_probability as inherent_impact_probability_probability_scale',
                 'h_i.risk_level as inherent_impact_probability_level',
                 'h_i.color as inherent_impact_probability_color',
                 'h_r1.risk_scale as residual_1_impact_probability_scale',
+                'h_r1.impact_probability as residual_1_impact_probability_probability_scale',
                 'h_r1.risk_level as residual_1_impact_probability_level',
                 'h_r1.color as residual_1_impact_probability_color',
                 'h_r2.risk_scale as residual_2_impact_probability_scale',
+                'h_r2.impact_probability as residual_2_impact_probability_probability_scale',
                 'h_r2.risk_level as residual_2_impact_probability_level',
                 'h_r2.color as residual_2_impact_probability_color',
                 'h_r3.risk_scale as residual_3_impact_probability_scale',
+                'h_r3.impact_probability as residual_3_impact_probability_probability_scale',
                 'h_r3.risk_level as residual_3_impact_probability_level',
                 'h_r3.color as residual_3_impact_probability_color',
                 'h_r4.risk_scale as residual_4_impact_probability_scale',
+                'h_r4.impact_probability as residual_4_impact_probability_probability_scale',
                 'h_r4.risk_level as residual_4_impact_probability_level',
                 'h_r4.color as residual_4_impact_probability_color',
 
@@ -447,6 +457,149 @@ class Worksheet extends Model
 
     public static function topRiskUpperQuery(?string $unit, ?string $subUnit)
     {
+        // return DB::table('children_worksheets as w')
+        //     ->withExpression('scales', DB::table('m_bumn_scales'))
+        //     ->withExpression('heatmaps', DB::table('m_heatmaps'))
+        //     ->withExpression('risk_categories', DB::table('m_kbumn_risk_categories'))
+        //     ->withExpression(
+        //         'children_worksheets',
+        //         DB::table('ra_worksheets as w')
+        //             ->select(
+        //                 'w.id',
+        //                 'winc.worksheet_id',
+        //                 'winc.risk_cause_number',
+        //                 'winc.risk_cause_code',
+        //                 'winc.risk_cause_body',
+        //                 'winc.kri_body',
+        //                 'winc.kri_unit_id',
+        //                 'winc.kri_threshold_safe',
+        //                 'winc.kri_threshold_caution',
+        //                 'winc.kri_threshold_danger',
+
+        //                 'w.worksheet_code',
+        //                 'w.worksheet_number',
+        //                 'w.unit_code',
+        //                 'w.unit_name',
+        //                 'w.sub_unit_code',
+        //                 'w.sub_unit_name',
+        //                 'w.organization_code',
+        //                 'w.organization_name',
+        //                 'w.personnel_area_code',
+        //                 'w.personnel_area_name',
+        //                 'w.company_code',
+        //                 'w.company_name',
+        //                 'w.target_body',
+        //                 'w.status',
+        //                 'w.status_monitoring',
+
+        //                 'wi.existing_control_body',
+
+        //                 'wi.risk_chronology_body',
+        //                 'wi.risk_chronology_description',
+        //                 'wi.risk_impact_category',
+        //                 'wi.risk_impact_body',
+        //                 'wi.risk_impact_start_date',
+        //                 'wi.risk_impact_end_date',
+
+        //                 'wi.inherent_body',
+        //                 'wi.inherent_impact_value',
+        //                 'wi.inherent_impact_probability',
+        //                 'wi.inherent_risk_exposure',
+        //                 'wi.inherent_risk_level',
+        //                 'wi.inherent_risk_scale',
+
+        //                 'wi.residual_1_impact_value',
+        //                 'wi.residual_1_impact_probability',
+        //                 'wi.residual_1_risk_exposure',
+        //                 'wi.residual_1_risk_level',
+        //                 'wi.residual_1_risk_scale',
+        //                 'wi.residual_2_impact_value',
+        //                 'wi.residual_2_impact_probability',
+        //                 'wi.residual_2_risk_exposure',
+        //                 'wi.residual_2_risk_level',
+        //                 'wi.residual_2_risk_scale',
+        //                 'wi.residual_3_impact_value',
+        //                 'wi.residual_3_impact_probability',
+        //                 'wi.residual_3_risk_exposure',
+        //                 'wi.residual_3_risk_level',
+        //                 'wi.residual_3_risk_scale',
+        //                 'wi.residual_4_impact_value',
+        //                 'wi.residual_4_impact_probability',
+        //                 'wi.residual_4_risk_exposure',
+        //                 'wi.residual_4_risk_level',
+        //                 'wi.residual_4_risk_scale',
+
+        //                 'kri_unit.name as kri_unit_name',
+        //                 'm_existing_control_types.name as existing_control_type_name',
+        //                 'm_control_effectiveness_assessments.name as control_effectiveness_assessment_name',
+        //                 'rc_t2.name as risk_category_t2_name',
+        //                 'rc_t3.name as risk_category_t3_name',
+        //                 'i.scale as inherent_impact_scale',
+        //                 'r1.scale as residual_1_impact_scale',
+        //                 'r2.scale as residual_2_impact_scale',
+        //                 'r3.scale as residual_3_impact_scale',
+        //                 'r4.scale as residual_4_impact_scale',
+        //                 'h_i.risk_scale as inherent_impact_probability_scale',
+        //                 'h_i.impact_probability as inherent_impact_probability_probability_scale',
+        //                 'h_i.risk_level as inherent_impact_probability_level',
+        //                 'h_i.color as inherent_impact_probability_color',
+        //                 'h_r1.risk_scale as residual_1_impact_probability_scale',
+        //                 'h_r1.impact_probability as residual_1_impact_probability_probability_scale',
+        //                 'h_r1.risk_level as residual_1_impact_probability_level',
+        //                 'h_r1.color as residual_1_impact_probability_color',
+        //                 'h_r2.risk_scale as residual_2_impact_probability_scale',
+        //                 'h_r2.impact_probability as residual_2_impact_probability_probability_scale',
+        //                 'h_r2.risk_level as residual_2_impact_probability_level',
+        //                 'h_r2.color as residual_2_impact_probability_color',
+        //                 'h_r3.risk_scale as residual_3_impact_probability_scale',
+        //                 'h_r3.impact_probability as residual_3_impact_probability_probability_scale',
+        //                 'h_r3.risk_level as residual_3_impact_probability_level',
+        //                 'h_r3.color as residual_3_impact_probability_color',
+        //                 'h_r4.risk_scale as residual_4_impact_probability_scale',
+        //                 'h_r4.impact_probability as residual_4_impact_probability_probability_scale',
+        //                 'h_r4.risk_level as residual_4_impact_probability_level',
+        //                 'h_r4.color as residual_4_impact_probability_color',
+
+        //                 'wtr.id as top_risk_id',
+        //                 'wtr.sub_unit_code as destination_sub_unit_code',
+        //                 'wtr.source_sub_unit_code',
+
+        //                 'wtr_submit.id as top_risk_submit_id',
+        //                 'wtr_submit.sub_unit_code as submit_destination_sub_unit_code',
+        //                 'wtr_submit.source_sub_unit_code as submit_source_sub_unit_code',
+        //                 'w.created_at',
+        //             )
+        //             ->distinct('w.id')
+        //             ->leftJoin('ra_worksheet_identifications as wi', 'wi.worksheet_id', '=', 'w.id')
+        //             ->leftJoin('ra_worksheet_incidents as winc', 'winc.worksheet_id', '=', 'w.id')
+        //             ->join(
+        //                 'ra_worksheet_top_risks as wtr',
+        //                 fn($q) => $q->on('wtr.worksheet_id', '=', 'w.id')
+        //                     ->whereLike('wtr.sub_unit_code', $unit)
+        //             )
+        //             ->leftJoin(
+        //                 'ra_worksheet_top_risks as wtr_submit',
+        //                 fn($q) => $q->on('wtr_submit.worksheet_id', '=', 'w.id')
+        //                     ->whereLike('wtr_submit.source_sub_unit_code', $subUnit)
+        //             )
+        //             ->leftJoin('m_kri_units as kri_unit', 'kri_unit.id', '=', 'winc.kri_unit_id')
+        //             ->leftJoin('m_existing_control_types', 'm_existing_control_types.id', '=', 'wi.existing_control_type_id')
+        //             ->leftJoin('m_control_effectiveness_assessments', 'm_control_effectiveness_assessments.id', '=', 'wi.control_effectiveness_assessment_id')
+        //             ->leftJoin('risk_categories as rc_t2', 'rc_t2.id', '=', 'wi.risk_category_t2_id')
+        //             ->leftJoin('risk_categories as rc_t3', 'rc_t3.id', '=', 'wi.risk_category_t3_id')
+        //             ->leftJoin('scales as i', 'i.id', '=', 'wi.inherent_impact_scale_id')
+        //             ->leftJoin('scales as r1', 'r1.id', '=', 'wi.residual_1_impact_scale_id')
+        //             ->leftJoin('scales as r2', 'r2.id', '=', 'wi.residual_2_impact_scale_id')
+        //             ->leftJoin('scales as r3', 'r3.id', '=', 'wi.residual_3_impact_scale_id')
+        //             ->leftJoin('scales as r4', 'r4.id', '=', 'wi.residual_4_impact_scale_id')
+        //             ->leftJoin('heatmaps as h_i', 'h_i.id', '=', 'wi.inherent_impact_probability_scale_id')
+        //             ->leftJoin('heatmaps as h_r1', 'h_r1.id', '=', 'wi.residual_1_impact_probability_scale_id')
+        //             ->leftJoin('heatmaps as h_r2', 'h_r2.id', '=', 'wi.residual_2_impact_probability_scale_id')
+        //             ->leftJoin('heatmaps as h_r3', 'h_r3.id', '=', 'wi.residual_3_impact_probability_scale_id')
+        //             ->leftJoin('heatmaps as h_r4', 'h_r4.id', '=', 'wi.residual_4_impact_probability_scale_id')
+        //     )
+        //     ->select('w.*');
+
         return DB::table('ra_worksheets as w')
             ->select(
                 'w.id',
@@ -524,18 +677,23 @@ class Worksheet extends Model
                 'r3.scale as residual_3_impact_scale',
                 'r4.scale as residual_4_impact_scale',
                 'h_i.risk_scale as inherent_impact_probability_scale',
+                'h_i.impact_probability as inherent_impact_probability_probability_scale',
                 'h_i.risk_level as inherent_impact_probability_level',
                 'h_i.color as inherent_impact_probability_color',
                 'h_r1.risk_scale as residual_1_impact_probability_scale',
+                'h_r1.impact_probability as residual_1_impact_probability_probability_scale',
                 'h_r1.risk_level as residual_1_impact_probability_level',
                 'h_r1.color as residual_1_impact_probability_color',
                 'h_r2.risk_scale as residual_2_impact_probability_scale',
+                'h_r2.impact_probability as residual_2_impact_probability_probability_scale',
                 'h_r2.risk_level as residual_2_impact_probability_level',
                 'h_r2.color as residual_2_impact_probability_color',
                 'h_r3.risk_scale as residual_3_impact_probability_scale',
+                'h_r3.impact_probability as residual_3_impact_probability_probability_scale',
                 'h_r3.risk_level as residual_3_impact_probability_level',
                 'h_r3.color as residual_3_impact_probability_color',
                 'h_r4.risk_scale as residual_4_impact_probability_scale',
+                'h_r4.impact_probability as residual_4_impact_probability_probability_scale',
                 'h_r4.risk_level as residual_4_impact_probability_level',
                 'h_r4.color as residual_4_impact_probability_color',
 
@@ -667,18 +825,23 @@ class Worksheet extends Model
                 'r3.scale as residual_3_impact_scale',
                 'r4.scale as residual_4_impact_scale',
                 'h_i.risk_scale as inherent_impact_probability_scale',
+                'h_i.impact_probability as inherent_impact_probability_probability_scale',
                 'h_i.risk_level as inherent_impact_probability_level',
                 'h_i.color as inherent_impact_probability_color',
                 'h_r1.risk_scale as residual_1_impact_probability_scale',
+                'h_r1.impact_probability as residual_1_impact_probability_probability_scale',
                 'h_r1.risk_level as residual_1_impact_probability_level',
                 'h_r1.color as residual_1_impact_probability_color',
                 'h_r2.risk_scale as residual_2_impact_probability_scale',
+                'h_r2.impact_probability as residual_2_impact_probability_probability_scale',
                 'h_r2.risk_level as residual_2_impact_probability_level',
                 'h_r2.color as residual_2_impact_probability_color',
                 'h_r3.risk_scale as residual_3_impact_probability_scale',
+                'h_r3.impact_probability as residual_3_impact_probability_probability_scale',
                 'h_r3.risk_level as residual_3_impact_probability_level',
                 'h_r3.color as residual_3_impact_probability_color',
                 'h_r4.risk_scale as residual_4_impact_probability_scale',
+                'h_r4.impact_probability as residual_4_impact_probability_probability_scale',
                 'h_r4.risk_level as residual_4_impact_probability_level',
                 'h_r4.color as residual_4_impact_probability_color',
 
@@ -749,8 +912,6 @@ class Worksheet extends Model
                     'rc_t3.name as risk_category_t3_name',
                     'wi.risk_chronology_body',
                     'wi.inherent_impact_probability_scale_id',
-                    'wi.inherent_risk_level',
-                    'wi.inherent_risk_scale',
                     'wi.inherent_risk_exposure',
 
                     'w.personnel_area_code',
@@ -802,10 +963,12 @@ class Worksheet extends Model
                 'hi.color as inherent_risk_color',
                 'hi.risk_level as inherent_risk_level',
                 'hi.risk_scale as inherent_risk_scale',
+                'hi.impact_probability as inherent_risk_impact_probability_scale',
                 'w.inherent_risk_exposure',
                 'hr.color as residual_risk_color',
                 'hr.risk_level as residual_risk_level',
                 'hr.risk_scale as residual_risk_scale',
+                'hr.impact_probability as residual_risk_impact_probability_scale',
                 'mr.risk_exposure as residual_risk_exposure',
                 'w.personnel_area_code',
                 'w.personnel_area_name',
@@ -1066,18 +1229,23 @@ class Worksheet extends Model
                 'r3.scale as residual_3_impact_scale',
                 'r4.scale as residual_4_impact_scale',
                 'h_i.risk_scale as inherent_impact_probability_scale',
+                'h_i.impact_probability as inherent_impact_probability_probability_scale',
                 'h_i.risk_level as inherent_impact_probability_level',
                 'h_i.color as inherent_impact_probability_color',
                 'h_r1.risk_scale as residual_1_impact_probability_scale',
+                'h_r1.impact_probability as residual_1_impact_probability_probability_scale',
                 'h_r1.risk_level as residual_1_impact_probability_level',
                 'h_r1.color as residual_1_impact_probability_color',
                 'h_r2.risk_scale as residual_2_impact_probability_scale',
+                'h_r2.impact_probability as residual_2_impact_probability_probability_scale',
                 'h_r2.risk_level as residual_2_impact_probability_level',
                 'h_r2.color as residual_2_impact_probability_color',
                 'h_r3.risk_scale as residual_3_impact_probability_scale',
+                'h_r3.impact_probability as residual_3_impact_probability_probability_scale',
                 'h_r3.risk_level as residual_3_impact_probability_level',
                 'h_r3.color as residual_3_impact_probability_color',
                 'h_r4.risk_scale as residual_4_impact_probability_scale',
+                'h_r4.impact_probability as residual_4_impact_probability_probability_scale',
                 'h_r4.risk_level as residual_4_impact_probability_level',
                 'h_r4.color as residual_4_impact_probability_color',
                 'w.created_at'
@@ -1088,6 +1256,84 @@ class Worksheet extends Model
             ->leftJoin('ra_worksheet_incidents as winc', 'winc.worksheet_id', '=', 'w.id')
             ->leftJoin('ra_worksheet_identifications as wi', 'wi.worksheet_id', '=', 'w.id')
             ->leftJoin('m_kri_units as ku', 'ku.id', '=', 'winc.kri_unit_id')
+            ->leftJoin('m_existing_control_types as ect', 'ect.id', '=', 'wi.existing_control_type_id')
+            ->leftJoin('m_control_effectiveness_assessments as cea', 'cea.id', '=', 'wi.control_effectiveness_assessment_id')
+            ->leftJoin('risk_categories as rc_t2', 'rc_t2.id', '=', 'wi.risk_category_t2_id')
+            ->leftJoin('risk_categories as rc_t3', 'rc_t3.id', '=', 'wi.risk_category_t3_id')
+            ->leftJoin('scales as i', 'i.id', '=', 'wi.inherent_impact_scale_id')
+            ->leftJoin('scales as r1', 'r1.id', '=', 'wi.residual_1_impact_scale_id')
+            ->leftJoin('scales as r2', 'r2.id', '=', 'wi.residual_2_impact_scale_id')
+            ->leftJoin('scales as r3', 'r3.id', '=', 'wi.residual_3_impact_scale_id')
+            ->leftJoin('scales as r4', 'r4.id', '=', 'wi.residual_4_impact_scale_id')
+            ->leftJoin('heatmaps as h_i', 'h_i.id', '=', 'wi.inherent_impact_probability_scale_id')
+            ->leftJoin('heatmaps as h_r1', 'h_r1.id', '=', 'wi.residual_1_impact_probability_scale_id')
+            ->leftJoin('heatmaps as h_r2', 'h_r2.id', '=', 'wi.residual_2_impact_probability_scale_id')
+            ->leftJoin('heatmaps as h_r3', 'h_r3.id', '=', 'wi.residual_3_impact_probability_scale_id')
+            ->leftJoin('heatmaps as h_r4', 'h_r4.id', '=', 'wi.residual_4_impact_probability_scale_id');
+    }
+
+    public static function residualMapQuery(?int $quarter = 1)
+    {
+        return DB::table('ra_worksheets as w')
+            ->select(
+                'wi.worksheet_id',
+                'w.worksheet_code',
+                'w.worksheet_number',
+                'w.unit_code',
+                'w.unit_name',
+                'w.sub_unit_code',
+                'w.sub_unit_name',
+                'w.organization_code',
+                'w.organization_name',
+                'w.personnel_area_code',
+                'w.personnel_area_name',
+                'w.company_code',
+                'w.company_name',
+                'w.target_body',
+                'w.status',
+                'w.status_monitoring',
+                'wi.existing_control_body',
+
+                'wi.risk_chronology_body',
+                'wi.risk_chronology_description',
+                'wi.risk_impact_category',
+                'wi.risk_impact_body',
+                'wi.risk_impact_start_date',
+                'wi.risk_impact_end_date',
+
+                'wi.inherent_body',
+                'wi.inherent_impact_value',
+                'wi.inherent_impact_probability',
+                'wi.inherent_risk_exposure',
+                'wi.inherent_risk_level',
+                'wi.inherent_risk_scale',
+
+                "wi.residual_{$quarter}_risk_exposure as residual_risk_exposure",
+                "h_r{$quarter}.risk_scale as residual_risk_scale",
+                "h_r{$quarter}.impact_probability as residual_impact_probability_scale",
+                "h_r{$quarter}.risk_level as residual_risk_level",
+                "h_r{$quarter}.color as residual_risk_color",
+
+                'ect.name as existing_control_type_name',
+                'cea.name as control_effectiveness_assessment_name',
+                'rc_t2.name as risk_category_t2_name',
+                'rc_t3.name as risk_category_t3_name',
+                'i.scale as inherent_impact_scale',
+                'r1.scale as residual_1_impact_scale',
+                'r2.scale as residual_2_impact_scale',
+                'r3.scale as residual_3_impact_scale',
+                'r4.scale as residual_4_impact_scale',
+
+                'h_i.risk_scale as inherent_impact_probability_scale',
+                'h_i.impact_probability as inherent_impact_probability_probability_scale',
+                'h_i.risk_level as inherent_impact_probability_level',
+                'h_i.color as inherent_impact_probability_color',
+                'w.created_at'
+            )
+            ->withExpression('scales', DB::table('m_bumn_scales'))
+            ->withExpression('heatmaps', DB::table('m_heatmaps'))
+            ->withExpression('risk_categories', DB::table('m_kbumn_risk_categories'))
+            ->leftJoin('ra_worksheet_identifications as wi', 'wi.worksheet_id', '=', 'w.id')
             ->leftJoin('m_existing_control_types as ect', 'ect.id', '=', 'wi.existing_control_type_id')
             ->leftJoin('m_control_effectiveness_assessments as cea', 'cea.id', '=', 'wi.control_effectiveness_assessment_id')
             ->leftJoin('risk_categories as rc_t2', 'rc_t2.id', '=', 'wi.risk_category_t2_id')

@@ -639,6 +639,13 @@ const identificationChoicesInit = async () => {
             }
             identificationChoices.inherent_impact_scale.clearChoices().setChoices(choices);
 
+            for (let info of document.querySelectorAll('.info-category-risk')) {
+                if (info.id.includes(risk_impact_category)) {
+                    info.classList.replace('d-none', 'd-block')
+                } else {
+                    info.classList.replace('d-block', 'd-none')
+                }
+            }
 
             for (let label of incidentForm.querySelectorAll('.label-category-risk')) {
                 if (label.dataset[risk_impact_category]) {
@@ -656,6 +663,9 @@ const identificationChoicesInit = async () => {
                 }
             }
 
+            for (let info of document.querySelectorAll('.info-category-risk')) {
+                info.classList.replace('d-block', 'd-none')
+            }
 
             identificationChoices.inherent_impact_scale.setChoiceByValue("Pilih").disable();
 

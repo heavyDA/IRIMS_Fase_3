@@ -10,6 +10,20 @@ if (!function_exists('format_date')) {
     }
 }
 
+if (!function_exists('month_quarter')) {
+    function month_quarter(?string $date = null): string
+    {
+        if (!$date) {
+            $date = date('Y-m-d');
+        }
+
+        $date = Carbon::parse($date);
+        $quarter = ceil($date->format('n') / 3);
+
+        return $quarter;
+    }
+}
+
 if (!function_exists('flash_message')) {
     /**
      * @param string $message

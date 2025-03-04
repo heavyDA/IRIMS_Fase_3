@@ -14,7 +14,7 @@
             </div>
             <div class="collapse show border-top" id="risk-map-inherent-collapse">
                 <div class="card-body">
-                    <div id="risk-chart-d3" style="height: 500px; width: 100%;">
+                    <div id="risk-chart-inherent" style="height: 500px; width: 100%;">
                         <svg width="100%" height="100%" viewBox="0 0 262 262">
                             <rect width="262" height="262" fill="white"></rect>
                             <g>
@@ -397,19 +397,19 @@
     <div class="col-12 col-xxl-6">
         <div class="card custom-card">
             <div class="card-header justify-content-between border-bottom-0">
-                <div class="card-title">
-                    Peta Risiko Aktual
+                <div class="card-title text-capitalize" id="risk-map-residual-title">
+                    Peta Risiko Target Residual
                 </div>
                 <a href="javascript:void(0);" data-bs-toggle="collapse" data-bs-target="#risk-map-actual-collapse"
-                    aria-expanded="false" aria-controls="risk-map-actual-collapse">
+                    aria-expanded="false" aria-controls="risk-map-residual-collapse">
                     <i class="ri-arrow-down-s-line fs-18 collapse-open"></i>
                     <i class="ri-arrow-up-s-line collapse-close fs-18"></i>
                 </a>
             </div>
-            <div class="collapse show border-top" id="risk-map-actual-collapse">
+            <div class="collapse show border-top" id="risk-map-residual-collapse">
                 <div class="card-body">
 
-                    <div id="risk-chart-d3" style="height: 500px; width: 100%;">
+                    <div id="risk-chart-residual" style="height: 500px; width: 100%;">
                         <svg width="100%" height="100%" viewBox="0 0 262 262">
                             <rect width="262" height="262" fill="white"></rect>
                             <g>

@@ -20,7 +20,8 @@
                     <table id="progress-monitoring-table" class="table text-nowrap table-bordered table-hover">
                         <thead>
                             <tr>
-                                <th class="table-dark-custom" rowspan="2" style="width: 256px;">Unit</th>
+                                <th class="table-dark-custom" rowspan="2"
+                                    style="text-align: center !important;width: 256px;">Unit</th>
                                 <th colspan="12" class="table-dark-custom" style="text-align: center !important;">
                                     Timeline</th>
                             </tr>

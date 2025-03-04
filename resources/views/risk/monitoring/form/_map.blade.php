@@ -362,7 +362,6 @@
         <span><i class="ti" style="color: #5A9AEB;font-size:24px;">&#xf671;</i> Risiko Inheren</span>
     </div>
     <div class="d-flex align-items-center">
-        <span><i class="ti" style="color: #9A9B9D;font-size:24px;">&#xf671;</i> Risiko Residual Triwulan/Tahun
-            Berjalan</span>
+        <span><i class="ti" style="color: #9A9B9D;font-size:24px;">&#xf671;</i> Risiko Residual</span>
     </div>
 </div>

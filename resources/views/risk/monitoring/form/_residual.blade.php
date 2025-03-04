@@ -17,7 +17,7 @@
 
             </div>
             <div class="row mb-1">
-                <div class="col-3">Tanggal</div>
+                <div class="col-3"><span>Tanggal<span class="text-danger">*</span></span></div>
                 <div class="col">
                     <input type="date" name="period_date" class="form-control"
                         value="{{ isset($monitoring) ? $monitoring->period_date : date('Y-m-d') }}">
@@ -26,14 +26,6 @@
             <div class="row mb-1">
                 <div class="col-3">
                     <span>No. Risiko</span>
-                    <a tabindex="0"
-                        class="link-secondary link-offset-2 link-underline-opacity-0 link-underline-opacity-50-hover text-decoration-underline mx-1"
-                        role="button" data-bs-toggle="popover" data-bs-trigger="focus" data-bs-placement="right"
-                        data-bs-html="true"
-                        data-bs-content="<p>No. Risiko adalah nomor unik untuk setiap risiko yang diidentifikasikan.</p><p>Ditulis sebagai berikut AREA-SUB_UNIT-NO_URUT</p><p>Contoh: PST-OPP-1</p>"
-                        aria-label="Information" data-bs-original-title="Information">
-                        <i class="ti ti-info-circle h5 text-secondary"></i>
-                    </a>
                 </div>
                 <div class="col">
                     <input type="text" value="{{ $worksheet->worksheet_number }}" name="risk_number" disabled
@@ -43,18 +35,6 @@
             <div class="row mb-1">
                 <div class="col-3">
                     <span>Peristiwa Risiko</span>
-                    <a tabindex="0"
-                        class="link-secondary link-offset-2 link-underline-opacity-0 link-underline-opacity-50-hover text-decoration-underline mx-1"
-                        role="button" data-bs-toggle="popover" data-bs-trigger="focus" data-bs-placement="right"
-                        data-bs-html="true"
-                        data-bs-content="
-                        <div class='col-md-12' style='padding:20px;'>
-                        <p>Diisi dengan peristiwa risiko yang relevan serta peristiwa risko harus diidentifikasi secara tepat <strong>(bukan negasi sasaran, negasi dampak)</strong></p>
-                    </div>
-                    "
-                        aria-label="Information" data-bs-original-title="Information"><i
-                            class="ti ti-info-circle h5 text-secondary"></i>
-                    </a>
                 </div>
                 <div class="col">
                     <div id="risk_chronology_body-editor" class="textarea not-allowed"></div>
@@ -76,14 +56,6 @@
             <div class="row mb-1">
                 <div class="col-3">
                     <span>{{ $isQuantitative ? 'Asumsi Perhitungan Dampak Kuantitatif' : 'Penjelasan Dampak Kualitatif' }}</span>
-                    <a tabindex="0"
-                        class="link-secondary link-offset-2 link-underline-opacity-0 link-underline-opacity-50-hover text-decoration-underline mx-1"
-                        role="button" data-bs-toggle="popover" data-bs-trigger="focus" data-bs-placement="right"
-                        data-bs-html="true"
-                        data-bs-content="<p>Diisi penjelasan atas asumsi/pendekatan yang dipakai untuk menghitung nilai dampak.</p>"
-                        aria-label="Information" data-bs-original-title="Information"
-                        aria-describedby="popover858117"><i class="ti ti-info-circle h5 text-secondary"></i>
-                    </a>
                 </div>
                 <div class="col">
                     <div id="inherent_body-editor" class="textarea not-allowed"></div>
@@ -96,23 +68,23 @@
                 <div class="col row">
                     <div class="col-12 col-md-6 col-lg-3">
                         <label>Q1</label>
-                        <input disabled type="text" class="not-allowed form-control"
-                            value="{{ $worksheet?->identification?->residual_1_impact_probability_level ?? '' }}">
+                        <label style="background-color: #F7F8FA"
+                            class="form-control not-allowed text-center">{{ $worksheet?->identification?->residual_1_impact_probability_level ?? '' }}<br>{{ $worksheet?->identification?->residual_1_impact_probability_scale }}</label>
                     </div>
                     <div class="col-12 col-md-6 col-lg-3">
                         <label>Q2</label>
-                        <input disabled type="text" class="not-allowed form-control"
-                            value="{{ $worksheet?->identification?->residual_2_impact_probability_level ?? '' }}">
+                        <label style="background-color: #F7F8FA"
+                            class="form-control not-allowed text-center">{{ $worksheet?->identification?->residual_2_impact_probability_level ?? '' }}<br>{{ $worksheet?->identification?->residual_2_impact_probability_scale }}</label>
                     </div>
                     <div class="col-12 col-md-6 col-lg-3">
                         <label>Q3</label>
-                        <input disabled type="text" class="not-allowed form-control"
-                            value="{{ $worksheet?->identification?->residual_3_impact_probability_level ?? '' }}">
+                        <label style="background-color: #F7F8FA"
+                            class="form-control not-allowed text-center">{{ $worksheet?->identification?->residual_3_impact_probability_level ?? '' }}<br>{{ $worksheet?->identification?->residual_3_impact_probability_scale }}</label>
                     </div>
                     <div class="col-12 col-md-6 col-lg-3">
                         <label>Q4</label>
-                        <input disabled type="text" class="not-allowed form-control"
-                            value="{{ $worksheet?->identification?->residual_4_impact_probability_level ?? '' }}">
+                        <label style="background-color: #F7F8FA"
+                            class="form-control not-allowed text-center">{{ $worksheet?->identification?->residual_4_impact_probability_level ?? '' }}<br>{{ $worksheet?->identification?->residual_4_impact_probability_scale }}</label>
                     </div>
                 </div>
             </div>
@@ -131,17 +103,42 @@
             </div>
             <div class="row mb-3">
                 <div class="col-3">
-                    <span>Skala Dampak Residual {{ $isQuantitative ? 'Kuantitatif' : 'Kualitatif' }} <i
-                            class="text-danger">*</i></span>
-                    <a tabindex="0"
-                        class="link-secondary link-offset-2 link-underline-opacity-0 link-underline-opacity-50-hover text-decoration-underline mx-1"
-                        role="button" data-bs-toggle="popover" data-bs-trigger="focus" data-bs-placement="right"
-                        data-bs-html="true"
-                        data-bs-content="<p>Diisi dengan penilaian dampak Risiko Inheren dengan skala 1 s.d. 5
-                        <br><strong>Reference to Table Skala KBUMN</strong></p>"
-                        aria-label="Information" data-bs-original-title="Information"><i
-                            class="ti ti-info-circle h5 text-secondary"></i>
-                    </a>
+                    @if ($isQuantitative)
+                        <span>Skala Dampak Residual Kuantitatif<i class="text-danger">*</i></span>
+                        <a tabindex="0"
+                            class="link-secondary link-offset-2 link-underline-opacity-0 link-underline-opacity-50-hover text-decoration-underline mx-1"
+                            role="button" data-bs-toggle="popover" data-bs-trigger="focus" data-bs-placement="right"
+                            title="Information" data-bs-html="true"
+                            data-bs-content='
+                                
+                                    <p>Diisi dengan penilaian dampak Risiko Inheren dengan skala 1 s.d. 5
+                                    <br><strong>Reference to Table Skala KBUMN</strong></p><br>
+                                    <img class="w-100" src="{{ asset('assets/images/pendukung/tabel_skala_bumn.png') }}"/>
+                                    <p>
+                                        Keterangan: <br>
+                                        Nilai Batasan Risiko merupakan nilai Risk Limit di level enterprise sebagaimana yang telah ditetapkan dalam Strategi Risiko BUMN.
+                                    </p>
+                                '><i
+                                class="ti ti-info-circle h5 text-secondary"></i>
+                        </a>
+                    @else
+                        <span>Skala Dampak Residual Kualitatif<i class="text-danger">*</i></span>
+                        <a tabindex="0"
+                            class="link-secondary link-offset-2 link-underline-opacity-0 link-underline-opacity-50-hover text-decoration-underline mx-1"
+                            role="button" data-bs-toggle="popover" data-bs-trigger="focus" data-bs-placement="right"
+                            title="Information" data-bs-html="true"
+                            data-bs-content='
+                                
+                                    <p>Diisi dengan penilaian dampak Risiko Inheren dengan skala 1 s.d. 5
+                                    <br><strong>Reference to Table Skala KBUMN</strong></p><br>
+                                    <img class="w-100" src="{{ asset('assets/images/pendukung/tabel_skala_kualitatif_bumn.png') }}"/>
+                                    <p>Catatan:<br>
+Apabila acuan kriteria dampak tidak tersedia pada tabel di atas, BUMN dapat menggunakan acuan tabel kriteria dampak 
+kualitatif lainnya sesuai dengan pedoman masing-masing dan menyampaikannya dalam buku RKAP.</p>
+                                '><i
+                                class="ti ti-info-circle h5 text-secondary"></i>
+                        </a>
+                    @endif
                 </div>
                 <div class="col row">
                     @for ($quarter = 1; $quarter < 5; $quarter++)
@@ -159,6 +156,14 @@
                 <div class="col-3">
                     <span>Nilai Probabilitas Residual {{ $isQuantitative ? 'Kuantitatif' : 'Kualitatif' }} <i
                             class="text-danger">*</i></span>
+                    <a tabindex="0"
+                        class="link-secondary link-offset-2 link-underline-opacity-0 link-underline-opacity-50-hover text-decoration-underline mx-1"
+                        role="button" data-bs-toggle="popover" data-bs-trigger="focus" data-bs-placement="right"
+                        title="Information" data-bs-html="true"
+                        data-bs-content='<img class="w-100" src="{{ asset('assets/images/pendukung/tabel_probabilitas.png') }}"/>
+                            '><i
+                            class="ti ti-info-circle h5 text-secondary"></i>
+                    </a>
                 </div>
                 <div class="col row">
                     @for ($quarter = 1; $quarter < 5; $quarter++)

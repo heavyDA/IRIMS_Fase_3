@@ -510,9 +510,9 @@ monitoring.actualizations.forEach((actualization, index) => {
     }
     row.innerHTML = `
         <td class="text-center">${actualization.risk_cause_number}</td>
-        <td class="text-center">${actualization.actualization_mitigation_plan}</td>
-        <td class="text-center">${actualization.actualization_plan_body}</td>
-        <td class="text-center">${actualization.actualization_plan_output}</td>
+        <td class="text-left">${actualization.actualization_mitigation_plan}</td>
+        <td class="text-left">${actualization.actualization_plan_body}</td>
+        <td class="text-left">${actualization.actualization_plan_output}</td>
         <td class="text-center">${actualization.actualization_cost ? formatNumeral(actualization.actualization_cost.replace('.', ','), defaultConfigFormatNumeral) : ''}</td>
         <td class="text-center">${actualization.actualization_cost_absorption ? actualization.actualization_cost_absorption + '%' : ''}</td>
         <td class="text-center">${actualization.actualization_pic}</td>

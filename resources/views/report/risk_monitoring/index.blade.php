@@ -49,13 +49,17 @@
                 style="width: 100%;table-layour: fixed;border-collapse: collapse;">
                 <thead class="table-dark">
                     <tr>
-                        <th class="table-dark-custom" rowspan="2">No.</th>
-                        <th class="table-dark-custom" rowspan="2">Status</th>
-                        <th class="table-dark-custom" rowspan="2">Organisasi</th>
-                        <th class="table-dark-custom" rowspan="2">Pilihan Sasaran</th>
-                        <th class="table-dark-custom" rowspan="2">Peristiwa Risiko</th>
-                        <th class="table-dark-custom" rowspan="2">Rencana Pengendalian</th>
-                        <th class="table-dark-custom" rowspan="2">Realisasi Rencana Perlakuan</th>
+                        <th class="table-dark-custom" style="text-align: center !important;" rowspan="2">No.</th>
+                        <th class="table-dark-custom" style="text-align: center !important;" rowspan="2">Status</th>
+                        <th class="table-dark-custom" style="text-align: center !important;" rowspan="2">Organisasi</th>
+                        <th class="table-dark-custom" style="text-align: center !important;" rowspan="2">Pilihan Sasaran
+                        </th>
+                        <th class="table-dark-custom" style="text-align: center !important;" rowspan="2">Peristiwa Risiko
+                        </th>
+                        <th class="table-dark-custom" style="text-align: center !important;" rowspan="2">Rencana
+                            Pengendalian</th>
+                        <th class="table-dark-custom" style="text-align: center !important;" rowspan="2">Realisasi
+                            Rencana Perlakuan</th>
                         <th class="table-dark-custom" style="text-align: center !important;" colspan="2">Risiko Inheren
                         </th>
                         <th class="table-dark-custom" style="text-align: center !important;" colspan="2">Risiko Residual

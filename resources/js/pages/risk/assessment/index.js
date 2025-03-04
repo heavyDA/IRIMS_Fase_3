@@ -268,7 +268,7 @@ const datatable = createDatatable('#worksheet-table', {
         }
     },
     fixedColumns: {
-        start: 4
+        start: 2
     },
     scrollX: true,
     scrollY: '48vh',

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\DocumentStatus;
 use App\Models\Master\Position;
 use App\Models\RBAC\Role;
 use App\Models\Risk\Monitoring;
@@ -138,6 +139,7 @@ class DashboardController extends Controller
                                 )
                             )
                             ->join('position_hierarchy as ph', 'ra_worksheets.sub_unit_code', 'ph.sub_unit_code')
+                            ->where('status', '!=', DocumentStatus::DRAFT->value)
                             ->when(
                                 $this->roleService->isRiskAdmin(),
                                 fn($q) => $q->where('created_by', auth()->user()->employee_id)
@@ -169,6 +171,11 @@ class DashboardController extends Controller
         }
         $levels = $this->roleService->getTraverseUnitLevel($unit->sub_unit_code, 1);
 
+        $quarter = (int) request('quarter', 1);
+        if ($quarter < 1 || $quarter > 4) {
+            $quarter = 1;
+        }
+
         $residual_scales = DB::table('m_heatmaps')
             ->withExpression(
                 'worksheets',
@@ -178,7 +185,8 @@ class DashboardController extends Controller
                         'w.sub_unit_code',
                         'w.sub_unit_name',
                         'w.personnel_area_code',
-                        'i.risk_chronology_body'
+                        'i.risk_chronology_body',
+                        "residual_{$quarter}_impact_probability_scale_id"
                     )
                     ->leftJoin('ra_worksheet_identifications as i', 'w.id', '=', 'i.worksheet_id')
                     ->withExpression(
@@ -189,6 +197,7 @@ class DashboardController extends Controller
                         )
                     )
                     ->join('position_hierarchy as ph', 'w.sub_unit_code', 'ph.sub_unit_code')
+                    ->where('w.status', '!=', DocumentStatus::DRAFT->value)
                     ->when(
                         $this->roleService->isRiskAdmin(),
                         fn($q) => $q->where('created_by', auth()->user()->employee_id)
@@ -196,8 +205,8 @@ class DashboardController extends Controller
                     )
                     ->whereYear('w.created_at', request('year', date('Y')))
             )
-            ->selectRaw('m_heatmaps.risk_scale, m_heatmaps.risk_level, color, COUNT(m.worksheet_incident_id) as total')
-            ->leftJoin('monitorings as m', 'm.risk_scale', '=', 'm_heatmaps.risk_scale')
+            ->selectRaw('m_heatmaps.risk_scale, m_heatmaps.risk_level, color, COUNT(w.id) as total')
+            ->leftJoin('worksheets as w', "w.residual_{$quarter}_impact_probability_scale_id", '=', 'm_heatmaps.id')
             ->groupBy('risk_scale', 'risk_level')
             ->get();
 
@@ -239,6 +248,7 @@ class DashboardController extends Controller
                         )
                     )
                     ->join('position_hierarchy as ph', 'w.sub_unit_code', 'ph.sub_unit_code')
+                    ->where('w.status', '!=', DocumentStatus::DRAFT->value)
                     ->when(
                         $this->roleService->isRiskAdmin(),
                         fn($q) => $q->where('created_by', auth()->user()->employee_id)

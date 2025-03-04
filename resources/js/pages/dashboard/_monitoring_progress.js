@@ -2,7 +2,6 @@ import axios from 'axios';
 import { Modal } from 'bootstrap';
 import dayjs from 'dayjs';
 import createDatatable from 'js/components/datatable';
-import Swal from 'sweetalert2';
 
 const dashboardFilter = document.querySelector('#dashboard-filter')
 const selectYear = dashboardFilter.querySelector('select[name="year"]')
@@ -46,7 +45,7 @@ if (monitoringProgressTable) {
                 }
 
                 const btn = document.createElement('button')
-                btn.classList.add('btn', 'btn-sm', 'btn-outline-light', 'btn-wave')
+                btn.classList.add('btn', 'btn-sm', 'btn-wave')
                 btn.addEventListener('click', e => openChildModal(row.sub_unit_code, `[${row.sub_unit_code_doc}] ${data}`))
                 btn.innerHTML = `[${row.sub_unit_code_doc}] ${data}`
 
@@ -155,13 +154,13 @@ if (monitoringProgressTable) {
                     if (data) {
                         data = parseInt(data)
                         if (data) {
-                            let color = 'bg-danger-transparent'
-                            if (data > 30 && data <= 70) {
-                                color = 'bg-warning-transparent'
-                            } else if (data > 70) {
-                                color = 'bg-success-transparent'
+                            if (data >= 1 && data < 55) {
+                                td.classList.add('bg-danger-transparent')
+                            } else if (data >= 55 && data < 100) {
+                                td.classList.add('bg-warning-transparent')
+                            } else if (data >= 100) {
+                                td.classList.add('bg-success-transparent')
                             }
-                            td.classList.add(color)
                         }
                     }
                 },
@@ -197,7 +196,7 @@ if (monitoringProgressTable) {
 
             table.innerHTML = `<thead>
                                 <tr>
-                                <th class="table-dark-custom" rowspan="2" style="width: 256px;">Unit</th>
+                                <th class="table-dark-custom" rowspan="2" style="text-align: center !important;width: 256px;">Unit</th>
                                 <th colspan="12" class="table-dark-custom" style="text-align: center !important;">
                                     Timeline</th>
                                 </tr>
@@ -363,65 +362,4 @@ if (monitoringProgressTable) {
             }
         })
     }
-
-
-    // const unitsColumn = monitoringProgressTable.querySelectorAll('.units');
-    // unitsColumn.forEach(column => {
-    //     if (column.hasAttribute('data-unit')) {
-    //         column.addEventListener('click', async e => {
-    //             Swal.fire({
-    //                 title: 'Sedang memproses...',
-    //                 allowOutsideClick: false,
-    //                 didOpen: async () => {
-    //                     Swal.showLoading(); // Show loading indicator
-    //                     const param = new URLSearchParams()
-    //                     param.append('unit', column.getAttribute('data-unit'));
-
-    //                     const response = await axios.get(new URL('/analytics/monitoring-progress-child', window.location.origin).href + '?' + param.toString());
-    //                     const data = response.data;
-
-    //                     if (response.status == 200) {
-    //                         setTimeout(() => {
-    //                             Swal.close()
-
-    //                             data.data.forEach(item => {
-    //                                 const row = document.createElement('tr')
-    //                                 const column = document.createElement('td')
-    //                                 column.innerHTML = item.name
-    //                                 row.append(column)
-
-    //                                 item.month.forEach(value => {
-    //                                     const column = document.createElement('td')
-    //                                     column.innerHTML = value ? parseInt(value) + '%' : '0%'
-
-    //                                     if (value >= 75) {
-    //                                         column.classList.add('bg-success-transparent')
-    //                                     } else if (value >= 40) {
-    //                                         column.classList.add('bg-warning-transparent')
-    //                                     }
-
-    //                                     row.append(column)
-    //                                 })
-
-    //                                 monitoringProgressChildTableBody.append(row)
-    //                             })
-
-    //                             monitoringProgressChildModal.show()
-    //                             monitoringProgressChildModalTitle.textContent = 'Monitoring Progress ' + column.textContent
-    //                         }, 575)
-    //                     } else {
-    //                         Swal.fire({
-    //                             icon: 'error',
-    //                             text: data.message
-    //                         })
-    //                     }
-    //                 }
-    //             });
-    //         })
-    //     }
-    // })
-
-    // monitoringProgressChildModalEl.addEventListener('hide.bs.modal', () => {
-    //     monitoringProgressChildTableBody.innerHTML = ''
-    // })
 }

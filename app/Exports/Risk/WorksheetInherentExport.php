@@ -58,7 +58,7 @@ class WorksheetInherentExport implements FromCollection, WithHeadings, WithStyle
                     'Nilai Dampak' => $worksheet->identification->inherent_impact_value ? money_format((float) $worksheet->identification->inherent_impact_value) : '-',
                     'Skala Dampak' => $worksheet->identification->inherent_impact_scale,
                     'Nilai Probabilitas' => $worksheet->identification->inherent_impact_probability,
-                    'Skala Probabilitas' => $worksheet->identification->inherent_impact_probability_scale,
+                    'Skala Probabilitas' => $worksheet->identification->inherent_impact_probability_probability_scale,
                     'Eksposur Risiko' => $worksheet->identification->inherent_risk_exposure ? money_format((float) $worksheet->identification->inherent_risk_exposure) : '-',
                     'Skala Risiko' => $worksheet->identification->inherent_risk_scale,
                     'Level Risiko' => $worksheet->identification->inherent_risk_level,

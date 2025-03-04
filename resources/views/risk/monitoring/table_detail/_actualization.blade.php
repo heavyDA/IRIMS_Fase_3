@@ -49,7 +49,7 @@
                                 <td></td>
                             @endif
                             @for ($i = 1; $i <= 12; $i++)
-                                @if ($monitoring->period_date_format->month == $i)
+                                @if ($monitoringMonths[$i - 1] ?? false)
                                     <td class="bg-success">1</td>
                                 @else
                                     <td>0</td>

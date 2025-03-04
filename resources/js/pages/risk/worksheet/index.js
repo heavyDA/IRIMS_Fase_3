@@ -642,6 +642,14 @@ const identificationChoicesInit = async () => {
             identificationChoices.inherent_impact_scale.clearChoices().setChoices(choices);
 
 
+            for (let info of document.querySelectorAll('.info-category-risk')) {
+                if (info.id.includes(risk_impact_category)) {
+                    info.classList.replace('d-none', 'd-block')
+                } else {
+                    info.classList.replace('d-block', 'd-none')
+                }
+            }
+
             for (let label of incidentForm.querySelectorAll('.label-category-risk')) {
                 if (label.dataset[risk_impact_category]) {
                     label.innerHTML = label.dataset[risk_impact_category]
@@ -658,6 +666,9 @@ const identificationChoicesInit = async () => {
                 }
             }
 
+            for (let info of document.querySelectorAll('.info-category-risk')) {
+                info.classList.replace('d-block', 'd-none')
+            }
 
             identificationChoices.inherent_impact_scale.setChoiceByValue("Pilih").disable();
 
@@ -1073,6 +1084,7 @@ const onIncidentSave = (data) => {
 }
 
 const onIncidentEdit = (data) => {
+    incidentModal.show();
     Object.keys(data).forEach(key => {
         const element = incidentForm.querySelector(`[name="${key}"]`)
         const event = new Event('change')
@@ -1093,13 +1105,10 @@ const onIncidentEdit = (data) => {
         }
         element.dispatchEvent(event)
     });
-
     // Set the flatpickr dates
     if (data.identification_start_date && data.identification_end_date) {
         identificationDatePicker.setDate([data.identification_start_date, data.identification_end_date]);
     }
-
-    incidentModal.show();
 }
 
 const addIncidentRow = (data) => {
@@ -1110,15 +1119,17 @@ const addIncidentRow = (data) => {
         data.key,
         (data) => onIncidentEdit(data),
         (data) => {
-            worksheet.incidents = worksheet.incidents
-                .filter(item => item.key != data.key)
-                .map((item, key) => {
-                    item.risk_cause_number = risk_numbers[key]
-                    item.risk_cause_code = currentRiskNumber.value + '.' + risk_numbers[key]
+            worksheet.incidents = [
+                ...worksheet.incidents
+                    .filter(item => item.key != data.key)
+                    .map((item, key) => {
+                        item.risk_cause_number = risk_numbers[key]
+                        item.risk_cause_code = currentRiskNumber.value + '.' + risk_numbers[key]
+                        onIncidentSave(item)
+                        return item
+                    })
+            ]
 
-                    updateIncidentRow(item)
-                    return item
-                })
         }
     );
     const buttonCell = document.createElement('td');
@@ -1144,6 +1155,24 @@ const addIncidentRow = (data) => {
 const updateIncidentRow = (data) => {
     const row = tables.incidents.querySelector('#incident-' + data.key);
     const cols = row.querySelectorAll('td');
+    const [removeButton, editButton] = addRowAction(
+        'incidents',
+        data.key,
+        (data) => onIncidentEdit(data),
+        (data) => {
+            worksheet.incidents = [
+                ...worksheet.incidents
+                    .filter(item => item.key != data.key)
+                    .map((item, key) => {
+                        item.risk_cause_number = risk_numbers[key]
+                        item.risk_cause_code = currentRiskNumber.value + '.' + risk_numbers[key]
+                        onIncidentSave(item)
+                        return item
+                    })
+            ]
+        }
+    );
+
     cols[1].textContent = data.risk_cause_number
     cols[2].textContent = data.risk_cause_code
     cols[3].innerHTML = data.risk_cause_body

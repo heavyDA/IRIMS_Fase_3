@@ -1,7 +1,6 @@
 // Core DataTables and Bootstrap 5
 import DataTables from 'datatables.net-bs5'
 import 'datatables.net-bs5/css/dataTables.bootstrap5.min.css'
-import 'css/app.css'
 
 // Responsive extension
 import 'datatables.net-responsive'
@@ -149,7 +148,6 @@ const createDatatable = (target = 'table', options) => {
                     last: 'Akhir',
                 }
             },
-            columns: [],
             initComplete: options.handleColumnSearchField ? handleColumnSearchField : null,
         }, ...options
     })

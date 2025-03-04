@@ -106,10 +106,15 @@ class WorksheetIncident extends Model
                 'r3.scale as residual_3_impact_scale',
                 'r4.scale as residual_4_impact_scale',
                 'h_i.risk_scale as inherent_impact_probability_scale',
+                'h_i.impact_probability as inherent_impact_probability_probability_scale',
                 'h_r1.risk_scale as residual_1_impact_probability_scale',
+                'h_r1.impact_probability as residual_1_impact_probability_probability_scale',
                 'h_r2.risk_scale as residual_2_impact_probability_scale',
+                'h_r2.impact_probability as residual_2_impact_probability_probability_scale',
                 'h_r3.risk_scale as residual_3_impact_probability_scale',
+                'h_r3.impact_probability as residual_3_impact_probability_probability_scale',
                 'h_r4.risk_scale as residual_4_impact_probability_scale',
+                'h_r4.impact_probability as residual_4_impact_probability_probability_scale',
             )
             ->withExpression('scales', DB::table('m_bumn_scales'))
             ->withExpression('heatmaps', DB::table('m_heatmaps'))
@@ -209,10 +214,15 @@ class WorksheetIncident extends Model
                 'r3.scale as residual_3_impact_scale',
                 'r4.scale as residual_4_impact_scale',
                 'h_i.risk_scale as inherent_impact_probability_scale',
+                'h_i.impact_probability as inherent_impact_probability_probability_scale',
                 'h_r1.risk_scale as residual_1_impact_probability_scale',
+                'h_r1.impact_probability as residual_1_impact_probability_probability_scale',
                 'h_r2.risk_scale as residual_2_impact_probability_scale',
+                'h_r2.impact_probability as residual_2_impact_probability_probability_scale',
                 'h_r3.risk_scale as residual_3_impact_probability_scale',
+                'h_r3.impact_probability as residual_3_impact_probability_probability_scale',
                 'h_r4.risk_scale as residual_4_impact_probability_scale',
+                'h_r4.impact_probability as residual_4_impact_probability_probability_scale',
             ])
             ->withExpression(
                 'worksheets',

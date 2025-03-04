@@ -53,6 +53,7 @@ Route::group(['middleware' => 'auth'], function () {
         Route::group(['as' => 'worksheet.', 'prefix' => 'worksheet'], function () {
             Route::get('', [WorksheetController::class, 'index'])->name('index');
             Route::get('get-by-inherent-risk-scale/{inherentScale}', [WorksheetController::class, 'get_by_inherent_risk_scale'])->name('get_by_inherent_risk_scale');
+            Route::get('get-by-target-risk-scale/{inherentScale}', [WorksheetController::class, 'get_by_target_risk_scale'])->name('get_by_target_risk_scale');
             Route::get('get-by-actualization-risk-scale/{inherentScale}', [WorksheetController::class, 'get_by_actualization_risk_scale'])->name('get_by_actualization_risk_scale');
             Route::post('', [WorksheetController::class, 'store'])->name('store');
 

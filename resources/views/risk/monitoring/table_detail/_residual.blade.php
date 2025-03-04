@@ -56,7 +56,7 @@
                         @endfor
                         @for ($i = 1; $i <= 4; $i++)
                             @if ($i == $monitoring->residual->quarter)
-                                <td>{{ $monitoring->residual->impact_probability_scale?->risk_scale }}</td>
+                                <td>{{ $monitoring->residual->impact_probability_scale?->impact_probability }}</td>
                             @else
                                 <td>-</td>
                             @endif

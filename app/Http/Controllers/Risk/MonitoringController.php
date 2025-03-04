@@ -116,7 +116,7 @@ class MonitoringController extends Controller
     public function show(string $worksheetId)
     {
         $worksheet = Worksheet::findByEncryptedIdOrFail($worksheetId);
-        $worksheet->identification = WorksheetIdentification::identification_query()->whereWorksheetId($worksheet->id)->firstOrFail();
+        $worksheet->identification = WorksheetIdentification::identificationQuery()->whereWorksheetId($worksheet->id)->firstOrFail();
         $worksheet->load('strategies', 'incidents.mitigations', 'monitorings');
         $title = 'Laporan Risk Monitoring';
         return view('risk.monitoring.index', compact('title', 'worksheet'));
@@ -125,7 +125,7 @@ class MonitoringController extends Controller
     public function create(string $worksheetId)
     {
         $worksheet = Worksheet::findByEncryptedIdOrFail($worksheetId);
-        $worksheet->identification = WorksheetIdentification::identification_query()->whereWorksheetId($worksheet->id)->firstOrFail();
+        $worksheet->identification = WorksheetIdentification::identificationQuery()->whereWorksheetId($worksheet->id)->firstOrFail();
         if (request()->ajax()) {
             $worksheet->load('incidents.mitigations');
 
@@ -309,6 +309,16 @@ class MonitoringController extends Controller
             abort(404, 'Data tidak ditemukan');
         }
 
+        $worksheet->load('monitorings');
+
+        $monitoringMonths = array_fill(0, 11, 0);
+        foreach ($worksheet->monitorings as $monitoring) {
+            $month = format_date($monitoring->period_date)->month - 1;
+            if (array_key_exists($month, $monitoringMonths)) {
+                $monitoringMonths[$month] = 1;
+            }
+        }
+
         $monitoring->load([
             'residual.impact_scale',
             'residual.impact_probability_scale',
@@ -320,10 +330,10 @@ class MonitoringController extends Controller
             'last_history',
         ]);
 
-        $worksheet->identification = WorksheetIdentification::identification_query()->whereWorksheetId($worksheet->id)->firstOrFail();
+        $worksheet->identification = WorksheetIdentification::identificationQuery()->whereWorksheetId($worksheet->id)->firstOrFail();
 
         $title = 'Risk Monitoring';
-        return view('risk.monitoring.show', compact('title', 'worksheet', 'monitoring'));
+        return view('risk.monitoring.show', compact('title', 'worksheet', 'monitoring', 'monitoringMonths'));
     }
 
     public function edit_monitoring(string $monitoring_id)
@@ -341,7 +351,7 @@ class MonitoringController extends Controller
         ]);
 
         $worksheet = Worksheet::findOrFail($monitoring->worksheet_id);
-        $worksheet->identification = WorksheetIdentification::identification_query()->whereWorksheetId($worksheet->id)->firstOrFail();
+        $worksheet->identification = WorksheetIdentification::identificationQuery()->whereWorksheetId($worksheet->id)->firstOrFail();
 
         if (request()->ajax()) {
             $residual = [

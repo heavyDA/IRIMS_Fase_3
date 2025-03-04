@@ -1,52 +1,69 @@
-<div class="table-container" style="height: 40vh;">
+<div style="height: 40vh;">
     <table id="identificationTable" class="table table-bordered table-hover" style="width: 100%;">
         <thead class="table-dark" style="position: sticky;top: 0;">
             <tr style="vertical-align: bottom;">
-                <th class="freeze" style="width: 180px" rowspan="3">Nama Perusahaan</th>
-                <th rowspan="3">Kode Perusahaan</th>
-                <th style="width: 180px" rowspan="3">Sasaran Perusahaan</th>
-                <th rowspan="3">Kategori Risiko T2 & T3</th>
-                <th style="width: 320px" rowspan="3">Peristiwa Risiko</th>
-                <th style="width: 320px" rowspan="3">Deskripsi Peristiwa Risiko</th>
-                <th rowspan="3">No. Penyebab Risiko</th>
-                <th rowspan="3">Kode Penyebab risiko</th>
-                <th style="width: 320px" rowspan="3">Penyebab risiko</th>
-                <th style="width: 320px" rowspan="3">Key Risk Indicators</th>
-                <th rowspan="3">Unit Satuan KRI</th>
-                <th colspan="3">Kategori Threshold KRI</th>
-                <th rowspan="3">Jenis Existing Control</th>
-                <th rowspan="3">Existing Control</th>
-                <th style="width: 320px" rowspan="3">Penilaian Efektivitas Kontrol</th>
-                <th rowspan="3">Kategori Dampak</th>
-                <th style="width: 320px" rowspan="3">Deskripsi Dampak</th>
-                <th rowspan="3">Perkiraan Waktu Terpapar Risiko</th>
-                <th colspan="8">Risiko Inheren</th>
-                <th colspan="28">Target Risiko Residual</th>
+                <th class="table-dark-custom" style="text-align:center !important;" rowspan="3">Nama Perusahaan</th>
+                <th class="table-dark-custom" style="text-align:center !important;" rowspan="3">Kode Perusahaan</th>
+                <th class="table-dark-custom" style="text-align:center !important;" rowspan="3">Sasaran Perusahaan
+                </th>
+                <th class="table-dark-custom" style="text-align:center !important;" rowspan="3">Kategori Risiko T2 &
+                    T3</th>
+                <th class="table-dark-custom" style="text-align:center !important;" rowspan="3">Peristiwa Risiko</th>
+                <th class="table-dark-custom" style="text-align:center !important;" rowspan="3">Deskripsi Peristiwa
+                    Risiko</th>
+                <th class="table-dark-custom" style="text-align:center !important;" rowspan="3">No. Penyebab Risiko
+                </th>
+                <th class="table-dark-custom" style="text-align:center !important;" rowspan="3">Kode Penyebab risiko
+                </th>
+                <th class="table-dark-custom" style="text-align:center !important;" rowspan="3">Penyebab risiko</th>
+                <th class="table-dark-custom" style="text-align:center !important;" rowspan="3">Key Risk Indicators
+                </th>
+                <th class="table-dark-custom" style="text-align:center !important;" rowspan="3">Unit Satuan KRI</th>
+                <th class="table-dark-custom" style="text-align:center !important;" colspan="3">Kategori Threshold
+                    KRI</th>
+                <th class="table-dark-custom" style="text-align:center !important;" rowspan="3">Jenis Existing
+                    Control</th>
+                <th class="table-dark-custom" style="text-align:center !important;" rowspan="3">Existing Control</th>
+                <th class="table-dark-custom" style="text-align:center !important;" rowspan="3">Penilaian Efektivitas
+                    Kontrol</th>
+                <th class="table-dark-custom" style="text-align:center !important;" rowspan="3">Kategori Dampak</th>
+                <th class="table-dark-custom" style="text-align:center !important;" rowspan="3">Deskripsi Dampak</th>
+                <th class="table-dark-custom" style="text-align:center !important;" rowspan="3">Perkiraan Waktu
+                    Terpapar Risiko</th>
+                <th class="table-dark-custom" style="text-align:center !important;" colspan="8">Risiko Inheren</th>
+                <th class="table-dark-custom" style="text-align:center !important;" colspan="28">Target Risiko
+                    Residual</th>
             </tr>
             <tr style="vertical-align: bottom;">
-                <th rowspan="2">Aman</th>
-                <th rowspan="2">Hati-Hati</th>
-                <th rowspan="2">Bahaya</th>
-                <th rowspan="2">Asumsi Perhitungan Dampak</th>
-                <th rowspan="2">Nilai Dampak</th>
-                <th rowspan="2">Skala Dampak</th>
-                <th rowspan="2">Nilai Probabilitas (%)</th>
-                <th rowspan="2">Skala Probabilitas</th>
-                <th rowspan="2">Eksposur Risiko</th>
-                <th rowspan="2">Skala Risiko</th>
-                <th rowspan="2">Level Risiko</th>
-                <th colspan="4">Nilai Dampak</th>
-                <th colspan="4">Skala Dampak</th>
-                <th colspan="4">Nilai Probabilitas (%)</th>
-                <th colspan="4">Skala Probabilitas</th>
-                <th colspan="4">Eksposur Risiko</th>
-                <th colspan="4">Skala Risiko</th>
-                <th colspan="4">Level Risiko</th>
+                <th class="table-dark-custom" style="text-align:center !important;" rowspan="2">Aman</th>
+                <th class="table-dark-custom" style="text-align:center !important;" rowspan="2">Hati-Hati</th>
+                <th class="table-dark-custom" style="text-align:center !important;" rowspan="2">Bahaya</th>
+                <th class="table-dark-custom" style="text-align:center !important;" rowspan="2">Asumsi Perhitungan
+                    Dampak</th>
+                <th class="table-dark-custom" style="text-align:center !important;" rowspan="2">Nilai Dampak</th>
+                <th class="table-dark-custom" style="text-align:center !important;" rowspan="2">Skala Dampak</th>
+                <th class="table-dark-custom" style="text-align:center !important;" rowspan="2">Nilai Probabilitas
+                    (%)</th>
+                <th class="table-dark-custom" style="text-align:center !important;" rowspan="2">Skala Probabilitas
+                </th>
+                <th class="table-dark-custom" style="text-align:center !important;" rowspan="2">Eksposur Risiko</th>
+                <th class="table-dark-custom" style="text-align:center !important;" rowspan="2">Skala Risiko</th>
+                <th class="table-dark-custom" style="text-align:center !important;" rowspan="2">Level Risiko</th>
+                <th class="table-dark-custom" style="text-align:center !important;" colspan="4">Nilai Dampak</th>
+                <th class="table-dark-custom" style="text-align:center !important;" colspan="4">Skala Dampak</th>
+                <th class="table-dark-custom" style="text-align:center !important;" colspan="4">Nilai Probabilitas
+                    (%)</th>
+                <th class="table-dark-custom" style="text-align:center !important;" colspan="4">Skala Probabilitas
+                </th>
+                <th class="table-dark-custom" style="text-align:center !important;" colspan="4">Eksposur Risiko
+                </th>
+                <th class="table-dark-custom" style="text-align:center !important;" colspan="4">Skala Risiko</th>
+                <th class="table-dark-custom" style="text-align:center !important;" colspan="4">Level Risiko</th>
             </tr>
             <tr style="vertical-align: bottom;">
                 @for ($i = 0; $i < 7; $i++)
                     @for ($q = 1; $q <= 4; $q++)
-                        <th>Q{{ $q }}</th>
+                        <th class="table-dark-custom" style="text-align:center !important;">Q{{ $q }}</th>
                     @endfor
                 @endfor
             </tr>
@@ -88,27 +105,35 @@
                         </td>
                         <td>{{ $worksheet->identification->inherent_impact_scale }}</td>
                         <td>{{ $worksheet->identification->inherent_impact_probability }}</td>
-                        <td>{{ $worksheet->identification->inherent_impact_probability_scale }}
+                        <td>{{ $worksheet->identification->inherent_impact_probability_probability_scale }}
                         </td>
                         <td>Rp.{{ number_format((float) $worksheet->identification->inherent_risk_exposure, 2, ',', '.') }}
                         </td>
-                        <td>{{ $worksheet->identification->inherent_risk_scale }}
+                        <td>{{ $worksheet->identification->inherent_impact_probability_scale }}
                         </td>
-                        <td>{{ $worksheet->identification->inherent_risk_level }}
+                        <td data-color="{{ $worksheet->identification->inherent_impact_probability_color }}">
+                            {{ $worksheet->identification->inherent_risk_level }}
                         </td>
-                        @foreach (['impact_value', 'impact_scale', 'impact_probability', 'impact_probability_scale', 'risk_exposure', 'risk_scale', 'risk_level'] as $key)
+                        @foreach (['impact_value', 'impact_scale', 'impact_probability', 'impact_probability_probability_scale', 'risk_exposure', 'risk_scale', 'risk_level'] as $key)
                             @php
                                 for ($i = 1; $i <= 4; $i++) {
                                     $property = "residual_{$i}_{$key}";
                                     $value = $worksheet->identification->$property;
+                                    $color = '';
+
+                                    if ($key == 'risk_level') {
+                                        $property = "residual_{$i}_impact_probability_color";
+                                        $color = 'data-color="' . $worksheet->identification->$property . '"';
+                                    }
+
                                     if ($value) {
                                         if (in_array($key, ['impact_value', 'risk_exposure'])) {
                                             echo '<td>' . money_format((float) $value) . '</td>';
                                         } else {
-                                            echo "<td>{$value}</td>";
+                                            echo "<td {$color}>{$value}</td>";
                                         }
                                     } else {
-                                        echo '<td>-</td>';
+                                        echo "<td {$color}>-</td>";
                                     }
                                 }
                             @endphp

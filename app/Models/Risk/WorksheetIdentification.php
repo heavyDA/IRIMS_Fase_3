@@ -91,7 +91,7 @@ class WorksheetIdentification extends Model
         );
     }
 
-    public static function identification_query()
+    public static function identificationQuery()
     {
         return DB::table('ra_worksheet_identifications as identification')
             ->select(
@@ -106,18 +106,23 @@ class WorksheetIdentification extends Model
                 'r3.scale as residual_3_impact_scale',
                 'r4.scale as residual_4_impact_scale',
                 'h_i.risk_scale as inherent_impact_probability_scale',
+                'h_i.impact_probability as inherent_impact_probability_probability_scale',
                 'h_i.risk_level as inherent_impact_probability_level',
                 'h_i.color as inherent_impact_probability_color',
                 'h_r1.risk_scale as residual_1_impact_probability_scale',
+                'h_r1.impact_probability as residual_1_impact_probability_probability_scale',
                 'h_r1.risk_level as residual_1_impact_probability_level',
                 'h_r1.color as residual_1_impact_probability_color',
                 'h_r2.risk_scale as residual_2_impact_probability_scale',
+                'h_r2.impact_probability as residual_2_impact_probability_probability_scale',
                 'h_r2.risk_level as residual_2_impact_probability_level',
                 'h_r2.color as residual_2_impact_probability_color',
                 'h_r3.risk_scale as residual_3_impact_probability_scale',
+                'h_r3.impact_probability as residual_3_impact_probability_probability_scale',
                 'h_r3.risk_level as residual_3_impact_probability_level',
                 'h_r3.color as residual_3_impact_probability_color',
                 'h_r4.risk_scale as residual_4_impact_probability_scale',
+                'h_r4.impact_probability as residual_4_impact_probability_probability_scale',
                 'h_r4.risk_level as residual_4_impact_probability_level',
                 'h_r4.color as residual_4_impact_probability_color',
             )

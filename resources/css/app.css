@@ -32853,11 +32853,6 @@ table.dataTable tbody td {
   background-color: rgb(247, 248, 250) !important;
 }
 
-.table-container {
-  overflow-y: auto;
-  position: relative;
-}
-
 /* Set specific column widths */
 th[col-width-180], td[col-width-180] { min-width: 180px; max-width: 180px; }
 th[col-width-320], td[col-width-320] { min-width: 320px; max-width: 320px; }
