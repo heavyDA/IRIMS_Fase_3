@@ -457,8 +457,8 @@ const openModalResidual = (residualScale) => {
             },
             {
                 sortable: false,
-                data: 'inherent_risk_level',
-                name: 'inherent_risk_level',
+                data: 'inherent_impact_probability_level',
+                name: 'inherent_impact_probability_level',
                 width: '100px',
                 render: function (data, type, row) {
                     if (type !== 'display') {
@@ -469,13 +469,13 @@ const openModalResidual = (residualScale) => {
                         return data
                     }
 
-                    return renderHeatmapBadge(data, row.inherent_risk_color)
+                    return renderHeatmapBadge(data, row.inherent_impact_probability_color)
                 }
             },
             {
                 sortable: false,
-                data: 'inherent_risk_scale',
-                name: 'inherent_risk_scale',
+                data: 'inherent_impact_probability_scale',
+                name: 'inherent_impact_probability_scale',
                 width: '100px',
             },
             {

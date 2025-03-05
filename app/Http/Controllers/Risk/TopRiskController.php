@@ -53,7 +53,17 @@ class TopRiskController extends Controller
                             true
                         )
                     )
-                    ->join('position_hierarchy as ph', 'ph.sub_unit_code', 'w.sub_unit_code')
+                    ->where(
+                        fn($q) => $q->where('wtr.sub_unit_code', $unit?->sub_unit_code)
+                            ->when(
+                                str_contains($unit->personnel_area_code, 'REG'),
+                                fn($q) => $q->orWhereRaw(DB::raw('w.sub_unit_code IN (SELECT sub_unit_code from position_hierarchy where branch_code = ?)'), $unit->personnel_area_code)
+                            )
+                            ->when(
+                                str_contains($unit->personnel_area_code, 'PST'),
+                                fn($q) => $q->orWhereRaw(DB::raw('w.sub_unit_code IN (SELECT sub_unit_code from position_hierarchy)'))
+                            )
+                    )
                     ->whereYear('w.created_at', request('year', date('Y')))
                     ->where('w.status', DocumentStatus::APPROVED->value);
             } else {
@@ -96,6 +106,9 @@ class TopRiskController extends Controller
                                 ->orWhereLike('wi.residual_4_risk_scale', '%' . $value . '%')
                         );
                     }
+                })
+                ->editColumn('id', function ($worksheet) {
+                    return Crypt::encryptString($worksheet->id);
                 })
                 ->editColumn('status', function ($worksheet) {
                     $status = DocumentStatus::tryFrom($worksheet->status);

@@ -607,6 +607,7 @@ class DefaultSeeder extends Seeder
         }
 
         $officials_to_users = [
+            ['personnel_area_code' => 'PST', 'position_name' => 'Direktur Utama'],
             ['personnel_area_code' => 'PST', 'position_name' => 'Corporate Secretary Group Head'],
             ['personnel_area_code' => 'PST', 'position_name' => 'Corporate Communication Division Head'],
             ['personnel_area_code' => 'PST', 'position_name' => 'Corporate Branding Division Head'],

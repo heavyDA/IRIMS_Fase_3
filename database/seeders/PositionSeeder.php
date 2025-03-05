@@ -17,6 +17,12 @@ class PositionSeeder extends Seeder
         $positions = [
             [
                 "branch_code" => "PST",
+                "sub_unit_code_doc" => "DU",
+                "position_name" => "Direktur Utama",
+                "assigned_roles" => "risk otorisator"
+            ],
+            [
+                "branch_code" => "PST",
                 "sub_unit_code_doc" => "DUS",
                 "position_name" => "Corporate Secretary Group Head",
                 "assigned_roles" => "risk otorisator"

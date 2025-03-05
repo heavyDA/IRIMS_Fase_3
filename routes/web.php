@@ -9,7 +9,6 @@ use App\Http\Controllers\Master\{
     HeatmapController,
     IncidentCategoryController,
     KBUMNRiskCategoryController,
-    KRIUnitController,
     PICController,
     RiskMetricsController,
     RiskTreatmentOptionController,
@@ -22,15 +21,12 @@ use App\Http\Controllers\Risk\MonitoringController;
 use App\Http\Controllers\Risk\TopRiskController;
 use App\Http\Controllers\Risk\WorksheetController;
 use App\Http\Controllers\Setting\PositionController;
-use App\Models\Risk\Worksheet;
+use App\Models\Master\Position;
 use Illuminate\Support\Facades\Route;
 
 Route::group(['prefix' => 'login', 'as' => 'auth.', 'middleware' => 'guest'], function () {
     Route::get('', fn() => view('auth.index'))->name('login');
     Route::post('', [AuthController::class, 'authenticate'])->name('authenticate');
-});
-Route::get('test', function () {
-    return Worksheet::progressMonitoringQuery('ap.52.9')->get();
 });
 Route::group(['middleware' => 'auth'], function () {
     Route::post('', [AuthController::class, 'change_role'])->name('change-role');

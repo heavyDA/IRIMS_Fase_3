@@ -40,8 +40,8 @@
         <div class="">
             <nav>
                 <ol class="breadcrumb mb-0">
-                    <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
-                    <li class="breadcrumb-item" aria-current="page"><a href="javascript:void(0);">Risk Assessment</a></li>
+                    <li class="breadcrumb-item"><a href="javascript:void(0);">Risk Process</a></li>
+                    <li class="breadcrumb-item"><a href="javascript:void(0);">Risk Assessment</a></li>
                     <li class="breadcrumb-item active" aria-current="page">{{ $title }}</li>
                 </ol>
             </nav>
@@ -81,21 +81,18 @@
                                     @endif
                                     @isset($worksheet)
                                         @if (
-                                            (
-                                                $worksheet->status == 'draft' &&
-                                                in_array(session()->get('current_role')?->name, ['risk admin', 'risk owner', 'risk analis'])
-                                            ) ||
-                                            (
-                                                $worksheet->status == 'on review' &&
-                                                in_array(session()->get('current_role')?->name, ['risk owner', 'risk analis'])
-                                            ) ||
-                                            auth()->user()->hasAnyRole('superadmin|risk analis|root')
-                                        )
+                                            ($worksheet->status == 'draft' &&
+                                                in_array(session()->get('current_role')?->name, ['risk admin', 'risk owner', 'risk analis'])) ||
+                                                ($worksheet->status == 'on review' &&
+                                                    in_array(session()->get('current_role')?->name, ['risk owner', 'risk analis'])) ||
+                                                auth()->user()->hasAnyRole('superadmin|risk analis|root'))
                                             <form action="{{ route('risk.worksheet.destroy', $worksheet->getEncryptedId()) }}"
                                                 method="POST">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button onclick="confirm('Hapus kertas kerja ini?') ? true : event.preventDefault()" style="min-width: 128px;" type="submit" class="btn btn-danger">
+                                                <button
+                                                    onclick="confirm('Hapus kertas kerja ini?') ? true : event.preventDefault()"
+                                                    style="min-width: 128px;" type="submit" class="btn btn-danger">
                                                     <span><i class="ti ti-x"></i></span>&nbsp;Hapus
                                                 </button>
                                             </form>

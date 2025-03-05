@@ -6,7 +6,6 @@
         <div class="">
             <nav>
                 <ol class="breadcrumb mb-0">
-                    <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
                     <li class="breadcrumb-item">Master</li>
                     <li class="breadcrumb-item"><a href="{{ route('master.risk_categories.index') }}">Kategori Risiko</a></li>
                     <li class="breadcrumb-item active" aria-current="page">Form Tambah</li>

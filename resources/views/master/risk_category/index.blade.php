@@ -10,7 +10,6 @@
         <div class="">
             <nav>
                 <ol class="breadcrumb mb-0">
-                    <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
                     <li class="breadcrumb-item">Master</li>
                     <li class="breadcrumb-item active" aria-current="page">Kategori Risiko</li>
                 </ol>
