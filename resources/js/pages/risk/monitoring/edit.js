@@ -166,6 +166,7 @@ const actualizationValidate = () => {
 		for (let key of Object.keys(actualization)) {
 			if (
 				[
+					'key',
 					'actualization_documents',
 					'actualization_pic_related',
 				].includes(key)

@@ -180,7 +180,6 @@ const actualizationValidate = () => {
 				actualization[key] == 'Pilih' ||
 				actualizationQuills[key]?.getLength() <= 1
 			) {
-				console.log(key, actualization);
 				return false;
 			}
 		}
