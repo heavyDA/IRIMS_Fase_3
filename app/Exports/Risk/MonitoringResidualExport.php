@@ -44,6 +44,8 @@ class MonitoringResidualExport implements FromCollection, WithTitle, WithHeading
 
     protected int $count = 0;
 
+    protected string $lastColumn;
+
     public function __construct(private Collection $worksheets) {}
 
     public function collection()
@@ -121,10 +123,10 @@ class MonitoringResidualExport implements FromCollection, WithTitle, WithHeading
 
     public function styles(Worksheet $sheet)
     {
-        $lastColumn = $this->getLastColumn(count($this->headers[0]));
+        $this->lastColumn = $this->getLastColumn(count($this->headers[0]));
 
         // Style for headers
-        $sheet->getStyle("A1:{$lastColumn}2")->applyFromArray([
+        $sheet->getStyle("A1:{$this->lastColumn}2")->applyFromArray([
             'font' => [
                 'bold' => true,
                 'color' => [
@@ -150,16 +152,13 @@ class MonitoringResidualExport implements FromCollection, WithTitle, WithHeading
                 $value = $alphabet . $alphabet2;
                 $alphabets[] = $value;
 
-                if ($lastColumn == $value) {
+                if ($this->lastColumn == $value) {
                     $break = true;
                     break;
                 }
             }
 
             if ($break) break;
-        }
-        foreach ($alphabets as $column) {
-            $sheet->getColumnDimension($column)->setAutoSize(true);
         }
 
         // Merge nested column headers
@@ -194,6 +193,45 @@ class MonitoringResidualExport implements FromCollection, WithTitle, WithHeading
             $sheet->mergeCells("{$startCol}1:{$startCol}2");
         }
 
+        $columnWidths = [
+            'A' => 20,
+            'B' => 54,
+            'C' => 42,
+            'D' => 36,
+            'E' => 36,
+            'F' => 36,
+            'G' => 36,
+            'H' => 12,
+            'I' => 12,
+            'J' => 12,
+            'K' => 12,
+            'L' => 12,
+            'M' => 12,
+            'N' => 12,
+            'O' => 12,
+            'P' => 12,
+            'Q' => 12,
+            'R' => 12,
+            'S' => 12,
+            'T' => 36,
+            'U' => 36,
+            'V' => 36,
+            'W' => 36,
+            'X' => 12,
+            'Y' => 12,
+            'Z' => 12,
+            'AA' => 12,
+            'AB' => 24,
+            'AC' => 24,
+            'AD' => 24,
+            'AE' => 24,
+            'AF' => 24,
+        ];
+
+        foreach ($alphabets as $column) {
+            $sheet->getColumnDimension($column)->setWidth($columnWidths[$column] ?? 18);
+        }
+
         // Merge cells with same values for specific columns
         excel_merge_same_values(
             $sheet,
@@ -204,11 +242,7 @@ class MonitoringResidualExport implements FromCollection, WithTitle, WithHeading
             $this->count
         );
 
-        for ($i = 3; $i <= $this->count + 2; $i++) {
-            $sheet->getRowDimension($i)->setRowHeight(-1);
-        }
-
-        $sheet->getStyle("A1:{$lastColumn}" . $this->count + 2)->applyFromArray([
+        $sheet->getStyle("A1:{$this->lastColumn}" . $this->count + 2)->applyFromArray([
             'borders' => [
                 'allBorders' => [
                     'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
@@ -217,11 +251,16 @@ class MonitoringResidualExport implements FromCollection, WithTitle, WithHeading
             ]
         ]);
 
-        $sheet->getStyle('B3:C' . ($this->count + 2))
+
+        $sheet->getStyle("A1:{$this->lastColumn}2")
             ->getAlignment()
-            ->setWrapText(true);
-        $sheet->getStyle("A3:{$lastColumn}" . $this->count + 2)
-            ->getAlignment()->setVertical(Alignment::VERTICAL_TOP);
+            ->setWrapText(true)
+            ->setVertical(Alignment::VERTICAL_CENTER)
+            ->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle("A3:{$this->lastColumn}" . $this->count + 2)
+            ->getAlignment()
+            ->setWrapText(true)
+            ->setVertical(Alignment::VERTICAL_TOP);
     }
 
     private function getColumnLetter(int $index): string

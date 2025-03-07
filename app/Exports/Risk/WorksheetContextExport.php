@@ -8,6 +8,7 @@ use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use Maatwebsite\Excel\Concerns\WithTitle;
+use Maatwebsite\Excel\Events\AfterSheet;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet as WorksheetExcel;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
@@ -44,6 +45,7 @@ class WorksheetContextExport implements FromCollection, WithHeadings, WithStyles
     protected array $merged_cells = [];
 
     protected int $count = 0;
+    protected string $lastColumn;
 
     public function __construct(private Collection $worksheets) {}
 
@@ -91,10 +93,10 @@ class WorksheetContextExport implements FromCollection, WithHeadings, WithStyles
 
     public function styles(WorksheetExcel $sheet)
     {
-        $lastColumn = $this->getLastColumn(count($this->headers[0]));
+        $this->lastColumn = $this->getLastColumn(count($this->headers[0]));
 
         // Style for headers
-        $sheet->getStyle("A1:{$lastColumn}2")->applyFromArray([
+        $sheet->getStyle("A1:{$this->lastColumn}2")->applyFromArray([
             'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
             'alignment' => [
                 'horizontal' => Alignment::HORIZONTAL_CENTER,
@@ -107,11 +109,6 @@ class WorksheetContextExport implements FromCollection, WithHeadings, WithStyles
         ]);
 
         $colors = ['00B050', 'FFFF00', 'FF0000',];
-        // Auto-size columns
-        foreach (range('A', $lastColumn) as $column) {
-            $sheet->getColumnDimension($column)->setAutoSize(true);
-        }
-
         // Merge nested column headers
         foreach ($this->merged_cells as $merge) {
             $startCol = $this->getColumnLetter($merge['start']);
@@ -147,32 +144,59 @@ class WorksheetContextExport implements FromCollection, WithHeadings, WithStyles
             $sheet->mergeCells("{$startCol}1:{$startCol}2");
         }
 
-        // Merge cells with same values for specific columns
-        excel_merge_same_values(
-            $sheet,
-            [
-                'B',
-                'C',
-                'D',
-                'E',
-                'F',
-                'L',
-                'M',
-                'N',
-                'O',
-                'P',
-                'Q',
-                'R',
-                'S',
-                'T',
-                'U',
-                'V',
-            ], // Columns to merge - adjust as needed
-            3, // Start from row 3 (after headers)
-            $this->count
-        );
+        $columnWidths = [
+            'A' => 8,
+            'B' => 36,
+            'C' => 18,
+            'D' => 54,
+            'E' => 36,
+            'F' => 18,
+            'G' => 54,
+            'H' => 54,
+            'I' => 12,
+            'J' => 18,
+            'K' => 54,
+            'L' => 36,
+            'M' => 36,
+            'N' => 42,
+            'Q' => 36,
+            'R' => 54,
+            'S' => 36,
+            'T' => 24,
+            'U' => 54,
+            'V' => 30,
+        ];
 
-        $sheet->getStyle("A1:{$lastColumn}" . ($this->count))->applyFromArray([
+        foreach (range('A', $this->lastColumn) as $column) {
+            $sheet->getColumnDimension($column)->setWidth($columnWidths[$column] ?? 18);
+        }
+
+        // // Merge cells with same values for specific columns
+        // excel_merge_same_values(
+        //     $sheet,
+        //     [
+        //         'B',
+        //         'C',
+        //         'D',
+        //         'E',
+        //         'F',
+        //         'L',
+        //         'M',
+        //         'N',
+        //         'O',
+        //         'P',
+        //         'Q',
+        //         'R',
+        //         'S',
+        //         'T',
+        //         'U',
+        //         'V',
+        //     ], // Columns to merge - adjust as needed
+        //     3, // Start from row 3 (after headers)
+        //     $this->count
+        // );
+
+        $sheet->getStyle("A1:{$this->lastColumn}{$this->count}")->applyFromArray([
             'borders' => [
                 'allBorders' => [
                     'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
@@ -180,6 +204,24 @@ class WorksheetContextExport implements FromCollection, WithHeadings, WithStyles
                 ]
             ]
         ]);
+
+        $sheet->getStyle("A1:{$this->lastColumn}2")
+            ->getAlignment()
+            ->setWrapText(true)
+            ->setVertical(Alignment::VERTICAL_CENTER)
+            ->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+        $sheet->getStyle("{$column}3:{$this->lastColumn}{$this->count}")
+            ->getAlignment()
+            ->setWrapText(true)
+            ->setVertical(Alignment::VERTICAL_TOP);
+    }
+
+    public function registerEvents(): array
+    {
+        return [
+            AfterSheet::class => function (AfterSheet $event) {}
+        ];
     }
 
     private function getColumnLetter(int $index): string

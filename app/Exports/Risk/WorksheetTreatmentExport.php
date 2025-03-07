@@ -39,6 +39,8 @@ class WorksheetTreatmentExport implements FromCollection, WithHeadings, WithStyl
 
     protected int $count = 0;
 
+    protected string $lastColumn;
+
     public function __construct(public Collection $worksheets)
     {
         $this->nested_columns = [
@@ -95,10 +97,10 @@ class WorksheetTreatmentExport implements FromCollection, WithHeadings, WithStyl
 
     public function styles(WorksheetExcel $sheet)
     {
-        $lastColumn = $this->getLastColumn(count($this->headers[0]));
+        $this->lastColumn = $this->getLastColumn(count($this->headers[0]));
 
         // Style for headers
-        $sheet->getStyle("A1:{$lastColumn}2")->applyFromArray([
+        $sheet->getStyle("A1:{$this->lastColumn}2")->applyFromArray([
             'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
             'alignment' => [
                 'horizontal' => Alignment::HORIZONTAL_CENTER,
@@ -109,11 +111,6 @@ class WorksheetTreatmentExport implements FromCollection, WithHeadings, WithStyl
                 'startColor' => ['rgb' => '1896A4']
             ],
         ]);
-
-        // Auto-size columns
-        foreach (range('A', $lastColumn) as $column) {
-            $sheet->getColumnDimension($column)->setAutoSize(true);
-        }
 
         // Merge nested column headers
         foreach ($this->merged_cells as $merge) {
@@ -147,6 +144,38 @@ class WorksheetTreatmentExport implements FromCollection, WithHeadings, WithStyl
             $sheet->mergeCells("{$startCol}1:{$startCol}2");
         }
 
+        $columnWidths = [
+            'A' => 8,
+            'B' => 36,
+            'C' => 18,
+            'D' => 18,
+            'E' => 18,
+            'F' => 54,
+            'G' => 36,
+            'H' => 42,
+            'I' => 54,
+            'J' => 54,
+            'K' => 36,
+            'L' => 36,
+            'M' => 36,
+            'N' => 6,
+            'O' => 6,
+            'P' => 6,
+            'Q' => 6,
+            'R' => 6,
+            'S' => 6,
+            'T' => 6,
+            'U' => 6,
+            'V' => 6,
+            'W' => 6,
+            'X' => 6,
+            'Y' => 6,
+        ];
+
+        foreach (range('A', $this->lastColumn) as $column) {
+            $sheet->getColumnDimension($column)->setWidth($columnWidths[$column] ?? 18);
+        }
+
         // Merge cells with same values for specific columns
         excel_merge_same_values(
             $sheet,
@@ -162,7 +191,7 @@ class WorksheetTreatmentExport implements FromCollection, WithHeadings, WithStyl
             $this->count
         );
 
-        $sheet->getStyle("A1:{$lastColumn}" . ($this->count))->applyFromArray([
+        $sheet->getStyle("A1:{$this->lastColumn}" . ($this->count))->applyFromArray([
             'borders' => [
                 'allBorders' => [
                     'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
@@ -170,6 +199,17 @@ class WorksheetTreatmentExport implements FromCollection, WithHeadings, WithStyl
                 ]
             ]
         ]);
+
+        $sheet->getStyle("A1:{$this->lastColumn}2")
+            ->getAlignment()
+            ->setWrapText(true)
+            ->setVertical(Alignment::VERTICAL_CENTER)
+            ->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+        $sheet->getStyle("{$column}3:{$this->lastColumn}{$this->count}")
+            ->getAlignment()
+            ->setWrapText(true)
+            ->setVertical(Alignment::VERTICAL_TOP);
     }
 
     private function getColumnLetter(int $index): string

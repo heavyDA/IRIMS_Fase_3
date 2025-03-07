@@ -43,6 +43,7 @@ class WorksheetResidualExport implements FromCollection, WithHeadings, WithStyle
 
     protected int $count = 0;
 
+    protected string $lastColumn;
 
     public function __construct(private Collection $worksheets, public string $impact_category = 'kuantitatif') {}
 
@@ -96,10 +97,10 @@ class WorksheetResidualExport implements FromCollection, WithHeadings, WithStyle
 
     public function styles(WorksheetExcel $sheet)
     {
-        $lastColumn = $this->getLastColumn(count($this->headers[0]));
+        $this->lastColumn = $this->getLastColumn(count($this->headers[0]));
 
         // Style for headers
-        $sheet->getStyle("A1:{$lastColumn}2")->applyFromArray([
+        $sheet->getStyle("A1:{$this->lastColumn}2")->applyFromArray([
             'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
             'alignment' => [
                 'horizontal' => Alignment::HORIZONTAL_CENTER,
@@ -111,7 +112,6 @@ class WorksheetResidualExport implements FromCollection, WithHeadings, WithStyle
             ],
         ]);
 
-        $colors = ['00B050', 'FFFF00', 'FF0000',];
         // Auto-size columns
         $alphabets = range('A', 'Z');
         $break = false;
@@ -120,16 +120,13 @@ class WorksheetResidualExport implements FromCollection, WithHeadings, WithStyle
                 $value = $alphabet . $alphabet2;
                 $alphabets[] = $value;
 
-                if ($lastColumn == $value) {
+                if ($this->lastColumn == $value) {
                     $break = true;
                     break;
                 }
             }
 
             if ($break) break;
-        }
-        foreach ($alphabets as $column) {
-            $sheet->getColumnDimension($column)->setAutoSize(true);
         }
 
         // Merge nested column headers
@@ -164,6 +161,46 @@ class WorksheetResidualExport implements FromCollection, WithHeadings, WithStyle
             $sheet->mergeCells("{$startCol}1:{$startCol}2");
         }
 
+        $columnWidths = [
+            'A' => 8,
+            'B' => 36,
+            'C' => 18,
+            'D' => 18,
+            'E' => 54,
+            'F' => 36,
+            'G' => 36,
+            'H' => 36,
+            'I' => 36,
+            'J' => 12,
+            'K' => 12,
+            'L' => 12,
+            'M' => 12,
+            'N' => 12,
+            'O' => 12,
+            'P' => 12,
+            'Q' => 12,
+            'R' => 12,
+            'S' => 12,
+            'T' => 12,
+            'U' => 12,
+            'V' => 36,
+            'W' => 36,
+            'X' => 36,
+            'Y' => 36,
+            'Z' => 12,
+            'AA' => 12,
+            'AB' => 12,
+            'AC' => 12,
+            'AD' => 20,
+            'AE' => 20,
+            'AF' => 20,
+            'AG' => 20,
+        ];
+
+        foreach ($alphabets as $column) {
+            $sheet->getColumnDimension($column)->setWidth($columnWidths[$column] ?? 18);
+        }
+
         // Merge cells with same values for specific columns
         $merged_rows = [
             'B',
@@ -171,7 +208,7 @@ class WorksheetResidualExport implements FromCollection, WithHeadings, WithStyle
         ];
 
         if ($this->impact_category == 'kuantitatif') {
-            $merged_rows = array_merge($merged_rows, array_slice($alphabets, 5, array_search($lastColumn, $alphabets)));
+            $merged_rows = array_merge($merged_rows, array_slice($alphabets, 5, array_search($this->lastColumn, $alphabets)));
         }
 
         excel_merge_same_values(
@@ -181,7 +218,7 @@ class WorksheetResidualExport implements FromCollection, WithHeadings, WithStyle
             $this->count
         );
 
-        $sheet->getStyle("A1:{$lastColumn}" . $this->count)->applyFromArray([
+        $sheet->getStyle("A1:{$this->lastColumn}" . $this->count)->applyFromArray([
             'borders' => [
                 'allBorders' => [
                     'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
@@ -189,6 +226,17 @@ class WorksheetResidualExport implements FromCollection, WithHeadings, WithStyle
                 ]
             ]
         ]);
+
+        $sheet->getStyle("A1:{$this->lastColumn}2")
+            ->getAlignment()
+            ->setWrapText(true)
+            ->setVertical(Alignment::VERTICAL_CENTER)
+            ->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+        $sheet->getStyle("{$column}3:{$this->lastColumn}{$this->count}")
+            ->getAlignment()
+            ->setWrapText(true)
+            ->setVertical(Alignment::VERTICAL_TOP);
     }
 
     private function getColumnLetter(int $index): string

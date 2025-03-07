@@ -27,6 +27,8 @@ class MonitoringAlterationExport implements FromCollection, WithTitle,  WithHead
 
     protected int $count = 0;
 
+    protected string $lastColumn;
+
     public function __construct(private Collection $worksheets) {}
     public function collection()
     {
@@ -53,10 +55,10 @@ class MonitoringAlterationExport implements FromCollection, WithTitle,  WithHead
 
     public function styles(Worksheet $sheet)
     {
-        $lastColumn = $this->getLastColumn(count($this->headers));
+        $this->lastColumn = $this->getLastColumn(count($this->headers));
 
         // Style for headers
-        $sheet->getStyle("A1:{$lastColumn}1")->applyFromArray([
+        $sheet->getStyle("A1:{$this->lastColumn}1")->applyFromArray([
             'font' => [
                 'bold' => true,
                 'color' => [
@@ -73,8 +75,15 @@ class MonitoringAlterationExport implements FromCollection, WithTitle,  WithHead
             ],
         ]);
 
-        foreach (range('A', 'Z') as $column) {
-            $sheet->getColumnDimension($column)->setAutoSize(true);
+        $columnWidths = [
+            'A' => 20,
+            'B' => 42,
+            'C' => 54,
+            'D' => 54,
+        ];
+
+        foreach (range('A', $this->lastColumn) as $column) {
+            $sheet->getColumnDimension($column)->setWidth($columnWidths[$column] ?? 18);
         }
 
         // Merge cells with same values for specific columns
@@ -87,7 +96,7 @@ class MonitoringAlterationExport implements FromCollection, WithTitle,  WithHead
             $this->count + 1
         );
 
-        $sheet->getStyle("A1:{$lastColumn}" . ($this->count + 1))->applyFromArray([
+        $sheet->getStyle("A1:{$this->lastColumn}" . ($this->count + 1))->applyFromArray([
             'borders' => [
                 'allBorders' => [
                     'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
@@ -106,6 +115,16 @@ class MonitoringAlterationExport implements FromCollection, WithTitle,  WithHead
                 'startColor' => ['rgb' => '00B050']
             ],
         ]);
+
+        $sheet->getStyle("A1:{$this->lastColumn}1")
+            ->getAlignment()
+            ->setWrapText(true)
+            ->setVertical(Alignment::VERTICAL_CENTER)
+            ->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle("A2:{$this->lastColumn}" . $this->count + 1)
+            ->getAlignment()
+            ->setWrapText(true)
+            ->setVertical(Alignment::VERTICAL_TOP);
     }
 
     private function getColumnLetter(int $index): string

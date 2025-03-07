@@ -41,6 +41,8 @@ class MonitoringIncidentExport implements FromCollection, WithTitle, WithStyles,
 
     protected array $merged_cells = [];
 
+    protected string $lastColumn = '';
+
     protected int $count = 0;
 
     public function __construct(private Collection $worksheets) {}
@@ -95,10 +97,10 @@ class MonitoringIncidentExport implements FromCollection, WithTitle, WithStyles,
 
     public function styles(Worksheet $sheet)
     {
-        $lastColumn = $this->getLastColumn(count($this->headers));
+        $this->lastColumn = $this->getLastColumn(count($this->headers));
 
         // Style for headers
-        $sheet->getStyle("A1:{$lastColumn}1")->applyFromArray([
+        $sheet->getStyle("A1:{$this->lastColumn}1")->applyFromArray([
             'font' => [
                 'bold' => true,
                 'color' => [
@@ -115,8 +117,31 @@ class MonitoringIncidentExport implements FromCollection, WithTitle, WithStyles,
             ],
         ]);
 
-        foreach (range('A', 'Z') as $column) {
-            $sheet->getColumnDimension($column)->setAutoSize(true);
+        $columnWidths = [
+            'A' => 20,
+            'B' => 36,
+            'C' => 42,
+            'D' => 36,
+            'E' => 36,
+            'F' => 36,
+            'G' => 42,
+            'H' => 42,
+            'I' => 36,
+            'J' => 36,
+            'K' => 36,
+            'L' => 24,
+            'M' => 24,
+            'N' => 54,
+            'O' => 54,
+            'P' => 54,
+            'Q' => 42,
+            'R' => 24,
+            'S' => 36,
+            'T' => 36,
+        ];
+
+        foreach (range('A', $this->lastColumn) as $column) {
+            $sheet->getColumnDimension($column)->setWidth($columnWidths[$column] ?? 18);
         }
 
         // Merge cells with same values for specific columns
@@ -129,7 +154,7 @@ class MonitoringIncidentExport implements FromCollection, WithTitle, WithStyles,
             $this->count + 1
         );
 
-        $sheet->getStyle("A1:{$lastColumn}" . ($this->count + 1))->applyFromArray([
+        $sheet->getStyle("A1:{$this->lastColumn}" . ($this->count + 1))->applyFromArray([
             'borders' => [
                 'allBorders' => [
                     'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
@@ -148,6 +173,16 @@ class MonitoringIncidentExport implements FromCollection, WithTitle, WithStyles,
                 'startColor' => ['rgb' => '00B050']
             ],
         ]);
+
+        $sheet->getStyle("A1:{$this->lastColumn}1")
+            ->getAlignment()
+            ->setWrapText(true)
+            ->setVertical(Alignment::VERTICAL_CENTER)
+            ->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle("A2:{$this->lastColumn}" . $this->count + 1)
+            ->getAlignment()
+            ->setWrapText(true)
+            ->setVertical(Alignment::VERTICAL_TOP);
     }
 
     private function getColumnLetter(int $index): string

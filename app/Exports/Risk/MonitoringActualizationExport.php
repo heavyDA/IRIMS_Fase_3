@@ -42,6 +42,8 @@ class MonitoringActualizationExport implements FromCollection, WithHeadings, Wit
 
     protected int $count = 0;
 
+    protected string $lastColumn;
+
     public function __construct(private Collection $worksheets)
     {
         $this->nested_columns = [
@@ -115,10 +117,10 @@ class MonitoringActualizationExport implements FromCollection, WithHeadings, Wit
 
     public function styles(WorksheetExcel $sheet)
     {
-        $lastColumn = $this->getLastColumn(count($this->headers[0]));
+        $this->lastColumn = $this->getLastColumn(count($this->headers[0]));
 
         // Style for headers
-        $sheet->getStyle("A1:{$lastColumn}2")->applyFromArray([
+        $sheet->getStyle("A1:{$this->lastColumn}2")->applyFromArray([
             'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
             'alignment' => [
                 'horizontal' => Alignment::HORIZONTAL_CENTER,
@@ -139,16 +141,13 @@ class MonitoringActualizationExport implements FromCollection, WithHeadings, Wit
                 $value = $alphabet . $alphabet2;
                 $alphabets[] = $value;
 
-                if ($lastColumn == $value) {
+                if ($this->lastColumn == $value) {
                     $break = true;
                     break;
                 }
             }
 
             if ($break) break;
-        }
-        foreach ($alphabets as $column) {
-            $sheet->getColumnDimension($column)->setAutoSize(true);
         }
 
         // Merge nested column headers
@@ -186,6 +185,43 @@ class MonitoringActualizationExport implements FromCollection, WithHeadings, Wit
             $sheet->mergeCells("{$startCol}1:{$startCol}2");
         }
 
+        $columnWidths = [
+            'A' => 20,
+            'B' => 54,
+            'C' => 36,
+            'D' => 54,
+            'E' => 54,
+            'F' => 36,
+            'G' => 30,
+            'H' => 42,
+            'I' => 42,
+            'J' => 6,
+            'K' => 6,
+            'L' => 6,
+            'M' => 6,
+            'N' => 6,
+            'O' => 6,
+            'P' => 6,
+            'Q' => 6,
+            'R' => 6,
+            'S' => 6,
+            'T' => 6,
+            'U' => 6,
+            'V' => 42,
+            'W' => 18,
+            'X' => 18,
+            'Y' => 24,
+            'Z' => 42,
+            'AA' => 12,
+            'AB' => 12,
+            'AC' => 12,
+            'AD' => 12,
+        ];
+
+        foreach ($alphabets as $column) {
+            $sheet->getColumnDimension($column)->setWidth($columnWidths[$column] ?? 18);
+        }
+
         // Merge cells with same values for specific columns
         excel_merge_same_values(
             $sheet,
@@ -208,7 +244,7 @@ class MonitoringActualizationExport implements FromCollection, WithHeadings, Wit
             $this->count
         );
 
-        $sheet->getStyle("A1:{$lastColumn}" . ($this->count))->applyFromArray([
+        $sheet->getStyle("A1:{$this->lastColumn}" . ($this->count))->applyFromArray([
             'borders' => [
                 'allBorders' => [
                     'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
@@ -227,6 +263,16 @@ class MonitoringActualizationExport implements FromCollection, WithHeadings, Wit
                 'startColor' => ['rgb' => '00B050']
             ],
         ]);
+
+        $sheet->getStyle("A1:{$this->lastColumn}2")
+            ->getAlignment()
+            ->setWrapText(true)
+            ->setVertical(Alignment::VERTICAL_CENTER)
+            ->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle("A3:{$this->lastColumn}" . $this->count + 2)
+            ->getAlignment()
+            ->setWrapText(true)
+            ->setVertical(Alignment::VERTICAL_TOP);
     }
 
     public function registerEvents(): array

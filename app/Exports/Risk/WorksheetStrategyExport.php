@@ -25,6 +25,7 @@ class WorksheetStrategyExport implements FromCollection, WithHeadings, WithTitle
     ];
 
     protected int $count = 0;
+    protected string $lastcolumn;
 
     public function __construct(private Collection $worksheets) {}
 
@@ -53,10 +54,10 @@ class WorksheetStrategyExport implements FromCollection, WithHeadings, WithTitle
 
     public function styles(WorksheetExcel $sheet)
     {
-        $lastColumn = $this->getLastColumn(count($this->headers[0]));
+        $this->lastColumn = $this->getLastColumn(count($this->headers[0]));
 
         // Style for headers
-        $sheet->getStyle("A1:{$lastColumn}1")->applyFromArray([
+        $sheet->getStyle("A1:{$this->lastColumn}1")->applyFromArray([
             'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
             'alignment' => [
                 'horizontal' => Alignment::HORIZONTAL_CENTER,
@@ -68,9 +69,18 @@ class WorksheetStrategyExport implements FromCollection, WithHeadings, WithTitle
             ],
         ]);
 
-        // Auto-size columns
-        foreach (range('A', $lastColumn) as $column) {
-            $sheet->getColumnDimension($column)->setAutoSize(true);
+        $columnWidths = [
+            'A' => 8,
+            'B' => 42,
+            'C' => 54,
+            'D' => 42,
+            'E' => 36,
+            'F' => 36,
+            'G' => 18,
+        ];
+
+        foreach (range('A', $this->lastColumn) as $column) {
+            $sheet->getColumnDimension($column)->setWidth($columnWidths[$column] ?? 18);
         }
 
         // Merge cells with same values for specific columns
@@ -84,7 +94,7 @@ class WorksheetStrategyExport implements FromCollection, WithHeadings, WithTitle
             $this->count + 1
         );
 
-        $sheet->getStyle("A1:{$lastColumn}" . ($this->count + 1))->applyFromArray([
+        $sheet->getStyle("A1:{$this->lastColumn}" . ($this->count + 1))->applyFromArray([
             'borders' => [
                 'allBorders' => [
                     'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
@@ -92,6 +102,17 @@ class WorksheetStrategyExport implements FromCollection, WithHeadings, WithTitle
                 ]
             ]
         ]);
+
+        $sheet->getStyle("A1:{$this->lastColumn}1")
+            ->getAlignment()
+            ->setWrapText(true)
+            ->setVertical(Alignment::VERTICAL_CENTER)
+            ->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+        $sheet->getStyle("{$column}2:{$this->lastColumn}{$this->count}")
+            ->getAlignment()
+            ->setWrapText(true)
+            ->setVertical(Alignment::VERTICAL_TOP);
     }
 
     public function title(): string
