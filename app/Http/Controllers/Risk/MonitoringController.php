@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Risk;
 
 use App\Enums\DocumentStatus;
 use App\Enums\State;
+use App\Exceptions\Services\UploadFileException;
 use App\Http\Controllers\Controller;
 use App\Models\Master\IncidentCategory;
 use App\Models\Master\IncidentFrequency;
@@ -16,12 +17,14 @@ use App\Models\Risk\MonitoringHistory;
 use App\Models\Risk\WorksheetIdentification;
 use App\Services\PositionService;
 use App\Services\RoleService;
+use App\Services\UploadFileService;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use League\Flysystem\FilesystemException;
 use Symfony\Component\HttpFoundation\Response;
 use Yajra\DataTables\Facades\DataTables;
 
@@ -29,7 +32,8 @@ class MonitoringController extends Controller
 {
     public function __construct(
         private RoleService $roleService,
-        private PositionService $positionService
+        private PositionService $positionService,
+        private UploadFileService $uploadFileService
     ) {}
 
     public function index()
@@ -62,7 +66,8 @@ class MonitoringController extends Controller
                         ->where('w.sub_unit_code', $unit?->sub_unit_code ?? '-')
                 )
                 ->when(request('document_status'), fn($q) => $q->where('w.status_monitoring', request('document_status')))
-                ->where('worksheet_year', request('year', date('Y')));
+                ->where('worksheet_year', request('year', date('Y')))
+                ->groupBy('lm.id');
 
             return DataTables::query($worksheets)
                 ->filter(function ($q) {
@@ -243,8 +248,8 @@ class MonitoringController extends Controller
                     . '/risk_monitoring/'
                     . $monitoring->period_date_format->translatedFormat('F');
 
-                if (!Storage::disk('local')->exists($directory)) {
-                    Storage::disk('local')->makeDirectory($directory);
+                if (!Storage::disk('s3')->exists($directory)) {
+                    Storage::disk('s3')->makeDirectory($directory);
                 }
 
                 $documents = [];
@@ -253,23 +258,7 @@ class MonitoringController extends Controller
                     if ($files) {
                         foreach ($files as $file) {
                             if ($file->isValid()) {
-                                $id = Str::uuid();
-
-                                $file->storeAs($directory, $id . '.' . $file->getClientOriginalExtension());
-                                $path = $directory . '/' . $id . '.' . $file->getClientOriginalExtension();
-
-                                $documents[] = [
-                                    'id' => $id,
-                                    'name' => $file->getClientOriginalName(),
-                                    'size' => $file->getSize(),
-                                    'type' => $file->getClientOriginalExtension(),
-                                    'url' => Crypt::encryptString(
-                                        json_encode([
-                                            'path' => $path,
-                                            'filename' => $file->getClientOriginalName()
-                                        ])
-                                    )
-                                ];
+                                $documents[] = $this->uploadFileService->store($file, $directory, 's3');
                             }
                         }
                     }
@@ -287,6 +276,13 @@ class MonitoringController extends Controller
                     'redirect' => route('risk.monitoring.show', $worksheet->getEncryptedId())
                 ],
             ])->header('Cache-Control', 'no-store');
+        } catch (UploadFileException $e) {
+            DB::rollBack();
+            logger()->error($e);
+
+            return response()->json([
+                'message' => 'Gagal menyimpan laporan monitoring, terjadi kesalahan saat mengunggah dokumen pendukung',
+            ], Response::HTTP_BAD_REQUEST)->header('Cache-Control', 'no-store');
         } catch (Exception $e) {
             DB::rollBack();
             logger()->error($e);
@@ -508,39 +504,17 @@ class MonitoringController extends Controller
 
             $actualizations_new = $monitoring->actualizations()->createMany($actualizations_new)->toArray();
 
+            $directory = $user->sub_unit_code
+                . '/risk_monitoring/'
+                . $monitoring->period_date_format->translatedFormat('F');
             foreach ($request->actualizations as $key => $item) {
-                $directory = $user->sub_unit_code
-                    . '/risk_monitoring/'
-                    . $monitoring->period_date_format->translatedFormat('F');
-
-                if (!Storage::disk('local')->exists($directory)) {
-                    Storage::disk('local')->makeDirectory($directory);
-                }
-
                 $documents = [];
-
                 if ($request->hasFile("actualizations.{$item['key']}.actualization_documents")) {
                     $files = $request->file("actualizations.{$item['key']}.actualization_documents");
                     if ($files) {
-                        foreach ($files as $key => $file) {
+                        foreach ($files as $file) {
                             if ($file->isValid()) {
-                                $id = Str::uuid();
-
-                                $file->storeAs($directory, $id . '.' . $file->getClientOriginalExtension());
-                                $path = $directory . '/' . $id . '.' . $file->getClientOriginalExtension();
-                                $documents[] = [
-                                    'id' => $id,
-                                    'name' => $file->getClientOriginalName(),
-                                    'size' => $file->getSize(),
-                                    'type' => $file->getClientOriginalExtension(),
-                                    'url' => Crypt::encryptString(
-                                        json_encode([
-                                            'path' => $path,
-                                            'filename' => $file->getClientOriginalName()
-                                        ])
-                                    )
-                                ];
-                                continue;
+                                $documents[] = $this->uploadFileService->store($file, $directory, 's3');
                             }
                         }
                     }
@@ -588,6 +562,13 @@ class MonitoringController extends Controller
                     'redirect' => route('risk.monitoring.show_monitoring', $monitoring_id)
                 ]
             ])->header('Cache-Control', 'no-store');
+        } catch (UploadFileException $e) {
+            DB::rollBack();
+            logger()->error('[Worksheet Monitoring] Update Monitoring with ID ' . $monitoring->id . ' ' . $e->getMessage());
+
+            return response()->json([
+                'message' => 'Gagal memperbarui laporan monitoring, terjadi kesalahan saat mengunggah dokumen pendukung',
+            ], Response::HTTP_BAD_REQUEST)->header('Cache-Control', 'no-store');
         } catch (Exception $e) {
             DB::rollBack();
             logger()->error('[Worksheet Monitoring] Update Monitoring with ID ' . $monitoring->id . ' ' . $e->getMessage());

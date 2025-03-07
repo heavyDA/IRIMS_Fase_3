@@ -10,7 +10,7 @@ class FileController extends Controller
 {
     public function serve($key)
     {
-        $disk = Storage::disk('local');
+        $disk = Storage::disk('s3');
         $decryptKey = Crypt::decryptString($key);
 
         $data = json_decode($decryptKey, true);
@@ -24,11 +24,10 @@ class FileController extends Controller
         }
 
         if ($disk->exists($path)) {
-            $file = $disk->path($path);
-            $filename = $filename ?: basename($file);
-
-            return response()->file(
-                $file,
+            $filename = $filename ?: basename($disk->path($path));
+            return $disk->response(
+                $path,
+                $filename,
                 [
                     'Content-Disposition' => 'inline; filename="' . $filename . '"'
                 ]
