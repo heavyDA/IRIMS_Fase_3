@@ -1,5 +1,5 @@
 import axios from 'axios';
-import './bootstrap';
+import 'bootstrap';
 import './themes/main';
 import '@tabler/icons-webfont/dist/tabler-icons.min.css';
 import Swal from 'sweetalert2';
