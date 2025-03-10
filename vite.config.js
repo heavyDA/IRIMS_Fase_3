@@ -43,9 +43,9 @@ export default defineConfig({
     resolve: {
         alias: {
             '@': '/node_modules',
-            'css': '/resources/css',
-            'js': '/resources/js',
-            '~fonts': path.resolve(__dirname, 'resources/fonts')
+            '~css': '/resources/css',
+            '~js': '/resources/js',
+            '~fonts': path.resolve(__dirname, 'resources/fonts'),
         },
     },
     build: {

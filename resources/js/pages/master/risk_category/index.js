@@ -1,5 +1,5 @@
-import createDatatable from "js/components/datatable";
-import debounce from "js/utils/debounce";
+import createDatatable from "~js/components/datatable";
+import debounce from "~js/utils/debounce";
 
 const table = createDatatable("#risk-category-table", {
     handleColumnSearchField: false,

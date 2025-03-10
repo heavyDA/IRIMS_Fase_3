@@ -3,7 +3,7 @@ import { formatNumeral, unformatNumeral } from 'cleave-zen';
 import Choices from 'choices.js';
 import Quill from 'quill';
 import 'quill/dist/quill.snow.css';
-import 'css/quill.css';
+import '~css//quill.css';
 import flatpickr from 'flatpickr';
 import debounce from 'js/utils/debounce';
 import axios from 'axios';

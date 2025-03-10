@@ -1,5 +1,5 @@
 import { formatNumeral } from "cleave-zen";
-import { defaultConfigFormatNumeral } from "js/components/helper";
+import { defaultConfigFormatNumeral } from "~js/components/helper";
 
 const form = document.querySelector('#risk-metrics-form');
 const currencyFields = form.querySelectorAll('.currency');

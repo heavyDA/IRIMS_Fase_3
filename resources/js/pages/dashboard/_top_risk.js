@@ -1,6 +1,6 @@
-import createDatatable from "js/components/datatable"
-import { decodeHtml, renderHeatmapBadge } from "js/components/helper"
-import debounce from "js/utils/debounce"
+import createDatatable from "~js/components/datatable"
+import { decodeHtml, renderHeatmapBadge } from "~js/components/helper"
+import debounce from "~js/utils/debounce"
 
 const dashboardFilter = document.querySelector('#dashboard-filter')
 const selectYear = dashboardFilter.querySelector('select[name="year"]')

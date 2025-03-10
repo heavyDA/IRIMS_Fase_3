@@ -1,8 +1,8 @@
 import { Offcanvas } from "bootstrap";
 import Choices from "choices.js";
-import createDatatable from "js/components/datatable";
-import { decodeHtml, defaultConfigFormatNumeral, defaultConfigChoices, renderHeatmapBadge } from "js/components/helper";
-import debounce from "js/utils/debounce";
+import createDatatable from "~js/components/datatable";
+import { decodeHtml, defaultConfigFormatNumeral, defaultConfigChoices, renderHeatmapBadge } from "~js/components/helper";
+import debounce from "~js/utils/debounce";
 
 const inputSearch = document.querySelector('input[name="search"]')
 

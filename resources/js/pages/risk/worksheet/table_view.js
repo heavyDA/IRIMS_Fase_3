@@ -1,5 +1,5 @@
-import createDatatable from "js/components/datatable";
-import { renderHeatmapBadge } from "js/components/helper";
+import createDatatable from "~js/components/datatable";
+import { renderHeatmapBadge } from "~js/components/helper";
 
 // Call the function when the page loads with columns to exclude
 // Example: exclude columns 3 and 4 (risk_value and risk_value_limit)

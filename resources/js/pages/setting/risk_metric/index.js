@@ -1,7 +1,7 @@
 import { formatNumeral } from "cleave-zen";
-import createDatatable from "js/components/datatable";
-import { defaultConfigFormatNumeral } from "js/components/helper";
-import debounce from "js/utils/debounce";
+import createDatatable from "~js/components/datatable";
+import { defaultConfigFormatNumeral } from "~js/components/helper";
+import debounce from "~js/utils/debounce";
 
 const table = createDatatable("#risk-metric-table", {
     handleColumnSearchField: false,

@@ -3,8 +3,8 @@ import ApexCharts from "apexcharts"
 import Swal from "sweetalert2"
 import Choices from "choices.js"
 import { formatNumeral } from "cleave-zen"
-import { decodeHtml, defaultConfigChoices, defaultConfigFormatNumeral, renderHeatmapBadge } from "js/components/helper"
-import createDatatable from "js/components/datatable"
+import { decodeHtml, defaultConfigChoices, defaultConfigFormatNumeral, renderHeatmapBadge } from "~js/components/helper"
+import createDatatable from "~js/components/datatable"
 import axios from "axios"
 
 const dashboardFilter = document.querySelector('#dashboard-filter')

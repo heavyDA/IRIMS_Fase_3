@@ -1,7 +1,8 @@
-import createDatatable from "js/components/datatable";
-import debounce from "js/utils/debounce";
+import createDatatable from "~js/components/datatable";
+import debounce from "~js/utils/debounce";
 
-const table = createDatatable("#bumn-scale-table", {handleColumnSearchField: false,
+const table = createDatatable("#bumn-scale-table", {
+    handleColumnSearchField: false,
     responsive: false,
     serverSide: true,
     processing: true,

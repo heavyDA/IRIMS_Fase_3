@@ -3,9 +3,9 @@ import { formatNumeral, unformatNumeral } from "cleave-zen";
 import Choices from "choices.js";
 import Quill from "quill";
 import "quill/dist/quill.snow.css";
-import "css/quill.css";
+import "~css/quill.css";
 import flatpickr from "flatpickr";
-import debounce from "js/utils/debounce";
+import debounce from "~js/utils/debounce";
 import axios from "axios";
 import dayjs from "dayjs";
 import "dayjs/locale/id";
@@ -16,7 +16,7 @@ import {
     defaultLocaleFlatpickr,
     formatDataToStructuredObject,
     generateRandomKey,
-} from "js/components/helper";
+} from "~js/components/helper";
 import Swal from "sweetalert2";
 
 dayjs.locale("id");
