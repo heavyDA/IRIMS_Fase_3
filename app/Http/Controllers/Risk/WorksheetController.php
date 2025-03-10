@@ -203,10 +203,12 @@ class WorksheetController extends Controller
 
             $worksheet->last_history()->create($history);
             DB::commit();
-            return response()->json(['data' => [
-                'redirect' => route('risk.worksheet.show', $worksheet->getEncryptedId()),
-                'message' => 'Kertas kerja berhasil dibuat'
-            ]])->header('Cache-Control', 'no-store');
+            return response()->json([
+                'message' => 'Kertas kerja berhasil dibuat',
+                'data' => [
+                    'redirect' => route('risk.worksheet.show', $worksheet->getEncryptedId())
+                ]
+            ])->header('Cache-Control', 'no-store');
         } catch (Exception $e) {
             DB::rollBack();
             return response()->json(['message' => $e->getMessage()], 500)->header('Cache-Control', 'no-store');
@@ -638,10 +640,12 @@ class WorksheetController extends Controller
 
             DB::commit();
             flash_message('flash_message', 'Kertas kerja berhasil diperbarui', State::SUCCESS);
-            return response()->json(['data' => [
+            return response()->json([
                 'message' => 'Kertas kerja berhasil diperbarui',
-                'redirect' => route('risk.worksheet.show', $worksheet->getEncryptedId())
-            ]])->header('Cache-Control', 'no-store');
+                'data' => [
+                    'redirect' => route('risk.worksheet.show', $worksheet->getEncryptedId())
+                ]
+            ])->header('Cache-Control', 'no-store');
         } catch (Exception $e) {
             DB::rollBack();
             logger()->error('[Worksheet] ' . $e->getMessage(), [$e]);

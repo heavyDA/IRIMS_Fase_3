@@ -167,7 +167,6 @@ const actualizationValidate = () => {
 		for (let key of Object.keys(actualization)) {
 			if (
 				[
-					'actualization_documents',
 					'actualization_pic_related',
 					'key',
 				].includes(key)
@@ -177,8 +176,7 @@ const actualizationValidate = () => {
 
 			if (
 				!actualization[key] ||
-				actualization[key] == 'Pilih' ||
-				actualizationQuills[key]?.getLength() <= 1
+				actualization[key] == 'Pilih'
 			) {
 				return false;
 			}
@@ -235,8 +233,7 @@ const inherentBlock = document.querySelector(
 if (inherentBlock) {
 	inherentBlock.parentNode.insertAdjacentHTML(
 		`beforeend`,
-		`<circle id="inherent-risk-scale" fill="#5A9AEB" r="6" cx="${
-			inherentBlock.x.baseVal[0].value + 6
+		`<circle id="inherent-risk-scale" fill="#5A9AEB" r="6" cx="${inherentBlock.x.baseVal[0].value + 6
 		}" cy="${inherentBlock.y.baseVal[0].value}"></circle>`
 	);
 }
@@ -256,8 +253,7 @@ const residualBlockOnMap = () => {
 		if (block) {
 			block.parentNode.insertAdjacentHTML(
 				`beforeend`,
-				`<circle fill="#9A9B9D" r="6" cx="${
-					block.x.baseVal[0].value + 6
+				`<circle fill="#9A9B9D" r="6" cx="${block.x.baseVal[0].value + 6
 				}" cy="${block.y.baseVal[0].value - 4}"></circle>`
 			);
 		}
@@ -482,9 +478,9 @@ const calculateRisk = (quarter) => {
 		]._currentState.choices.find(
 			(choice) =>
 				choice.customProperties.impact_scale ==
-					scale.customProperties.scale &&
+				scale.customProperties.scale &&
 				choice.customProperties.impact_probability ==
-					probability.customProperties.scale
+				probability.customProperties.scale
 		);
 
 		if (result) {
@@ -688,7 +684,6 @@ const onActualizationSave = (data) => {
 	for (let key of Object.keys(data)) {
 		if (
 			[
-				'actualization_document',
 				'actualization_pic_related',
 				'key',
 			].includes(key)
@@ -732,49 +727,42 @@ const onActualizationSave = (data) => {
         <td class="text-center">${data.actualization_mitigation_plan}</td>
         <td class="text-center">${data.actualization_plan_body}</td>
         <td class="text-center">${data.actualization_plan_output}</td>
-        <td class="text-center">${
-			data.actualization_cost
-				? formatNumeral(
-						data.actualization_cost.replaceAll('.', ','),
-						defaultConfigFormatNumeral
-				  )
-				: ''
+        <td class="text-center">${data.actualization_cost
+			? formatNumeral(
+				data.actualization_cost.replaceAll('.', ','),
+				defaultConfigFormatNumeral
+			)
+			: ''
 		}</td>
-        <td class="text-center">${
-			data.actualization_cost_absorption
-				? data.actualization_cost_absorption + '%'
-				: ''
+        <td class="text-center">${data.actualization_cost_absorption
+			? data.actualization_cost_absorption + '%'
+			: ''
 		}</td>
         <td class="text-center">${data.actualization_pic}</td>
         <td class="text-center">${picRelatedLabel}</td>
         <td class="text-center">${data.actualization_kri}</td>
         <td class="text-center">${data.actualization_kri_threshold}</td>
-        <td class="text-center">${
-			data.actualization_kri_threshold_score
-				? data.actualization_kri_threshold_score + '%'
-				: ''
+        <td class="text-center">${data.actualization_kri_threshold_score
+			? data.actualization_kri_threshold_score + '%'
+			: ''
 		}</td>
         <td class="text-center">${data.actualization_plan_status}</td>
         <td class="text-center">${data.actualization_plan_explanation}</td>
-        <td class="text-center">${
-			data.hasOwnProperty('actualization_plan_progress[1]')
-				? data['actualization_plan_progress[1]'] + '%'
-				: ''
+        <td class="text-center">${data.hasOwnProperty('actualization_plan_progress[1]')
+			? data['actualization_plan_progress[1]'] + '%'
+			: ''
 		}</td>
-        <td class="text-center">${
-			data.hasOwnProperty('actualization_plan_progress[2]')
-				? data['actualization_plan_progress[2]'] + '%'
-				: ''
+        <td class="text-center">${data.hasOwnProperty('actualization_plan_progress[2]')
+			? data['actualization_plan_progress[2]'] + '%'
+			: ''
 		}</td>
-        <td class="text-center">${
-			data.hasOwnProperty('actualization_plan_progress[3]')
-				? data['actualization_plan_progress[3]'] + '%'
-				: ''
+        <td class="text-center">${data.hasOwnProperty('actualization_plan_progress[3]')
+			? data['actualization_plan_progress[3]'] + '%'
+			: ''
 		}</td>
-        <td class="text-center">${
-			data.hasOwnProperty('actualization_plan_progress[4]')
-				? data['actualization_plan_progress[4]'] + '%'
-				: ''
+        <td class="text-center">${data.hasOwnProperty('actualization_plan_progress[4]')
+			? data['actualization_plan_progress[4]'] + '%'
+			: ''
 		}</td>
     `;
 
@@ -801,55 +789,46 @@ monitoring.actualizations.forEach((actualization, index) => {
 
 	row.innerHTML = `
         <td class="text-center">${actualization.risk_cause_number}</td>
-        <td class="text-left">${
-			actualization.actualization_mitigation_plan
+        <td class="text-left">${actualization.actualization_mitigation_plan
 		}</td>
         <td class="text-left">${actualization.actualization_plan_body}</td>
         <td class="text-left">${actualization.actualization_plan_output}</td>
-        <td class="text-center">${
-			actualization.actualization_cost
-				? formatNumeral(
-						actualization.actualization_cost.replaceAll('.', ','),
-						defaultConfigFormatNumeral
-				  )
-				: ''
+        <td class="text-center">${actualization.actualization_cost
+			? formatNumeral(
+				actualization.actualization_cost.replaceAll('.', ','),
+				defaultConfigFormatNumeral
+			)
+			: ''
 		}</td>
-        <td class="text-center">${
-			actualization.actualization_cost_absorption
-				? actualization.actualization_cost_absorption + '%'
-				: ''
+        <td class="text-center">${actualization.actualization_cost_absorption
+			? actualization.actualization_cost_absorption + '%'
+			: ''
 		}</td>
         <td class="text-center">${actualization.actualization_pic}</td>
         <td class="text-center">${actualization.actualization_pic_related}</td>
         <td class="text-center">${actualization.actualization_kri}</td>
-        <td class="text-center">${
-			actualization.actualization_kri_threshold
+        <td class="text-center">${actualization.actualization_kri_threshold
 		}</td>
-        <td class="text-center">${
-			actualization.actualization_kri_threshold_score
-				? actualization.actualization_kri_threshold_score + '%'
-				: ''
+        <td class="text-center">${actualization.actualization_kri_threshold_score
+			? actualization.actualization_kri_threshold_score + '%'
+			: ''
 		}</td>
         <td class="text-center">${actualization.actualization_plan_status}</td>
-        <td class="text-center">${
-			actualization.hasOwnProperty('actualization_plan_progress[1]')
-				? actualization['actualization_plan_progress[1]'] + '%'
-				: ''
+        <td class="text-center">${actualization.hasOwnProperty('actualization_plan_progress[1]')
+			? actualization['actualization_plan_progress[1]'] + '%'
+			: ''
 		}</td>
-        <td class="text-center">${
-			actualization.hasOwnProperty('actualization_plan_progress[2]')
-				? actualization['actualization_plan_progress[2]'] + '%'
-				: ''
+        <td class="text-center">${actualization.hasOwnProperty('actualization_plan_progress[2]')
+			? actualization['actualization_plan_progress[2]'] + '%'
+			: ''
 		}</td>
-        <td class="text-center">${
-			actualization.hasOwnProperty('actualization_plan_progress[3]')
-				? actualization['actualization_plan_progress[3]'] + '%'
-				: ''
+        <td class="text-center">${actualization.hasOwnProperty('actualization_plan_progress[3]')
+			? actualization['actualization_plan_progress[3]'] + '%'
+			: ''
 		}</td>
-        <td class="text-center">${
-			actualization.hasOwnProperty('actualization_plan_progress[4]')
-				? actualization['actualization_plan_progress[4]'] + '%'
-				: ''
+        <td class="text-center">${actualization.hasOwnProperty('actualization_plan_progress[4]')
+			? actualization['actualization_plan_progress[4]'] + '%'
+			: ''
 		}</td>
     `;
 
@@ -1360,24 +1339,51 @@ const save = async () => {
 	});
 
 	const formData = jsonToFormData(data);
-	axios
-		.post(window.location.href, formData)
-		.then((response) => {
-			if (response.status == 200) {
-				Swal.fire({
-					icon: 'success',
-					text: response.data.message,
-				}).then(() => {
-					setTimeout(() => {
-						window.location.replace(response.data.data.redirect);
-					}, 325);
-				});
-			}
-		})
-		.catch((error) => {
-			Swal.fire({
-				icon: 'error',
-				text: error.response.data?.message ?? error?.message,
-			});
-		});
+
+	Swal.fire({
+		text: 'Dalam proses menyimpan..',
+		showCancelButton: false,
+		showConfirmButton: false,
+		allowOutsideClick: false,
+		allowEscapeKey: false,
+		didOpen: () => {
+			Swal.showLoading()
+
+			setTimeout(() => {
+				axios
+					.post(window.location.href, formData)
+					.then((response) => {
+						if (response.status == 200) {
+							Swal.fire({
+								icon: 'success',
+								title: 'Berhasil',
+								text: response.data?.message,
+								showCancelButton: false,
+								showConfirmButton: false,
+								allowOutsideClick: false,
+								allowEscapeKey: false,
+								didOpen: () => {
+									setTimeout(() => {
+										if (response.data?.data?.redirect) {
+											window.location.replace(response.data.data.redirect);
+										} else {
+											window.location.reload();
+										}
+									}, 625);
+								}
+							})
+
+							return
+						}
+					})
+					.catch((error) => {
+						Swal.fire({
+							icon: 'error',
+							title: 'Gagal',
+							text: error.response?.data?.message ?? error?.message,
+						});
+					});
+			}, 375);
+		}
+	})
 };

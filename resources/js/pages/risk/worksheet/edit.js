@@ -82,9 +82,9 @@ const identificationValidate = () => {
     worksheet.identification.inherent_impact_value =
         identificationInherentImpactValue.value
             ? unformatNumeral(
-                  identificationInherentImpactValue.value,
-                  defaultConfigFormatNumeral
-              )
+                identificationInherentImpactValue.value,
+                defaultConfigFormatNumeral
+            )
             : "";
 
     const isQualitative =
@@ -492,9 +492,9 @@ const addStrategyRow = (data) => {
         <td>${data.strategy_expected_feedback}</td>
         <td>${data.strategy_risk_value}</td>
         <td>${formatNumeral(
-            data.strategy_risk_value_limit,
-            defaultConfigFormatNumeral
-        )}</td>
+        data.strategy_risk_value_limit,
+        defaultConfigFormatNumeral
+    )}</td>
         <td>${data.strategy_decision}</td>
     `;
     buttonCell.appendChild(editButton);
@@ -755,10 +755,10 @@ const identificationChoicesInit = async () => {
     identificationSelects?.risk_cause_number?.addEventListener(
         "change",
         (e) =>
-            (identificationRiskCauseCode.value =
-                identificationRiskNumber.value +
-                "." +
-                identificationChoices.risk_cause_number.getValue(true))
+        (identificationRiskCauseCode.value =
+            identificationRiskNumber.value +
+            "." +
+            identificationChoices.risk_cause_number.getValue(true))
     );
     identificationSelects?.inherent_impact_scale?.addEventListener(
         "change",
@@ -1031,9 +1031,9 @@ const calculateRisk = (
         (choice) =>
             scale?.customProperties?.scale &&
             parseInt(targetImpactProbability.value) >=
-                choice.customProperties.min &&
+            choice.customProperties.min &&
             parseInt(targetImpactProbability.value) <=
-                choice.customProperties.max
+            choice.customProperties.max
     );
 
     if (isResidual) {
@@ -1053,12 +1053,12 @@ const calculateRisk = (
                     const riskValueByLimit = parseFloat(
                         (parseInt(scale.customProperties.scale) /
                             parseInt(scaleQ1.customProperties.scale)) *
-                            parseFloat(
-                                unformatNumeral(
-                                    identificationResidualImpactValues[0].value,
-                                    defaultConfigFormatNumeral
-                                )
+                        parseFloat(
+                            unformatNumeral(
+                                identificationResidualImpactValues[0].value,
+                                defaultConfigFormatNumeral
                             )
+                        )
                     ).toFixed(2);
                     targetImpactValue.value = formatNumeral(
                         riskValueByLimit.toString().replaceAll(".", ","),
@@ -1107,9 +1107,9 @@ const calculateRisk = (
             targetExposure.value = formatNumeral(
                 parseFloat(
                     (1 / 100) *
-                        parseFloat(fetchers?.risk_metric?.limit ?? "0") *
-                        parseInt(scale.customProperties.scale) *
-                        (probabilityValue / 100)
+                    parseFloat(fetchers?.risk_metric?.limit ?? "0") *
+                    parseInt(scale.customProperties.scale) *
+                    (probabilityValue / 100)
                 )
                     .toFixed(2)
                     .toString()
@@ -1126,9 +1126,9 @@ const calculateRisk = (
         const result = targetImpactProbabilityScale._currentState.choices.find(
             (choice) =>
                 choice.customProperties.impact_scale ==
-                    scale.customProperties.scale &&
+                scale.customProperties.scale &&
                 choice.customProperties.impact_probability ==
-                    probability.customProperties.scale
+                probability.customProperties.scale
         );
 
         if (result) {
@@ -1285,6 +1285,32 @@ incidentForm.addEventListener("submit", (e) => {
         delete data.search_terms;
     }
 
+    for (let key of Object.keys(data)) {
+        if (key == "key" || key == "id") {
+            continue;
+        }
+
+        if (
+            !data[key] ||
+            data[key] == "Pilih" ||
+            incidentQuills[key]?.getLength() <= 1
+        ) {
+            Swal.fire(
+                "Peringatan",
+                "Pastikan semua isian harus terisi",
+                "warning"
+            );
+            return;
+        }
+
+        if (key.includes("impact_value") || key.includes("risk_exposure")) {
+            data[key] = unformatNumeral(
+                data[key],
+                defaultConfigFormatNumeral
+            ).replaceAll(".", ",");
+        }
+    }
+
     onIncidentSave(data);
 });
 
@@ -1329,32 +1355,6 @@ incidentModalElement.addEventListener("hide.bs.modal", async () => {
 });
 
 const onIncidentSave = (data) => {
-    for (let key of Object.keys(data)) {
-        if (key == "key" || key == "id") {
-            continue;
-        }
-
-        if (
-            !data[key] ||
-            data[key] == "Pilih" ||
-            incidentQuills[key]?.getLength() <= 1
-        ) {
-            Swal.fire(
-                "Peringatan",
-                "Pastikan semua isian harus terisi",
-                "warning"
-            );
-            return;
-        }
-
-        if (key.includes("impact_value") || key.includes("risk_exposure")) {
-            data[key] = unformatNumeral(
-                data[key],
-                defaultConfigFormatNumeral
-            ).replaceAll(".", ",");
-        }
-    }
-
     if (data.key) {
         worksheet.incidents[
             worksheet.incidents.findIndex((item) => item.key == data.key)
@@ -1392,7 +1392,7 @@ const onIncidentSave = (data) => {
 
 const onIncidentEdit = (data) => {
     incidentModal.show();
-
+    console.log('triggered')
     Object.keys(data).forEach((key) => {
         const element = incidentForm.querySelector(`[name="${key}"]`);
         const event = new Event("change");
@@ -1445,6 +1445,13 @@ const addIncidentRow = (data) => {
                     return item;
                 });
 
+            treatmentTable.querySelector('tbody').innerHTML = '';
+            worksheet.mitigations = worksheet.mitigations.filter((item) => item.risk_cause_number != data.risk_cause_number)
+                .map(item => {
+                    addTreatmentRow(item);
+                    return item;
+                });
+
             const choices = [
                 {
                     id: "Pilih",
@@ -1477,10 +1484,9 @@ const addIncidentRow = (data) => {
         <td>${data.risk_cause_code}</td>
         <td>${data.risk_cause_body}</td>
         <td>${data.kri_body}</td>
-        <td>${
-            incidentForm.querySelector(
-                `select[name="kri_unit"] option[value="${data.kri_unit}"]`
-            )?.textContent ?? ""
+        <td>${incidentForm.querySelector(
+        `select[name="kri_unit"] option[value="${data.kri_unit}"]`
+    )?.textContent ?? ""
         }</td>
         <td>${data.kri_threshold_safe}</td>
         <td>${data.kri_threshold_caution}</td>
@@ -1494,6 +1500,58 @@ const addIncidentRow = (data) => {
 const updateIncidentRow = (data) => {
     const row = tables.incidents.querySelector("#incident-" + data.key);
     const cols = row.querySelectorAll("td");
+    const [removeButton, editButton] = addRowAction(
+        "incidents",
+        data.key,
+        (data) => onIncidentEdit(data),
+        (data) => {
+            worksheet.incidents = [
+                ...worksheet.incidents
+                    .filter((item) => item.key != data.key)
+                    .map((item, key) => {
+                        item.risk_cause_number = risk_numbers[key];
+                        item.risk_cause_code =
+                            currentRiskNumber.value + "." + risk_numbers[key];
+                        onIncidentSave(item);
+                        return item;
+                    }),
+            ];
+
+            treatmentTable.querySelector('tbody').innerHTML = '';
+            worksheet.mitigations = worksheet.mitigations.filter((item) => item.risk_cause_number != data.risk_cause_number)
+                .map(item => {
+                    addTreatmentRow(item);
+                    return item;
+                });
+
+            const choices = [
+                {
+                    id: "Pilih",
+                    value: "Pilih",
+                    label: "Pilih",
+                },
+            ];
+
+            for (let incident of worksheet.incidents) {
+                choices.push({
+                    id: incident.risk_cause_number,
+                    value: incident.risk_cause_number,
+                    label: incident.risk_cause_number,
+                });
+            }
+
+            treatmentRiskCauseNumber.innerHTML = "<option>Pilih</option>";
+            treatmentRiskCauseNumberChoices.destroy();
+            treatmentRiskCauseNumberChoices.init();
+            treatmentRiskCauseNumberChoices
+                .setChoices(choices)
+                .setChoiceByValue("Pilih");
+        }
+    );
+
+    cols[0].innerHTML = '';
+    cols[0].appendChild(editButton);
+    cols[0].appendChild(removeButton);
     cols[1].textContent = data.risk_cause_number;
     cols[2].textContent = data.risk_cause_code;
     cols[3].innerHTML = data.risk_cause_body;
@@ -1679,17 +1737,15 @@ const addTreatmentRow = (data) => {
     row.id = `treatment-${data.key}`;
     row.innerHTML = `
         <td>${data.risk_cause_number}</td>
-        <td>${
-            treatmentRiskTreatmentOptionChoices._currentState.choices.find(
-                (choice) =>
-                    choice.value == data?.risk_treatment_option?.toString()
-            )?.label ?? ""
+        <td>${treatmentRiskTreatmentOptionChoices._currentState.choices.find(
+        (choice) =>
+            choice.value == data?.risk_treatment_option?.toString()
+    )?.label ?? ""
         }</td>
-        <td>${
-            treatmentRiskTreatmentTypeChoices._currentState.choices.find(
-                (choice) =>
-                    choice.value == data?.risk_treatment_type?.toString()
-            )?.label ?? ""
+        <td>${treatmentRiskTreatmentTypeChoices._currentState.choices.find(
+            (choice) =>
+                choice.value == data?.risk_treatment_type?.toString()
+        )?.label ?? ""
         }</td>
         <td>${data.mitigation_plan}</td>
         <td>${data.mitigation_output}</td>
@@ -1699,10 +1755,9 @@ const addTreatmentRow = (data) => {
             data.mitigation_cost,
             defaultConfigFormatNumeral
         )}</td>
-        <td>${
-            mitigationProgramTypeChoices._currentState.choices.find(
-                (choice) => choice.value == data.mitigation_rkap_program_type
-            )?.label ?? ""
+        <td>${mitigationProgramTypeChoices._currentState.choices.find(
+            (choice) => choice.value == data.mitigation_rkap_program_type
+        )?.label ?? ""
         }</td>
         <td>${data.mitigation_pic}</td>
     `;
@@ -1791,28 +1846,6 @@ const onTreatmentEdit = (data) => {
 };
 
 const onTreatmentSave = (data) => {
-    for (let key of Object.keys(data)) {
-        if (
-            ["key", "id", "incident_id"].includes(key) ||
-            data[key] === undefined
-        ) {
-            continue;
-        }
-
-        if (
-            !data[key] ||
-            data[key] == "Pilih" ||
-            mitigationQuills[key]?.getLength() <= 1
-        ) {
-            Swal.fire(
-                "Peringatan",
-                "Pastikan semua isian harus terisi",
-                "warning"
-            );
-            return;
-        }
-    }
-
     data.mitigation_cost = unformatNumeral(
         data.mitigation_cost,
         defaultConfigFormatNumeral
@@ -1868,6 +1901,28 @@ treatmentMitigationForm.addEventListener("submit", (e) => {
     ).value;
     treatmentRiskCauseNumber.dispatchEvent(new Event("change"));
 
+    for (let key of Object.keys(data)) {
+        if (
+            ["key", "id", "incident_id"].includes(key) ||
+            data[key] === undefined
+        ) {
+            continue;
+        }
+
+        if (
+            !data[key] ||
+            data[key] == "Pilih" ||
+            mitigationQuills[key]?.getLength() <= 1
+        ) {
+            Swal.fire(
+                "Peringatan",
+                "Pastikan semua isian harus terisi",
+                "warning"
+            );
+            return;
+        }
+    }
+
     onTreatmentSave(data);
 });
 
@@ -1913,27 +1968,52 @@ treatmentModalElement.addEventListener("hidden.bs.modal", () => {
 });
 
 worksheetTabSubmitButton.addEventListener("click", async (e) => {
-    const response = await axios.post(window.location.href, {
-        ...worksheet,
-        _method: "PUT",
-    });
-    let data = {};
-
-    if (response.status == 200) {
-        data = response.data.data;
-    }
-
     Swal.fire({
-        icon: response.status == 200 ? "success" : "error",
-        title: response.status == 200 ? "Berhasil" : "Gagal",
-        text: data?.message,
-    }).then(() => {
-        setTimeout(() => {
-            if (data.redirect) {
-                window.location.replace(data.redirect);
-            }
-        }, 375);
-    });
+        text: 'Dalam proses menyimpan..',
+        showCancelButton: false,
+        showConfirmButton: false,
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        didOpen: () => {
+            Swal.showLoading()
+
+            setTimeout(() => {
+                axios
+                    .post(window.location.href, { ...worksheet, _method: "PUT" })
+                    .then((response) => {
+                        if (response.status == 200) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Berhasil',
+                                text: response.data?.message,
+                                showCancelButton: false,
+                                showConfirmButton: false,
+                                allowOutsideClick: false,
+                                allowEscapeKey: false,
+                                didOpen: () => {
+                                    setTimeout(() => {
+                                        if (response.data?.data?.redirect) {
+                                            window.location.replace(response.data.data.redirect);
+                                        } else {
+                                            window.location.reload();
+                                        }
+                                    }, 625);
+                                }
+                            })
+
+                            return
+                        }
+                    })
+                    .catch((error) => {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Gagal',
+                            text: error.response?.data?.message ?? error?.message,
+                        });
+                    });
+            }, 375);
+        }
+    })
 });
 
 worksheet.context = fetchers.data.context;

@@ -5,6 +5,7 @@ import Choices from "choices.js"
 import { formatNumeral } from "cleave-zen"
 import { decodeHtml, defaultConfigChoices, defaultConfigFormatNumeral, renderHeatmapBadge } from "js/components/helper"
 import createDatatable from "js/components/datatable"
+import axios from "axios"
 
 const dashboardFilter = document.querySelector('#dashboard-filter')
 const selectYear = dashboardFilter.querySelector('select[name="year"]')
