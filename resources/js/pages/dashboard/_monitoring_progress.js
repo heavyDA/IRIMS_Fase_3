@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { Modal } from 'bootstrap';
 import dayjs from 'dayjs';
-import createDatatable from 'js/components/datatable';
+import createDatatable from '~js/components/datatable';
 
 const dashboardFilter = document.querySelector('#dashboard-filter')
 const selectYear = dashboardFilter.querySelector('select[name="year"]')

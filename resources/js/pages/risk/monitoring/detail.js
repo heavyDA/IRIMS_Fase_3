@@ -1,4 +1,4 @@
-import { autoMergeCells } from 'js/components/helper'
+import { autoMergeCells } from '~js/components/helper'
 
 const residualTable = document.querySelector('#residualTable')
 if (residualTable) {

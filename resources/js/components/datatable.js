@@ -11,7 +11,7 @@ import 'datatables.net-fixedcolumns';
 import 'datatables.net-fixedcolumns-bs5';
 import 'datatables.net-fixedcolumns-bs5/css/fixedColumns.bootstrap5.min.css';
 
-import debounce from 'js/utils/debounce';
+import debounce from '~js/utils/debounce';
 
 DataTables.Api.registerPlural(
 	'columns().searchable()',
