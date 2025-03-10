@@ -169,7 +169,8 @@
 <!-- /app-header -->
 
 @push('element')
-    {{ html()->form('delete', route('auth.unauthenticate'))->id('signoutForm')->open() }}
-    @csrf
-    {{ html()->form()->close() }}
+    <form id="signoutForm" action="{{ route('auth.unauthenticate') }}" method="POST">
+        @method('DELETE')
+        @csrf
+    </form>
 @endpush

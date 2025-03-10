@@ -24,3 +24,11 @@ yarn-error.log
 /.zed
 .windsurfrules
 .prettierrc
+
+# This is intended to ignore telescope installation on
+# another environment
+/app/Providers/TelescopeServiceProvider.php
+/config/*telescope*.php
+/database/migrations/*telescope*
+frankenphp
+frankenphp-worker.php

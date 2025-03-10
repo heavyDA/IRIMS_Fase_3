@@ -31,31 +31,35 @@
                     <div class="card-body p-0">
                         <div class="p-5">
                             <p class="h4 fw-semibold mb-4 text-center">{{ config('app.name', 'IRIMS') }}</p>
-                            {{ html()->form('POST', route('auth.authenticate'))->id('signinForm')->open() }}
-                            @session('validation')
-                                <x-elements.alert :type="$value['type']->value" :message="$value['message']" />
-                            @endsession
-                            <div class="row gy-3">
-                                <div class="col-xl-12">
-                                    <div class="position-relative">
-                                        {{ html()->text('username')->class(['form-control', 'form-control-lg'])->id('signinUsername')->placeholder('username')->autofocus() }}
+                            <form id="signinForm" method="POST" action="{{ route('auth.authenticate') }}">
+                                @csrf
+                                @session('validation')
+                                    <x-elements.alert :type="$value['type']->value" :message="$value['message']" />
+                                @endsession
+                                <div class="row gy-3">
+                                    <div class="col-xl-12">
+                                        <div class="position-relative">
+                                            <input type="text" name="username" id="signinUsername"
+                                                class="form-control form-control-lg" placeholder="username" autofocus
+                                                required />
+                                        </div>
+                                        @error('username')
+                                            <x-forms.error>{{ $message }}</x-forms.error>
+                                        @enderror
                                     </div>
-                                    @error('username')
-                                        <x-forms.error>{{ $message }}</x-forms.error>
-                                    @enderror
-                                </div>
-                                <div class="col-xl-12 mb-2">
-                                    <div class="position-relative">
-                                        {{ html()->password('password')->class(['form-control', 'form-control-lg'])->id('signinPassword')->placeholder('Password') }}
-                                        <a href="javascript:void(0);" class="show-password-button text-muted"
-                                            id="signinShowPassword"><i class="ri-eye-off-line align-middle"></i></a>
+                                    <div class="col-xl-12 mb-2">
+                                        <div class="position-relative">
+                                            <input type="password" name="password" id="signinPassword"
+                                                class="form-control form-control-lg" placeholder="Password" required />
+                                            <a href="javascript:void(0);" class="show-password-button text-muted"
+                                                id="signinShowPassword"><i class="ri-eye-off-line align-middle"></i></a>
+                                        </div>
+                                        @error('password')
+                                            <x-forms.error>{{ $message }}</x-forms.error>
+                                        @enderror
                                     </div>
-                                    @error('password')
-                                        <x-forms.error>{{ $message }}</x-forms.error>
-                                    @enderror
                                 </div>
-                            </div>
-                            {{ html()->form()->close() }}
+                            </form>
                             <div class="d-grid mt-4">
                                 <button type="submit" form="signinForm" class="btn btn-primary">Sign In</button>
                             </div>
