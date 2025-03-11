@@ -4,6 +4,9 @@ import './themes/main';
 import '@tabler/icons-webfont/dist/tabler-icons.min.css';
 import Swal from 'sweetalert2';
 
+window.axios = axios;
+window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
+
 window.alert_message = (state, title, message) => {
     state = state == 'danger' ? 'error' : state
     Swal.fire({
