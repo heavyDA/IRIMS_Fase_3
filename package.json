@@ -58,6 +58,7 @@
         "gridjs": "^6.0.6",
         "intl-tel-input": "^18.3.3",
         "isotope-layout": "^3.0.6",
+        "jquery": "^3.7.1",
         "jsvectormap": "^1.5.3",
         "leaflet": "^1.9.4",
         "moment": "^2.30.1",
