@@ -41,6 +41,10 @@
                         path *.ico *.css *.js *.gif *.jpg *.jpeg *.png *.svg *.woff *.woff2 *ttf *.svg
                 }
 
+                handle @static {
+                        file_server
+                }
+                
                 header @static Cache-Control max-age=5184000
 
                 php_server {
