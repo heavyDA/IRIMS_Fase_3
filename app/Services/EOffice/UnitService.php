@@ -37,14 +37,14 @@ class UnitService extends EOfficeAbstract
 
     public function get_by_id(?string $unit_code = null): ?object
     {
-        return Cache::remember('unit.' . $unit_code, now()->addMinutes(5), function () use ($unit_code) {
+        return Cache::remember('units.' . $unit_code, now()->addMinutes(5), function () use ($unit_code) {
             return $this->transform_key($this->make_request('all_unit', ['unit_id' => $unit_code], true));
         });
     }
 
     public function get_all(): Collection
     {
-        return Cache::remember('units', now()->addMinutes(5), function () {
+        return Cache::remember('units.all', now()->addMinutes(5), function () {
             $data = collect($this->make_request('all_unit', [], false));
             if (empty($data)) {
                 return collect([]);

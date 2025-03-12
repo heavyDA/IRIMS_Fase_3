@@ -105,7 +105,7 @@ Route::group(['middleware' => 'auth'], function () {
 
     Route::group(['as' => 'master.', 'prefix' => 'master'], function () {
         Route::resource(
-            'skala',
+            'scales',
             BUMNScaleController::class,
             [
                 'names' => custom_route_names('bumn_scales'),
@@ -113,7 +113,7 @@ Route::group(['middleware' => 'auth'], function () {
             ]
         );
         Route::resource(
-            'jenis-existing-control',
+            'existing-control-types',
             ExistingControlTypeController::class,
             [
                 'names' => custom_route_names('existing_control_types'),
@@ -121,7 +121,7 @@ Route::group(['middleware' => 'auth'], function () {
             ]
         );
         Route::resource(
-            'kategori-kejadian',
+            'incident-categories',
             IncidentCategoryController::class,
             [
                 'names' => custom_route_names('incident_categories'),
@@ -129,7 +129,7 @@ Route::group(['middleware' => 'auth'], function () {
             ]
         );
         Route::resource(
-            'kategori-risiko',
+            'risk-categories',
             KBUMNRiskCategoryController::class,
             [
                 'names' => custom_route_names('risk_categories'),
@@ -137,7 +137,7 @@ Route::group(['middleware' => 'auth'], function () {
             ]
         );
         Route::resource(
-            'jenis-rencana-perlakuan-risiko',
+            'risk-treatment-types',
             RiskTreatmentTypeController::class,
             [
                 'names' => custom_route_names('risk_treatment_types'),
@@ -145,7 +145,7 @@ Route::group(['middleware' => 'auth'], function () {
             ]
         );
         Route::resource(
-            'opsi-rencana-perlakuan-risiko',
+            'risk-treatment-options',
             RiskTreatmentOptionController::class,
             [
                 'names' => custom_route_names('risk_treatment_options'),
@@ -168,7 +168,7 @@ Route::group(['middleware' => 'auth'], function () {
         );
     });
 
-    Route::group(['as' => 'setting.', 'prefix' => 'pengaturan'], function () {
+    Route::group(['as' => 'setting.', 'prefix' => 'setting'], function () {
         Route::resource(
             'matriks-strategi-risiko',
             RiskMetricsController::class,
@@ -177,23 +177,25 @@ Route::group(['middleware' => 'auth'], function () {
                 'parameters' => ['risk_metric' => 'risk_metric'],
             ]
         );
+
+        Route::get('positions/all', [PositionController::class, 'get_all'])->name('positions.all');
         Route::resource(
-            'posisi',
+            'positions',
             PositionController::class,
             [
                 'names' => custom_route_names('positions'),
-                'parameters' => ['position' => 'position'],
+                'parameters' => ['positions' => 'position'],
             ]
         );
     });
 
-    Route::group(['as' => 'rbac.', 'prefix' => 'akses'], function () {
+    Route::group(['as' => 'rbac.', 'prefix' => 'access'], function () {
         Route::resource(
-            'pengguna',
+            'users',
             App\Http\Controllers\RBAC\UserController::class,
             [
-                'names' => custom_route_names('user'),
-                'parameters' => ['user' => 'user']
+                'names' => custom_route_names('users'),
+                'parameters' => ['users' => 'user']
             ]
         );
     });

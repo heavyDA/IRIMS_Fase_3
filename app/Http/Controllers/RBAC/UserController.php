@@ -9,6 +9,9 @@ use App\Http\Requests\RBAC\UserUpdateRequest;
 use Yajra\DataTables\Facades\DataTables;
 
 use App\Enums\State;
+use App\Models\Master\Position;
+use Exception;
+use Illuminate\Support\Facades\DB;
 
 class UserController extends Controller
 {
@@ -29,9 +32,8 @@ class UserController extends Controller
                 })
                 ->addColumn('action', function ($user) {
                     $actions = [
-                        ['id' => $user->id, 'route' => route('rbac.user.show', $user->id), 'type' => 'link', 'text' => 'detail', 'permission' => 'rbac.user.detail'],
-                        ['id' => $user->id, 'route' => route('rbac.user.edit', $user->id), 'type' => 'link', 'text' => 'edit', 'permission' => 'rbac.user.edit'],
-                        ['id' => $user->id, 'route' => route('rbac.user.destroy', $user->id), 'type' => 'delete', 'text' => 'hapus', 'permission' => 'rbac.user.destroy'],
+                        ['id' => $user->id, 'route' => route('rbac.users.edit', $user->id), 'type' => 'link', 'text' => 'edit', 'permission' => 'rbac.user.edit'],
+                        ['id' => $user->id, 'route' => route('rbac.users.destroy', $user->id), 'type' => 'delete', 'text' => 'hapus', 'permission' => 'rbac.user.destroy'],
                     ];
 
                     return view('layouts.partials._table_action', compact('actions'));
@@ -50,7 +52,7 @@ class UserController extends Controller
     {
         $title = 'Tambah Pengguna';
 
-        return view('RBAC.users.form', compact('title'));
+        return view('RBAC.users.create', compact('title'));
     }
 
     /**
@@ -58,17 +60,54 @@ class UserController extends Controller
      */
     public function store(UserStoreRequest $request)
     {
-        $request->merge([
-            'password' => bcrypt($request->password),
-        ]);
+        try {
+            $request->merge([
+                'password' => bcrypt($request->password),
+            ]);
 
-        if (User::create($request->only('first_name', 'last_name', 'email', 'password'))) {
-            flash_message('success', 'Pengguna berhasil ditambahkan', State::SUCCESS);
-            return redirect()->route('rbac.user.index');
+            $position = Position::whereSubUnitCode($request->sub_unit_code)->first();
+            DB::beginTransaction();
+            $roles =
+                array_merge(
+                    $position->assigned_roles ? explode(',', $position->assigned_roles) : ['risk admin'],
+                    $request->role
+                );
+
+            $user = User::create(
+                $request->only(
+                    'email',
+                    'username',
+                    'password',
+                    'employee_id',
+                    'employee_name',
+                    'position_name',
+                    'sub_unit_code',
+                ) +
+                    [
+                        'unit_code' => $position->unit_code,
+                        'unit_name' => $position->unit_name,
+                        'sub_unit_name' => $position->sub_unit_name,
+                        'organization_code' => $position->sub_unit_code,
+                        'organization_name' => $position->sub_unit_name,
+                        'personnel_area_code' => $position->branch_code,
+                        'personnel_area_name' => '',
+                        'employee_grade_code' => '-',
+                        'employee_grade' => '-',
+                        'image_url' => '',
+                        'is_active' => true,
+                    ]
+            );
+            $user->syncRoles($roles);
+
+            DB::commit();
+            flash_message('flash_message', 'Pengguna berhasil disimpan', State::SUCCESS);
+            return redirect()->route('rbac.users.index');
+        } catch (Exception $e) {
+            DB::rollBack();
+            logger()->error('[Access > User] failed to create user. ' . $e->getMessage(), [$e]);
+            flash_message('flash_message', 'Gagal menambahkan pengguna baru', State::ERROR);
+            return redirect()->route('rbac.users.index');
         }
-
-        flash_message('danger', 'Pengguna gagal ditambahkan', State::ERROR);
-        return redirect()->route('rbac.user.index');
     }
 
     /**
@@ -85,7 +124,15 @@ class UserController extends Controller
     public function edit(User $user)
     {
         $title = 'Edit Pengguna';
-        return view('RBAC.users.form', compact('user', 'title'));
+        $user->load('roles');
+
+        $roles = [];
+        foreach ($user->roles as $role) {
+            $roles[] = $role->name;
+        }
+
+        $user->role = $roles;
+        return view('RBAC.users.edit', compact('user', 'title'));
     }
 
     /**
@@ -93,7 +140,66 @@ class UserController extends Controller
      */
     public function update(UserUpdateRequest $request, User $user)
     {
-        //
+        try {
+            $data = $request->only(
+                'email',
+                'username',
+                'employee_id',
+                'employee_name',
+                'position_name',
+                'sub_unit_code',
+            );
+
+            if ($request->get('password')) {
+                $request->merge([
+                    'password' => bcrypt($request->password),
+                ]);
+                $data = $request->only(
+                    'email',
+                    'username',
+                    'password',
+                    'employee_id',
+                    'employee_name',
+                    'position_name',
+                    'sub_unit_code',
+                );
+            }
+
+            $position = Position::whereSubUnitCode($request->sub_unit_code)->first();
+
+            DB::beginTransaction();
+            $roles =
+                array_merge(
+                    $position->assigned_roles ? explode(',', $position->assigned_roles) : ['risk admin'],
+                    $request->role
+                );
+
+            $user->update(
+                $data +
+                    [
+                        'unit_code' => $position->unit_code,
+                        'unit_name' => $position->unit_name,
+                        'sub_unit_name' => $position->sub_unit_name,
+                        'organization_code' => $position->sub_unit_code,
+                        'organization_name' => $position->sub_unit_name,
+                        'personnel_area_code' => $position->branch_code,
+                        'personnel_area_name' => '',
+                        'employee_grade_code' => '-',
+                        'employee_grade' => '-',
+                        'image_url' => $user->image_url,
+                    ]
+            );
+            $user->syncRoles($roles);
+
+            DB::commit();
+            flash_message('flash_message', 'Pengguna berhasil disimpan', State::SUCCESS);
+            return redirect()->route('rbac.users.index');
+        } catch (Exception $e) {
+            DB::rollBack();
+            logger()->error('[Access > User] failed to create user. ' . $e->getMessage(), [$e]);
+            flash_message('flash_message', 'Gagal menambahkan pengguna baru', State::ERROR);
+            return redirect()->route('rbac.users.index');
+        }
     }
 
     /**
@@ -101,6 +207,12 @@ class UserController extends Controller
      */
     public function destroy(User $user)
     {
-        //
+        if ($user->delete()) {
+            flash_message('flash_message', 'Pengguna berhasil dihapus', State::SUCCESS);
+        } else {
+            flash_message('flash_message', 'Gagal menghapus pengguna', State::ERROR);
+        }
+
+        return redirect()->route('rbac.users.index');
     }
 }

@@ -87,4 +87,23 @@ class PositionController extends Controller
 
         return redirect()->route('setting.positions.index');
     }
+
+    public function get_all()
+    {
+        $units = cache()->remember(
+            'units',
+            now()->addMinutes(5),
+            function () {
+                $units = Position::latest('unit_code')
+                    ->get();
+
+                return $units->isEmpty() ? null : $units;
+            }
+        );
+
+        return response()->json([
+            'data' => $units,
+            'message' => 'loaded',
+        ]);
+    }
 }

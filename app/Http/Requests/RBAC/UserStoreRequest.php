@@ -23,10 +23,15 @@ class UserStoreRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'first_name' => 'required',
-            'last_name' => 'required',
             'email' => 'required|email',
+            'username' => 'required|unique:users,username' . (request('user') ? ',' . request('user')->id : ''),
             'password' => ['required', Password::min(8)->mixedCase()->numbers()->symbols(), 'confirmed'],
+            'employee_id' => 'required|unique:users,employee_id' . (request('user') ? ',' . request('user')->id : ''),
+            'employee_name' => 'required',
+            'role' => 'required|array',
+            'role.*' => 'required|in:risk admin,risk owner,risk otorisator,risk analis,risk reviewer',
+            'sub_unit_code' => 'required',
+            'position_name' => 'required',
         ];
     }
 }

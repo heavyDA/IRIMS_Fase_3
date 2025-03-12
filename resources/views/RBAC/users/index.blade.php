@@ -17,8 +17,8 @@
         </div>
     </div>
     <div class="btn-list">
-        @can('rbac.user.create')
-            <a href="{{ route('rbac.user.create') }}" class="btn btn-primary-light btn-wave me-2 waves-effect waves-light">
+        @can('rbac.users.create')
+            <a href="{{ route('rbac.users.create') }}" class="btn btn-primary-light btn-wave me-2 waves-effect waves-light">
                 <i class="ti ti-plus align-middle"></i> Buat Baru
             </a>
         @endcan

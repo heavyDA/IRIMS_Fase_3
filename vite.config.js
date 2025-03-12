@@ -12,7 +12,9 @@ export default defineConfig({
                 'resources/js/pages/dashboard/index.js',
                 'resources/js/pages/dashboard/_monitoring_progress.js',
                 'resources/js/pages/dashboard/_top_risk.js',
+
                 'resources/js/pages/RBAC/users/index.js',
+                'resources/js/pages/RBAC/users/form.js',
 
                 'resources/js/pages/risk/assessment/index.js',
                 'resources/js/pages/risk/top_risk/index.js',
@@ -31,6 +33,7 @@ export default defineConfig({
                 'resources/js/pages/master/bumn_scale/index.js',
                 'resources/js/pages/master/existing_control_type/index.js',
                 'resources/js/pages/master/risk_category/index.js',
+                'resources/js/pages/master/incident_category/index.js',
                 'resources/js/pages/master/risk_treatment_type/index.js',
                 'resources/js/pages/master/risk_treatment_option/index.js',
                 'resources/js/pages/setting/risk_metric/index.js',
