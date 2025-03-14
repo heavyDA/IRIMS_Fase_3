@@ -21,7 +21,6 @@ use App\Http\Controllers\Risk\MonitoringController;
 use App\Http\Controllers\Risk\TopRiskController;
 use App\Http\Controllers\Risk\WorksheetController;
 use App\Http\Controllers\Setting\PositionController;
-use App\Models\Master\Position;
 use Illuminate\Support\Facades\Route;
 
 Route::group(['prefix' => 'login', 'as' => 'auth.', 'middleware' => 'guest'], function () {
