@@ -39,7 +39,7 @@ const table = createDatatable("#risk-metric-table", {
                     return data
                 }
 
-                return formatNumeral(row.capacity, defaultConfigFormatNumeral)
+                return formatNumeral(row.capacity.replace('.', ','), defaultConfigFormatNumeral)
             }
         },
         {
@@ -52,7 +52,7 @@ const table = createDatatable("#risk-metric-table", {
                     return data
                 }
 
-                return formatNumeral(row.appetite, defaultConfigFormatNumeral)
+                return formatNumeral(row.appetite.replace('.', ','), defaultConfigFormatNumeral)
             }
         },
         {
@@ -65,7 +65,7 @@ const table = createDatatable("#risk-metric-table", {
                     return data
                 }
 
-                return formatNumeral(row.tolerancy, defaultConfigFormatNumeral)
+                return formatNumeral(row.tolerancy.replace('.', ','), defaultConfigFormatNumeral)
             }
         },
         {
@@ -78,7 +78,7 @@ const table = createDatatable("#risk-metric-table", {
                     return data
                 }
 
-                return formatNumeral(row.limit, defaultConfigFormatNumeral)
+                return formatNumeral(row.limit.replace('.', ','), defaultConfigFormatNumeral)
             }
         },
         {

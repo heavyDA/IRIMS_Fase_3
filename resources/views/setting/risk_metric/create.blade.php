@@ -42,8 +42,8 @@
                         required>
                         <option value="">Pilih</option>
                         @foreach ($units as $unit)
-                            <option {{ old('unit_code') == $unit->unit_code ? 'selected' : null }}
-                                value="{{ $unit->unit_code }}">{{ "[{$unit->personnel_area_code}] $unit->unit_name" }}
+                            <option {{ old('unit_code') == $unit->sub_unit_code ? 'selected' : null }}
+                                value="{{ $unit->sub_unit_code }}">{{ "[{$unit->branch_code}] $unit->sub_unit_name" }}
                             </option>
                         @endforeach
                     </select>

@@ -131,7 +131,7 @@ class Position extends Model
     public function scopeBranch($query)
     {
         return $query->whereRaw("
-        (personnel_area_code like 'PST' OR personnel_area_code like 'REG%') 
+        (branch_code like 'PST' OR branch_code like 'REG%') 
         AND (LENGTH(unit_code) - LENGTH(REPLACE(unit_code, '.', ''))) = 1
         ");
     }
