@@ -378,7 +378,14 @@ exportButton.addEventListener('click', e => {
     e.preventDefault();
     const url = new URL(e.target.dataset.url)
     url.search = new URLSearchParams(query).toString()
-    window.open(url, '_blank')
+
+    const a = document.createElement('a')
+    a.href = url.toString()
+    a.target = '_blank'
+
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
 })
 
 worksheetTableFilter.addEventListener('submit', e => {
