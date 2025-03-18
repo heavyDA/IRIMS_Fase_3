@@ -212,6 +212,9 @@ document.addEventListener('DOMContentLoaded', () => {
             serverSide: false,
             processing: false,
             paging: false,
+            fixedColumns: {
+                start: 2
+            },
             scrollX: true,
             scrollCollapse: true,
             lengthChange: false,

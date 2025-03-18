@@ -19,7 +19,7 @@
         <div class="d-flex justify-content-center">
             <select id="role-select" name="role" style="width: 80%;" class="form-select"
                 aria-label="Default select example">
-                @foreach (auth()->user()->roles as $role)
+                @foreach ($current_roles as $role)
                     <option {{ session()->get('current_role')?->id == $role->id ? 'selected' : '' }}
                         value="{{ $role->name }}">{{ ucwords($role->name) }}</option>
                 @endforeach

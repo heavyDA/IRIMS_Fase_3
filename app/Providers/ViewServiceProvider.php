@@ -2,9 +2,11 @@
 
 namespace App\Providers;
 
+use App\View\Composers\Auth\RoleByUserUnitComposer;
 use App\View\Composers\Master\RoleComposer;
 use App\View\Composers\MenuComposer;
 use App\View\Composers\Master\UnitComposer;
+use App\View\Composers\Auth\UserUnitComposer;
 use App\View\Composers\Risk\WorksheetYearComposer;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
@@ -25,6 +27,8 @@ class ViewServiceProvider extends ServiceProvider
     public function boot(): void
     {
         View::composer('layouts.partials.sidebar', MenuComposer::class);
+        View::composer('layouts.partials.sidebar', RoleByUserUnitComposer::class);
+        View::composer('layouts.partials.header', UserUnitComposer::class);
 
         View::composer([
             'dashboard.index',

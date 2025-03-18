@@ -1,4 +1,4 @@
-@hasanyrole('superadmin|risk analis|root')
+@hasanyrole('root|risk analis|root')
     @include('risk.monitoring.history._risk_analis')
 @else
     @if (!str_contains(request()->route()->getName(), 'edit'))

@@ -9,11 +9,6 @@ use Illuminate\Support\Facades\Http;
 
 class UnitService extends EOfficeAbstract
 {
-    public function __construct(?string $host, ?string $token)
-    {
-        parent::__construct($host, $token);
-    }
-
     protected function replace_id_with_code(string $value): string
     {
         return str_replace('_id', '_code', $value);

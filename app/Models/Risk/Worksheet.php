@@ -163,7 +163,7 @@ class Worksheet extends Model
                                 fn($q) => $q->orWhereLike('sub_unit_code', str_replace('.%', '',  $unit))
                             )
                     )
-                    ->when(str_contains(auth()->user()->personnel_area_code, 'REG '), fn($q) => $q->whereNotLike('personnel_area_code', 'REG %'))
+                    ->when(str_contains(session()->get('current_unit')->personnel_area_code, 'REG '), fn($q) => $q->whereNotLike('personnel_area_code', 'REG %'))
                     ->whereYear('w.created_at', $year)
             )
             ->selectRaw('

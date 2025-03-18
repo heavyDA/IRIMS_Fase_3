@@ -43,22 +43,79 @@
                             data-bs-toggle="tooltip" title="Reset">
                             <span><i class="me-1 ti ti-refresh"></i></span>
                         </button>
+                        <button style="min-width: 32px;" class="btn btn-primary" type="button" id="filter-button"
+                            data-bs-toggle="tooltip" title="Filter" aria-controls="table-offcanvas">
+                            <span><i class="me-1 ti ti-filter"></i></span>
+                        </button>
                     </div>
                 </div>
             </div>
             <table id="risk-metric-table" class="table table-bordered table-hover display nowrap" style="width: 100%;">
-                <thead class="table-dark">
+                <thead>
                     <tr>
-                        <th class="text-center">Unit</th>
-                        <th class="text-center">Kapasitas</th>
-                        <th class="text-center">Appetite</th>
-                        <th class="text-center">Toleransi</th>
-                        <th class="text-center">Limit</th>
-                        <th class="text-center">Diperbarui Oleh</th>
-                        <th class="text-center">Status</th>
+                        <th class="table-dark-custom text-center">Unit</th>
+                        <th class="table-dark-custom text-center">Kapasitas</th>
+                        <th class="table-dark-custom text-center">Appetite</th>
+                        <th class="table-dark-custom text-center">Toleransi</th>
+                        <th class="table-dark-custom text-center">Limit</th>
+                        <th class="table-dark-custom text-center">Diperbarui Oleh</th>
+                        <th class="table-dark-custom text-center">Status</th>
+                        <th class="table-dark-custom text-center">Tanggal</th>
                     </tr>
                 </thead>
             </table>
         </x-slot>
     </x-card>
 @endsection
+
+@push('element')
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="table-offcanvas" aria-labelledby="table-offcanvas-label">
+        <div class="offcanvas-header border-bottom border-block-end-dashed">
+            <h5 class="offcanvas-title" id="table-offcanvas-label">Filter</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body py-2 px-4">
+            <form id="table-filter" class="mb-4">
+                <div class="row gap-2">
+                    <div class="col-12 d-flex flex-column">
+                        <label for="length" class="form-label">Jumlah</label>
+                        <select name="length" class="form-select">
+                            <option value="10">10</option>
+                            <option value="25">25</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                            <option value="-1">Semua</option>
+                        </select>
+                    </div>
+                    <div class="col-12 d-flex flex-column">
+                        <label for="unit" class="form-label">Unit</label>
+                        <select name="unit" class="form-select">
+                            @if ($units->count() > 1)
+                                <option value="">Semua</option>
+                            @endif
+                            @foreach ($units as $unit)
+                                <option {{ request('unit') == $unit->sub_unit_code ? 'selected' : null }}
+                                    value="{{ $unit->sub_unit_code }}">
+                                    {{ "[{$unit->branch_code}] $unit->sub_unit_name" }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-12 d-flex flex-column">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="1" id="with_history"
+                                name="with_history">
+                            <label class="form-check-label" for="with_history">
+                                Tampilkan Riwayat
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-12 d-grid">
+                        <button form="table-filter" type="submit" class="btn btn-block btn-primary-light"><i
+                                class="ti ti-filter"></i> Filter</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+@endpush

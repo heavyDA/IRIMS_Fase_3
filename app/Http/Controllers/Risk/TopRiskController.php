@@ -3,12 +3,10 @@
 namespace App\Http\Controllers\Risk;
 
 use App\Enums\DocumentStatus;
-use App\Enums\State;
 use App\Http\Controllers\Controller;
 use App\Models\Master\Position;
 use App\Models\RBAC\Role;
 use App\Models\Risk\Worksheet;
-use App\Models\Risk\WorksheetIncident;
 use App\Models\Risk\WorksheetTopRisk;
 use App\Services\PositionService;
 use App\Services\RoleService;
@@ -252,7 +250,7 @@ class TopRiskController extends Controller
 
         try {
             throw_if(
-                !Role::risk_otorisator_top_risk_approval() && !auth()->user()->hasAnyRole('superadmin', 'root', 'risk analis', 'risk otorisator'),
+                !Role::risk_otorisator_top_risk_approval() && !$this->roleService->getCurrentUnit()->hasAnyRole('root', 'risk analis', 'risk otorisator'),
                 new Exception('Failed to submit top risk, User ID: ' . auth()->user()->employee_id . ' doesn\'t have access')
             );
 

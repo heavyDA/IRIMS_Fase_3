@@ -15,8 +15,6 @@ use App\Models\Master\Position;
 use App\Models\Master\RiskTreatmentOption;
 use App\Models\Master\RiskTreatmentType;
 use App\Models\Master\RKAPProgramType;
-use App\Models\RBAC\Role;
-use App\Models\Risk\MonitoringResidual;
 use App\Models\Risk\Worksheet;
 use App\Models\Risk\WorksheetHistory;
 use App\Models\Risk\WorksheetIdentification;
@@ -181,7 +179,7 @@ class WorksheetController extends Controller
                 $mitigations[] = $incidents[$incidentIndex]->mitigations()->create($mitigation);
             }
 
-            $role = session()->get('current_role') ?? $user->roles()->first();
+            $role = $this->roleService->getCurrentRole() ?? $user->roles()->first();
             $history = [
                 'created_by' => $user->employee_id,
                 'created_role' => $role->name,
@@ -220,7 +218,7 @@ class WorksheetController extends Controller
         $worksheet = Worksheet::findByEncryptedIdOrFail($worksheet);
 
         if (
-            session()->get('current_role')?->name == 'risk admin' &&
+            $this->roleService->getCurrentRole()?->name == 'risk admin' &&
             $worksheet->created_by != auth()->user()->employee_id
         ) {
             abort(404, 'Data tidak ditemukan');
@@ -378,7 +376,7 @@ class WorksheetController extends Controller
     {
         $worksheet = Worksheet::findByEncryptedIdOrFail($worksheet);
         if (
-            session()->get('current_role')?->name == 'risk admin' &&
+            $this->roleService->getCurrentRole()?->name == 'risk admin' &&
             $worksheet->created_by != auth()->user()->employee_id
         ) {
             abort(404, 'Data tidak ditemukan');
@@ -414,7 +412,7 @@ class WorksheetController extends Controller
     {
         $worksheet = Worksheet::findByEncryptedIdOrFail($worksheetId);
         if (
-            session()->get('current_role')?->name == 'risk admin' &&
+            $this->roleService->getCurrentRole()?->name == 'risk admin' &&
             $worksheet->created_by != auth()->user()->employee_id
         ) {
             abort(ResponseStatus::HTTP_NOT_FOUND, 'Data tidak ditemukan');
@@ -611,7 +609,7 @@ class WorksheetController extends Controller
                 );
             }
 
-            $role = session()->get('current_role') ?? auth()->user()->roles()->first();
+            $role = $this->roleService->getCurrentRole();
             $history = [
                 'created_by' => auth()->user()->employee_id,
                 'created_role' => $role->name,
@@ -661,7 +659,7 @@ class WorksheetController extends Controller
         try {
             $worksheet = Worksheet::findByEncryptedIdOrFail($worksheetId);
             if (
-                session()->get('current_role')?->name == 'risk admin' &&
+                $this->roleService->getCurrentRole()?->name == 'risk admin' &&
                 $worksheet->created_by != auth()->user()->employee_id
             ) {
                 abort(404, 'Data tidak ditemukan');
@@ -692,7 +690,7 @@ class WorksheetController extends Controller
     public function update_status(string $worksheetId, Request $request)
     {
         $worksheet = Worksheet::findByEncryptedIdOrFail($worksheetId);
-        $currentRole = session()->get('current_role');
+        $currentRole = $this->roleService->getCurrentRole();
 
         if (
             $currentRole?->name == 'risk admin' &&
@@ -793,7 +791,11 @@ class WorksheetController extends Controller
                 'note' => $note
             ];
         } else if ($status == DocumentStatus::APPROVED) {
-            $role = $worksheet->creator?->roles()?->first();
+            $creatorUnit = $worksheet->creator?->units()
+                ->where('sub_unit_code', $worksheet->sub_unit_code)
+                ->first();
+
+            $role = $creatorUnit->roles()->first();
             $history = [
                 'created_by' => auth()->user()->employee_id,
                 'created_role' => 'risk otorisator',

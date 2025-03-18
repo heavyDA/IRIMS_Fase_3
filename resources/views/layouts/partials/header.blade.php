@@ -112,7 +112,8 @@
                         <div class="d-inline-block lh-1 flex-shrink-1" style="max-width: 320px; !important">
                             <span class="fw-bold lh-1">{{ auth()->user()->employee_name }}</span><br>
                             <span class="fs-12 text-muted text-capitalize text-wrap">
-                                [{{ auth()->user()->personnel_area_code }}] {{ auth()->user()->position_name }}<br>
+                                [{{ session()->get('current_unit')->personnel_area_code }}]
+                                {{ session()->get('current_unit')->position_name }}<br>
                                 {{ session()->get('current_role')?->name ?? '' }}
                             </span>
                         </div>
@@ -127,9 +128,18 @@
                                 <i class="ti ti-id-badge me-2 fs-16"></i> {{ auth()->user()->employee_id }}
                             </div>
                             <div class="d-flex align-self-top p-0">
-                                <i class="ti ti-buildings me-2 fs-16"></i> {{ auth()->user()->sub_unit_name }} <br>
-                                {{ auth()->user()->personnel_area_name }}
+                                <i class="ti ti-buildings me-2 fs-16"></i>
+                                [{{ session()->get('current_unit')->sub_unit_code }}]
+                                {{ session()->get('current_unit')->sub_unit_name }}
                             </div>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="d-flex align-items-center justify-content-center">
+                            <button class="btn btn-sm btn-outline-primary" style="min-width: 128px;"
+                                data-bs-toggle="modal" data-bs-target="#changeUnitModal">
+                                <span><i class="ti ti-transfer"></i></span>&nbsp; Ganti Unit
+                            </button>
                         </div>
                     </li>
                     <li><a href="javascript:void(0);" onclick="document.querySelector('#signoutForm').submit()"
@@ -173,4 +183,37 @@
         @method('DELETE')
         @csrf
     </form>
+
+    <div class="modal fade modal-status" id="changeUnitModal" data-bs-backdrop="static" data-bs-keyboard="false"
+        tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title" id="staticBackdropLabel">Pilih Unit Untuk Diganti</h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="changeUnitForm" action="{{ route('change_unit') }}" method="POST">
+                        @csrf
+                        <div class="d-flex flex-column mb-2">
+                            <div>
+                                <select name="unit_target" id="changeUnitSelect" class="form-select form-control-sm">
+                                    @foreach ($current_units as $unit)
+                                        <option {{ session()->get('current_unit')->id === $unit->id ? 'selected' : null }}
+                                            value="{{ $unit->id }}">{{ $unit->personnel_area_code }}
+                                            {{ $unit->position_name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button data-bs-dismiss="modal" data-bs-target="#changeUnitModal" type="button"
+                        class="btn btn-secondary" form="changeUnitForm">Batal</button>
+                    <button type="submit" form="changeUnitForm" class="btn btn-primary">Simpan</button>
+                </div>
+            </div>
+        </div>
+    </div>
 @endpush

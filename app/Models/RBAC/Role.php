@@ -68,8 +68,8 @@ class Role extends Model
 
     public static function risk_otorisator_worksheet_approval()
     {
-        $user = session()->get('current_unit') ?? auth()->user();
-        $role = session()?->get('current_role') ?? auth()->roles()->first();
+        $user = session()->get('current_unit');
+        $role = session()?->get('current_role');
         $level = Role::getLevel($user->sub_unit_code);
 
         if ($role->name != 'risk otorisator') {

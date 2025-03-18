@@ -5,7 +5,7 @@
                 <div class="col-3">Unit Kerja</div>
                 <div class="col">
                     <input disabled type="text" name="unit_name" class="form-control not-allowed"
-                        value="{{ isset($worksheet) ? $worksheet->unit_name : auth()->user()->unit_name }}">
+                        value="{{ isset($worksheet) ? $worksheet->sub_unit_name : session()->get('current_unit')->sub_unit_name }}">
                 </div>
             </div>
             <div class="row mb-1">

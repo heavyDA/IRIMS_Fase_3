@@ -85,7 +85,7 @@
                                                 in_array(session()->get('current_role')?->name, ['risk admin', 'risk owner', 'risk analis'])) ||
                                                 ($worksheet->status == 'on review' &&
                                                     in_array(session()->get('current_role')?->name, ['risk owner', 'risk analis'])) ||
-                                                auth()->user()->hasAnyRole('superadmin|risk analis|root'))
+                                                session()->get('current_unit')->hasAnyRole('root|risk analis|root'))
                                             <form action="{{ route('risk.worksheet.destroy', $worksheet->getEncryptedId()) }}"
                                                 method="POST">
                                                 @csrf
@@ -138,7 +138,7 @@
                                                                 class="text-capitalize">{{ $history->created_role }}</span>
                                                         </div>
                                                         <div class="mt-0 pt-0">
-                                                            {{ $history->created_at->format('d F Y H:i') }}
+                                                            {{ $history->created_at->translatedFormat('d F Y H:i') }}
                                                         </div>
                                                     </div>
                                                     <div class="timeline-body pt-4 text-dark">

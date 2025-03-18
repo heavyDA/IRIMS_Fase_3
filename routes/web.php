@@ -28,7 +28,9 @@ Route::group(['prefix' => 'login', 'as' => 'auth.', 'middleware' => 'guest'], fu
     Route::post('', [AuthController::class, 'authenticate'])->name('authenticate');
 });
 Route::group(['middleware' => 'auth'], function () {
-    Route::post('', [AuthController::class, 'change_role'])->name('change-role');
+    Route::post('change-role', [AuthController::class, 'change_role'])->name('change_role');
+    Route::post('change-unit', [AuthController::class, 'change_unit'])->name('change_unit');
+
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard.index');
     Route::delete('', [AuthController::class, 'unauthenticate'])->name('auth.unauthenticate');
 

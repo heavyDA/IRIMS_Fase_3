@@ -2,12 +2,14 @@
 
 namespace Database\Seeders;
 
+use App\Enums\UnitSourceType;
 use App\Models\Master\Official;
 use App\Models\Master\Position;
 use App\Models\RBAC\Menu;
 use App\Models\RBAC\Permission;
 use App\Models\RBAC\Role;
 use App\Models\User;
+use App\Models\UserUnit;
 use Illuminate\Database\Seeder;
 
 class DefaultSeeder extends Seeder
@@ -416,9 +418,45 @@ class DefaultSeeder extends Seeder
         $users = [
             [
                 [
+                    'username' => 'secret_root',
+                    'password' => bcrypt('53cret#321'),
+                    'email' => 'root@injourneyairports.id',
+                    'employee_name' => 'Administrator',
+                    'employee_id' => 'x999991111',
+                    'organization_code' => 'ap',
+                    'organization_name' => '',
+                    'personnel_area_name' => 'Kantor Pusat',
+                    'personnel_area_code' => 'PST',
+                    'position_name' => 'Administrator',
+                    'unit_name' => '',
+                    'sub_unit_name' => '',
+                    'unit_code' => 'root',
+                    'sub_unit_code' => 'ap',
+                    'employee_grade_code' => '-',
+                    'employee_grade' => '-',
+                    'image_url' => '',
+                    'is_active' => true,
+                ],
+                ['root', 'risk admin', 'risk analis', 'risk owner', 'risk otorisator'],
+                [
+                    'organization_code' => 'ap',
+                    'organization_name' => '',
+                    'personnel_area_name' => 'Kantor Pusat',
+                    'personnel_area_code' => 'PST',
+                    'position_name' => 'Administrator',
+                    'unit_name' => '',
+                    'sub_unit_name' => 'Administrator',
+                    'unit_code' => 'root',
+                    'sub_unit_code' => 'ap',
+                    'source_type' => UnitSourceType::SYSTEM->value,
+                    'expired_at' => now()->addYears(50),
+                ]
+            ],
+            [
+                [
                     'username' => 'rahasia',
                     'password' => bcrypt('rahasia#321'),
-                    'email' => 'root@injourneyairports.id',
+                    'email' => 'administrator@injourneyairports.id',
                     'employee_name' => 'Administrator',
                     'employee_id' => 'x9999999',
                     'organization_code' => 'ap',
@@ -435,22 +473,35 @@ class DefaultSeeder extends Seeder
                     'image_url' => '',
                     'is_active' => true,
                 ],
-                ['root', 'risk admin', 'risk analis', 'risk owner', 'risk otorisator']
+                ['administrator', 'risk admin', 'risk analis', 'risk owner', 'risk otorisator'],
+                [
+                    'organization_code' => 'ap',
+                    'organization_name' => '',
+                    'personnel_area_name' => 'Kantor Pusat',
+                    'personnel_area_code' => 'PST',
+                    'position_name' => 'Administrator',
+                    'unit_name' => '',
+                    'sub_unit_name' => '',
+                    'unit_code' => 'root',
+                    'sub_unit_code' => 'ap',
+                    'source_type' => UnitSourceType::SYSTEM->value,
+                    'expired_at' => now()->addYears(50),
+                ]
             ],
             [
                 [
                     'username' => 'reviewer',
                     'password' => bcrypt('reviewer#321'),
                     'email' => 'reviewer@injourneyairports.id',
-                    'employee_name' => 'Administrator',
+                    'employee_name' => 'Reviewer',
                     'employee_id' => 'x9999998',
                     'organization_code' => 'ap',
-                    'organization_name' => '',
-                    'personnel_area_name' => 'Sidoel Group',
-                    'personnel_area_code' => '',
+                    'organization_name' => 'Reviewer',
+                    'personnel_area_name' => 'Kantor Pusat',
+                    'personnel_area_code' => 'PST',
                     'position_name' => 'Reviewer',
                     'unit_name' => '',
-                    'sub_unit_name' => '',
+                    'sub_unit_name' => 'Reviewer',
                     'unit_code' => 'root',
                     'sub_unit_code' => 'ap',
                     'employee_grade_code' => '-',
@@ -458,7 +509,22 @@ class DefaultSeeder extends Seeder
                     'image_url' => '',
                     'is_active' => true,
                 ],
-                ['risk reviewer']
+                ['risk reviewer'],
+                [
+                    'organization_code' => 'ap',
+                    'organization_name' => 'Reviewer',
+                    'personnel_area_name' => 'Kantor Pusat',
+                    'personnel_area_code' => 'PST',
+                    'position_name' => 'Reviewer',
+                    'unit_name' => '',
+                    'sub_unit_name' => 'Reviewer',
+                    'unit_code' => 'root',
+                    'sub_unit_code' => 'ap',
+                    'employee_grade_code' => '-',
+                    'employee_grade' => '-',
+                    'source_type' => UnitSourceType::SYSTEM->value,
+                    'expired_at' => now()->addYears(50),
+                ]
             ],
             [
                 [
@@ -468,12 +534,12 @@ class DefaultSeeder extends Seeder
                     'employee_name' => 'Administrator',
                     'employee_id' => 'x9999997',
                     'organization_code' => 'ap',
-                    'organization_name' => '',
-                    'personnel_area_name' => 'Sidoel Group',
-                    'personnel_area_code' => '',
-                    'position_name' => 'Administrator',
+                    'organization_name' => 'Risk Analis',
+                    'personnel_area_name' => 'Kantor Pusat',
+                    'personnel_area_code' => 'PST',
+                    'position_name' => 'Risk Analis',
                     'unit_name' => '',
-                    'sub_unit_name' => '',
+                    'sub_unit_name' => 'Risk Analis',
                     'unit_code' => 'ap',
                     'sub_unit_code' => 'ap',
                     'employee_grade_code' => '-',
@@ -481,7 +547,22 @@ class DefaultSeeder extends Seeder
                     'image_url' => '',
                     'is_active' => true,
                 ],
-                ['risk analis']
+                ['risk analis'],
+                [
+                    'organization_code' => 'ap',
+                    'organization_name' => 'Risk Analis',
+                    'personnel_area_name' => 'Kantor Pusat',
+                    'personnel_area_code' => 'PST',
+                    'position_name' => 'Risk Analis',
+                    'unit_name' => '',
+                    'sub_unit_name' => 'Risk Analis',
+                    'unit_code' => 'root',
+                    'sub_unit_code' => 'ap',
+                    'employee_grade_code' => '-',
+                    'employee_grade' => '-',
+                    'source_type' => UnitSourceType::SYSTEM->value,
+                    'expired_at' => now()->addYears(50),
+                ]
             ],
             [
                 [
@@ -491,12 +572,12 @@ class DefaultSeeder extends Seeder
                     'employee_name' => 'Administrator',
                     'employee_id' => 'x9999996',
                     'organization_code' => 'ap.50',
-                    'organization_name' => '',
+                    'organization_name' => 'Enterprise Risk Management',
                     'personnel_area_name' => 'Kantor PUSAT',
                     'personnel_area_code' => 'PST',
-                    'position_name' => 'Administrator',
+                    'position_name' => 'Risk Analis',
                     'unit_name' => '',
-                    'sub_unit_name' => '',
+                    'sub_unit_name' => 'Enterprise Risk Management',
                     'unit_code' => 'ap',
                     'sub_unit_code' => 'ap.50',
                     'employee_grade_code' => '-',
@@ -504,7 +585,22 @@ class DefaultSeeder extends Seeder
                     'image_url' => '',
                     'is_active' => true,
                 ],
-                ['risk analis']
+                ['risk analis'],
+                [
+                    'organization_code' => 'ap',
+                    'organization_name' => 'Enterprise Risk Management',
+                    'personnel_area_name' => 'Kantor Pusat',
+                    'personnel_area_code' => 'PST',
+                    'position_name' => 'Risk Analis',
+                    'unit_name' => 'Kantor Pusat',
+                    'sub_unit_name' => 'Enterprise Risk Management',
+                    'unit_code' => 'root',
+                    'sub_unit_code' => 'ap.50',
+                    'employee_grade_code' => '-',
+                    'employee_grade' => '-',
+                    'source_type' => UnitSourceType::SYSTEM->value,
+                    'expired_at' => now()->addYears(50),
+                ]
             ],
             [
                 [
@@ -518,7 +614,7 @@ class DefaultSeeder extends Seeder
                     'personnel_area_name' => 'Kantor Regional I',
                     'personnel_area_code' => 'REG I',
                     'position_name' => 'Risk Analis - Kantor Regional I',
-                    'unit_name' => 'SIDOEL Group',
+                    'unit_name' => 'Kantor Pusat',
                     'sub_unit_name' => 'Kantor Regional I (09 September 2024) - CGK',
                     'unit_code' => 'ap',
                     'sub_unit_code' => 'ap.51',
@@ -527,30 +623,22 @@ class DefaultSeeder extends Seeder
                     'image_url' => '',
                     'is_active' => true,
                 ],
-                ['risk analis']
-            ],
-            [
+                ['risk analis'],
                 [
-                    'username' => 'user_risk_owner_reg_1',
-                    'password' => bcrypt('user_risk_owner_reg_1#321'),
-                    'email' => 'user_risk_owner_reg_1@injourneyairports.id',
-                    'employee_name' => 'Risk Owner REG 1',
-                    'employee_id' => '328947281',
-                    'organization_code' => 'ap.51.2',
+                    'organization_code' => 'ap.51',
                     'organization_name' => 'Kantor Regional I (09 September 2024) - CGK',
                     'personnel_area_name' => 'Kantor Regional I',
                     'personnel_area_code' => 'REG I',
-                    'position_name' => 'Risk Owner - Kantor Regional I',
-                    'unit_name' => 'Regional CEO - Kantor Regional I',
-                    'sub_unit_name' => 'Regional Airport Commercial Development Head',
-                    'unit_code' => 'ap.51',
-                    'sub_unit_code' => 'ap.51.2',
+                    'position_name' => 'Risk Analis - Kantor Regional I',
+                    'unit_name' => 'Kantor Pusat',
+                    'sub_unit_name' => 'Kantor Regional I (09 September 2024) - CGK',
+                    'unit_code' => 'ap',
+                    'sub_unit_code' => 'ap.51',
                     'employee_grade_code' => '-',
                     'employee_grade' => '-',
-                    'image_url' => '',
-                    'is_active' => true,
-                ],
-                ['risk owner']
+                    'source_type' => UnitSourceType::SYSTEM->value,
+                    'expired_at' => now()->addYears(50),
+                ]
             ],
             [
                 [
@@ -562,9 +650,9 @@ class DefaultSeeder extends Seeder
                     'organization_code' => 'ap.52',
                     'organization_name' => 'Kantor Regional III (09 September 2024) - KNO',
                     'personnel_area_name' => 'Kantor Regional III',
-                    'personnel_area_code' => 'REG III',
+                    'personnel_area_code' => 'KNO',
                     'position_name' => 'Risk Analis - Kantor Regional III',
-                    'unit_name' => 'SIDOEL Group',
+                    'unit_name' => 'Kantor Pusat',
                     'sub_unit_name' => 'Kantor Regional III (09 September 2024) - KNO',
                     'unit_code' => 'ap',
                     'sub_unit_code' => 'ap.52',
@@ -573,7 +661,22 @@ class DefaultSeeder extends Seeder
                     'image_url' => '',
                     'is_active' => true,
                 ],
-                ['risk analis']
+                ['risk analis'],
+                [
+                    'organization_code' => 'ap.52',
+                    'organization_name' => 'Kantor Regional III (09 September 2024) - KNO',
+                    'personnel_area_name' => 'Kantor Regional III',
+                    'personnel_area_code' => 'KNO',
+                    'position_name' => 'Risk Analis - Kantor Regional III',
+                    'unit_name' => 'Kantor Pusat',
+                    'sub_unit_name' => 'Kantor Regional III (09 September 2024) - KNO',
+                    'unit_code' => 'ap',
+                    'sub_unit_code' => 'ap.52',
+                    'employee_grade_code' => '-',
+                    'employee_grade' => '-',
+                    'source_type' => UnitSourceType::SYSTEM->value,
+                    'expired_at' => now()->addYears(50),
+                ]
             ],
             [
                 [
@@ -585,9 +688,9 @@ class DefaultSeeder extends Seeder
                     'organization_code' => 'ap.53',
                     'organization_name' => 'Kantor Regional II (09 September 2024) - DPS',
                     'personnel_area_name' => 'Kantor Regional II',
-                    'personnel_area_code' => 'REG II',
+                    'personnel_area_code' => 'DPS',
                     'position_name' => 'Risk Analis - Kantor Regional II',
-                    'unit_name' => 'SIDOEL Group',
+                    'unit_name' => 'Kantor Pusat',
                     'sub_unit_name' => 'Kantor Regional II (09 September 2024) - DPS',
                     'unit_code' => 'ap',
                     'sub_unit_code' => 'ap.53',
@@ -596,14 +699,148 @@ class DefaultSeeder extends Seeder
                     'image_url' => '',
                     'is_active' => true,
                 ],
-                ['risk analis']
+                ['risk analis'],
+                [
+                    'organization_code' => 'ap.53',
+                    'organization_name' => 'Kantor Regional II (09 September 2024) - DPS',
+                    'personnel_area_name' => 'Kantor Regional II',
+                    'personnel_area_code' => 'DPS',
+                    'position_name' => 'Risk Analis - Kantor Regional II',
+                    'unit_name' => 'Kantor Pusat',
+                    'sub_unit_name' => 'Kantor Regional II (09 September 2024) - DPS',
+                    'unit_code' => 'ap',
+                    'sub_unit_code' => 'ap.53',
+                    'employee_grade_code' => '-',
+                    'employee_grade' => '-',
+                    'source_type' => UnitSourceType::SYSTEM->value,
+                    'expired_at' => now()->addYears(50),
+                ]
+            ],
+            [
+                [
+                    'username' => 'user_analis_reg_4',
+                    'password' => bcrypt('user_analis_reg_4#321'),
+                    'email' => 'user_analis_reg_4@injourneyairports.id',
+                    'employee_name' => 'ANALIS REG 4',
+                    'employee_id' => 'x9999994',
+                    'organization_code' => 'ap.54',
+                    'organization_name' => 'Kantor Regional IV (09 September 2024) - YIA',
+                    'personnel_area_name' => 'Kantor Regional IV',
+                    'personnel_area_code' => 'YIA',
+                    'position_name' => 'Risk Analis - Kantor Regional IV',
+                    'unit_name' => 'Kantor Pusat',
+                    'sub_unit_name' => 'Kantor Regional IV (09 September 2024) - YIA',
+                    'unit_code' => 'ap',
+                    'sub_unit_code' => 'ap.54',
+                    'employee_grade_code' => '-',
+                    'employee_grade' => '-',
+                    'image_url' => '',
+                    'is_active' => true,
+                ],
+                ['risk analis'],
+                [
+                    'organization_code' => 'ap.54',
+                    'organization_name' => 'Kantor Regional IV (09 September 2024) - YIA',
+                    'personnel_area_name' => 'Kantor Regional IV',
+                    'personnel_area_code' => 'YIA',
+                    'position_name' => 'Risk Analis - Kantor Regional IV',
+                    'unit_name' => 'Kantor Pusat',
+                    'sub_unit_name' => 'Kantor Regional IV (09 September 2024) - YIA',
+                    'unit_code' => 'ap',
+                    'sub_unit_code' => 'ap.54',
+                    'employee_grade_code' => '-',
+                    'employee_grade' => '-',
+                    'source_type' => UnitSourceType::SYSTEM->value,
+                    'expired_at' => now()->addYears(50),
+                ]
+            ],
+            [
+                [
+                    'username' => 'user_analis_reg_5',
+                    'password' => bcrypt('user_analis_reg_5#321'),
+                    'email' => 'user_analis_reg_5@injourneyairports.id',
+                    'employee_name' => 'ANALIS REG 5',
+                    'employee_id' => 'x9999995',
+                    'organization_code' => 'ap.55',
+                    'organization_name' => 'Kantor Regional V (09 September 2024) - UPG',
+                    'personnel_area_name' => 'Kantor Regional V',
+                    'personnel_area_code' => 'UPG',
+                    'position_name' => 'Risk Analis - Kantor Regional V',
+                    'unit_name' => 'Kantor Pusat',
+                    'sub_unit_name' => 'Kantor Regional V (09 September 2024) - UPG',
+                    'unit_code' => 'ap',
+                    'sub_unit_code' => 'ap.55',
+                    'employee_grade_code' => '-',
+                    'employee_grade' => '-',
+                    'image_url' => '',
+                    'is_active' => true,
+                ],
+                ['risk analis'],
+                [
+                    'organization_code' => 'ap.55',
+                    'organization_name' => 'Kantor Regional V (09 September 2024) - UPG',
+                    'personnel_area_name' => 'Kantor Regional V',
+                    'personnel_area_code' => 'UPG',
+                    'position_name' => 'Risk Analis - Kantor Regional V',
+                    'unit_name' => 'Kantor Pusat',
+                    'sub_unit_name' => 'Kantor Regional V (09 September 2024) - UPG',
+                    'unit_code' => 'ap',
+                    'sub_unit_code' => 'ap.55',
+                    'employee_grade_code' => '-',
+                    'employee_grade' => '-',
+                    'source_type' => UnitSourceType::SYSTEM->value,
+                    'expired_at' => now()->addYears(50),
+                ]
+            ],
+            [
+                [
+                    'username' => 'user_analis_reg_6',
+                    'password' => bcrypt('user_analis_reg_6#321'),
+                    'email' => 'user_analis_reg_6@injourneyairports.id',
+                    'employee_name' => 'ANALIS REG 6',
+                    'employee_id' => 'x9999996',
+                    'organization_code' => 'ap.56',
+                    'organization_name' => 'Kantor Regional VI (09 September 2024) - BPN',
+                    'personnel_area_name' => 'Kantor Regional VI',
+                    'personnel_area_code' => 'BPN',
+                    'position_name' => 'Risk Analis - Kantor Regional VI',
+                    'unit_name' => 'Kantor Pusat',
+                    'sub_unit_name' => 'Kantor Regional VI (09 September 2024) - BPN',
+                    'unit_code' => 'ap',
+                    'sub_unit_code' => 'ap.56',
+                    'employee_grade_code' => '-',
+                    'employee_grade' => '-',
+                    'image_url' => '',
+                    'is_active' => true,
+                ],
+                ['risk analis'],
+                [
+                    'organization_code' => 'ap.56',
+                    'organization_name' => 'Kantor Regional VI (09 September 2024) - BPN',
+                    'personnel_area_name' => 'Kantor Regional VI',
+                    'personnel_area_code' => 'BPN',
+                    'position_name' => 'Risk Analis - Kantor Regional VI',
+                    'unit_name' => 'Kantor Pusat',
+                    'sub_unit_name' => 'Kantor Regional VI (09 September 2024) - BPN',
+                    'unit_code' => 'ap',
+                    'sub_unit_code' => 'ap.56',
+                    'employee_grade_code' => '-',
+                    'employee_grade' => '-',
+                    'source_type' => UnitSourceType::SYSTEM->value,
+                    'expired_at' => now()->addYears(50),
+                ]
             ],
         ];
 
         foreach ($users as $user) {
             $newUser = User::firstOrCreate(['username' => $user[0]['username']], $user[0]);
             $newUser->update($user[0]);
-            $newUser->syncRoles($user[1]);
+
+            $unit = $newUser->units()->firstOrCreate([
+                'sub_unit_code' => $user[2]['sub_unit_code'],
+                'position_name' => $user[2]['position_name'],
+            ], $user[2]);
+            $unit->syncRoles($user[1]);
         }
 
         $officials_to_users = [
@@ -678,16 +915,38 @@ class DefaultSeeder extends Seeder
                     ]
             );
 
+            $unit = $user->units()->firstOrCreate(
+                [
+                    'sub_unit_code' => $official['sub_unit_code'],
+                    'position_name' => $official['position_name'],
+                ],
+                [
+                    'organization_code' => $official['organization_code'],
+                    'organization_name' => $official['organization_name'],
+                    'personnel_area_name' => $official['personnel_area_name'],
+                    'personnel_area_code' => $official['personnel_area_code'],
+                    'position_name' => $official['position_name'],
+                    'unit_name' => $official['unit_name'],
+                    'sub_unit_name' => $official['sub_unit_name'],
+                    'unit_code' => $official['unit_code'],
+                    'sub_unit_code' => $official['sub_unit_code'],
+                    'employee_grade_code' => $official['employee_grade_code'],
+                    'employee_grade' => $official['employee_grade'],
+                    'source_type' => UnitSourceType::SYSTEM->value,
+                    'expired_at' => now()->addYears(50),
+                ]
+            );
+
             $position = Position::whereSubUnitCode($official['sub_unit_code'])
                 ->where('position_name', $official['position_name'])
                 ->first();
             if (!$position) {
                 logger()->error('[DefaultSeeder] Position not found: ' . $official['position_name']);
-                $user->syncRoles('risk admin');
+                $unit->syncRoles('risk admin');
                 continue;
             }
 
-            $user->syncRoles($position->assigned_roles);
+            $unit->syncRoles(explode(',', $position->assigned_roles));
         }
     }
 }

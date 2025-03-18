@@ -4,12 +4,12 @@ namespace App\Services\EOffice;
 
 use Illuminate\Support\Facades\Cache;
 
-class OfficialService extends EOfficeAbstract
+class StaffService extends EOfficeAbstract
 {
     public function get(?string $unit_code): object
     {
-        return Cache::remember('officials.' . $unit_code, now()->addMinutes(5), function () use ($unit_code) {
-            $data = $this->make_request('pejabat_get', ['organization_code' => $unit_code, 'effective_date' => Date('Y') . '-01-06'], true);
+        return Cache::remember('staffs.' . $unit_code, now()->addMinutes(5), function () use ($unit_code) {
+            $data = $this->make_request('sekretaris_get', ['organization_code' => $unit_code, 'effective_date' => Date('Y') . '-01-06'], true);
 
             if (empty($data)) {
                 return (object) [];
@@ -26,8 +26,8 @@ class OfficialService extends EOfficeAbstract
 
     public function get_all(): object
     {
-        return Cache::remember('officials', now()->addMinutes(5), function () {
-            $data = $this->make_request('pejabat_get', ['effective_date' => Date('Y') . '-01-06']);
+        return Cache::remember('staffs', now()->addMinutes(5), function () {
+            $data = $this->make_request('sekretaris_get', ['effective_date' => Date('Y') . '-01-06']);
 
             if (empty($data)) {
                 return collect([]);

@@ -39,7 +39,7 @@
                         </button>
                         @if (
                             \App\Models\RBAC\Role::risk_otorisator_top_risk_approval() ||
-                                auth()->user()->hasAnyRole('superadmin|risk analis|root'))
+                                session()->get('current_unit')->hasAnyRole('root|risk analis|root'))
                             <button style="min-width: 128px;" class="btn btn-success align-items-center" disabled
                                 type="button" id="worksheet-submit-button" data-bs-toggle="tooltip"
                                 title="Submit Top Risk">

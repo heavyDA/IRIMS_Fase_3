@@ -1,5 +1,6 @@
 <?php
 
+use App\Jobs\FetchEmployeeJob;
 use App\Jobs\OfficialJob;
 use App\Jobs\PositionJob;
 use Illuminate\Foundation\Inspiring;
@@ -20,3 +21,7 @@ Artisan::command('fetch:position', function () {
     PositionJob::dispatch();
     Artisan::call('db:seed --class=PositionSeeder');
 })->purpose('Fetch position from API');
+
+Artisan::command('fetch:employee', function () {
+    FetchEmployeeJob::dispatch();
+})->purpose('Fetch employee from API');

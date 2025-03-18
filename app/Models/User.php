@@ -2,9 +2,6 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
-
-use App\Models\Master\Company;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -26,6 +23,10 @@ class User extends Authenticatable
         'password',
         'employee_id',
         'employee_name',
+        'image_url',
+        'is_active',
+        'email_verified_at',
+
         'unit_code',
         'unit_name',
         'sub_unit_code',
@@ -37,9 +38,6 @@ class User extends Authenticatable
         'position_name',
         'employee_grade_code',
         'employee_grade',
-        'image_url',
-        'is_active',
-        'email_verified_at',
     ];
 
     /**
@@ -68,5 +66,10 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    public function units()
+    {
+        return $this->hasMany(UserUnit::class)->filterByScopeAndExpiredAt();
     }
 }

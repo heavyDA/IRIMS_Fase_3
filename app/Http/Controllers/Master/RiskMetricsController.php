@@ -9,6 +9,7 @@ use Yajra\DataTables\Facades\DataTables;
 use App\Enums\State;
 use App\Events\RiskMetricChanged;
 use App\Models\Master\Position;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\DB;
 
@@ -17,43 +18,57 @@ class RiskMetricsController extends Controller
     public function index()
     {
         if (request()->ajax()) {
-            $risk_metrics = RiskMetric::with('creator')
-                ->when(request('with_history'), fn($q) => $q->withTrashed())
+            $riskMetrics = RiskMetric::with('creator')
+                ->when(in_array(request('with_history'), ['1', 1]), fn($q) => $q->withTrashed())
+                ->when(request('unit'), fn($q) => $q->where('organization_code', request('unit')))
                 ->orderBy('id', 'desc');
 
-            return DataTables::eloquent($risk_metrics)
+            return DataTables::eloquent($riskMetrics)
                 ->filter(function ($q) {
                     $value = request('search.value');
                     if ($value) {
                         $q->where(
                             fn($q) => $q->whereLike('personnel_area_code', '%' . $value . '%')
                                 ->orWhereLike('organization_name', '%' . $value . '%')
+                                ->orWhere('capacity', '>=', $value)
+                                ->orWhere('appetite', '>=', $value)
+                                ->orWhere('tolerancy', '>=', $value)
+                                ->orWhere('limit', '>=', $value)
+                                ->orWhereHas('creator', fn($q) => $q->whereLike('username', '%' . $value . '%')->whereLike('employee_name', '%' . $value . '%'))
                         );
                     }
                 })
-                ->addColumn('status', function ($risk_metric) {
+                ->addColumn('status', function ($riskMetric) {
                     $badge = ['color' => State::SUCCESS, 'label' => 'Aktif'];
-                    if ($risk_metric->deleted_at) {
+                    if ($riskMetric->deleted_at) {
                         $badge = ['color' => State::ERROR, 'label' => 'Tidak Aktif'];
                     }
                     return view('components.badge', $badge);
                 })
+                ->editColumn('created_at', function ($riskMetric) {
+                    return Carbon::parse($riskMetric->created_at)->translatedFormat('d F Y H:i');
+                })
+                ->orderColumn('organization_code', 'organization_name $1')
+                ->orderColumn('capacity', 'capacity $1')
+                ->orderColumn('appetite', 'appetite $1')
+                ->orderColumn('tolerancy', 'tolerancy $1')
+                ->orderColumn('limit', 'limit $1')
+                ->orderColumn('created_by', 'created_by $1')
+                ->orderColumn('deleted_at', 'deleted_at $1')
+                ->orderColumn('created_at', 'created_at $1')
                 ->rawColumns(['state'])
                 ->make(true);
         }
 
-        return view('setting.risk_metric.index');
+        $years = RiskMetric::select('year')->distinct()->get() ?? collect(['year' => date('Y')]);
+        $units = $this->getLevelOneUnit();
+
+        return view('setting.risk_metric.index', compact('years', 'units'));
     }
 
     public function create()
     {
-        $units = Position::hierarchyQuery('ap')
-            ->where(
-                fn($q) => $q->where('branch_code', 'PST')
-                    ->orWhereLike('branch_code', 'REG%')
-            )
-            ->where('level', 1)
-            ->get();
+        $units = $this->getLevelOneUnit();
         return view('setting.risk_metric.create', compact('units'));
     }
 
@@ -81,12 +96,12 @@ class RiskMetricsController extends Controller
             }
 
             DB::beginTransaction();
-            $risk_metric = RiskMetric::whereOrganizationCode($position->sub_unit_code)->first();
-            if ($risk_metric) {
-                $risk_metric->delete();
+            $riskMetric = RiskMetric::whereOrganizationCode($position->sub_unit_code)->first();
+            if ($riskMetric) {
+                $riskMetric->delete();
             }
 
-            $risk_metric = RiskMetric::create(
+            $riskMetric = RiskMetric::create(
                 [
                     'organization_code' => $position->sub_unit_code,
                     'organization_name' => $position->sub_unit_name,
@@ -99,7 +114,7 @@ class RiskMetricsController extends Controller
 
             DB::commit();
 
-            RiskMetricChanged::dispatch($risk_metric);
+            RiskMetricChanged::dispatch($riskMetric);
             return redirect()->route('setting.risk_metrics.index');
         } catch (Exception $e) {
             DB::rollBack();
@@ -108,5 +123,16 @@ class RiskMetricsController extends Controller
 
             return back()->withInput();
         }
+    }
+
+    protected function getLevelOneUnit()
+    {
+        return Position::hierarchyQuery('ap')
+            ->where(
+                fn($q) => $q->where('branch_code', 'PST')
+                    ->orWhereLike('branch_code', 'REG%')
+            )
+            ->where('level', 1)
+            ->get();
     }
 }

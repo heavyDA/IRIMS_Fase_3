@@ -6,7 +6,7 @@ use Carbon\Carbon;
 if (!function_exists('format_date')) {
     function format_date(string $date): Carbon
     {
-        return Carbon::parse($date);
+        return Carbon::parse($date)->setTimeZone(session()->get('current_timezone', 'Asia/Jakarta'));
     }
 }
 
@@ -85,6 +85,13 @@ if (!function_exists('get_unit_manager')) {
     {
         if (!$unit) return false;
         return implode('.', array_slice(explode('.', $unit), 0, 3));
+    }
+}
+
+if (!function_exists('replace_pgs_from_position')) {
+    function replace_pgs_from_position(string $position)
+    {
+        return str_replace('Pgs. ', '', $position);
     }
 }
 
