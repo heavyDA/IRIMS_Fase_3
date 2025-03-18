@@ -127,19 +127,20 @@
                             <div class="d-flex align-self-top p-0">
                                 <i class="ti ti-id-badge me-2 fs-16"></i> {{ auth()->user()->employee_id }}
                             </div>
-                            <div class="d-flex align-self-top p-0">
-                                <i class="ti ti-buildings me-2 fs-16"></i>
-                                [{{ session()->get('current_unit')->sub_unit_code }}]
-                                {{ session()->get('current_unit')->sub_unit_name }}
+                            <div class="d-flex flex-column align-self-top gap-1">
+                                <div class="d-flex align-self-top p-0">
+                                    <i class="ti ti-buildings me-2 fs-16"></i>
+                                    [{{ session()->get('current_unit')->sub_unit_code }}]
+                                    {{ session()->get('current_unit')->sub_unit_name }}
+                                </div>
+                                <div class="d-flex align-self-top p-0">
+                                    <i class="me-2" style="width: 1rem;"></i>
+                                    <a style="cursor: pointer"
+                                        class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover text-decoration-underline"
+                                        data-bs-toggle="modal" data-bs-target="#changeUnitModal"><span><i
+                                                class="ti ti-transfer"></i></span>&nbsp; Ganti Unit</a>
+                                </div>
                             </div>
-                        </div>
-                    </li>
-                    <li>
-                        <div class="d-flex align-items-center justify-content-center">
-                            <button class="btn btn-sm btn-outline-primary" style="min-width: 128px;"
-                                data-bs-toggle="modal" data-bs-target="#changeUnitModal">
-                                <span><i class="ti ti-transfer"></i></span>&nbsp; Ganti Unit
-                            </button>
                         </div>
                     </li>
                     <li><a href="javascript:void(0);" onclick="document.querySelector('#signoutForm').submit()"

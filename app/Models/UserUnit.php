@@ -3,13 +3,15 @@
 namespace App\Models;
 
 use App\Enums\UnitSourceType;
+use Illuminate\Contracts\Auth\Access\Authorizable;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Foundation\Auth\Access\Authorizable as AccessAuthorizable;
 use Illuminate\Support\Str;
 use Spatie\Permission\Traits\HasRoles;
 
-class UserUnit extends Model
+class UserUnit extends Model implements Authorizable
 {
-    use HasRoles;
+    use HasRoles, AccessAuthorizable;
 
     protected $fillable = [
         'user_id',
