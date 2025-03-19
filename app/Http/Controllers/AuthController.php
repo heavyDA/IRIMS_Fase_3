@@ -3,20 +3,16 @@
 namespace App\Http\Controllers;
 
 use App\Enums\State;
-use App\Enums\UnitSourceType;
 use App\Exceptions\Services\AuthServiceException;
 use App\Http\Requests\LoginRequest;
-use App\Models\Master\Official;
 use App\Models\Master\Position;
 use App\Models\Master\RiskMetric;
 use App\Models\RBAC\Role;
-use App\Models\User;
 use App\Services\Auth\AuthService;
 use App\Services\EOffice\OfficialService;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\DB;
 
 class AuthController extends Controller
 {
@@ -136,7 +132,13 @@ class AuthController extends Controller
 
     public function get_risk_metric()
     {
-        $risk_metric = RiskMetric::where('organization_code', '=', session()->get('current_unit')->sub_unit_code == 'ap' ? 'ap.50' : session()->get('current_unit')->sub_unit_code)->first();
-        return response()->json(['data' => $risk_metric])->header('Cache-Control', 'no-store');
+        $riskMetric = RiskMetric::withExpression(
+            'ancestor_hierarchy',
+            Position::ancestorHierarchyQuery(session()->get('current_unit')->sub_unit_code == 'ap' ? 'ap.50' : session()->get('current_unit')->sub_unit_code)
+                ->where('level', 1)
+        )
+            ->join('ancestor_hierarchy as ah', 'm_risk_metrics.organization_code', '=', 'ah.sub_unit_code')
+            ->first();
+        return response()->json(['data' => $riskMetric])->header('Cache-Control', 'no-store');
     }
 }

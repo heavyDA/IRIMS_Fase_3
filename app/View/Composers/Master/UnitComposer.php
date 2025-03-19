@@ -20,7 +20,7 @@ class UnitComposer
                 fn() =>
                 Position::hierarchyQuery($currentUnit->sub_unit_code, $this->roleService->isRiskOwner() || $this->roleService->isRiskAdmin() || $this->roleService->isRiskAdmin())
                     ->whereBetween('level', $this->roleService->getTraverseUnitLevel())
-                    ->latest('unit_code')
+                    ->oldest('level', 'sub_unit_code')
                     ->get()
             );
         } catch (\Exception $e) {
