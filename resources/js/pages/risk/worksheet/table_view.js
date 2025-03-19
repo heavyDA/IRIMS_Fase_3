@@ -16,6 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 start: 2
             },
             scrollX: true,
+            scrollY: '40vh',
             scrollCollapse: true,
             lengthChange: false,
             autoWidth: true,
@@ -115,6 +116,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 start: 2
             },
             scrollX: true,
+            scrollY: '40vh',
             scrollCollapse: true,
             lengthChange: false,
             autoWidth: true,
@@ -216,6 +218,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 start: 2
             },
             scrollX: true,
+            scrollY: '40vh',
             scrollCollapse: true,
             lengthChange: false,
             autoWidth: true,

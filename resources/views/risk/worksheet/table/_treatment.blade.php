@@ -1,6 +1,6 @@
-<div style="height: 40vh;">
+<div>
     <table id="treatmentTable" class="table table-bordered table-hover" style="width:100%">
-        <thead class="table-dark" style="position: sticky; top: 0">
+        <thead class="table-dark">
             <tr style="vertical-align: bottom;">
                 <th class="table-dark-custom" style="text-align: center !important;">No. Risiko</th>
                 <th class="table-dark-custom" style="text-align: center !important;">No. Penyebab Risiko</th>

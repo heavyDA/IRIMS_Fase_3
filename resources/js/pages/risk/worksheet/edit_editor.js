@@ -315,18 +315,7 @@ const fetchers = {
     data: {},
     bumn_scales: [],
     heat_maps: [],
-    unit_head: {
-        name: "",
-        position_name: "",
-        personnel_area_code: "",
-        personnel_area_name: "",
-        organization_code: "",
-        organization_name: "",
-        unit_code: "",
-        unit_name: "",
-        sub_unit_code: "",
-        sub_unit_name: "",
-    },
+    unit_heads: [],
     risk_metric: {},
     risk_categories: [],
 };
@@ -336,7 +325,7 @@ const fetchData = async () => {
         axios.get(window.location.href.replace("/edit", "")),
         axios.get("/master/data/bumn-scales"),
         axios.get("/master/data/heatmaps"),
-        axios.get("/profile/unit_head"),
+        axios.get("/profile/unit-heads"),
         axios.get("/profile/risk_metric"),
         axios.get("/master/data/risk-categories"),
     ]).then((res) => {
@@ -492,7 +481,7 @@ const addStrategyRow = (data) => {
         <td>${data.strategy_expected_feedback}</td>
         <td>${data.strategy_risk_value}</td>
         <td>${formatNumeral(
-        data.strategy_risk_value_limit.replace('.', ','),
+        data.strategy_risk_value_limit,
         defaultConfigFormatNumeral
     )}</td>
         <td>${data.strategy_decision}</td>
@@ -510,7 +499,7 @@ const updateStrategyRow = (data) => {
         data.strategy_expected_feedback;
     row.querySelector("td:nth-child(4)").innerHTML = data.strategy_risk_value;
     row.querySelector("td:nth-child(5)").innerHTML = formatNumeral(
-        data.strategy_risk_value_limit.replace('.', ','),
+        data.strategy_risk_value_limit.toString(),
         defaultConfigFormatNumeral
     );
     row.querySelector("td:nth-child(6)").innerHTML = data.strategy_decision;
@@ -537,9 +526,9 @@ const onStrategySave = (data) => {
     }
 
     data.strategy_risk_value_limit = unformatNumeral(
-        data.strategy_risk_value_limit.replace('.', ','),
+        data.strategy_risk_value_limit,
         defaultConfigFormatNumeral
-    );
+    ).replaceAll(".", ",");
     if (data.key) {
         worksheet.strategies[
             worksheet.strategies.findIndex((item) => item.key == data.key)
@@ -562,7 +551,7 @@ const onStrategyEdit = (data) => {
     strategyQuills["strategy_risk_value"].root.innerHTML =
         data.strategy_risk_value;
     strategyRiskValueLimit.value = formatNumeral(
-        data.strategy_risk_value_limit.replace('.', ','),
+        data.strategy_risk_value_limit,
         defaultConfigFormatNumeral
     );
     strategyDecisionChoices.setChoiceByValue(data.strategy_decision);
@@ -1645,7 +1634,28 @@ mitigationCost.addEventListener("keyup", (e) => {
 const mitigationPic = treatmentMitigationForm.querySelector(
     '[name="mitigation_pic"]'
 );
-mitigationPic.value = `${fetchers?.unit_head?.name ?? ""}`;
+const mitigationPicChoices = new Choices(
+    mitigationPic,
+    {
+        ...defaultConfigChoices,
+        choices: [
+            {
+                label: 'Pilih',
+            },
+            ...fetchers.unit_heads.reduce(
+                (pics, pic) => {
+                    pics.push({
+                        value: pic.sub_unit_code,
+                        label: `[${pic.personnel_area_code}] ${pic.position_name}`,
+                        customProperties: pic,
+                    })
+                    return pics
+                },
+                []
+            )
+        ]
+    }
+)
 
 const mitigationProgramType = treatmentMitigationForm.querySelector(
     '[name="mitigation_rkap_program_type"]'
@@ -1817,6 +1827,8 @@ const onTreatmentEdit = (data) => {
         } else if (element.tagName == "TEXTAREA") {
             element.value = data[key];
             mitigationQuills[key].root.innerHTML = data[key];
+        } else if (key == 'mitigation_pic') {
+            mitigationPicChoices.setChoiceByValue(data.sub_unit_code)
         } else {
             element.value = data[key];
         }
@@ -1840,7 +1852,7 @@ const onTreatmentEdit = (data) => {
     treatmentRiskTreatmentTypeChoices.setChoiceByValue(
         data?.risk_treatment_type?.toString()
     );
-    mitigationPic.value = `${fetchers?.unit_head?.name ?? ""}`;
+    mitigationPicChoices.setChoiceByValue(data?.sub_unit_code)
 
     treatmentModal.show();
 };
@@ -1877,18 +1889,19 @@ treatmentMitigationForm.addEventListener("submit", (e) => {
         delete data.search_terms;
     }
 
+    const unit_head = mitigationPicChoices.getValue().customProperties
     data.mitigation_plan = mitigationQuills.mitigation_plan.root.innerHTML;
     data.mitigation_output = mitigationQuills.mitigation_output.root.innerHTML;
-    data.mitigation_pic = mitigationPic.value;
-    data.organization_code = fetchers.unit_head.organization_code;
-    data.organization_name = fetchers.unit_head.organization_name;
-    data.unit_code = fetchers.unit_head.unit_code;
-    data.unit_name = fetchers.unit_head.unit_name;
-    data.sub_unit_code = fetchers.unit_head.sub_unit_code;
-    data.sub_unit_name = fetchers.unit_head.sub_unit_name;
-    data.personnel_area_code = fetchers.unit_head.personnel_area_code;
-    data.personnel_area_name = fetchers.unit_head.personnel_area_name;
-    data.position_name = fetchers.unit_head.position_name;
+    data.mitigation_pic = `[${unit_head.personnel_area_code}] ${unit_head.sub_unit_name}`;
+    data.organization_code = unit_head.organization_code;
+    data.organization_name = unit_head.organization_name;
+    data.unit_code = unit_head.unit_code;
+    data.unit_name = unit_head.unit_name;
+    data.sub_unit_code = unit_head.sub_unit_code;
+    data.sub_unit_name = unit_head.sub_unit_name;
+    data.personnel_area_code = unit_head.personnel_area_code;
+    data.personnel_area_name = unit_head.personnel_area_name;
+    data.position_name = unit_head.position_name;
     data.risk_number = treatmentForm.querySelector(
         '[name="risk_number"]'
     ).value;
@@ -1947,7 +1960,9 @@ treatmentModalElement.addEventListener("hidden.bs.modal", () => {
     mitigationProgramTypeChoices.destroy();
     mitigationProgramTypeChoices.init();
 
-    mitigationPic.value = `${fetchers?.unit_head?.name ?? ""}`;
+    mitigationPicChoices.destroy()
+    mitigationPicChoices.init();
+
     Object.keys(mitigationTextareas).forEach((key) => {
         mitigationTextareas[key].innerHTML = "";
         mitigationQuills[key].deleteText(0, mitigationQuills[key].getLength());

@@ -317,16 +317,16 @@ const fetchers = {
     bumn_scales: [],
     heat_maps: [],
     unit_head: {
-        pic_name: "",
-        pic_position_name: "",
-        pic_personnel_area_code: "",
-        pic_personnel_area_name: "",
-        pic_organization_code: "",
-        pic_organization_name: "",
-        pic_unit_code: "",
-        pic_unit_name: "",
-        pic_sub_unit_code: "",
-        pic_sub_unit_name: "",
+        name: "",
+        position_name: "",
+        personnel_area_code: "",
+        personnel_area_name: "",
+        organization_code: "",
+        organization_name: "",
+        unit_code: "",
+        unit_name: "",
+        sub_unit_code: "",
+        sub_unit_name: "",
     },
     risk_metric: {},
     risk_categories: [],
@@ -432,7 +432,7 @@ const strategyRiskValueLimit = strategyForm.querySelector(
     '[name="strategy_risk_value_limit"]'
 );
 strategyRiskValueLimit.value = fetchers?.risk_metric?.limit
-    ? formatNumeral(fetchers?.risk_metric?.limit, defaultConfigFormatNumeral)
+    ? formatNumeral(fetchers?.risk_metric?.limit.replace('.', ','), defaultConfigFormatNumeral)
     : "";
 const strategyDecision = strategyForm.querySelector(
     '[name="strategy_decision"]'
@@ -491,7 +491,7 @@ const addStrategyRow = (data) => {
         <td>${data.strategy_expected_feedback}</td>
         <td>${data.strategy_risk_value}</td>
         <td>${formatNumeral(
-        data.strategy_risk_value_limit,
+        data.strategy_risk_value_limit.replace('.', ','),
         defaultConfigFormatNumeral
     )}</td>
         <td>${data.strategy_decision}</td>
@@ -509,7 +509,7 @@ const updateStrategyRow = (data) => {
         data.strategy_expected_feedback;
     row.querySelector("td:nth-child(4)").innerHTML = data.strategy_risk_value;
     row.querySelector("td:nth-child(5)").innerHTML = formatNumeral(
-        data.strategy_risk_value_limit.toString(),
+        data.strategy_risk_value_limit.replace('.', ','),
         defaultConfigFormatNumeral
     );
     row.querySelector("td:nth-child(6)").innerHTML = data.strategy_decision;
@@ -536,9 +536,10 @@ const onStrategySave = (data) => {
     }
 
     data.strategy_risk_value_limit = unformatNumeral(
-        data.strategy_risk_value_limit,
+        data.strategy_risk_value_limit.replace('.', ','),
         defaultConfigFormatNumeral
-    ).replaceAll(".", ",");
+    );
+
     if (data.key) {
         worksheet.strategies[
             worksheet.strategies.findIndex((item) => item.key == data.key)
@@ -561,7 +562,7 @@ const onStrategyEdit = (data) => {
     strategyQuills["strategy_risk_value"].root.innerHTML =
         data.strategy_risk_value;
     strategyRiskValueLimit.value = formatNumeral(
-        data.strategy_risk_value_limit,
+        data.strategy_risk_value_limit.replace('.', ','),
         defaultConfigFormatNumeral
     );
     strategyDecisionChoices.setChoiceByValue(data.strategy_decision);
@@ -591,7 +592,7 @@ strategyModalElement.addEventListener("hidden.bs.modal", () => {
 
     strategyRiskValueLimit.value = fetchers?.risk_metric?.limit
         ? formatNumeral(
-            fetchers?.risk_metric?.limit,
+            fetchers?.risk_metric?.limit.replace('.', ','),
             defaultConfigFormatNumeral
         )
         : "";
@@ -1647,7 +1648,7 @@ mitigationCost.addEventListener("keyup", (e) => {
 const mitigationPic = treatmentMitigationForm.querySelector(
     '[name="mitigation_pic"]'
 );
-mitigationPic.value = `${fetchers?.unit_head?.pic_name ?? ""}`;
+mitigationPic.value = `${fetchers?.unit_head?.name ?? ""}`;
 
 const mitigationProgramType = treatmentMitigationForm.querySelector(
     '[name="mitigation_rkap_program_type"]'
@@ -1841,7 +1842,7 @@ const onTreatmentEdit = (data) => {
     treatmentRiskTreatmentTypeChoices.setChoiceByValue(
         data?.risk_treatment_type?.toString()
     );
-    mitigationPic.value = `${fetchers?.unit_head?.pic_name ?? ""}`;
+    mitigationPic.value = `${fetchers?.unit_head?.name ?? ""}`;
 
     treatmentModal.show();
 };
@@ -1878,15 +1879,15 @@ treatmentMitigationForm.addEventListener("submit", (e) => {
     data.mitigation_plan = mitigationQuills.mitigation_plan.root.innerHTML;
     data.mitigation_output = mitigationQuills.mitigation_output.root.innerHTML;
     data.mitigation_pic = mitigationPic.value;
-    data.organization_code = fetchers.unit_head.pic_organization_code;
-    data.organization_name = fetchers.unit_head.pic_organization_name;
-    data.unit_code = fetchers.unit_head.pic_unit_code;
-    data.unit_name = fetchers.unit_head.pic_unit_name;
-    data.sub_unit_code = fetchers.unit_head.pic_sub_unit_code;
-    data.sub_unit_name = fetchers.unit_head.pic_sub_unit_name;
-    data.personnel_area_code = fetchers.unit_head.pic_personnel_area_code;
-    data.personnel_area_name = fetchers.unit_head.pic_personnel_area_name;
-    data.position_name = fetchers.unit_head.pic_position_name;
+    data.organization_code = fetchers.unit_head.organization_code;
+    data.organization_name = fetchers.unit_head.organization_name;
+    data.unit_code = fetchers.unit_head.unit_code;
+    data.unit_name = fetchers.unit_head.unit_name;
+    data.sub_unit_code = fetchers.unit_head.sub_unit_code;
+    data.sub_unit_name = fetchers.unit_head.sub_unit_name;
+    data.personnel_area_code = fetchers.unit_head.personnel_area_code;
+    data.personnel_area_name = fetchers.unit_head.personnel_area_name;
+    data.position_name = fetchers.unit_head.position_name;
     data.risk_number = currentRiskNumber.value;
     data.risk_cause_number = treatmentRiskCauseNumberChoices.getValue(true);
     data.risk_treatment_option = treatmentForm.querySelector(
@@ -1940,7 +1941,7 @@ treatmentModalElement.addEventListener("hidden.bs.modal", () => {
     mitigationProgramTypeChoices.destroy();
     mitigationProgramTypeChoices.init();
 
-    mitigationPic.value = `${fetchers?.unit_head?.pic_name ?? ""}`;
+    mitigationPic.value = `${fetchers?.unit_head?.name ?? ""}`;
     Object.keys(mitigationTextareas).forEach((key) => {
         mitigationTextareas[key].innerHTML = "";
         mitigationQuills[key].deleteText(0, mitigationQuills[key].getLength());

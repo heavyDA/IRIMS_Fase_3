@@ -144,6 +144,7 @@ const contextValidate = () => {
             contextData.append(item.name, item.value);
         }
     }
+
     worksheet.context = Object.fromEntries(contextData);
 
     for (let key of Object.keys(worksheet.context)) {
@@ -247,8 +248,8 @@ worksheetTabPreviousButton.addEventListener("click", (e) => {
 
 const worksheet = {
     context: {
-        risk_number: "",
         unit_name: "",
+        risk_number: "",
         period_date: "",
         period_year: 0,
         target_body: "",
@@ -311,32 +312,20 @@ const worksheet = {
 };
 
 const risk_numbers = ["a", "b", "c", "d", "e"];
+
 const fetchers = {
-    data: {},
     bumn_scales: [],
     heat_maps: [],
-    unit_head: {
-        name: "",
-        position_name: "",
-        personnel_area_code: "",
-        personnel_area_name: "",
-        organization_code: "",
-        organization_name: "",
-        unit_code: "",
-        unit_name: "",
-        sub_unit_code: "",
-        sub_unit_name: "",
-    },
+    unit_heads: [],
     risk_metric: {},
     risk_categories: [],
 };
 
 const fetchData = async () => {
     await Promise.allSettled([
-        axios.get(window.location.href.replace("/edit", "")),
         axios.get("/master/data/bumn-scales"),
         axios.get("/master/data/heatmaps"),
-        axios.get("/profile/unit_head"),
+        axios.get("/profile/unit-heads"),
         axios.get("/profile/risk_metric"),
         axios.get("/master/data/risk-categories"),
     ]).then((res) => {
@@ -431,10 +420,9 @@ for (let editor of strategyForm.querySelectorAll(".textarea")) {
 const strategyRiskValueLimit = strategyForm.querySelector(
     '[name="strategy_risk_value_limit"]'
 );
-strategyRiskValueLimit.value = fetchers.risk_metric.limit
-    ? formatNumeral(fetchers.risk_metric.limit.replace('.', ','), defaultConfigFormatNumeral)
+strategyRiskValueLimit.value = fetchers?.risk_metric?.limit
+    ? formatNumeral(fetchers?.risk_metric?.limit.replace('.', ','), defaultConfigFormatNumeral)
     : "";
-
 const strategyDecision = strategyForm.querySelector(
     '[name="strategy_decision"]'
 );
@@ -492,7 +480,7 @@ const addStrategyRow = (data) => {
         <td>${data.strategy_expected_feedback}</td>
         <td>${data.strategy_risk_value}</td>
         <td>${formatNumeral(
-        data.strategy_risk_value_limit.replace('.', ','),
+        data.strategy_risk_value_limit,
         defaultConfigFormatNumeral
     )}</td>
         <td>${data.strategy_decision}</td>
@@ -510,7 +498,7 @@ const updateStrategyRow = (data) => {
         data.strategy_expected_feedback;
     row.querySelector("td:nth-child(4)").innerHTML = data.strategy_risk_value;
     row.querySelector("td:nth-child(5)").innerHTML = formatNumeral(
-        data.strategy_risk_value_limit.replace('.', ','),
+        data.strategy_risk_value_limit.toString(),
         defaultConfigFormatNumeral
     );
     row.querySelector("td:nth-child(6)").innerHTML = data.strategy_decision;
@@ -537,9 +525,9 @@ const onStrategySave = (data) => {
     }
 
     data.strategy_risk_value_limit = unformatNumeral(
-        data.strategy_risk_value_limit.replace('.', ','),
+        data.strategy_risk_value_limit,
         defaultConfigFormatNumeral
-    );
+    ).replaceAll(".", ",");
     if (data.key) {
         worksheet.strategies[
             worksheet.strategies.findIndex((item) => item.key == data.key)
@@ -562,7 +550,7 @@ const onStrategyEdit = (data) => {
     strategyQuills["strategy_risk_value"].root.innerHTML =
         data.strategy_risk_value;
     strategyRiskValueLimit.value = formatNumeral(
-        data.strategy_risk_value_limit.replace('.', ','),
+        data.strategy_risk_value_limit,
         defaultConfigFormatNumeral
     );
     strategyDecisionChoices.setChoiceByValue(data.strategy_decision);
@@ -589,10 +577,12 @@ strategyForm.addEventListener("submit", (e) => {
 strategyModalElement.addEventListener("hidden.bs.modal", () => {
     strategyForm.reset();
     strategyForm.querySelector('[name="key"]').value = "";
-    strategyForm.querySelector('[name="id"]').value = "";
 
-    strategyRiskValueLimit.value = fetchers.risk_metric.limit
-        ? formatNumeral(fetchers.risk_metric.limit.replace('.', ','), defaultConfigFormatNumeral)
+    strategyRiskValueLimit.value = fetchers?.risk_metric?.limit
+        ? formatNumeral(
+            fetchers?.risk_metric?.limit.replace('.', ','),
+            defaultConfigFormatNumeral
+        )
         : "";
     strategyDecisionChoices.destroy();
     strategyDecisionChoices.init();
@@ -605,6 +595,12 @@ strategyModalElement.addEventListener("hidden.bs.modal", () => {
 
 const identificationForm = document.querySelector("#identificationForm");
 const identificationTabs = document.querySelector("#identificationTabs");
+const identificationInherentTab = document.querySelector(
+    "#identificationInherentTab"
+);
+const identificationResidualTab = document.querySelector(
+    "#identificationResidualTab"
+);
 
 const identificationDateRange = identificationForm.querySelector(
     "#risk_impact_date-picker"
@@ -962,22 +958,20 @@ const identificationDatePicker = flatpickr(identificationDateRange, {
     altFormat: "j F Y",
     locale: defaultLocaleFlatpickr,
     onChange: (dates) => {
-        if (dates.length == 2) {
-            const [start, end] = dates;
-            identificationStartDate.value = dayjs(start).format("YYYY-MM-DD");
-            identificationEndDate.value = dayjs(end).format("YYYY-MM-DD");
-        }
+        identificationStartDate.value =
+            dates[0]?.getFullYear() +
+            "-" +
+            (dates[0]?.getMonth() + 1) +
+            "-" +
+            dates[0]?.getDate();
+        identificationEndDate.value =
+            dates[1]?.getFullYear() +
+            "-" +
+            (dates[1]?.getMonth() + 1) +
+            "-" +
+            dates[1]?.getDate();
     },
-    defaultDate: [
-        dayjs(fetchers.data.identification.risk_impact_start_date).format(
-            "YYYY-MM-DD"
-        ),
-        dayjs(fetchers.data.identification.risk_impact_end_date).format(
-            "YYYY-MM-DD"
-        ),
-    ],
-    enableTime: false,
-    allowInput: false,
+    defaultDate: [identificationStartDate.value, identificationEndDate.value],
 });
 
 /**
@@ -1213,6 +1207,7 @@ residualItemsInit();
 
 identificationInherentImpactValue.addEventListener("input", (e) => {
     const value = formatNumeral(e.target.value, defaultConfigFormatNumeral);
+    const limit = fetchers.risk_metric.limit;
 
     e.target.value = value;
     for (let i = 0; i < 4; i++) {
@@ -1254,6 +1249,7 @@ const incidentKRIUnitChoices = new Choices(
     incidentKRIUnit,
     defaultConfigChoices
 );
+
 const incidentTextareas = {};
 const incidentQuills = {};
 for (let t of incidentForm.querySelectorAll("textarea")) {
@@ -1273,12 +1269,9 @@ incidentForm.addEventListener("submit", (e) => {
     e.preventDefault();
 
     const formData = new FormData(e.target);
-
-    e.target
-        .querySelectorAll("input:disabled, select:disabled")
-        .forEach((input) => {
-            formData.append(input.name, input.value);
-        });
+    e.target.querySelectorAll("input:disabled").forEach((input) => {
+        formData.append(input.name, input.value);
+    });
 
     const data = Object.fromEntries(formData);
     if (data.hasOwnProperty("search_terms")) {
@@ -1318,7 +1311,7 @@ incidentForm.addEventListener("reset", async () => {
     incidentModal.hide();
 });
 
-incidentModalElement.addEventListener("show.bs.modal", async (e) => {
+incidentModalElement.addEventListener("show.bs.modal", () => {
     const incidentsLength = worksheet.incidents.length;
 
     if (incidentsLength >= risk_numbers.length) {
@@ -1349,7 +1342,6 @@ incidentModalElement.addEventListener("hide.bs.modal", async () => {
         currentRiskNumber.value + "." + risk_numbers[incidentsLength];
 
     Object.keys(incidentTextareas).forEach((key) => {
-        // incidentTextareas[key].innerHTML = '';
         incidentQuills[key].deleteText(0, incidentQuills[key].getLength());
     });
 });
@@ -1392,7 +1384,7 @@ const onIncidentSave = (data) => {
 
 const onIncidentEdit = (data) => {
     incidentModal.show();
-    console.log('triggered')
+
     Object.keys(data).forEach((key) => {
         const element = incidentForm.querySelector(`[name="${key}"]`);
         const event = new Event("change");
@@ -1416,7 +1408,6 @@ const onIncidentEdit = (data) => {
         }
         element.dispatchEvent(event);
     });
-
     // Set the flatpickr dates
     if (data.identification_start_date && data.identification_end_date) {
         identificationDatePicker.setDate([
@@ -1440,8 +1431,7 @@ const addIncidentRow = (data) => {
                     item.risk_cause_number = risk_numbers[key];
                     item.risk_cause_code =
                         currentRiskNumber.value + "." + risk_numbers[key];
-
-                    updateIncidentRow(item);
+                    onIncidentSave(item);
                     return item;
                 });
 
@@ -1459,6 +1449,7 @@ const addIncidentRow = (data) => {
                     label: "Pilih",
                 },
             ];
+
             for (let incident of worksheet.incidents) {
                 choices.push({
                     id: incident.risk_cause_number,
@@ -1466,6 +1457,7 @@ const addIncidentRow = (data) => {
                     label: incident.risk_cause_number,
                 });
             }
+
             treatmentRiskCauseNumber.innerHTML = "<option>Pilih</option>";
             treatmentRiskCauseNumberChoices.destroy();
             treatmentRiskCauseNumberChoices.init();
@@ -1641,11 +1633,32 @@ const mitigationCost = treatmentMitigationForm.querySelector(
 mitigationCost.addEventListener("keyup", (e) => {
     e.target.value = formatNumeral(e.target.value, defaultConfigFormatNumeral);
 });
-
 const mitigationPic = treatmentMitigationForm.querySelector(
     '[name="mitigation_pic"]'
 );
-mitigationPic.value = `${fetchers?.unit_head?.name ?? ""}`;
+const mitigationPicChoices = new Choices(
+    mitigationPic,
+    {
+        ...defaultConfigChoices,
+        choices: [
+            {
+                label: 'Pilih',
+            },
+            ...fetchers.unit_heads.reduce(
+                (pics, pic) => {
+                    pics.push({
+                        value: pic.sub_unit_code,
+                        label: `[${pic.personnel_area_code}] ${pic.position_name}`,
+                        customProperties: pic,
+                    })
+                    return pics
+                },
+                []
+            )
+        ]
+    }
+)
+
 
 const mitigationProgramType = treatmentMitigationForm.querySelector(
     '[name="mitigation_rkap_program_type"]'
@@ -1813,10 +1826,12 @@ const onTreatmentEdit = (data) => {
             );
         } else if (key == "mitigation_rkap_program_type") {
             element.value = data[key];
-            mitigationProgramTypeChoices.setChoiceByValue(data[key].toString());
+            mitigationProgramTypeChoices.setChoiceByValue(data[key]);
         } else if (element.tagName == "TEXTAREA") {
             element.value = data[key];
             mitigationQuills[key].root.innerHTML = data[key];
+        } else if (key == 'mitigation_pic') {
+            mitigationPicChoices.setChoiceByValue(data.sub_unit_code)
         } else {
             element.value = data[key];
         }
@@ -1836,11 +1851,10 @@ const onTreatmentEdit = (data) => {
     treatmentRiskTreatmentOptionChoices.setChoiceByValue(
         data?.risk_treatment_option?.toString()
     );
-
     treatmentRiskTreatmentTypeChoices.setChoiceByValue(
         data?.risk_treatment_type?.toString()
     );
-    mitigationPic.value = `${fetchers?.unit_head?.name ?? ""}`;
+    mitigationPicChoices.setChoiceByValue(data?.sub_unit_code)
 
     treatmentModal.show();
 };
@@ -1851,10 +1865,6 @@ const onTreatmentSave = (data) => {
         defaultConfigFormatNumeral
     ).replaceAll(".", ",");
     if (data.key) {
-        const current = worksheet.mitigations.find(
-            (item) => item.key == data.key
-        );
-        data.incident_id = current.incident_id;
         worksheet.mitigations[
             worksheet.mitigations.findIndex((item) => item.key == data.key)
         ] = data;
@@ -1871,27 +1881,27 @@ const onTreatmentSave = (data) => {
 treatmentMitigationForm.addEventListener("submit", (e) => {
     e.preventDefault();
 
-    const formData = new FormData(e.target);
+    const formData = new FormData(treatmentMitigationForm);
+
     const data = Object.fromEntries(formData);
     if (data.hasOwnProperty("search_terms")) {
         delete data.search_terms;
     }
 
+    const unit_head = mitigationPicChoices.getValue().customProperties
     data.mitigation_plan = mitigationQuills.mitigation_plan.root.innerHTML;
     data.mitigation_output = mitigationQuills.mitigation_output.root.innerHTML;
-    data.mitigation_pic = mitigationPic.value;
-    data.organization_code = fetchers.unit_head.organization_code;
-    data.organization_name = fetchers.unit_head.organization_name;
-    data.unit_code = fetchers.unit_head.unit_code;
-    data.unit_name = fetchers.unit_head.unit_name;
-    data.sub_unit_code = fetchers.unit_head.sub_unit_code;
-    data.sub_unit_name = fetchers.unit_head.sub_unit_name;
-    data.personnel_area_code = fetchers.unit_head.personnel_area_code;
-    data.personnel_area_name = fetchers.unit_head.personnel_area_name;
-    data.position_name = fetchers.unit_head.position_name;
-    data.risk_number = treatmentForm.querySelector(
-        '[name="risk_number"]'
-    ).value;
+    data.mitigation_pic = `[${unit_head.personnel_area_code}] ${unit_head.sub_unit_name}`;
+    data.organization_code = unit_head.organization_code;
+    data.organization_name = unit_head.organization_name;
+    data.unit_code = unit_head.unit_code;
+    data.unit_name = unit_head.unit_name;
+    data.sub_unit_code = unit_head.sub_unit_code;
+    data.sub_unit_name = unit_head.sub_unit_name;
+    data.personnel_area_code = unit_head.personnel_area_code;
+    data.personnel_area_name = unit_head.personnel_area_name;
+    data.position_name = unit_head.position_name;
+    data.risk_number = currentRiskNumber.value;
     data.risk_cause_number = treatmentRiskCauseNumberChoices.getValue(true);
     data.risk_treatment_option = treatmentForm.querySelector(
         '[name="risk_treatment_option"]'
@@ -1902,10 +1912,7 @@ treatmentMitigationForm.addEventListener("submit", (e) => {
     treatmentRiskCauseNumber.dispatchEvent(new Event("change"));
 
     for (let key of Object.keys(data)) {
-        if (
-            ["key", "id", "incident_id"].includes(key) ||
-            data[key] === undefined
-        ) {
+        if (key == "key" || key == "id") {
             continue;
         }
 
@@ -1914,6 +1921,7 @@ treatmentMitigationForm.addEventListener("submit", (e) => {
             data[key] == "Pilih" ||
             mitigationQuills[key]?.getLength() <= 1
         ) {
+            console.log(key, data[key])
             Swal.fire(
                 "Peringatan",
                 "Pastikan semua isian harus terisi",
@@ -1947,7 +1955,9 @@ treatmentModalElement.addEventListener("hidden.bs.modal", () => {
     mitigationProgramTypeChoices.destroy();
     mitigationProgramTypeChoices.init();
 
-    mitigationPic.value = `${fetchers?.unit_head?.name ?? ""}`;
+    mitigationPicChoices.destroy()
+    mitigationPicChoices.init();
+
     Object.keys(mitigationTextareas).forEach((key) => {
         mitigationTextareas[key].innerHTML = "";
         mitigationQuills[key].deleteText(0, mitigationQuills[key].getLength());
@@ -1979,7 +1989,7 @@ worksheetTabSubmitButton.addEventListener("click", async (e) => {
 
             setTimeout(() => {
                 axios
-                    .post(window.location.href, { ...worksheet, _method: "PUT" })
+                    .post(window.location.href, { ...worksheet })
                     .then((response) => {
                         if (response.status == 200) {
                             Swal.fire({
@@ -2015,160 +2025,3 @@ worksheetTabSubmitButton.addEventListener("click", async (e) => {
         }
     })
 });
-
-worksheet.context = fetchers.data.context;
-worksheet.identification = fetchers.data.identification;
-worksheet.strategies = fetchers.data.strategies;
-worksheet.incidents = fetchers.data.incidents;
-worksheet.mitigations = fetchers.data.mitigations;
-
-if (worksheet?.mitigations[0]?.mitigation_pic) {
-    fetchers.unit_head = {
-        name: worksheet.mitigations[0].mitigation_pic,
-        personnel_area_code: worksheet.mitigations[0].personnel_area_code,
-        personnel_area_name: worksheet.mitigations[0].personnel_area_name,
-        sub_unit_code: worksheet.mitigations[0].sub_unit_code,
-        sub_unit_name: worksheet.mitigations[0].sub_unit_name,
-        position_name: worksheet.mitigations[0].position_name,
-    };
-    mitigationPic.value = worksheet.mitigations[0].mitigation_pic;
-}
-
-for (const key of Object.keys(fetchers.data.context)) {
-    contextForm.querySelector(`[name="${key}"]`).value =
-        fetchers.data.context[key];
-}
-
-for (const key of Object.keys(fetchers.data.identification)) {
-    if (key == "id") {
-        continue;
-    }
-
-    if (identificationTextareas.hasOwnProperty(key)) {
-        const content = new DOMParser().parseFromString(
-            fetchers.data.identification[key],
-            "text/html"
-        ).body.textContent;
-        identificationTextareas[key].innerHTML = content;
-
-        identificationQuills[key].clipboard.dangerouslyPasteHTML(
-            content,
-            "api"
-        );
-        continue;
-    }
-
-    const input = identificationForm.querySelector(`[name="${key}"]`);
-    if (!input) {
-        continue;
-    }
-
-    if (input.tagName == "SELECT") {
-        if (key == "risk_impact_category") {
-            identificationRiskImpact.value = fetchers.data.identification[key];
-            identificationRiskImpactChoices.setChoiceByValue(
-                fetchers.data.identification[key].toString()
-            );
-            identificationRiskImpact.dispatchEvent(new Event("change"));
-        } else if (key == "kbumn_risk_category_t2") {
-            identificationRiskCategoryT2Choices.setChoiceByValue(
-                fetchers.data.identification[key]
-            );
-            identificationRiskCategoryT2.dispatchEvent(new Event("change"));
-        } else if (key == "kbumn_risk_category_t3") {
-            identificationRiskCategoryT3Choices.setChoiceByValue(
-                fetchers.data.identification[key]
-            );
-            identificationRiskCategoryT3.dispatchEvent(new Event("change"));
-        } else if (key == "existing_control_type") {
-            identificationExistingControlType.value =
-                fetchers.data.identification[key];
-            identificationExistingControlTypeChoices.setChoiceByValue(
-                fetchers.data.identification[key].toString()
-            );
-            identificationExistingControlType.dispatchEvent(
-                new Event("change")
-            );
-        } else if (key == "control_effectiveness_assessment") {
-            identificationControlEffectivenessAssessment.value =
-                fetchers.data.identification[key];
-            identificationControlEffectivenessAssessmentChoices.setChoiceByValue(
-                fetchers.data.identification[key].toString()
-            );
-            identificationControlEffectivenessAssessment.dispatchEvent(
-                new Event("change")
-            );
-        } else {
-            identificationSelects[key].value =
-                fetchers.data.identification[key];
-            identificationChoices[key].setChoiceByValue(
-                fetchers.data.identification[key]
-            );
-            identificationSelects[key].dispatchEvent(new Event("change"));
-        }
-        continue;
-    }
-
-    if (key.includes("impact_value") || key.includes("risk_exposure")) {
-        input.value = formatNumeral(
-            fetchers.data.identification[key].replaceAll(".", ","),
-            defaultConfigFormatNumeral
-        );
-    } else {
-        input.value = fetchers.data.identification[key];
-    }
-    input.dispatchEvent(new Event("change"));
-}
-
-for (const key of Object.keys(fetchers.data.context)) {
-    const contextInput = contextForm.querySelector(`[name="${key}"]`);
-    if (contextInput.tagName == "TEXTAREA") {
-        const content = new DOMParser().parseFromString(
-            fetchers.data.context[key],
-            "text/html"
-        ).body.textContent;
-        contextInput.innerHTML = content;
-
-        targetBodyQuill.clipboard.dangerouslyPasteHTML(content, "api");
-    } else {
-        contextInput.value = fetchers.data.context[key];
-    }
-}
-
-const treatmentIncidentChoices = [
-    {
-        id: "Pilih",
-        value: "Pilih",
-        label: "Pilih",
-    },
-];
-for (let incident of worksheet.incidents) {
-    treatmentIncidentChoices.push({
-        id: incident.risk_cause_number,
-        value: incident.risk_cause_number,
-        label: incident.risk_cause_number,
-    });
-}
-
-treatmentRiskNumber.value = currentRiskNumber.value;
-treatmentRiskCauseNumber.innerHTML = "<option>Pilih</option>";
-treatmentRiskCauseNumberChoices
-    .clearStore()
-    .clearChoices()
-    .setChoices(treatmentIncidentChoices)
-    .setChoiceByValue("Pilih");
-
-for (const strategy of worksheet.strategies) {
-    strategy.key = strategy.id.toString();
-    addStrategyRow(strategy);
-}
-
-for (const incident of worksheet.incidents) {
-    incident.key = incident.id.toString();
-    addIncidentRow(incident);
-}
-
-for (const mitigation of worksheet.mitigations) {
-    mitigation.key = mitigation.id.toString();
-    addTreatmentRow(mitigation);
-}

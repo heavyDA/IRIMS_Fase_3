@@ -1,6 +1,6 @@
-<div style="height: 40vh;">
+<div>
     <table id="identificationTable" class="table table-bordered table-hover" style="width: 100%;">
-        <thead class="table-dark" style="position: sticky;top: 0;">
+        <thead class="table-dark">
             <tr style="vertical-align: bottom;">
                 <th class="table-dark-custom" style="text-align:center !important;" rowspan="3">Nama Perusahaan</th>
                 <th class="table-dark-custom" style="text-align:center !important;" rowspan="3">Kode Perusahaan</th>

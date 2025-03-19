@@ -1,4 +1,4 @@
-<div style="height: 40vh;">
+<div>
     <table id="contextTable" class="table table-bordered table-hover">
         <thead class="table-dark" style="position: sticky; top: 0;">
             <tr>

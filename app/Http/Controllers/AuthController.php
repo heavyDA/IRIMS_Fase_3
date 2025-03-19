@@ -10,6 +10,7 @@ use App\Models\Master\RiskMetric;
 use App\Models\RBAC\Role;
 use App\Services\Auth\AuthService;
 use App\Services\EOffice\OfficialService;
+use App\Services\RoleService;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -20,6 +21,7 @@ class AuthController extends Controller
 
     public function __construct(
         protected OfficialService $officialService,
+        protected RoleService $roleService
     ) {
         $this->authService = new AuthService();
         $this->officialService = new OfficialService(env('EOFFICE_URL'), env('EOFFICE_TOKEN'));
@@ -97,37 +99,69 @@ class AuthController extends Controller
     public function get_unit_head()
     {
         $data = [
-            'pic_name' => '',
-            'pic_position_name' => '',
-            'pic_personnel_area_code' => '',
-            'pic_personnel_area_name' => '',
-            'pic_organization_code' => '',
-            'pic_organization_name' => '',
-            'pic_unit_code' => '',
-            'pic_unit_name' => '',
-            'pic_sub_unit_code' => '',
-            'pic_sub_unit_name' => '',
+            'name' => '',
+            'position_name' => '',
+            'personnel_area_code' => '',
+            'personnel_area_name' => '',
+            'organization_code' => '',
+            'organization_name' => '',
+            'unit_code' => '',
+            'unit_name' => '',
+            'sub_unit_code' => '',
+            'sub_unit_name' => '',
         ];
 
         try {
             $position = Position::whereSubUnitCode(session()->get('current_unit')->sub_unit_code)->first();
             $data = [
-                'pic_name' => "[{$position->sub_unit_code_doc}] {$position->sub_unit_name}",
-                'pic_position_name' => $position->position_name,
-                'pic_personnel_area_code' => $position->sub_unit_code_doc,
-                'pic_personnel_area_name' => session()->get('current_unit')->personnel_area_name,
-                'pic_organization_code' => $position->sub_unit_code,
-                'pic_organization_name' => $position->sub_unit_name,
-                'pic_unit_code' => $position->unit_code,
-                'pic_unit_name' => $position->unit_name,
-                'pic_sub_unit_code' => $position->sub_unit_code,
-                'pic_sub_unit_name' => $position->sub_unit_name,
+                'name' => "[{$position->sub_unit_code_doc}] {$position->sub_unit_name}",
+                'position_name' => $position->position_name,
+                'personnel_area_code' => $position->sub_unit_code_doc,
+                'personnel_area_name' => session()->get('current_unit')->personnel_area_name,
+                'organization_code' => $position->sub_unit_code,
+                'organization_name' => $position->sub_unit_name,
+                'unit_code' => $position->unit_code,
+                'unit_name' => $position->unit_name,
+                'sub_unit_code' => $position->sub_unit_code,
+                'sub_unit_name' => $position->sub_unit_name,
             ];
         } catch (Exception $e) {
             logger()->error('[Profile] Failed to get unit head.', [$e->getMessage()]);
         }
 
         return response()->json(['data' => $data])->header('Cache-Control', 'no-store');
+    }
+
+    public function get_unit_heads()
+    {
+        $currentUnit = $this->roleService->getCurrentUnit();
+        $positions = cache()->remember(
+            'current_unit_hierarchy.' . auth()->user()->employee_id . '.' . $currentUnit->sub_unit_code,
+            now()->addMinutes(5),
+            fn() =>
+            Position::hierarchyQuery($currentUnit->sub_unit_code)
+                ->whereBetween('level', $this->roleService->getTraverseUnitLevel())
+                ->oldest('level', 'sub_unit_code')
+                ->get()
+        );
+
+        $positionHeads = [];
+        foreach ($positions as $position) {
+            $positionHeads[] = [
+                'name' => "[{$position->sub_unit_code_doc}] {$position->sub_unit_name}",
+                'position_name' => $position->position_name,
+                'personnel_area_code' => $position->sub_unit_code_doc,
+                'personnel_area_name' => session()->get('current_unit')->personnel_area_name,
+                'organization_code' => $position->sub_unit_code,
+                'organization_name' => $position->sub_unit_name,
+                'unit_code' => $position->unit_code,
+                'unit_name' => $position->unit_name,
+                'sub_unit_code' => $position->sub_unit_code,
+                'sub_unit_name' => $position->sub_unit_name,
+            ];
+        }
+
+        return response()->json(['data' => $positionHeads])->header('Cache-Control', 'no-store');
     }
 
     public function get_risk_metric()
