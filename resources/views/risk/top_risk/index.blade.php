@@ -131,7 +131,7 @@
                             @endif
                             @foreach ($units as $unit)
                                 <option value="{{ $unit->sub_unit_code }}">
-                                    [{{ $unit->branch_code }}] {{ $unit->sub_unit_name }}</option>
+                                    [{{ $unit->sub_unit_code_doc }}] {{ $unit->sub_unit_name }}</option>
                             @endforeach
                         </select>
                     </div>

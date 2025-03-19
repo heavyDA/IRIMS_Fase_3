@@ -34,7 +34,7 @@ class Position extends Model
      * @param string $unit_code The unit code
      * @return \Illuminate\Database\Query\Builder
      */
-    public static function hierarchyQuery(?string $unitCode = '', ?bool $includeParent = false)
+    public static function hierarchyQuery(?string $unitCode = '', ?bool $includeParent = true)
     {
         return DB::table('position_hierarchy')
             ->withRecursiveExpression(
@@ -51,8 +51,7 @@ class Position extends Model
                         position_name,
                         (LENGTH(sub_unit_code) - length(replace(sub_unit_code, '.', ''))) as level
                 ")
-                    ->when($unitCode && !$includeParent, fn($q) => $q->where('unit_code', $unitCode))
-                    ->when($unitCode && $includeParent, fn($q) => $q->where('sub_unit_code', $unitCode))
+                    ->where('sub_unit_code', $unitCode)
                     ->unionAll(
                         DB::table(app(self::class)->getTable() . ' as p')
                             ->selectRaw("
@@ -70,6 +69,46 @@ class Position extends Model
                                 'position_hierarchy as ph',
                                 fn($join) => $join->on('p.unit_code', 'ph.sub_unit_code')
                                     ->whereRaw('p.unit_code != ph.unit_code')
+                            )
+                    )
+            );
+    }
+
+    public static function ancestorHierarchyQuery(?string $unitCode = '')
+    {
+        return DB::table('position_hierarchy')
+            ->withRecursiveExpression(
+                'position_hierarchy',
+                DB::table(app(self::class)->getTable())
+                    ->selectRaw("
+                        branch_code,
+                        unit_code,
+                        unit_code_doc,
+                        unit_name,
+                        sub_unit_code,
+                        sub_unit_code_doc,
+                        sub_unit_name,
+                        position_name,
+                        (LENGTH(sub_unit_code) - length(replace(sub_unit_code, '.', ''))) as level
+                ")
+                    ->where('sub_unit_code', $unitCode)
+                    ->unionAll(
+                        DB::table(app(self::class)->getTable() . ' as p')
+                            ->selectRaw("
+                                p.branch_code,
+                                p.unit_code,
+                                p.unit_code_doc,
+                                p.unit_name,
+                                p.sub_unit_code,
+                                p.sub_unit_code_doc,
+                                p.sub_unit_name,
+                                p.position_name,
+                                (LENGTH(p.sub_unit_code) - length(replace(p.sub_unit_code, '.', ''))) as level
+                            ")
+                            ->join(
+                                'position_hierarchy as ph',
+                                'p.sub_unit_code',
+                                'ph.unit_code'
                             )
                     )
             );
