@@ -26,12 +26,6 @@
 
 @push('bottom-script')
     @vite(['resources/js/pages/risk/worksheet/table_view.js'])
-
-    @if (str_contains(request()->route()->getName(), 'worksheet.edit'))
-        @vite(['resources/js/pages/risk/worksheet/edit.js'])
-    @elseif (str_contains(request()->route()->getName(), 'worksheet.index'))
-        @vite(['resources/js/pages/risk/worksheet/index.js'])
-    @endif
 @endpush
 
 @section('header-content')

@@ -44,6 +44,7 @@ Route::group(['middleware' => 'auth'], function () {
     });
 
     Route::get('profile/unit_head', [AuthController::class, 'get_unit_head'])->name('profile.get_unit_head');
+    Route::get('profile/unit-heads', [AuthController::class, 'get_unit_heads'])->name('profile.get_unit_heads');
     Route::get('profile/risk_metric', [AuthController::class, 'get_risk_metric'])->name('profile.get_risk_metric');
 
     Route::group(['as' => 'risk.', 'prefix' => 'risk-process'], function () {

@@ -294,7 +294,7 @@ class WorksheetController extends Controller
                     'period_year' => $worksheet->created_at->format('Y'),
                     'risk_number' => $worksheet->worksheet_number,
                     'target_body' => $worksheet->target_body,
-                    'unit_name' => $worksheet->unit_name,
+                    'unit_name' => $worksheet->sub_unit_name,
                 ],
                 'strategies' => $worksheet->strategies->select([
                     'id',
