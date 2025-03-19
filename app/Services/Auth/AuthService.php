@@ -90,9 +90,11 @@ class AuthService
                 if ($unit->source_type === UnitSourceType::EOFFICE->value) {
                     $position = Position::where('sub_unit_code', $unit->sub_unit_code)
                         ->where('position_name', replace_pgs_from_position($unit->position_name))
-                        ->firstOrFail();
+                        ->first();
 
-                    $unit->syncRoles(explode(',', $position->assigned_roles) ?? ['risk admin']);
+                    if ($position) {
+                        $unit->syncRoles(explode(',', $position->assigned_roles) ?? ['risk admin']);
+                    }
                 }
 
                 session()->put('current_unit', $unit);
