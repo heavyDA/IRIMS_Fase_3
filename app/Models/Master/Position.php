@@ -42,6 +42,7 @@ class Position extends Model
                 DB::table(app(self::class)->getTable())
                     ->selectRaw("
                         branch_code,
+                        branch_code as personnel_area_code,
                         unit_code,
                         unit_code_doc,
                         unit_name,
@@ -56,6 +57,7 @@ class Position extends Model
                         DB::table(app(self::class)->getTable() . ' as p')
                             ->selectRaw("
                                 p.branch_code,
+                                p.branch_code as personnel_area_code,
                                 p.unit_code,
                                 p.unit_code_doc,
                                 p.unit_name,

@@ -28,7 +28,6 @@ class TopRiskController extends Controller
     {
         if (request()->ajax()) {
             $unit = $this->roleService->getCurrentUnit();
-            $currentUnit = $this->roleService->getCurrentUnit();
             $currentLevel = $this->roleService->getUnitLevel();
 
             if (request('unit')) {
@@ -41,8 +40,8 @@ class TopRiskController extends Controller
 
             if ($currentLevel < 2) {
                 $worksheets = Worksheet::topRiskUpperQuery(
-                    $currentUnit->sub_unit_code,
-                    $currentUnit->sub_unit_code
+                    $unit->unit_code,
+                    $unit->sub_unit_code
                 )
                     ->withExpression(
                         'position_hierarchy',
@@ -66,7 +65,7 @@ class TopRiskController extends Controller
                     ->where('w.status', DocumentStatus::APPROVED->value);
             } else {
                 $worksheets = Worksheet::topRiskLowerQuery(
-                    $currentLevel > 2 ? get_unit_manager($currentUnit->sub_unit_code) : $currentUnit->sub_unit_code
+                    $currentLevel > 2 ? get_unit_manager($unit->sub_unit_code) : $unit->sub_unit_code
                 )
                     ->withExpression(
                         'position_hierarchy',
@@ -159,7 +158,7 @@ class TopRiskController extends Controller
 
         if ($currentLevel < 2) {
             $worksheets = Worksheet::topRiskUpperDashboardQuery(
-                $currentUnit->sub_unit_code,
+                $currentUnit->unit_code,
                 $currentUnit->sub_unit_code
             )
                 ->withExpression(
