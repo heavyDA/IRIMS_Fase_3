@@ -19,7 +19,9 @@ export default defineConfig({
                 'resources/js/pages/risk/assessment/index.js',
                 'resources/js/pages/risk/top_risk/index.js',
                 'resources/js/pages/risk/worksheet/index.js',
+                'resources/js/pages/risk/worksheet/index_editor.js',
                 'resources/js/pages/risk/worksheet/edit.js',
+                'resources/js/pages/risk/worksheet/edit_editor.js',
                 'resources/js/pages/risk/worksheet/table_view.js',
 
                 'resources/js/pages/report/risk_profile/index.js',
