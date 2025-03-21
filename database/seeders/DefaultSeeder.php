@@ -437,7 +437,7 @@ class DefaultSeeder extends Seeder
                     'image_url' => '',
                     'is_active' => true,
                 ],
-                ['root', 'risk admin', 'risk analis', 'risk owner', 'risk otorisator'],
+                ['root', 'risk analis'],
                 [
                     'organization_code' => 'ap',
                     'organization_name' => '',
@@ -473,7 +473,7 @@ class DefaultSeeder extends Seeder
                     'image_url' => '',
                     'is_active' => true,
                 ],
-                ['administrator', 'risk admin', 'risk analis', 'risk owner', 'risk otorisator'],
+                ['administrator', 'risk analis'],
                 [
                     'organization_code' => 'ap',
                     'organization_name' => '',
@@ -540,7 +540,7 @@ class DefaultSeeder extends Seeder
                     'position_name' => 'Risk Analis',
                     'unit_name' => '',
                     'sub_unit_name' => 'Risk Analis',
-                    'unit_code' => 'ap',
+                    'unit_code' => 'root',
                     'sub_unit_code' => 'ap',
                     'employee_grade_code' => '-',
                     'employee_grade' => '-',
