@@ -13,6 +13,12 @@ Artisan::command('inspire', function () {
 
 Schedule::job('App\Jobs\PositionJob')->everyFifteenSeconds();
 
+Schedule::call(function () {
+    Artisan::call('fetch:position');
+    Artisan::call('fetch:official');
+    Artisan::call('fetch:employee');
+})->dailyAt('00:00');
+
 Artisan::command('fetch:official', function () {
     OfficialJob::dispatch();
 })->purpose('Fetch position from API');

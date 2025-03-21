@@ -64,8 +64,10 @@ class AuthController extends Controller
 
     public function change_role(Request $request)
     {
-        if (session()->get('current_unit')->hasRole($request->role)) {
-            session()->put('current_role', Role::where('name', $request->role)->first());
+        $role = session()->get('current_roles')->where('id', $request->role)->first();
+        if ($role) {
+            session()->put('current_role', $role);
+            session()->put('current_menu', null);
             return redirect()->back();
         }
         return redirect()->back();
@@ -82,16 +84,18 @@ class AuthController extends Controller
             return redirect()->back();
         }
 
-        $role = $unit->roles()->first();
+        $roles = $unit->roles()->get();
+        $role = $roles->first();
         if (!$role) {
             flash_message('flash_message',  'Gagal mengganti unit kerja.', State::ERROR);
             logger()->error("[Authentication] Failed to change user {$user->employee_id} unit, unit with ID {$request->get('unit_target')} doesn't have assigned roles");
             return redirect()->back();
         }
 
-        cache()->delete('current_roles.' . $user->employee_id);
         session()->put('current_unit', $unit);
         session()->put('current_role', $role);
+        session()->put('current_roles', $roles);
+        session()->put('current_menu', null);
         flash_message('flash_message',  'Berhasil mengganti unit kerja', State::SUCCESS);
         return redirect()->back();
     }

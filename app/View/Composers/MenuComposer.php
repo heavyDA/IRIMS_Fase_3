@@ -16,9 +16,9 @@ class MenuComposer
 {
     public function compose(View $view)
     {
-        $role = session()->get('current_role') ?? Auth::user()->roles()->first() ?? null;
-
+        $role = session()->get('current_role') ?? null;
         $menus = session()->get('current_menu');
+
         if (!$menus) {
             $menus = Menu::with([
                 'children' => fn($q) => $q->when($role?->name !== 'root', fn($qw) => $qw->whereHas('roles', fn($qr) => $qr->whereRoleId($role?->id)))

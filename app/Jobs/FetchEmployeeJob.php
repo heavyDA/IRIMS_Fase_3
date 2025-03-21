@@ -35,6 +35,7 @@ class FetchEmployeeJob implements ShouldQueue
      */
     public function handle(): void
     {
+        $start = microtime(true);
         try {
             $officials = $this->officialService->get_all();
             if ($officials->isEmpty()) {
@@ -55,6 +56,8 @@ class FetchEmployeeJob implements ShouldQueue
             }
 
             $sourceType = UnitSourceType::EOFFICE->value;
+            $users = [];
+
             DB::beginTransaction();
 
 
@@ -66,15 +69,18 @@ class FetchEmployeeJob implements ShouldQueue
 
                 if ($user->wasRecentlyCreated) {
                     $created += 1;
-                } else if ($user) {
+                } else {
                     $updated += 1;
                 }
 
-                $unit = UserUnit::create(
+                $unit = UserUnit::updateOrCreate(
                     [
                         'user_id' => $user->id,
                         'source_type' => $sourceType,
-                    ] + (array) $official
+                        'sub_unit_code' => $official->sub_unit_code,
+                        'position_name' => $official->position_name,
+                    ],
+                    (array) $official
                 );
 
                 $headUnit = Position::whereSubUnitCode($official->sub_unit_code)
@@ -82,6 +88,12 @@ class FetchEmployeeJob implements ShouldQueue
                     ->first();
                 if ($unit) {
                     $unit->syncRoles($headUnit ? explode(',', $headUnit->assigned_roles) : ['risk admin']);
+                }
+
+                if (array_key_exists($user->id, $users)) {
+                    $users[$user->id] = [$unit->id];
+                } else {
+                    $users[$user->id][] = $unit->id;
                 }
             }
 
@@ -93,15 +105,18 @@ class FetchEmployeeJob implements ShouldQueue
 
                 if ($user->wasRecentlyCreated) {
                     $created += 1;
-                } else if ($user) {
+                } else {
                     $updated += 1;
                 }
 
-                $unit = UserUnit::create(
+                $unit = UserUnit::updateOrCreate(
                     [
                         'user_id' => $user->id,
                         'source_type' => $sourceType,
-                    ] + (array) $staff
+                        'sub_unit_code' => $staff->sub_unit_code,
+                        'position_name' => $staff->position_name,
+                    ],
+                    (array) $staff
                 );
 
                 $headUnit = Position::whereSubUnitCode($staff->sub_unit_code)
@@ -110,13 +125,26 @@ class FetchEmployeeJob implements ShouldQueue
                 if ($unit) {
                     $unit->syncRoles($headUnit ? explode(',', $headUnit->assigned_roles) : ['risk admin']);
                 }
+
+                if (array_key_exists($user->id, $users)) {
+                    $users[$user->id][] = $unit->id;
+                } else {
+                    $users[$user->id] = [$unit->id];
+                }
+            }
+
+            foreach ($users as $userId => $units) {
+                $inactiveUnits = UserUnit::where('user_id', $userId)->whereNotIn('id', $units)->get();
+                foreach ($inactiveUnits as $inactiveUnit) {
+                    $inactiveUnit->delete();
+                }
             }
 
             DB::commit();
-            logger()->info("[FetchEmployeeJob] successfully fetched data number of created {$created} and updated {$updated}");
+            logger()->info("[FetchEmployeeJob] successfully fetched data number of created {$created} and updated {$updated} in " . (microtime(true) - $start) . " seconds");
         } catch (Exception $e) {
             DB::rollBack();
-            logger()->error('[FetchEmployeeJob] ' . $e->getMessage(), [$e]);
+            logger()->error('[FetchEmployeeJob] ' . $e->getMessage() . " in " . (microtime(true) - $start) . " seconds", [$e]);
         }
     }
 }

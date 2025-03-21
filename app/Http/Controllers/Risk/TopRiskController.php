@@ -50,17 +50,7 @@ class TopRiskController extends Controller
                             true
                         )
                     )
-                    ->where(
-                        fn($q) => $q->where('wtr.sub_unit_code', $unit?->sub_unit_code)
-                            ->when(
-                                str_contains($unit->personnel_area_code, 'REG'),
-                                fn($q) => $q->orWhereRaw(DB::raw('w.sub_unit_code IN (SELECT sub_unit_code from position_hierarchy where branch_code = ?)'), $unit->personnel_area_code)
-                            )
-                            ->when(
-                                str_contains($unit->personnel_area_code, 'PST'),
-                                fn($q) => $q->orWhereRaw(DB::raw('w.sub_unit_code IN (SELECT sub_unit_code from position_hierarchy)'))
-                            )
-                    )
+                    ->join('position_hierarchy as ph', 'ph.sub_unit_code', 'w.sub_unit_code')
                     ->whereYear('w.created_at', request('year', date('Y')))
                     ->where('w.status', DocumentStatus::APPROVED->value);
             } else {

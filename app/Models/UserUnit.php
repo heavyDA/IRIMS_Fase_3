@@ -32,6 +32,15 @@ class UserUnit extends Model implements Authorizable
 
     protected $guard_name = 'web';
 
+    public static function boot()
+    {
+        parent::boot();
+
+        static::deleting(function ($model) {
+            $model->roles()->detach();
+        });
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class);

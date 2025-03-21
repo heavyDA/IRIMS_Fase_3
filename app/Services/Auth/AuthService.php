@@ -41,13 +41,15 @@ class AuthService
             }
             session()->put('current_unit', $unit);
 
-            $role = $unit->roles()->first();
+            $roles = $unit->roles()->get();
+            $role = $roles->first();
             if (!$role) {
                 auth()->logout();
                 session()->flush();
                 throw new AuthServiceException("User with {$user->username} ({$user->employee_id}) for User Unit ID {$unit->id} {$unit->position_name} doesn't have assigned roles.");
             }
             session()->put('current_role', $role);
+            session()->put('current_roles', $roles);
 
             return true;
         }
@@ -97,8 +99,16 @@ class AuthService
                     }
                 }
 
+                $roles = $unit->roles()->get();
+                $role = $roles->first();
+                if (!$role) {
+                    auth()->logout();
+                    session()->flush();
+                    throw new AuthServiceException("User with {$user->username} ({$user->employee_id}) for User Unit ID {$unit->id} {$unit->position_name} doesn't have assigned roles.");
+                }
                 session()->put('current_unit', $unit);
-                session()->put('current_role', $unit->roles()->first());
+                session()->put('current_role', $role);
+                session()->put('current_roles', $roles);
             }
 
             return true;
@@ -115,7 +125,6 @@ class AuthService
     {
         cache()->delete('current_unit_hierarchy.' . auth()->user()->employee_id . '.' . session()->get('current_unit', auth()->user())->sub_unit_code);
         cache()->delete('current_units.' . auth()->user()->employee_id);
-        cache()->delete('current_roles.' . auth()->user()->employee_id);
 
         session()->flush();
         auth()->logout();
