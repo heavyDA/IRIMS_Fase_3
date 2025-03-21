@@ -977,8 +977,8 @@ class Worksheet extends Model
             ->leftJoin('heatmaps as hi', 'hi.id', '=', 'w.inherent_impact_probability_scale_id')
             ->leftJoin('latest_monitoring as lm', 'lm.worksheet_id', '=', 'w.id')
             ->leftJoin('ra_monitoring_actualizations as ma', 'ma.monitoring_id', '=', 'lm.id')
-            ->leftJoin('ra_worksheet_mitigations as wmit', 'wmit.id', '=', 'ma.worksheet_mitigation_id')
-            ->leftJoin('ra_worksheet_incidents as winc', 'winc.id', '=', 'wmit.worksheet_incident_id')
+            ->leftJoin('ra_worksheet_incidents as winc', 'winc.worksheet_id', '=', 'w.id')
+            ->leftJoin('ra_worksheet_mitigations as wmit', 'wmit.worksheet_incident_id', '=', 'winc.id')
             ->leftJoin('ra_monitoring_residuals as mr', 'mr.monitoring_id', '=', 'lm.id')
             ->leftJoin('heatmaps as hr', 'hr.id', '=', 'mr.impact_probability_scale_id');
     }

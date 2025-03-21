@@ -66,8 +66,7 @@ class MonitoringController extends Controller
                         ->where('w.sub_unit_code', $unit?->sub_unit_code ?? '-')
                 )
                 ->when(request('document_status'), fn($q) => $q->where('w.status_monitoring', request('document_status')))
-                ->where('worksheet_year', request('year', date('Y')))
-                ->groupBy('lm.id');
+                ->where('worksheet_year', request('year', date('Y')));
 
             return DataTables::query($worksheets)
                 ->filter(function ($q) {
@@ -82,8 +81,8 @@ class MonitoringController extends Controller
                                 ->orWhereLike('w.risk_chronology_body', '%' . $value . '%')
                                 ->orWhereLike('wmit.mitigation_plan', '%' . $value . '%')
                                 ->orWhereLike('ma.actualization_plan_output', '%' . $value . '%')
-                                ->orWhereLike('w.inherent_risk_level', '%' . $value . '%')
-                                ->orWhereLike('w.inherent_risk_scale', '%' . $value . '%')
+                                ->orWhereLike('hi.risk_level', '%' . $value . '%')
+                                ->orWhereLike('hi.risk_scale', '%' . $value . '%')
                                 ->orWhereLike('ma.quarter', '%' . $value . '%')
                                 ->orWhereLike('mr.risk_level', '%' . $value . '%')
                                 ->orWhereLike('mr.risk_scale', '%' . $value . '%')
