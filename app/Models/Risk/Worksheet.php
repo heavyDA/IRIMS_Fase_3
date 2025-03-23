@@ -980,7 +980,8 @@ class Worksheet extends Model
             ->leftJoin('ra_worksheet_incidents as winc', 'winc.worksheet_id', '=', 'w.id')
             ->leftJoin('ra_worksheet_mitigations as wmit', 'wmit.worksheet_incident_id', '=', 'winc.id')
             ->leftJoin('ra_monitoring_residuals as mr', 'mr.monitoring_id', '=', 'lm.id')
-            ->leftJoin('heatmaps as hr', 'hr.id', '=', 'mr.impact_probability_scale_id');
+            ->leftJoin('heatmaps as hr', 'hr.id', '=', 'mr.impact_probability_scale_id')
+            ->groupBy('lm.id', 'wmit.id');
     }
 
     public static function progressMonitoringQuery(?string $unitCode = 'ap', ?int $year = null)
