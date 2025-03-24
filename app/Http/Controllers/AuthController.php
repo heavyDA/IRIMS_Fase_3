@@ -37,6 +37,7 @@ class AuthController extends Controller
         try {
             $authenticate = $this->authService->login($request->only('username', 'password'));
             if ($authenticate) {
+                session()->put('current_timezone', is_timezone_available($request->timezone) ? $request->timezone : 'Asia/Jakarta');
                 return redirect()->route('dashboard.index');
             }
 
