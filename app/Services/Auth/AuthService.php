@@ -98,7 +98,11 @@ class AuthService
                             'unit_code_doc' => $position->unit_code_doc,
                             'sub_unit_code_doc' => $position->sub_unit_code_doc,
                         ]);
-                        $unit->syncRoles(explode(',', $position->assigned_roles) ?? ['risk admin']);
+                        $unit->syncRoles(
+                            $position->position_name == replace_pgs_from_position($employee->position_name) ?
+                                (explode(',', $position->assigned_roles) ?? ['risk admin']) :
+                                ['risk admin']
+                        );
                     }
                 }
 
