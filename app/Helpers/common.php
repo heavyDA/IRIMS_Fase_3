@@ -6,7 +6,14 @@ use Carbon\Carbon;
 if (!function_exists('format_date')) {
     function format_date(string $date): Carbon
     {
-        return Carbon::parse($date)->setTimeZone(session()->get('current_timezone', 'Asia/Jakarta'));
+        return Carbon::parse($date);
+    }
+}
+
+if (!function_exists('is_timezone_available')) {
+    function is_timezone_available(?string $timezone): bool
+    {
+        return in_array($timezone, timezone_identifiers_list(DateTimeZone::PER_COUNTRY, countryCode: 'ID'));
     }
 }
 
