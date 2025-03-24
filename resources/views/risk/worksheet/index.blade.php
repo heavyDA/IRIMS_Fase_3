@@ -75,22 +75,12 @@
                                     @endif
 
                                     @isset($worksheet)
-                                        @if (str_contains(request()->route()->getName(), 'edit') &&
-                                                (($worksheet->status == \App\Enums\DocumentStatus::DRAFT->value && session()->get('')) ||
-                                                    ($worksheet->status == \App\Enums\DocumentStatus::ON_REVIEW->value &&
-                                                        session()->get('current_unit')->hasRole('risk owner')) ||
-                                                    session()->get('current_unit')->hasAnyRole(['risk analis', 'risk analis pusat'])))
-                                            <a href="{{ route('risk.worksheet.edit', $worksheet->getEncryptedId()) }}"
-                                                style="min-width: 128px;" class="btn btn-success">
-                                                <span><i class="ti ti-edit"></i></span>&nbsp;Edit
-                                            </a>
-                                        @endif
                                         @if (
                                             ($worksheet->status == 'draft' &&
                                                 in_array(session()->get('current_role')?->name, ['risk admin', 'risk owner', 'risk analis'])) ||
                                                 ($worksheet->status == 'on review' &&
                                                     in_array(session()->get('current_role')?->name, ['risk owner', 'risk analis'])) ||
-                                                session()->get('current_unit')->hasAnyRole('root|risk analis|root'))
+                                                session()->get('current_unit')->hasAnyRole('administrator|risk analis|root'))
                                             <form action="{{ route('risk.worksheet.destroy', $worksheet->getEncryptedId()) }}"
                                                 method="POST">
                                                 @csrf

@@ -9,9 +9,14 @@ use App\Http\Requests\RBAC\UserUpdateRequest;
 use Yajra\DataTables\Facades\DataTables;
 
 use App\Enums\State;
+use App\Enums\UnitSourceType;
 use App\Models\Master\Position;
+use App\Models\UserUnit;
 use Exception;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
 
 class UserController extends Controller
 {
@@ -21,24 +26,33 @@ class UserController extends Controller
     public function index()
     {
         if (request()->ajax()) {
-            $users = User::query()->with('roles')
-                ->whereNotIn(
-                    'username',
-                    ['rahasia']
-                );
+            $users = UserUnit::query()
+                ->with('user', 'roles')
+                ->whereDoesntHave('roles', function ($query) {
+                    $query->where('name', 'root');
+                });
+            // $users = User::query()->with('roles')
+            //     ->whereNotIn(
+            //         'username',
+            //         ['rahasia']
+            //     );
+
             return DataTables::eloquent($users)
-                ->addColumn('is_local_user', function ($user) {
-                    return is_null($user->password);
+                ->editColumn('source_type', function ($user) {
+                    if ($user->source_type == UnitSourceType::SYSTEM->value) {
+                        return '<span class="badge badge-sm bg-info-transparent">Lokal</span>';
+                    }
+                    return '<span class="badge badge-sm bg-secondary-transparent">E-Office</span>';
                 })
                 ->addColumn('action', function ($user) {
                     $actions = [
-                        ['id' => $user->id, 'route' => route('rbac.users.edit', $user->id), 'type' => 'link', 'text' => 'edit', 'permission' => 'rbac.user.edit'],
-                        ['id' => $user->id, 'route' => route('rbac.users.destroy', $user->id), 'type' => 'delete', 'text' => 'hapus', 'permission' => 'rbac.user.destroy'],
+                        ['id' => $user->getEncryptedId(), 'route' => route('rbac.users.edit', $user->getEncryptedId()), 'type' => 'link', 'text' => 'edit', 'permission' => 'rbac.user.edit'],
+                        ['id' => $user->getEncryptedId(), 'route' => route('rbac.users.destroy', $user->getEncryptedId()), 'type' => 'delete', 'text' => 'hapus', 'permission' => 'rbac.user.destroy'],
                     ];
 
                     return view('layouts.partials._table_action', compact('actions'));
                 })
-                ->rawColumns(['action'])
+                ->rawColumns(['action', 'source_type'])
                 ->make(true);
         }
 
@@ -66,23 +80,46 @@ class UserController extends Controller
             ]);
 
             $position = Position::whereSubUnitCode($request->sub_unit_code)->first();
-            DB::beginTransaction();
-            $roles =
-                array_merge(
-                    $position->assigned_roles ? explode(',', $position->assigned_roles) : ['risk admin'],
-                    $request->role
-                );
 
-            $user = User::create(
-                $request->only(
-                    'email',
-                    'username',
-                    'password',
-                    'employee_id',
-                    'employee_name',
-                    'position_name',
-                    'sub_unit_code',
-                ) +
+            DB::beginTransaction();
+            $user = User::where('employee_id', $request->employee_id)
+                ->orWhere('username', $request->username)
+                ->first();
+
+            if (!$user) {
+                $user = User::create(
+                    $request->only(
+                        'email',
+                        'username',
+                        'password',
+                        'employee_id',
+                        'employee_name',
+                        'position_name',
+                        'sub_unit_code',
+                    ) +
+                        [
+                            'unit_code' => $position->unit_code,
+                            'unit_name' => $position->unit_name,
+                            'sub_unit_code' => $position->sub_unit_code,
+                            'sub_unit_name' => $position->sub_unit_name,
+                            'organization_code' => $position->sub_unit_code,
+                            'organization_name' => $position->sub_unit_name,
+                            'personnel_area_code' => $position->branch_code,
+                            'personnel_area_name' => '',
+                            'employee_grade_code' => '-',
+                            'employee_grade' => '-',
+                            'image_url' => '',
+                            'is_active' => true,
+                        ]
+                );
+            }
+
+            $unit = $user->units()
+                ->updateOrCreate(
+                    [
+                        'sub_unit_code' => $position->sub_unit_code,
+                        'position_name' => $request->position_name,
+                    ],
                     [
                         'unit_code' => $position->unit_code,
                         'unit_name' => $position->unit_name,
@@ -94,10 +131,12 @@ class UserController extends Controller
                         'employee_grade_code' => '-',
                         'employee_grade' => '-',
                         'image_url' => '',
+                        'source_type' => UnitSourceType::SYSTEM->value,
+                        'expired_at' => $request->expired_at,
                         'is_active' => true,
                     ]
-            );
-            $user->syncRoles($roles);
+                );
+            $unit->syncRoles($request->role);
 
             DB::commit();
             flash_message('flash_message', 'Pengguna berhasil disimpan', State::SUCCESS);
@@ -105,26 +144,19 @@ class UserController extends Controller
         } catch (Exception $e) {
             DB::rollBack();
             logger()->error('[Access > User] failed to create user. ' . $e->getMessage(), [$e]);
-            flash_message('flash_message', 'Gagal menambahkan pengguna baru', State::ERROR);
+            flash_message('flash_message', 'Gagal menambahkan pengguna', State::ERROR);
             return redirect()->route('rbac.users.index');
         }
     }
 
     /**
-     * Display the specified resource.
-     */
-    public function show(User $user)
-    {
-        //
-    }
-
-    /**
      * Show the form for editing the specified resource.
      */
-    public function edit(User $user)
+    public function edit(string $user)
     {
-        $title = 'Edit Pengguna';
-        $user->load('roles');
+        $user = UserUnit::findByEncryptedIdOrFail($user);
+        $user->load('user', 'roles');
+
 
         $roles = [];
         foreach ($user->roles as $role) {
@@ -132,14 +164,28 @@ class UserController extends Controller
         }
 
         $user->role = $roles;
+
+        $title = 'Edit Pengguna';
         return view('RBAC.users.edit', compact('user', 'title'));
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(UserUpdateRequest $request, User $user)
+    public function update(UserUpdateRequest $request, string $user)
     {
+        $user = UserUnit::findByEncryptedIdOrFail($user);
+        $user->load('user');
+
+        $validator = Validator::make($request->only('username', 'employee_id'), [
+            'username' => 'unique:users,username,' . $user->user->id,
+            'employee_id' => 'unique:users,employee_id,' . $user->user->id,
+        ]);
+
+        if ($validator->fails()) {
+            throw ValidationException::withMessages($validator->errors()->toArray());
+        }
+
         try {
             $data = $request->only(
                 'email',
@@ -165,39 +211,52 @@ class UserController extends Controller
                 );
             }
 
-            $position = Position::whereSubUnitCode($request->sub_unit_code)->first();
+            $position = Position::whereSubUnitCode($request->sub_unit_code)->firstOrFail();
 
             DB::beginTransaction();
-            $roles =
-                array_merge(
-                    $position->assigned_roles ? explode(',', $position->assigned_roles) : ['risk admin'],
-                    $request->role
-                );
 
-            $user->update(
-                $data +
-                    [
-                        'unit_code' => $position->unit_code,
-                        'unit_name' => $position->unit_name,
-                        'sub_unit_name' => $position->sub_unit_name,
-                        'organization_code' => $position->sub_unit_code,
-                        'organization_name' => $position->sub_unit_name,
-                        'personnel_area_code' => $position->branch_code,
-                        'personnel_area_name' => '',
-                        'employee_grade_code' => '-',
-                        'employee_grade' => '-',
-                        'image_url' => $user->image_url,
-                    ]
+            $user->update([
+                'unit_code' => $position->unit_code,
+                'unit_name' => $position->unit_name,
+                'sub_unit_code' => $position->sub_unit_code,
+                'sub_unit_name' => $position->sub_unit_name,
+                'organization_code' => $position->sub_unit_code,
+                'organization_name' => $position->sub_unit_name,
+                'personnel_area_code' => $position->branch_code,
+                'personnel_area_name' => '',
+                'employee_grade_code' => '-',
+                'employee_grade' => '-',
+                'image_url' => '',
+                'is_active' => true,
+            ] + ($user->source_type == UnitSourceType::EOFFICE->value ? [] : $request->only('expired_at')));
+            $user->syncRoles($request->role);
+
+            $user->user->update(
+                $data + [
+                    'unit_code' => $position->unit_code,
+                    'unit_name' => $position->unit_name,
+                    'sub_unit_code' => $position->sub_unit_code,
+                    'sub_unit_name' => $position->sub_unit_name,
+                    'organization_code' => $position->sub_unit_code,
+                    'organization_name' => $position->sub_unit_name,
+                    'personnel_area_code' => $position->branch_code,
+                    'personnel_area_name' => '',
+                    'employee_grade_code' => '-',
+                    'employee_grade' => '-',
+                    'image_url' => '',
+                    'is_active' => true,
+                ]
             );
-            $user->syncRoles($roles);
 
             DB::commit();
+
+            DB::table('sessions')->where('user_id', $user->user->id)->delete();
             flash_message('flash_message', 'Pengguna berhasil disimpan', State::SUCCESS);
             return redirect()->route('rbac.users.index');
         } catch (Exception $e) {
             DB::rollBack();
             logger()->error('[Access > User] failed to create user. ' . $e->getMessage(), [$e]);
-            flash_message('flash_message', 'Gagal menambahkan pengguna baru', State::ERROR);
+            flash_message('flash_message', 'Gagal memperbarui pengguna', State::ERROR);
             return redirect()->route('rbac.users.index');
         }
     }

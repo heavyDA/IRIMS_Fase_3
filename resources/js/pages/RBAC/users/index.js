@@ -4,8 +4,8 @@ import debounce from "~js/utils/debounce";
 const columns = [
     {
         title: 'Nama Lengkap',
-        data: 'employee_name',
-        name: 'employee_name',
+        data: 'user.employee_name',
+        name: 'user.employee_name',
         render: function (data, type, row) {
             if (type !== 'display') {
                 return data
@@ -13,14 +13,14 @@ const columns = [
 
             return `<div class="d-flex flex-column">
                 <p>${data}</p>
-                <small><strong>${row.employee_id}</strong></small>
+                <small><strong>${row.user.employee_id}</strong></small>
             </div>`
         }
     },
     {
         title: 'Email',
-        data: 'email',
-        name: 'email'
+        data: 'user.email',
+        name: 'user.email'
     },
     {
         title: 'Unit',
@@ -41,20 +41,9 @@ const columns = [
     },
     {
         title: 'Status',
-        data: 'is_local_user',
-        name: 'is_local_user',
-        searchable: false,
-        render: function (data, type, row) {
-            if (type !== 'display') {
-                return data
-            }
-
-            if (data) {
-                return `<span class="badge badge-sm bg-secondary-transparent">E-Office</span>`
-            }
-
-            return `<span class="badge badge-sm bg-info-transparent">Lokal</span>`
-        }
+        data: 'source_type',
+        name: 'source_type',
+        searchable: false
     },
     {
         title: 'Roles',
@@ -115,5 +104,5 @@ resetTableButton?.addEventListener('click', () => {
     if (searchField) {
         searchField.value = ''
     }
-    datatable.draw()
+    datatable.search('').draw()
 })

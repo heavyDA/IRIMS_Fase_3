@@ -86,6 +86,14 @@
                     @enderror
                 </div>
                 <div class="col-12">
+                    <label for="expired_at">Tanggal Akhir Berlaku</label>
+                    <input value="{{ old('expired_at') }}" name="expired_at" type="date" required
+                        class="form-control {{ $errors->has('expired_at') ? 'is-invalid' : null }}" />
+                    @error('expired_at')
+                        <x-forms.error :message="$message"></x-forms.error>
+                    @enderror
+                </div>
+                <div class="col-12">
                     <label for="username">Username</label>
                     <input value="{{ old('username') }}" name="username" type="text" required
                         class="form-control {{ $errors->has('username') ? 'is-invalid' : null }}" />
@@ -95,7 +103,7 @@
                 </div>
                 <div class="col-12">
                     <label for="password">Kata Sandi</label>
-                    <input value="{{ old('password') }}" name="password" type="password" required
+                    <input value="{{ old('password') }}" name="password" type="password"
                         class="form-control {{ $errors->has('password') ? 'is-invalid' : null }}" />
                     @error('password')
                         <x-forms.error :message="$message"></x-forms.error>
@@ -104,7 +112,7 @@
                 <div class="col-12">
                     <label for="password_confirmation">Konfirmasi Kata Sandi</label>
                     <input value="{{ old('password_confirmation') }}" name="password_confirmation"
-                        type="password_confirmation" required
+                        type="password_confirmation"
                         class="form-control {{ $errors->has('password_confirmation') ? 'is-invalid' : null }}" />
                     @error('password_confirmation')
                         <x-forms.error :message="$message"></x-forms.error>
