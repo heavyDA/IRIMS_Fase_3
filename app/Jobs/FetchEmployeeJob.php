@@ -62,6 +62,14 @@ class FetchEmployeeJob implements ShouldQueue
 
 
             foreach ($officials as $official) {
+                $headUnit = Position::where('sub_unit_code', $official->sub_unit_code)
+                    ->first();
+
+                if (!$headUnit) {
+                    logger()->debug("[FetchEmployeeJob] Position [{$official->sub_unit_code}] {$official->sub_unit_name} not found from Employee [$official->employee_id] {$official->employee_name}", ['data' => $official]);
+                    continue;
+                }
+
                 $user = User::updateOrCreate(
                     ['employee_id' => $official->employee_id],
                     (array) $official
@@ -73,21 +81,31 @@ class FetchEmployeeJob implements ShouldQueue
                     $updated += 1;
                 }
 
-                $unit = UserUnit::updateOrCreate(
+                $unit = $user->units()->updateOrCreate(
                     [
-                        'user_id' => $user->id,
                         'source_type' => $sourceType,
                         'sub_unit_code' => $official->sub_unit_code,
                         'position_name' => $official->position_name,
                     ],
-                    (array) $official
+                    [
+                        'branch_code' => $headUnit->branch_code,
+                        'unit_code' => $headUnit->unit_code,
+                        'unit_code_doc' => $headUnit->unit_code_doc,
+                        'unit_name' => $headUnit->unit_name,
+                        'sub_unit_code_doc' => $headUnit->sub_unit_code_doc,
+                        'sub_unit_name' => $headUnit->sub_unit_name,
+                        'organization_code' => $headUnit->organization_code,
+                        'organization_name' => $headUnit->organization_name,
+                        'personnel_area_code' => $official->personnel_area_code,
+                        'personnel_area_name' => $official->personnel_area_name,
+                        'employee_grade_code' => $official->employee_grade_code,
+                        'employee_grade' => $official->employee_grade,
+                        'source_type' => $sourceType,
+                    ]
                 );
 
-                $headUnit = Position::whereSubUnitCode($official->sub_unit_code)
-                    ->wherePositionName($official->position_name)
-                    ->first();
                 if ($unit) {
-                    $unit->syncRoles($headUnit ? explode(',', $headUnit->assigned_roles) : ['risk admin']);
+                    $unit->syncRoles($headUnit->position_name == replace_pgs_from_position($official->position_name) ? explode(',', $headUnit->assigned_roles) : ['risk admin']);
                 }
 
                 if (array_key_exists($user->id, $users)) {
@@ -98,6 +116,14 @@ class FetchEmployeeJob implements ShouldQueue
             }
 
             foreach ($staffs as $staff) {
+                $headUnit = Position::where('sub_unit_code', $staff->sub_unit_code)
+                    ->first();
+
+                if (!$headUnit) {
+                    logger()->debug("[FetchEmployeeJob] Position [{$staff->sub_unit_code}] {$staff->sub_unit_name} not found from Employee [$staff->employee_id] {$staff->employee_name}", ['data' => $staff]);
+                    continue;
+                }
+
                 $user = User::updateOrCreate(
                     ['employee_id' => $staff->employee_id],
                     (array) $staff
@@ -109,21 +135,31 @@ class FetchEmployeeJob implements ShouldQueue
                     $updated += 1;
                 }
 
-                $unit = UserUnit::updateOrCreate(
+                $unit = $user->units()->updateOrCreate(
                     [
-                        'user_id' => $user->id,
                         'source_type' => $sourceType,
                         'sub_unit_code' => $staff->sub_unit_code,
                         'position_name' => $staff->position_name,
                     ],
-                    (array) $staff
+                    [
+                        'branch_code' => $headUnit->branch_code,
+                        'unit_code' => $headUnit->unit_code,
+                        'unit_code_doc' => $headUnit->unit_code_doc,
+                        'unit_name' => $headUnit->unit_name,
+                        'sub_unit_code_doc' => $headUnit->sub_unit_code_doc,
+                        'sub_unit_name' => $headUnit->sub_unit_name,
+                        'organization_code' => $headUnit->organization_code,
+                        'organization_name' => $headUnit->organization_name,
+                        'personnel_area_code' => $staff->personnel_area_code,
+                        'personnel_area_name' => $staff->personnel_area_name,
+                        'employee_grade_code' => $staff->employee_grade_code,
+                        'employee_grade' => $staff->employee_grade,
+                        'source_type' => $sourceType,
+                    ]
                 );
 
-                $headUnit = Position::whereSubUnitCode($staff->sub_unit_code)
-                    ->wherePositionName($staff->position_name)
-                    ->first();
                 if ($unit) {
-                    $unit->syncRoles($headUnit ? explode(',', $headUnit->assigned_roles) : ['risk admin']);
+                    $unit->syncRoles($headUnit->position_name == replace_pgs_from_position($staff->position_name) ? explode(',', $headUnit->assigned_roles) : ['risk admin']);
                 }
 
                 if (array_key_exists($user->id, $users)) {

@@ -297,7 +297,7 @@ class DashboardController extends Controller
         $level = Role::getTraverseLevel($unit);
 
         $data = Monitoring::monitoring_progress_each_unit_query($unit, $level, request('year', date('Y')))
-            ->whereNotLike('lu.personnel_area_code', 'Reg %')
+            ->whereNotLike('lu.personnel_area_code', 'REG%')
             ->get()
             ->map(function ($monitoring) {
                 $months = collect($monitoring)->flatten()->toArray();

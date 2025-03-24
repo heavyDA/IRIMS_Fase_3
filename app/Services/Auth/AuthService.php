@@ -91,10 +91,13 @@ class AuthService
                  */
                 if ($unit->source_type === UnitSourceType::EOFFICE->value) {
                     $position = Position::where('sub_unit_code', $unit->sub_unit_code)
-                        ->where('position_name', replace_pgs_from_position($unit->position_name))
                         ->first();
 
                     if ($position) {
+                        $unit->update([
+                            'unit_code_doc' => $position->unit_code_doc,
+                            'sub_unit_code_doc' => $position->sub_unit_code_doc,
+                        ]);
                         $unit->syncRoles(explode(',', $position->assigned_roles) ?? ['risk admin']);
                     }
                 }

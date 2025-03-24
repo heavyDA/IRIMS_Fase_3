@@ -43,16 +43,17 @@
                     </div>
                 </div>
             </div>
-            <table id="user-table" class="table table-bordered table-stripped display nowrap" style="width: 100%;">
+            <table id="user-table" class="table table-bordered table-stripped display"
+                style="width: 100%;table-layout: fixed;border-collapse: collapse;">
                 <thead>
                     <tr>
-                        <th class="table-dark-custom">Nama Lengkap</th>
-                        <th class="table-dark-custom">Email</th>
-                        <th class="table-dark-custom">Unit</th>
-                        <th class="table-dark-custom">Posisi</th>
-                        <th class="table-dark-custom">Status</th>
-                        <th class="table-dark-custom">Roles</th>
-                        <th class="table-dark-custom">Aksi</th>
+                        <th class="table-dark-custom" style="text-align: center !important;">Nama Lengkap/ID</th>
+                        <th class="table-dark-custom" style="text-align: center !important;">Email</th>
+                        <th class="table-dark-custom" style="text-align: center !important;">Unit</th>
+                        <th class="table-dark-custom" style="text-align: center !important;">Posisi</th>
+                        <th class="table-dark-custom" style="text-align: center !important;">Status</th>
+                        <th class="table-dark-custom" style="text-align: center !important;">Role</th>
+                        <th class="table-dark-custom" style="text-align: center !important;">Aksi</th>
                     </tr>
                 </thead>
             </table>

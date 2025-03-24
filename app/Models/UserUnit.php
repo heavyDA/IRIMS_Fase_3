@@ -3,21 +3,24 @@
 namespace App\Models;
 
 use App\Enums\UnitSourceType;
+use App\Traits\HasEncryptedId;
 use Illuminate\Contracts\Auth\Access\Authorizable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Auth\Access\Authorizable as AccessAuthorizable;
-use Illuminate\Support\Str;
 use Spatie\Permission\Traits\HasRoles;
 
 class UserUnit extends Model implements Authorizable
 {
-    use HasRoles, AccessAuthorizable;
+    use HasRoles, AccessAuthorizable, HasEncryptedId;
 
     protected $fillable = [
         'user_id',
+        'branch_code',
         'unit_code',
+        'unit_code_doc',
         'unit_name',
         'sub_unit_code',
+        'sub_unit_code_doc',
         'sub_unit_name',
         'organization_code',
         'organization_name',
@@ -31,6 +34,10 @@ class UserUnit extends Model implements Authorizable
     ];
 
     protected $guard_name = 'web';
+
+    protected $casts = [
+        'expired_at' => 'datetime',
+    ];
 
     public static function boot()
     {

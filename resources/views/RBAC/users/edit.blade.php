@@ -21,12 +21,13 @@
 @section('main-content')
     <x-card>
         <x-slot name="body">
-            <form method="POST" action="{{ route('rbac.users.update', $user->id) }}" class="row gap-2" id="userForm">
+            <form method="POST" action="{{ route('rbac.users.update', $user->getEncryptedId()) }}" class="row gap-2"
+                id="userForm">
                 @csrf
                 @method('PUT')
                 <div class="col-12">
                     <label for="employee_id">Nomor Pegawai</label>
-                    <input value="{{ $user->employee_id }}" name="employee_id" type="text" required
+                    <input value="{{ $user->user->employee_id }}" name="employee_id" type="text" required
                         class="form-control {{ $errors->has('employee_id') ? 'is-invalid' : null }}" />
                     @error('employee_id')
                         <x-forms.error :message="$message"></x-forms.error>
@@ -34,7 +35,7 @@
                 </div>
                 <div class="col-12">
                     <label for="employee_name">Nama Pegawai</label>
-                    <input value="{{ $user->employee_name }}" name="employee_name" type="text" required
+                    <input value="{{ $user->user->employee_name }}" name="employee_name" type="text" required
                         class="form-control {{ $errors->has('employee_name') ? 'is-invalid' : null }}" />
                     @error('employee_name')
                         <x-forms.error :message="$message"></x-forms.error>
@@ -42,7 +43,7 @@
                 </div>
                 <div class="col-12">
                     <label for="email">Email</label>
-                    <input value="{{ $user->email }}" name="email" type="email" required
+                    <input value="{{ $user->user->email }}" name="email" type="email" required
                         class="form-control {{ $errors->has('email') ? 'is-invalid' : null }}" />
                     @error('email')
                         <x-forms.error :message="$message"></x-forms.error>
@@ -52,14 +53,16 @@
                     <label for="role">Role</label>
                     <select class="form-select {{ $errors->has('role') || $errors->has('role.*') ? 'is-invalid' : null }}"
                         required name="role[]" multiple>
-                        <option value="risk admin" {{ in_array('risk admin', $user->role ?? []) ? 'selected' : null }}>Risk
+                        <option value="risk admin" {{ in_array('risk admin', $user->role) ? 'selected' : null }}>Risk
                             Admin</option>
-                        <option value="risk owner" {{ in_array('risk owner', $user->role ?? []) ? 'selected' : null }}>Risk
+                        <option value="risk owner" {{ in_array('risk owner', $user->role) ? 'selected' : null }}>Risk
                             Owner</option>
-                        <option value="risk otorisator"
-                            {{ in_array('risk otorisator', $user->role ?? []) ? 'selected' : null }}>
-                            Risk
-                            Otorisator</option>
+                        <option value="risk otorisator" {{ in_array('risk otorisator', $user->role) ? 'selected' : null }}>
+                            Risk Otorisator</option>
+                        <option value="risk analis" {{ in_array('risk analis', $user->role) ? 'selected' : null }}>Risk
+                            Analis</option>
+                        <option value="risk reviewer" {{ in_array('risk reviewer', $user->role) ? 'selected' : null }}>
+                            Risk Reviewer</option>
                     </select>
                     @error('role')
                         <x-forms.error :message="$message"></x-forms.error>
@@ -85,8 +88,16 @@
                     @enderror
                 </div>
                 <div class="col-12">
+                    <label for="expired_at">Tanggal Akhir Berlaku</label>
+                    <input value="{{ $user->expired_at->format('Y-m-d') }}" name="expired_at" type="date" required
+                        class="form-control {{ $errors->has('expired_at') ? 'is-invalid' : null }}" />
+                    @error('expired_at')
+                        <x-forms.error :message="$message"></x-forms.error>
+                    @enderror
+                </div>
+                <div class="col-12">
                     <label for="username">Username</label>
-                    <input value="{{ $user->username }}" name="username" type="text" required
+                    <input value="{{ $user->user->username }}" name="username" type="text" required
                         class="form-control {{ $errors->has('username') ? 'is-invalid' : null }}" />
                     @error('username')
                         <x-forms.error :message="$message"></x-forms.error>

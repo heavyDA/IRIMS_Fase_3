@@ -24,14 +24,15 @@ class UserUpdateRequest extends FormRequest
     {
         return [
             'email' => 'required|email',
-            'username' => 'required|unique:users,username' . (request('user') ? ',' . request('user')->id : ''),
+            'username' => 'required',
             'password' => ['nullable', Password::min(8)->mixedCase()->numbers()->symbols(), 'confirmed'],
-            'employee_id' => 'required|unique:users,employee_id' . (request('user') ? ',' . request('user')->id : ''),
+            'employee_id' => 'required',
             'employee_name' => 'required',
             'role' => 'required|array',
             'role.*' => 'in:risk admin,risk owner,risk otorisator,risk analis,risk reviewer',
             'sub_unit_code' => 'required',
             'position_name' => 'required',
+            'expired_at' => 'nullable|date|date_format:Y-m-d',
         ];
     }
 }
