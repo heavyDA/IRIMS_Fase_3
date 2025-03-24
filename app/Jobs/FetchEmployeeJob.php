@@ -105,7 +105,10 @@ class FetchEmployeeJob implements ShouldQueue
                 );
 
                 if ($unit) {
-                    $unit->syncRoles($headUnit->position_name == replace_pgs_from_position($official->position_name) ? explode(',', $headUnit->assigned_roles) : ['risk admin']);
+                    $unit->syncRoles(
+                        $headUnit->position_name == replace_pgs_from_position($official->position_name) ?
+                            (explode(',', $headUnit->assigned_roles) ?? ['risk admin']) : ['risk admin']
+                    );
                 }
 
                 if (array_key_exists($user->id, $users)) {
@@ -159,7 +162,10 @@ class FetchEmployeeJob implements ShouldQueue
                 );
 
                 if ($unit) {
-                    $unit->syncRoles($headUnit->position_name == replace_pgs_from_position($staff->position_name) ? explode(',', $headUnit->assigned_roles) : ['risk admin']);
+                    $unit->syncRoles(
+                        $headUnit->position_name == replace_pgs_from_position($staff->position_name) ?
+                            (explode(',', $headUnit->assigned_roles) ?? ['risk admin']) : ['risk admin']
+                    );
                 }
 
                 if (array_key_exists($user->id, $users)) {
