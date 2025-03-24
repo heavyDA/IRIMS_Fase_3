@@ -64,7 +64,7 @@
                                                         <span class="text-capitalize">{{ $history->created_role }}</span>
                                                     </div>
                                                     <div class="mt-0 pt-0">
-                                                        {{ $history->created_at->format('d F Y H:i') }}
+                                                        {{ $history->created_at->setTimezone(session()->get('current_timezone'))->format('d F Y H:i') }}
                                                     </div>
                                                 </div>
                                                 <div class="timeline-body pt-4 text-dark">

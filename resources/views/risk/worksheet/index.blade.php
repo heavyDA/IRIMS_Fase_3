@@ -73,7 +73,18 @@
                                             <span><i class="ti ti-arrow-back"></i></span>&nbsp;Kembali
                                         </a>
                                     @endif
+
                                     @isset($worksheet)
+                                        @if (str_contains(request()->route()->getName(), 'edit') &&
+                                                (($worksheet->status == \App\Enums\DocumentStatus::DRAFT->value && session()->get('')) ||
+                                                    ($worksheet->status == \App\Enums\DocumentStatus::ON_REVIEW->value &&
+                                                        session()->get('current_unit')->hasRole('risk owner')) ||
+                                                    session()->get('current_unit')->hasAnyRole(['risk analis', 'risk analis pusat'])))
+                                            <a href="{{ route('risk.worksheet.edit', $worksheet->getEncryptedId()) }}"
+                                                style="min-width: 128px;" class="btn btn-success">
+                                                <span><i class="ti ti-edit"></i></span>&nbsp;Edit
+                                            </a>
+                                        @endif
                                         @if (
                                             ($worksheet->status == 'draft' &&
                                                 in_array(session()->get('current_role')?->name, ['risk admin', 'risk owner', 'risk analis'])) ||
@@ -132,7 +143,7 @@
                                                                 class="text-capitalize">{{ $history->created_role }}</span>
                                                         </div>
                                                         <div class="mt-0 pt-0">
-                                                            {{ $history->created_at->translatedFormat('d F Y H:i') }}
+                                                            {{ $history->created_at->setTimezone(session()->get('current_timezone'))->translatedFormat('d F Y H:i') }}
                                                         </div>
                                                     </div>
                                                     <div class="timeline-body pt-4 text-dark">

@@ -33,6 +33,7 @@
                             <p class="h4 fw-semibold mb-4 text-center">{{ config('app.name', 'IRIMS') }}</p>
                             <form id="signinForm" method="POST" action="{{ route('auth.authenticate') }}">
                                 @csrf
+                                <input type="hidden" name="timezone" id="timezone">
                                 @session('validation')
                                     <x-elements.alert :type="$value['type']->value" :message="$value['message']" />
                                 @endsession
@@ -89,6 +90,8 @@
             showPasswordButton.innerHTML = type === 'password' ?
                 `<i class="ri-eye-off-line align-middle">` : `<i class="ri-eye-line align-middle">`;
         });
+
+        document.getElementById('timezone').value = Intl.DateTimeFormat().resolvedOptions().timeZone;
     })
 </script>
 
