@@ -10,6 +10,24 @@ if (!function_exists('format_date')) {
     }
 }
 
+if (!function_exists('string_to_float')) {
+    function string_to_float(string $string): float
+    {
+        if (is_numeric($string)) {
+            return (float) $string;
+        }
+
+        return 0;
+    }
+}
+
+if (!function_exists('array_remove_empty')) {
+    function array_remove_empty(array $array): array
+    {
+        return array_filter($array, fn($value) => $value !== null && $value !== '');
+    }
+}
+
 if (!function_exists('is_timezone_available')) {
     function is_timezone_available(?string $timezone): bool
     {

@@ -36,7 +36,7 @@
                     </a>
                 </div>
                 <div class="col">
-                    <select class="form-select" name="kbumn_risk_category_t2">
+                    <select class="form-select" name="risk_category_t2">
                         <option>Pilih</option>
                     </select>
                 </div>
@@ -44,7 +44,7 @@
             <div class="row mb-3">
                 <div class="col-3">Kategori Risiko T3<span class="text-danger">*</span></div>
                 <div class="col">
-                    <select class="form-select" name="kbumn_risk_category_t3">
+                    <select class="form-select" name="risk_category_t3">
                         <option>Pilih</option>
                     </select>
                 </div>
