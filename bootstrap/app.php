@@ -15,7 +15,6 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->append(PreventExternalRedirects::class);
         $middleware->redirectGuestsTo(fn(Request $request) => route('auth.login'));
-        $middleware->validateCsrfTokens(['/test']);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
