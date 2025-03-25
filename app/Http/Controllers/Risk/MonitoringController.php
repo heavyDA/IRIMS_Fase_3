@@ -25,6 +25,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use League\Flysystem\FilesystemException;
+use Mews\Purifier\Facades\Purifier;
 use Symfony\Component\HttpFoundation\Response;
 use Yajra\DataTables\Facades\DataTables;
 
@@ -218,9 +219,9 @@ class MonitoringController extends Controller
 
             $monitoring->residual()->create($this->residualRequestMapping($request->residual));
             $monitoring->alteration()->create([
-                'body' => $request->alteration['alteration_body'] ?? '',
-                'impact' => $request->alteration['alteration_impact'] ?? '',
-                'description' => $request->alteration['alteration_description'] ?? '',
+                'body' => Purifier::clean($request->alteration['alteration_body'] ?? ''),
+                'impact' => Purifier::clean($request->alteration['alteration_impact'] ?? ''),
+                'description' => Purifier::clean($request->alteration['alteration_description'] ?? ''),
             ]);
             $monitoring->incident()->create($this->incidentRequestMapping($request->incident));
 
@@ -604,7 +605,7 @@ class MonitoringController extends Controller
                 throw new Exception("Target role not found: {$rule}");
             }
             DB::beginTransaction();
-            $this->$rule($monitoring, $request->status, $request->note);
+            $this->$rule($monitoring, strip_tags(Purifier::clean($request->status)), Purifier::clean($request->note));
             DB::commit();
 
             flash_message('flash_message', 'Laporan monitoring berhasil disubmit.', State::SUCCESS);
@@ -711,14 +712,14 @@ class MonitoringController extends Controller
     protected function residualRequestMapping(?array $data = []): array
     {
         return [
-            'quarter' => $data['quarter'],
+            'quarter' => (int) $data['quarter'],
             'impact_scale_id' => $data['impact_scale'] ?? null,
             'impact_probability_scale_id' => $data['impact_probability_scale'] ?? null,
-            'impact_probability' => $data['impact_probability'] ?? 0,
-            'impact_value' => $data['impact_value'] ?? 0,
-            'risk_exposure' => $data['risk_exposure'] ?? 0,
-            'risk_level' => $data['risk_level'] ?? 0,
-            'risk_scale' => $data['risk_scale'] ?? 0,
+            'impact_probability' => (int) $data['impact_probability'] ?? 0,
+            'impact_value' => (float) $data['impact_value'] ?? 0,
+            'risk_exposure' => (float) $data['risk_exposure'] ?? 0,
+            'risk_level' => $data['risk_level'] ?? '',
+            'risk_scale' => $data['risk_scale'] ?? '',
             'risk_mitigation_effectiveness' => string_to_bool($data['risk_mitigation_effectiveness']),
         ];
     }
@@ -727,49 +728,49 @@ class MonitoringController extends Controller
     {
         return [
             'worksheet_mitigation_id' => $data['actualization_mitigation_id'] ?? null,
-            'actualization_mitigation_plan' => $data['actualization_mitigation_plan'] ?? '',
-            'actualization_cost' => $data['actualization_cost'] ?? '',
-            'actualization_cost_absorption' => $data['actualization_cost_absorption'] ?? '',
-            'quarter' => $data['quarter'] ?? '',
+            'actualization_mitigation_plan' => Purifier::clean($data['actualization_mitigation_plan'] ?? ''),
+            'actualization_cost' => (float) $data['actualization_cost'] ?? 0,
+            'actualization_cost_absorption' => (int) $data['actualization_cost_absorption'] ?? 0,
+            'quarter' => (int) $data['quarter'] ?? '',
             'documents' => '',
             'kri_unit_id' => null,
-            'kri_threshold' => $data['actualization_kri_threshold'] ?? '',
-            'kri_threshold_score' => $data['actualization_kri_threshold_score'] ?? '',
-            'actualization_plan_body' => $data['actualization_plan_body'] ?? '',
-            'actualization_plan_output' => $data['actualization_plan_output'] ?? '',
-            'actualization_plan_status' => $data['actualization_plan_status'] ?? '',
-            'actualization_plan_explanation' => $data['actualization_plan_explanation'] ?? '',
-            'actualization_plan_progress' => $data['actualization_plan_progress'] ?? '',
-            'unit_code' => $data['unit_code'] ?? '',
-            'unit_name' => $data['unit_name'] ?? '',
-            'personnel_area_code' => $data['personnel_area_code'] ?? '',
-            'position_name' => $data['position_name'] ?? '',
+            'kri_threshold' => strip_tags(Purifier::clean($data['actualization_kri_threshold'] ?? '')),
+            'kri_threshold_score' => strip_tags(Purifier::clean($data['actualization_kri_threshold_score'] ?? '')),
+            'actualization_plan_body' => Purifier::clean($data['actualization_plan_body'] ?? ''),
+            'actualization_plan_output' => Purifier::clean($data['actualization_plan_output'] ?? ''),
+            'actualization_plan_status' => Purifier::clean($data['actualization_plan_status'] ?? ''),
+            'actualization_plan_explanation' => Purifier::clean($data['actualization_plan_explanation'] ?? ''),
+            'actualization_plan_progress' => (int) $data['actualization_plan_progress'] ?? '',
+            'unit_code' => strip_tags(Purifier::clean($data['unit_code'] ?? '')),
+            'unit_name' => strip_tags(Purifier::clean($data['unit_name'] ?? '')),
+            'personnel_area_code' => strip_tags(Purifier::clean($data['personnel_area_code'] ?? '')),
+            'position_name' => strip_tags(Purifier::clean($data['position_name'] ?? '')),
         ];
     }
 
     protected function incidentRequestMapping(?array $data = []): array
     {
         return [
-            'incident_body' => $data['incident_body'] ?? '',
-            'incident_identification' => $data['incident_identification'] ?? '',
+            'incident_body' => Purifier::clean($data['incident_body'] ?? ''),
+            'incident_identification' => Purifier::clean($data['incident_identification'] ?? ''),
             'incident_category_id' => check_select_option_value($data['incident_category'] ?? ''),
             'incident_source' => check_select_option_value($data['incident_source'] ?? ''),
-            'incident_cause' => $data['incident_cause'] ?? '',
-            'incident_handling' => $data['incident_handling'] ?? '',
-            'incident_description' => $data['incident_description'] ?? '',
+            'incident_cause' => Purifier::clean($data['incident_cause'] ?? ''),
+            'incident_handling' => Purifier::clean($data['incident_handling'] ?? ''),
+            'incident_description' => Purifier::clean($data['incident_description'] ?? ''),
             'risk_category_t2_id' => check_select_option_value($data['risk_category_t2'] ?? ''),
             'risk_category_t3_id' => check_select_option_value($data['risk_category_t3'] ?? ''),
-            'loss_description' => $data['loss_description'] ?? '',
-            'loss_value' => $data['loss_value'] ?? '',
+            'loss_description' => Purifier::clean($data['loss_description'] ?? ''),
+            'loss_value' => (float) $data['loss_value'] ?? '',
             'incident_repetitive' => string_to_bool($data['incident_repetitive'] ?? ''),
             'incident_frequency_id' => check_select_option_value($data['incident_frequency'] ?? ''),
-            'mitigation_plan' => $data['mitigation_plan'] ?? '',
-            'actualization_plan' => $data['actualization_plan'] ?? '',
-            'follow_up_plan' => $data['follow_up_plan'] ?? '',
-            'related_party' => $data['related_party'] ?? '',
+            'mitigation_plan' => Purifier::clean($data['mitigation_plan'] ?? ''),
+            'actualization_plan' => Purifier::clean($data['actualization_plan'] ?? ''),
+            'follow_up_plan' => Purifier::clean($data['follow_up_plan'] ?? ''),
+            'related_party' => Purifier::clean($data['related_party'] ?? ''),
             'insurance_status' => string_to_bool($data['insurance_status'] ?? ''),
-            'insurance_permit' => $data['insurance_permit'] ?? '',
-            'insurance_claim' => $data['insurance_claim'] ?? '',
+            'insurance_permit' => (float) $data['insurance_permit'] ?? '',
+            'insurance_claim' => (float) $data['insurance_claim'] ?? '',
         ];
     }
 }

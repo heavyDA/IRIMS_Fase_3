@@ -258,10 +258,8 @@ const worksheet = {
         company_name: null,
         company_code: null,
         target_body: null,
-        kbumn_target: null,
-        kbumn_risk_category: null,
-        kbumn_risk_category_t3: null,
-        kbumn_risk_category_t2: null,
+        risk_category_t3: null,
+        risk_category_t2: null,
         existing_control_type: null,
         existing_control_body: null,
         control_effectiveness_assessment: null,
@@ -606,10 +604,10 @@ const identificationEndDate = identificationForm.querySelector(
 );
 
 const identificationRiskCategoryT2 = identificationForm.querySelector(
-    '[name="kbumn_risk_category_t2"]'
+    '[name="risk_category_t2"]'
 );
 const identificationRiskCategoryT3 = identificationForm.querySelector(
-    '[name="kbumn_risk_category_t3"]'
+    '[name="risk_category_t3"]'
 );
 const identificationExistingControlType = identificationForm.querySelector(
     '[name="existing_control_type"]'
@@ -2044,6 +2042,10 @@ if (worksheet?.mitigations[0]?.mitigation_pic) {
         personnel_area_name: worksheet.mitigations[0].personnel_area_name,
         sub_unit_code: worksheet.mitigations[0].sub_unit_code,
         sub_unit_name: worksheet.mitigations[0].sub_unit_name,
+        organization_code: worksheet.mitigations[0].organization_code,
+        organization_name: worksheet.mitigations[0].organization_name,
+        unit_code: worksheet.mitigations[0].unit_code,
+        unit_name: worksheet.mitigations[0].unit_name,
         position_name: worksheet.mitigations[0].position_name,
     };
     mitigationPic.value = worksheet.mitigations[0].mitigation_pic;
@@ -2085,12 +2087,12 @@ for (const key of Object.keys(fetchers.data.identification)) {
                 fetchers.data.identification[key].toString()
             );
             identificationRiskImpact.dispatchEvent(new Event("change"));
-        } else if (key == "kbumn_risk_category_t2") {
+        } else if (key == "risk_category_t2") {
             identificationRiskCategoryT2Choices.setChoiceByValue(
                 fetchers.data.identification[key]
             );
             identificationRiskCategoryT2.dispatchEvent(new Event("change"));
-        } else if (key == "kbumn_risk_category_t3") {
+        } else if (key == "risk_category_t3") {
             identificationRiskCategoryT3Choices.setChoiceByValue(
                 fetchers.data.identification[key]
             );

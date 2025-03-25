@@ -259,10 +259,8 @@ const worksheet = {
         company_name: null,
         company_code: null,
         target_body: null,
-        kbumn_target: null,
-        kbumn_risk_category: null,
-        kbumn_risk_category_t3: null,
-        kbumn_risk_category_t2: null,
+        risk_category_t3: null,
+        risk_category_t2: null,
         existing_control_type: null,
         existing_control_body: null,
         control_effectiveness_assessment: null,
@@ -625,10 +623,10 @@ const identificationEndDate = identificationForm.querySelector(
 );
 
 const identificationRiskCategoryT2 = identificationForm.querySelector(
-    '[name="kbumn_risk_category_t2"]'
+    '[name="risk_category_t2"]'
 );
 const identificationRiskCategoryT3 = identificationForm.querySelector(
-    '[name="kbumn_risk_category_t3"]'
+    '[name="risk_category_t3"]'
 );
 const identificationExistingControlType = identificationForm.querySelector(
     '[name="existing_control_type"]'

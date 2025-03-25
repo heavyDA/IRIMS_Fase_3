@@ -2,12 +2,17 @@
 
 namespace App\Http\Controllers\Risk;
 
+use App\DTO\Worksheet\WorksheetRequestDTO;
 use Symfony\Component\HttpFoundation\Response as ResponseStatus;
 use App\Enums\DocumentStatus;
 use App\Enums\State;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Risk\StoreWorksheetRequest;
+use App\Http\Requests\Risk\UpdateWorksheetRequest;
+use App\Models\Master\BUMNScale;
 use App\Models\Master\ControlEffectivenessAssessment;
 use App\Models\Master\ExistingControlType;
+use App\Models\Master\Heatmap;
 use App\Models\Master\KBUMNRiskCategory;
 use App\Models\Master\KRIThreshold;
 use App\Models\Master\KRIUnit;
@@ -21,19 +26,24 @@ use App\Models\Risk\WorksheetIdentification;
 use App\Models\Risk\WorksheetMitigation;
 use App\Services\PositionService;
 use App\Services\RoleService;
+use App\Services\Worksheet\WorksheetService;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Mews\Purifier\Facades\Purifier;
 use Yajra\DataTables\Facades\DataTables;
 
 class WorksheetController extends Controller
 {
     public function __construct(
         private RoleService $roleService,
-        private PositionService $positionService
-    ) {}
+        private PositionService $positionService,
+        private WorksheetService $worksheetService
+    ) {
+        $this->worksheetService = new WorksheetService();
+    }
 
     public function index()
     {
@@ -66,141 +76,128 @@ class WorksheetController extends Controller
         return view('risk.worksheet.index');
     }
 
-    public function store(Request $request)
+    public function store(StoreWorksheetRequest $request)
     {
+        $validated = $request->validated();
+
+        $data['context'] = [
+            'worksheet_number' => strip_tags(Purifier::clean($validated['context']['risk_number'])),
+            'company_code' => 'API',
+            'company_name' => 'PT Angkasa Pura Indonesia',
+            'status' => DocumentStatus::DRAFT->value,
+            'status_monitoring' => DocumentStatus::ON_MONITORING->value,
+            'created_by' => auth()->user()->employee_id,
+            'target_body' => Purifier::clean($validated['context']['target_body']),
+            'risk_number' => strip_tags(Purifier::clean($validated['context']['risk_number'])),
+        ] + $this->roleService->getCurrentUnit()->only([
+            'unit_code',
+            'unit_name',
+            'sub_unit_code',
+            'sub_unit_name',
+            'organization_code',
+            'organization_name',
+            'personnel_area_code',
+            'personnel_area_name',
+        ]);
+
+        $data['strategies'] = array_map(function ($strategy) {
+            return [
+                'body' => Purifier::clean($strategy['strategy_body'] ?? ''),
+                'expected_feedback' => Purifier::clean($strategy['strategy_expected_feedback'] ?? ''),
+                'risk_value' => Purifier::clean($strategy['strategy_risk_value'] ?? ''),
+                'risk_value_limit' => $strategy['strategy_risk_value_limit'],
+                'decision' => $strategy['strategy_decision'],
+            ];
+        }, $validated['strategies'] ?? []);
+
+        $data['identification'] = [
+            'company_code' => 'API',
+            'company_name' => 'PT Angkasa Pura Indonesia',
+            'risk_category_t2_id' => $validated['identification']['risk_category_t2'],
+            'risk_category_t3_id' => $validated['identification']['risk_category_t3'],
+            'risk_chronology_body' => Purifier::clean($validated['identification']['risk_chronology_body'] ?? ''),
+            'risk_chronology_description' => Purifier::clean($validated['identification']['risk_chronology_description'] ?? ''),
+            'existing_control_type_id' => $validated['identification']['existing_control_type'],
+            'existing_control_body' => Purifier::clean($validated['identification']['existing_control_body'] ?? ''),
+            'control_effectiveness_assessment_id' => $validated['identification']['control_effectiveness_assessment'],
+            'risk_impact_category' => $validated['identification']['risk_impact_category'],
+            'risk_impact_body' => Purifier::clean($validated['identification']['risk_impact_body'] ?? ''),
+            'risk_impact_start_date' => $validated['identification']['risk_impact_start_date'],
+            'risk_impact_end_date' => $validated['identification']['risk_impact_end_date'],
+            'inherent_body' => Purifier::clean($validated['identification']['inherent_body'] ?? ''),
+            'inherent_impact_value' => (float) $validated['identification']['inherent_impact_value'],
+            'inherent_impact_scale_id' => $validated['identification']['inherent_impact_scale'],
+            'inherent_impact_probability' => (int) $validated['identification']['inherent_impact_probability'],
+            'inherent_impact_probability_scale_id' => $validated['identification']['inherent_impact_probability_scale'],
+            'inherent_risk_exposure' => (float) $validated['identification']['inherent_risk_exposure'],
+            'inherent_risk_level' => '',
+            'inherent_risk_scale' => '',
+        ];
+
+        for ($i = 1; $i <= 4; $i++) {
+            $data['identification']["residual_{$i}_impact_value"] = (float) $validated['identification']['residual'][$i]['impact_value'] ?? 0;
+            $data['identification']["residual_{$i}_impact_scale_id"] = $validated['identification']['residual'][$i]['impact_scale'] ?? null;
+            $data['identification']["residual_{$i}_impact_probability"] = (int) $validated['identification']['residual'][$i]['impact_probability'] ?? 0;
+            $data['identification']["residual_{$i}_impact_probability_scale_id"] = $validated['identification']['residual'][$i]['impact_probability_scale'] ?? null;
+            $data['identification']["residual_{$i}_risk_exposure"] = (float) $validated['identification']['residual'][$i]['risk_exposure'] ?? 0;
+            $data['identification']["residual_{$i}_risk_level"] = '';
+            $data['identification']["residual_{$i}_risk_scale"] = '';
+        }
+
+        $data['incidents'] = array_map(function ($incident) {
+            return [
+                'risk_cause_number' => strip_tags(Purifier::clean($incident['risk_cause_number'] ?? '')),
+                'risk_cause_code' => strip_tags(Purifier::clean($incident['risk_cause_code'] ?? '')),
+                'risk_cause_body' => Purifier::clean($incident['risk_cause_body'] ?? ''),
+                'kri_body' => strip_tags(Purifier::clean($incident['kri_body'] ?? '')),
+                'kri_unit_id' => $incident['kri_unit'],
+                'kri_threshold_safe' => strip_tags(Purifier::clean($incident['kri_threshold_safe'] ?? '')),
+                'kri_threshold_caution' => strip_tags(Purifier::clean($incident['kri_threshold_caution'] ?? '')),
+                'kri_threshold_danger' => strip_tags(Purifier::clean($incident['kri_threshold_danger'] ?? '')),
+            ];
+        }, $validated['incidents'] ?? []);
+        $data['mitigations'] = array_map(function ($mitigation) {
+            return [
+                'risk_cause_number' => strip_tags(Purifier::clean($mitigation['risk_cause_number'] ?? '')),
+                'risk_treatment_option_id' => (int) $mitigation['risk_treatment_option'],
+                'risk_treatment_type_id' => (int) $mitigation['risk_treatment_type'],
+                'mitigation_plan' => Purifier::clean($mitigation['mitigation_plan'] ?? ''),
+                'mitigation_output' => Purifier::clean($mitigation['mitigation_output'] ?? ''),
+                'mitigation_start_date' => $mitigation['mitigation_start_date'],
+                'mitigation_end_date' => $mitigation['mitigation_end_date'],
+                'mitigation_cost' => (float) $mitigation['mitigation_cost'],
+                'mitigation_rkap_program_type_id' => (int) $mitigation['mitigation_rkap_program_type'],
+                'sub_unit_code' => $mitigation['sub_unit_code']
+            ];
+        }, $validated['mitigations'] ?? []);
+        $dto = WorksheetRequestDTO::fromArray($data);
+        $dto->incidents = $dto->incidents->unique('risk_cause_number');
+
         try {
             DB::beginTransaction();
-            $user = auth()->user();
-            $worksheet = Worksheet::create([
-                'worksheet_code' =>  'WR/' . date('Y') . '/' . Str::random(8),
-                'worksheet_number' => $request->context['risk_number'],
-                'company_code' => 'API',
-                'company_name' => 'PT Angkasa Pura Indonesia',
-                'target_body' => $request->context['target_body'],
-                'status' => DocumentStatus::DRAFT->value,
-                'created_by' => $user->employee_id,
-            ] + $user->only('organization_name', 'organization_code', 'unit_name', 'unit_code', 'sub_unit_name', 'sub_unit_code', 'personnel_area_name', 'personnel_area_code'));
-
-            $strategies = [];
-            foreach ($request->strategies as $index => $items) {
-                $strategy = [];
-                foreach ($items as $key => $value) {
-                    $strategy[str_replace('strategy_', '', $key)] = $value;
-                }
-
-                $strategies[] = $strategy;
-            }
-            $worksheet->strategies()->createMany($strategies);
-
-            $identification = ['created_by' => $user->employee_id];
-            foreach ($request->identification as $key => $value) {
-                if (str_contains($key, 'inherent') || str_contains($key, 'residual')) {
-                    continue;
-                }
-
-                if (in_array($key, ['existing_control_type', 'kbumn_target', 'control_effectiveness_assessment'])) {
-                    $identification[$key . '_id'] = $value == 'Pilih' || !$value ? null : $value;
-                } else if (str_contains($key, 'risk_category')) {
-                    $identification[str_replace('kbumn_', '', $key) . '_id'] = $value == 'Pilih' || !$value ? null : $value;
-                } else {
-                    if ($key == 'key' || ($key == 'id' && !$value)) {
-                        continue;
-                    }
-
-                    $identification[$key] = $value == 'Pilih' || !$value ? '' : $value;
-                }
-            }
-
-            foreach ($request->identification as $key => $value) {
-                if (str_contains($key, 'inherent')) {
-                    if (
-                        str_contains($key, 'impact_probability_scale') ||
-                        str_contains($key, 'impact_scale')
-                    ) {
-                        $key .= '_id';
-                        $identification[$key] = $value == 'Pilih' || !$value ? null : $value;
-                    } else {
-                        $identification[$key] = $value == 'Pilih' || !$value ? '' : $value;
-                    }
-                } else if (str_contains($key, 'residual')) {
-                    foreach ($value as $quarter => $residual) {
-                        if ($residual) {
-                            foreach ($residual as $residualKey => $residualValue) {
-                                $residualKey .= in_array($residualKey, ['impact_probability_scale', 'impact_scale']) ? '_id' : '';
-                                $identification['residual_' . $quarter . '_' . $residualKey] = $residualValue == 'Pilih' || !$residualValue ? '' : $residualValue;
-                            }
-                        }
-                    }
-                }
-            }
-            $identification = $worksheet->identification()->create($identification);
-
-            $incidents = [];
-            foreach ($request->incidents as $item) {
-                $incident = [];
-                foreach ($item as $key => $value) {
-                    if ($key == 'key') continue;
-
-                    $key = $key == 'kri_unit' ? $key . '_id' : $key;
-                    $incident[$key] = $value;
-                }
-
-                $incidents[] = $incident;
-            }
-
-            $incidents = $worksheet->incidents()->createMany($incidents);
-
-            $mitigations = [];
-            $incidents_array = $incidents->toArray();
-            foreach ($request->mitigations as $item) {
-                $incidentIndex = array_search(
-                    $item['risk_cause_number'],
-                    array_column($incidents_array, 'risk_cause_number')
-                );
-
-                if ($incidentIndex === false) {
-                    continue;
-                }
-
-                foreach ($item as $key => $value) {
-                    $key =
-                        $key == 'risk_treatment_option' ||
-                        $key == 'risk_treatment_type' ||
-                        $key == 'mitigation_rkap_program_type'
-                        ? $key . '_id' : $key;
-
-                    if ($value == 'Pilih') {
-                        $mitigation[$key] = null;
-                    } else {
-                        $mitigation[$key] = $key == 'mitigation_cost' ? ($value ?: '0') : $value;
-                    }
-                }
-
-                $mitigations[] = $incidents[$incidentIndex]->mitigations()->create($mitigation);
-            }
-
-            $role = $this->roleService->getCurrentRole() ?? $user->roles()->first();
+            $worksheet = $this->worksheetService->create($dto);
             $history = [
-                'created_by' => $user->employee_id,
-                'created_role' => $role->name,
+                'created_by' => auth()->user()->employee_id,
+                'created_role' => $this->roleService->getCurrentRole()->name,
                 'status' => DocumentStatus::DRAFT->value,
                 'note' => 'Membuat kertas kerja baru'
             ];
 
-            if ($role->name == 'risk admin') {
+            if ($this->roleService->getCurrentRole()->name == 'risk admin') {
                 $history = array_merge($history, [
                     'receiver_id' => 3,
                     'receiver_role' => 'risk owner',
                 ]);
             } else {
                 $history = array_merge($history, [
-                    'receiver_id' => $role->id,
-                    'receiver_role' => $role->name,
+                    'receiver_id' => $this->roleService->getCurrentRole()->id,
+                    'receiver_role' => $this->roleService->getCurrentRole()->name,
                 ]);
             }
 
-            $worksheet->last_history()->create($history);
+            $history = $worksheet->last_history()->create($history);
             DB::commit();
+
             return response()->json([
                 'message' => 'Kertas kerja berhasil dibuat',
                 'data' => [
@@ -209,9 +206,159 @@ class WorksheetController extends Controller
             ])->header('Cache-Control', 'no-store');
         } catch (Exception $e) {
             DB::rollBack();
-            return response()->json(['message' => $e->getMessage()], 500)->header('Cache-Control', 'no-store');
+            return response()->json([
+                'message' => 'Gagal membuat kertas kerja',
+                'error' => $e->getMessage()
+            ], ResponseStatus::HTTP_BAD_REQUEST);
         }
     }
+
+    // public function store(Request $request)
+    // {
+    //     try {
+    //         DB::beginTransaction();
+    //         $user = auth()->user();
+    //         $worksheet = Worksheet::create([
+    //             'worksheet_code' =>  'WR/' . date('Y') . '/' . Str::random(8),
+    //             'worksheet_number' => $request->context['risk_number'],
+    //             'company_code' => 'API',
+    //             'company_name' => 'PT Angkasa Pura Indonesia',
+    //             'target_body' => $request->context['target_body'],
+    //             'status' => DocumentStatus::DRAFT->value,
+    //             'created_by' => $user->employee_id,
+    //         ] + $user->only('organization_name', 'organization_code', 'unit_name', 'unit_code', 'sub_unit_name', 'sub_unit_code', 'personnel_area_name', 'personnel_area_code'));
+
+    //         $strategies = [];
+    //         foreach ($request->strategies as $index => $items) {
+    //             $strategy = [];
+    //             foreach ($items as $key => $value) {
+    //                 $strategy[str_replace('strategy_', '', $key)] = $value;
+    //             }
+
+    //             $strategies[] = $strategy;
+    //         }
+    //         $worksheet->strategies()->createMany($strategies);
+
+    //         $identification = ['created_by' => $user->employee_id];
+    //         foreach ($request->identification as $key => $value) {
+    //             if (str_contains($key, 'inherent') || str_contains($key, 'residual')) {
+    //                 continue;
+    //             }
+
+    //             if (in_array($key, ['existing_control_type', 'kbumn_target', 'control_effectiveness_assessment'])) {
+    //                 $identification[$key . '_id'] = $value == 'Pilih' || !$value ? null : $value;
+    //             } else if (str_contains($key, 'risk_category')) {
+    //                 $identification[str_replace('kbumn_', '', $key) . '_id'] = $value == 'Pilih' || !$value ? null : $value;
+    //             } else {
+    //                 if ($key == 'key' || ($key == 'id' && !$value)) {
+    //                     continue;
+    //                 }
+
+    //                 $identification[$key] = $value == 'Pilih' || !$value ? '' : $value;
+    //             }
+    //         }
+
+    //         foreach ($request->identification as $key => $value) {
+    //             if (str_contains($key, 'inherent')) {
+    //                 if (
+    //                     str_contains($key, 'impact_probability_scale') ||
+    //                     str_contains($key, 'impact_scale')
+    //                 ) {
+    //                     $key .= '_id';
+    //                     $identification[$key] = $value == 'Pilih' || !$value ? null : $value;
+    //                 } else {
+    //                     $identification[$key] = $value == 'Pilih' || !$value ? '' : $value;
+    //                 }
+    //             } else if (str_contains($key, 'residual')) {
+    //                 foreach ($value as $quarter => $residual) {
+    //                     if ($residual) {
+    //                         foreach ($residual as $residualKey => $residualValue) {
+    //                             $residualKey .= in_array($residualKey, ['impact_probability_scale', 'impact_scale']) ? '_id' : '';
+    //                             $identification['residual_' . $quarter . '_' . $residualKey] = $residualValue == 'Pilih' || !$residualValue ? '' : $residualValue;
+    //                         }
+    //                     }
+    //                 }
+    //             }
+    //         }
+    //         $identification = $worksheet->identification()->create($identification);
+
+    //         $incidents = [];
+    //         foreach ($request->incidents as $item) {
+    //             $incident = [];
+    //             foreach ($item as $key => $value) {
+    //                 if ($key == 'key') continue;
+
+    //                 $key = $key == 'kri_unit' ? $key . '_id' : $key;
+    //                 $incident[$key] = $value;
+    //             }
+
+    //             $incidents[] = $incident;
+    //         }
+
+    //         $incidents = $worksheet->incidents()->createMany($incidents);
+
+    //         $mitigations = [];
+    //         $incidents_array = $incidents->toArray();
+    //         foreach ($request->mitigations as $item) {
+    //             $incidentIndex = array_search(
+    //                 $item['risk_cause_number'],
+    //                 array_column($incidents_array, 'risk_cause_number')
+    //             );
+
+    //             if ($incidentIndex === false) {
+    //                 continue;
+    //             }
+
+    //             foreach ($item as $key => $value) {
+    //                 $key =
+    //                     $key == 'risk_treatment_option' ||
+    //                     $key == 'risk_treatment_type' ||
+    //                     $key == 'mitigation_rkap_program_type'
+    //                     ? $key . '_id' : $key;
+
+    //                 if ($value == 'Pilih') {
+    //                     $mitigation[$key] = null;
+    //                 } else {
+    //                     $mitigation[$key] = $key == 'mitigation_cost' ? ($value ?: '0') : $value;
+    //                 }
+    //             }
+
+    //             $mitigations[] = $incidents[$incidentIndex]->mitigations()->create($mitigation);
+    //         }
+
+    //         $role = $this->roleService->getCurrentRole() ?? $user->roles()->first();
+    //         $history = [
+    //             'created_by' => $user->employee_id,
+    //             'created_role' => $role->name,
+    //             'status' => DocumentStatus::DRAFT->value,
+    //             'note' => 'Membuat kertas kerja baru'
+    //         ];
+
+    //         if ($role->name == 'risk admin') {
+    //             $history = array_merge($history, [
+    //                 'receiver_id' => 3,
+    //                 'receiver_role' => 'risk owner',
+    //             ]);
+    //         } else {
+    //             $history = array_merge($history, [
+    //                 'receiver_id' => $role->id,
+    //                 'receiver_role' => $role->name,
+    //             ]);
+    //         }
+
+    //         $worksheet->last_history()->create($history);
+    //         DB::commit();
+    //         return response()->json([
+    //             'message' => 'Kertas kerja berhasil dibuat',
+    //             'data' => [
+    //                 'redirect' => route('risk.worksheet.show', $worksheet->getEncryptedId())
+    //             ]
+    //         ])->header('Cache-Control', 'no-store');
+    //     } catch (Exception $e) {
+    //         DB::rollBack();
+    //         return response()->json(['message' => $e->getMessage()], 500)->header('Cache-Control', 'no-store');
+    //     }
+    // }
 
     public function show(string $worksheet)
     {
@@ -230,8 +377,8 @@ class WorksheetController extends Controller
         if (request()->ajax()) {
             $identification = (array) $worksheet->identification;
             $identification['id'] = $identification['id'];
-            $identification['kbumn_risk_category_t2'] = $identification['risk_category_t2_id'];
-            $identification['kbumn_risk_category_t3'] = $identification['risk_category_t3_id'];
+            $identification['risk_category_t2'] = $identification['risk_category_t2_id'];
+            $identification['risk_category_t3'] = $identification['risk_category_t3_id'];
             $identification['existing_control_type'] = $identification['existing_control_type_id'];
             $identification['control_effectiveness_assessment'] = $identification['control_effectiveness_assessment_id'];
 
@@ -408,236 +555,119 @@ class WorksheetController extends Controller
         ));
     }
 
-    public function update(string $worksheetId, Request $request)
+    public function update(UpdateWorksheetRequest $request, string $worksheetId)
     {
         $worksheet = Worksheet::findByEncryptedIdOrFail($worksheetId);
-        if (
-            $this->roleService->getCurrentRole()?->name == 'risk admin' &&
-            $worksheet->created_by != auth()->user()->employee_id
-        ) {
-            abort(ResponseStatus::HTTP_NOT_FOUND, 'Data tidak ditemukan');
-        }
-
+        $worksheet->load('last_history');
         $hasAlreadyApproved = $worksheet->histories()->where('status', DocumentStatus::APPROVED->value)->exists();
+
         try {
-            DB::beginTransaction();
-            $worksheet->update([
-                'worksheet_number' => $request->context['risk_number'],
-                'taget_body' => $request->context['target_body'],
-            ]);
-
-            $strategies = [];
-            $strategyIds = [];
-            foreach ($request->strategies as $index => $items) {
-                $strategy = [];
-                foreach ($items as $key => $value) {
-                    if ($key == 'key') continue;
-                    $strategy[str_replace('strategy_', '', $key)] = $value;
-                }
-
-                if ($items['id']) {
-                    $strategyIds[] = $items['id'];
-                    unset($strategy['id']);
-                    throw_if(
-                        !$worksheet->strategies()->where('id', $items['id'])->update($strategy),
-                        new Exception("Failed to update strategy data with ID {$worksheet->id}: {$items['id']}", ResponseStatus::HTTP_BAD_REQUEST)
-                    );
-                } else {
-                    $strategies[] = $strategy;
-                }
-            }
-
-            if ($strategies) {
-                $strategies = $worksheet->strategies()->createMany($strategies)->pluck('id')->toArray();
-                throw_if(!$strategies, new Exception("Failed to create new strategy data with Worksheet ID {$worksheet->id}", ResponseStatus::HTTP_BAD_REQUEST));
-
-                $strategyIds = array_unique(array_merge($strategyIds, $strategies));
-            }
-
-            if ($strategyIds) {
-                $worksheet->strategies()->whereNotIn('id', array_unique($strategyIds))->delete();
-                logger()->info("[Worksheet] Attempt to delete strategy data with Worksheet ID {$worksheet->id} Not In " . implode(',', array_unique($strategyIds)));
-            }
-
-            $identification = [];
-            foreach ($request->identification as $key => $value) {
-                if (str_contains($key, 'inherent') || str_contains($key, 'residual')) {
-                    continue;
-                }
-
-                if (in_array($key, ['existing_control_type', 'kbumn_target', 'control_effectiveness_assessment'])) {
-                    $identification[$key . '_id'] = $value == 'Pilih' || !$value ? null : $value;
-                } else if (str_contains($key, 'risk_category')) {
-                    $identification[str_replace('kbumn_', '', $key) . '_id'] = $value == 'Pilih' || !$value ? null : $value;
-                } else {
-                    if ($key == 'key' || ($key == 'id' && !$value)) {
-                        continue;
-                    }
-
-                    $identification[$key] = $value == 'Pilih' || !$value ? '' : $value;
-                }
-            }
-
-            foreach ($request->identification as $key => $value) {
-                if (str_contains($key, 'inherent')) {
-                    if (
-                        str_contains($key, 'impact_probability_scale') ||
-                        str_contains($key, 'impact_scale')
-                    ) {
-                        $key .= '_id';
-                        $identification[$key] = $value == 'Pilih' || !$value ? null : $value;
-                    } else {
-                        $identification[$key] = $value == 'Pilih' || !$value ? '' : $value;
-                    }
-                } else if (str_contains($key, 'residual')) {
-                    foreach ($value as $quarter => $item) {
-                        if ($item) {
-                            foreach ($item as $residualKey => $residualValue) {
-                                $residualKey .= in_array($residualKey, ['impact_probability_scale', 'impact_scale']) ? '_id' : '';
-                                $identification['residual_' . $quarter . '_' . $residualKey] = $residualValue == 'Pilih' || !$residualValue ? '' : $residualValue;
-                            }
-                        }
-                    }
-                }
-            }
-
-            unset($identification['target_body']);
-            throw_if(!$worksheet->identification()->update($identification), new Exception("Failed to update identification data with Worksheet ID {$worksheet->id}: {$worksheet->identification->id}", ResponseStatus::HTTP_BAD_REQUEST));
-
-            $incidents = [];
-            $incident_ids = [];
-            $new_incidents = [];
-            foreach ($request->incidents as $index => $item) {
-                $incident = [];
-                foreach ($item as $key => $value) {
-                    if (in_array($key, ['key', 'risk_number'])) continue;
-
-                    $key = $key == 'kri_unit' ? $key . '_id' : $key;
-                    $incident[$key] = $value;
-                }
-
-                if ($incident['id']) {
-                    $incident_ids[] = $incident['id'];
-                    throw_if(
-                        !$worksheet->incidents()->where('id', $incident['id'])->update($incident),
-                        new Exception("Failed to update incident data with Worksheet ID {$worksheet->id}: {$incident['id']}", ResponseStatus::HTTP_BAD_REQUEST)
-                    );
-                    $incidents[] = $incident;
-                } else {
-                    $new_incidents[] = $incident;
-                }
-            }
-
-            if ($new_incidents) {
-                $new_incidents = $worksheet->incidents()->createMany($new_incidents);
-                throw_if(
-                    empty($new_incidents->toArray()),
-                    new Exception("Failed to create new incidents with Worksheet ID {$worksheet->id}", ResponseStatus::HTTP_BAD_REQUEST)
-                );
-
-
-                $incident_ids = array_unique(array_merge($incident_ids, $new_incidents->pluck('id')->toArray()));
-            }
-
-            if ($incident_ids) {
-                $worksheet->incidents()->whereNotIn('id', $incident_ids)->delete();
-                logger()->info("[Worksheet] Attempt to delete incident data with Worksheet ID {$worksheet->id} Not In ID " . implode(',', $incident_ids));
-            }
-
-
-            $incidents_array = array_merge($incidents, $new_incidents ? $new_incidents->toArray() : []);
-            $new_mitigations = [];
-            $mitigation_ids = [];
-            foreach ($request->mitigations as $index => $item) {
-                $incidentIndex = array_search(
-                    $item['risk_cause_number'],
-                    array_column($incidents_array, 'risk_cause_number')
-                );
-
-                if ($incidentIndex === false) {
-                    continue;
-                }
-
-                $mitigation = [
-                    'worksheet_incident_id' => $item['incident_id'] ?? null
-                ];
-
-                foreach ($item as $key => $value) {
-                    if (in_array($key, ['incident_id', 'key']) || str_contains($key, '_number')) continue;
-                    $key =
-                        $key == 'risk_treatment_option' ||
-                        $key == 'risk_treatment_type' ||
-                        $key == 'mitigation_rkap_program_type'
-                        ? $key . '_id' : $key;
-
-                    if ($value == 'Pilih') {
-                        $mitigation[$key] = null;
-                    } else {
-                        $mitigation[$key] = $key == 'mitigation_cost' ? ($value ?: '0') : $value;
-                    }
-                }
-
-                $mitigation_id = $mitigation['id'];
-                unset($mitigation['id']);
-
-                if (
-                    $mitigation_id && $mitigation['worksheet_incident_id'] == $incidents_array[$incidentIndex]['id']
-                ) {
-                    $mitigation_ids[] = $mitigation_id;
-                    throw_if(
-                        !WorksheetMitigation::where('id', $mitigation_id)->update($mitigation),
-                        new Exception("Failed to update mitigation data from Worksheet ID {$worksheet->id}: {$mitigation_id}", ResponseStatus::HTTP_BAD_REQUEST)
-                    );
-                } else {
-                    $mitigation['worksheet_incident_id'] = $incidents_array[$incidentIndex]['id'];
-                    $mitigation['created_at'] = now();
-                    $mitigation['updated_at'] = now();
-                    $new_mitigations[] = $mitigation;
-                }
-            }
-
-            if ($mitigation_ids) {
-                $mitigation_ids = array_unique($mitigation_ids);
-                WorksheetMitigation::whereIn('worksheet_incident_id', $incident_ids)->whereNotIn('id', $mitigation_ids)->delete();
-                logger()->info("[Worksheet] Failed to delete mitigation data from Worksheet ID {$worksheet->id} Not In ID " . implode(',', $mitigation_ids));
-            }
-
-            if ($new_mitigations) {
-                throw_if(
-                    !WorksheetMitigation::insert($new_mitigations),
-                    new Exception("Failed to create mitigations from Worksheet ID {$worksheet->id}", ResponseStatus::HTTP_BAD_REQUEST)
-                );
-            }
-
-            $role = $this->roleService->getCurrentRole();
-            $history = [
-                'created_by' => auth()->user()->employee_id,
-                'created_role' => $role->name,
-                'status' => $worksheet->status,
-                'note' => 'Memperbarui kertas kerja'
+            $validated = $request->validated();
+            $data['context'] = [
+                'target_body' => Purifier::clean($validated['context']['target_body']),
+                'risk_number' => strip_tags(Purifier::clean($validated['context']['risk_number'])),
             ];
 
-            if ($role->name == 'risk admin') {
-                $history = array_merge($history, [
-                    'receiver_id' => 3,
-                    'receiver_role' => 'risk owner',
-                ]);
-            } else {
-                $history = array_merge($history, [
-                    'receiver_id' => $role->id,
-                    'receiver_role' => $role->name,
-                ]);
+            $data['strategies'] = array_map(function ($strategy) {
+                return [
+                    'id' => (int) $strategy['id'] ?? null,
+                    'body' => Purifier::clean($strategy['strategy_body'] ?? ''),
+                    'expected_feedback' => Purifier::clean($strategy['strategy_expected_feedback'] ?? ''),
+                    'risk_value' => Purifier::clean($strategy['strategy_risk_value'] ?? ''),
+                    'risk_value_limit' => (float) $strategy['strategy_risk_value_limit'],
+                    'decision' => $strategy['strategy_decision'],
+                ];
+            }, $validated['strategies'] ?? []);
+
+            $data['identification'] = [
+                'risk_category_t2_id' => $validated['identification']['risk_category_t2'],
+                'risk_category_t3_id' => $validated['identification']['risk_category_t3'],
+                'risk_chronology_body' => Purifier::clean($validated['identification']['risk_chronology_body'] ?? ''),
+                'risk_chronology_description' => Purifier::clean($validated['identification']['risk_chronology_description'] ?? ''),
+                'existing_control_type_id' => $validated['identification']['existing_control_type'],
+                'existing_control_body' => Purifier::clean($validated['identification']['existing_control_body'] ?? ''),
+                'control_effectiveness_assessment_id' => $validated['identification']['control_effectiveness_assessment'],
+                'risk_impact_category' => $validated['identification']['risk_impact_category'],
+                'risk_impact_body' => Purifier::clean($validated['identification']['risk_impact_body'] ?? ''),
+                'risk_impact_start_date' => $validated['identification']['risk_impact_start_date'],
+                'risk_impact_end_date' => $validated['identification']['risk_impact_end_date'],
+                'inherent_body' => Purifier::clean($validated['identification']['inherent_body'] ?? ''),
+                'inherent_impact_value' => (float) $validated['identification']['inherent_impact_value'],
+                'inherent_impact_scale_id' => $validated['identification']['inherent_impact_scale'],
+                'inherent_impact_probability' => (int) $validated['identification']['inherent_impact_probability'],
+                'inherent_impact_probability_scale_id' => $validated['identification']['inherent_impact_probability_scale'],
+                'inherent_risk_exposure' => (float) $validated['identification']['inherent_risk_exposure'],
+            ];
+
+            for ($i = 1; $i <= 4; $i++) {
+                $data['identification']["residual_{$i}_impact_value"] = (float) $validated['identification']['residual'][$i]['impact_value'] ?? 0;
+                $data['identification']["residual_{$i}_impact_scale_id"] = $validated['identification']['residual'][$i]['impact_scale'] ?? null;
+                $data['identification']["residual_{$i}_impact_probability"] = (int) $validated['identification']['residual'][$i]['impact_probability'] ?? 0;
+                $data['identification']["residual_{$i}_impact_probability_scale_id"] = $validated['identification']['residual'][$i]['impact_probability_scale'] ?? null;
+                $data['identification']["residual_{$i}_risk_exposure"] = (float) $validated['identification']['residual'][$i]['risk_exposure'] ?? 0;
             }
+
+            $data['incidents'] = array_map(function ($incident) {
+                return [
+                    'id' => (int) $incident['id'] ?? null,
+                    'risk_cause_number' => strip_tags(Purifier::clean($incident['risk_cause_number'] ?? '')),
+                    'risk_cause_code' => strip_tags(Purifier::clean($incident['risk_cause_code'] ?? '')),
+                    'risk_cause_body' => Purifier::clean($incident['risk_cause_body'] ?? ''),
+                    'kri_body' => strip_tags(Purifier::clean($incident['kri_body'] ?? '')),
+                    'kri_unit_id' => $incident['kri_unit'] ?? null,
+                    'kri_threshold_safe' => strip_tags(Purifier::clean($incident['kri_threshold_safe'] ?? '')),
+                    'kri_threshold_caution' => strip_tags(Purifier::clean($incident['kri_threshold_caution'] ?? '')),
+                    'kri_threshold_danger' => strip_tags(Purifier::clean($incident['kri_threshold_danger'] ?? '')),
+                ];
+            }, $validated['incidents'] ?? []);
+            $data['mitigations'] = array_map(function ($mitigation) {
+                return [
+                    'id' => (int) $mitigation['id'] ?? null,
+                    'risk_cause_number' => strip_tags(Purifier::clean($mitigation['risk_cause_number'] ?? '')),
+                    'risk_treatment_option_id' => (int) $mitigation['risk_treatment_option'],
+                    'risk_treatment_type_id' => (int) $mitigation['risk_treatment_type'],
+                    'mitigation_plan' => Purifier::clean($mitigation['mitigation_plan'] ?? ''),
+                    'mitigation_output' => Purifier::clean($mitigation['mitigation_output'] ?? ''),
+                    'mitigation_start_date' => $mitigation['mitigation_start_date'],
+                    'mitigation_end_date' => $mitigation['mitigation_end_date'],
+                    'mitigation_cost' => (float) $mitigation['mitigation_cost'],
+                    'mitigation_rkap_program_type_id' => (int) $mitigation['mitigation_rkap_program_type'],
+                    'sub_unit_code' => $mitigation['sub_unit_code']
+                ];
+            }, $validated['mitigations'] ?? []);
+
+            $dto = WorksheetRequestDTO::fromArray($data);
+            $dto->incidents = $dto->incidents->unique('risk_cause_number');
 
             if ($hasAlreadyApproved) {
-                $history['status'] = DocumentStatus::APPROVED->value;
-                $worksheet->update(['status' => DocumentStatus::APPROVED->value]);
+                $dto->context->status = DocumentStatus::APPROVED->value;
             }
 
-            $worksheet->last_history()->create($history);
+            DB::beginTransaction();
+            $worksheet = $this->worksheetService->update($worksheet, $dto);
+
+            if ($hasAlreadyApproved) {
+                $worksheet->histories()->create([
+                    'created_by' => auth()->user()->employee_id,
+                    'created_role' => 'risk owner',
+                    'receiver_id' => $worksheet->last_history?->created_by,
+                    'receiver_role' => $worksheet->last_history?->created_role,
+                    'status' => DocumentStatus::APPROVED->value,
+                    'note' => 'Kertas kerja berhasil diperbarui'
+                ]);
+            } else {
+                $worksheet->histories()->create([
+                    'created_by' => auth()->user()->employee_id,
+                    'created_role' => $this->roleService->getCurrentRole()->name,
+                    'receiver_id' => $this->roleService->getCurrentRole()->id,
+                    'receiver_role' => $this->roleService->getCurrentRole()->name,
+                    'status' => $worksheet->status,
+                    'note' => 'Kertas kerja berhasil diperbarui'
+                ]);
+            }
 
             DB::commit();
-            flash_message('flash_message', 'Kertas kerja berhasil diperbarui', State::SUCCESS);
+
             return response()->json([
                 'message' => 'Kertas kerja berhasil diperbarui',
                 'data' => [
@@ -647,12 +677,314 @@ class WorksheetController extends Controller
         } catch (Exception $e) {
             DB::rollBack();
             logger()->error('[Worksheet] ' . $e->getMessage(), [$e]);
-            flash_message('flash_message', 'Gagal memperbarui kertas kerja', State::ERROR);
             return response()
-                ->json(['message' => 'Gagal memperbarui kertas kerja'], $e->getCode() ?: ResponseStatus::HTTP_INTERNAL_SERVER_ERROR)
+                ->json(['message' => 'Gagal memperbarui kertas kerja'], ResponseStatus::HTTP_INTERNAL_SERVER_ERROR)
                 ->header('Cache-Control', 'no-store');
         }
     }
+
+    // public function update(string $worksheetId, Request $request)
+    // {
+    //     $worksheet = Worksheet::findByEncryptedIdOrFail($worksheetId);
+    //     if (
+    //         $this->roleService->getCurrentRole()?->name == 'risk admin' &&
+    //         $worksheet->created_by != auth()->user()->employee_id
+    //     ) {
+    //         abort(ResponseStatus::HTTP_NOT_FOUND, 'Data tidak ditemukan');
+    //     }
+
+    //     $hasAlreadyApproved = $worksheet->histories()->where('status', DocumentStatus::APPROVED->value)->exists();
+    //     try {
+    //         DB::beginTransaction();
+    //         $worksheet->update([
+    //             'worksheet_number' => $request->context['risk_number'],
+    //             'target_body' => Purifier::clean($request->context['target_body']),
+    //         ]);
+
+    //         $strategies = [];
+    //         $strategyIds = [];
+    //         foreach ($request->strategies as $index => $items) {
+    //             $strategy = [
+    //                 'body' => Purifier::clean($items['strategy_body'] ?? ''),
+    //                 'expected_feedback' => Purifier::clean($items['strategy_expected_feedback'] ?? ''),
+    //                 'risk_value' => Purifier::clean($items['strategy_risk_value'] ?? ''),
+    //                 'risk_value_limit' => $items['strategy_risk_value_limit'],
+    //                 'decision' => $items['strategy_decision'],
+    //             ];
+
+    //             if ($items['id']) {
+    //                 $strategyIds[] = $items['id'];
+    //                 throw_if(
+    //                     !$worksheet->strategies()->where('id', $items['id'])->update($strategy),
+    //                     new Exception("Failed to update strategy data with ID {$worksheet->id}: {$items['id']}", ResponseStatus::HTTP_BAD_REQUEST)
+    //                 );
+    //             } else {
+    //                 $strategies[] = $strategy;
+    //             }
+    //         }
+
+    //         if ($strategies) {
+    //             $strategies = $worksheet->strategies()->createMany($strategies)->pluck('id')->toArray();
+    //             throw_if(!$strategies, new Exception("Failed to create new strategy data with Worksheet ID {$worksheet->id}", ResponseStatus::HTTP_BAD_REQUEST));
+
+    //             $strategyIds = array_unique(array_merge($strategyIds, $strategies));
+    //         }
+
+    //         if ($strategyIds) {
+    //             $worksheet->strategies()->whereNotIn('id', array_unique($strategyIds))->delete();
+    //             logger()->info("[Worksheet] Attempt to delete strategy data with Worksheet ID {$worksheet->id} Not In " . implode(',', array_unique($strategyIds)));
+    //         }
+
+    //         $identification = [
+    //             'company_code' => 'API',
+    //             'company_name' => 'PT Angkasa Pura Indonesia',
+    //             'risk_category_t2_id' => $request->identification['risk_category_t2'],
+    //             'risk_category_t3_id' => $request->identification['risk_category_t3'],
+    //             'risk_chronology_body' => Purifier::clean($request->identification['risk_chronology_body'] ?? ''),
+    //             'risk_chronology_description' => Purifier::clean($request->identification['risk_chronology_description'] ?? ''),
+    //             'existing_control_type_id' => $request->identification['existing_control_type'] == 'Pilih' || !$request->identification['existing_control_type'] ? null : (int) $request->identification['existing_control_type'],
+    //             'existing_control_body' => Purifier::clean($request->identification['existing_control_body'] ?? ''),
+    //             'control_effectiveness_assessment_id' => $request->identification['control_effectiveness_assessment'] == 'Pilih' || !$request->identification['control_effectiveness_assessment'] ? null : (int) $request->identification['control_effectiveness_assessment'],
+    //             'risk_impact_category' => $request->identification['risk_impact_category'],
+    //             'risk_impact_body' => Purifier::clean($request->identification['risk_impact_body'] ?? ''),
+    //             'risk_impact_start_date' => $request->identification['risk_impact_start_date'],
+    //             'risk_impact_end_date' => $request->identification['risk_impact_end_date'],
+    //             'inherent_body' => Purifier::clean($request->identification['inherent_body'] ?? ''),
+    //             'inherent_impact_value' => (float) $request->identification['inherent_impact_value'],
+    //             'inherent_impact_scale_id' => $request->identification['inherent_impact_scale'] == 'Pilih' || !$request->identification['inherent_impact_scale'] ? null : (int) $request->identification['inherent_impact_scale'],
+    //             'inherent_impact_probability' => (int) $request->identification['inherent_impact_probability'],
+    //             'inherent_impact_probability_scale_id' => $request->identification['inherent_impact_probability_scale'] == 'Pilih' || !$request->identification['inherent_impact_probability_scale'] ? null : (int) $request->identification['inherent_impact_probability_scale'],
+    //             'inherent_risk_exposure' => (float) $request->identification['inherent_risk_exposure'],
+    //             'inherent_risk_level' => '',
+    //             'inherent_risk_scale' => '',
+    //         ];
+
+    //         $scales = [$identification['inherent_impact_scale_id']];
+    //         $probabilityScales = [$identification['inherent_impact_probability_scale_id']];
+    //         for ($i = 1; $i <= 4; $i++) {
+    //             $scales[] = $request->identification['residual'][$i]['impact_scale'] == 'Pilih' || !$request->identification['residual'][$i]['impact_scale'] ? null : (int) $request->identification['residual'][$i]['impact_scale'];
+    //             $probabilityScales[] = $request->identification['residual'][$i]['impact_probability_scale'] == 'Pilih' || !$request->identification['residual'][$i]['impact_probability_scale'] ? null : (int) $request->identification['residual'][$i]['impact_probability_scale'];
+    //             $identification["residual_{$i}_impact_value"] = (float) $request->identification['residual'][$i]['impact_value'] ?? 0;
+    //             $identification["residual_{$i}_impact_scale_id"] = (int) $scales[$i];
+    //             $identification["residual_{$i}_impact_probability"] = (int) $request->identification['residual'][$i]['impact_probability'] ?? 0;
+    //             $identification["residual_{$i}_impact_probability_scale_id"] = (int) $probabilityScales[$i];
+    //             $identification["residual_{$i}_risk_exposure"] = (float) $request->identification['residual'][$i]['risk_exposure'] ?? 0;
+    //             $identification["residual_{$i}_risk_level"] = '';
+    //             $identification["residual_{$i}_risk_scale"] = '';
+    //         }
+
+    //         $scales = BUMNScale::whereIn('id', $scales)->get();
+    //         $probabilityScales = Heatmap::whereIn('id', $probabilityScales)->get();
+
+    //         $identification['inherent_impact_scale_id'] = $scales->where('id', $identification['inherent_impact_scale_id'])->first()->id;
+
+    //         $inherentScale = $probabilityScales->where('id', $identification['inherent_impact_probability_scale_id'])->first();
+    //         $identification['inherent_impact_probability_scale_id'] = $inherentScale->id;
+    //         $identification['inherent_risk_scale'] = $inherentScale->risk_scale;
+    //         $identification['inherent_risk_level'] = $inherentScale->risk_level;
+
+    //         for ($i = 1; $i <= 4; $i++) {
+    //             $probability = $probabilityScales->where('id', $identification["residual_{$i}_impact_probability_scale_id"])->first();
+
+    //             foreach (['impact_probability_scale_id', 'risk_scale', 'risk_level'] as $index => $key) {
+    //                 $property = $index == 0 ? 'id' : $key;
+    //                 $identification["residual_{$i}_{$key}"] = $probability->$property;
+    //             }
+    //         }
+
+    //         foreach ($request->identification as $key => $value) {
+    //             if (str_contains($key, 'inherent') || str_contains($key, 'residual')) {
+    //                 continue;
+    //             }
+
+    //             if (in_array($key, ['existing_control_type', 'kbumn_target', 'control_effectiveness_assessment'])) {
+    //                 $identification[$key . '_id'] = $value == 'Pilih' || !$value ? null : $value;
+    //             } else if (str_contains($key, 'risk_category')) {
+    //                 $identification[str_replace('kbumn_', '', $key) . '_id'] = $value == 'Pilih' || !$value ? null : $value;
+    //             } else {
+    //                 if ($key == 'key' || ($key == 'id' && !$value)) {
+    //                     continue;
+    //                 }
+
+    //                 $identification[$key] = $value == 'Pilih' || !$value ? '' : $value;
+    //             }
+    //         }
+
+    //         foreach ($request->identification as $key => $value) {
+    //             if (str_contains($key, 'inherent')) {
+    //                 if (
+    //                     str_contains($key, 'impact_probability_scale') ||
+    //                     str_contains($key, 'impact_scale')
+    //                 ) {
+    //                     $key .= '_id';
+    //                     $identification[$key] = $value == 'Pilih' || !$value ? null : $value;
+    //                 } else {
+    //                     $identification[$key] = $value == 'Pilih' || !$value ? '' : $value;
+    //                 }
+    //             } else if (str_contains($key, 'residual')) {
+    //                 foreach ($value as $quarter => $item) {
+    //                     if ($item) {
+    //                         foreach ($item as $residualKey => $residualValue) {
+    //                             $residualKey .= in_array($residualKey, ['impact_probability_scale', 'impact_scale']) ? '_id' : '';
+    //                             $identification['residual_' . $quarter . '_' . $residualKey] = $residualValue == 'Pilih' || !$residualValue ? '' : $residualValue;
+    //                         }
+    //                     }
+    //                 }
+    //             }
+    //         }
+
+    //         unset($identification['target_body']);
+    //         throw_if(!$worksheet->identification()->update($identification), new Exception("Failed to update identification data with Worksheet ID {$worksheet->id}: {$worksheet->identification->id}", ResponseStatus::HTTP_BAD_REQUEST));
+
+    //         $incidents = [];
+    //         $incident_ids = [];
+    //         $new_incidents = [];
+    //         foreach ($request->incidents as $index => $item) {
+    //             $incident = [];
+    //             foreach ($item as $key => $value) {
+    //                 if (in_array($key, ['key', 'risk_number'])) continue;
+
+    //                 $key = $key == 'kri_unit' ? $key . '_id' : $key;
+    //                 $incident[$key] = $value;
+    //             }
+
+    //             if ($incident['id']) {
+    //                 $incident_ids[] = $incident['id'];
+    //                 throw_if(
+    //                     !$worksheet->incidents()->where('id', $incident['id'])->update($incident),
+    //                     new Exception("Failed to update incident data with Worksheet ID {$worksheet->id}: {$incident['id']}", ResponseStatus::HTTP_BAD_REQUEST)
+    //                 );
+    //                 $incidents[] = $incident;
+    //             } else {
+    //                 $new_incidents[] = $incident;
+    //             }
+    //         }
+
+    //         if ($new_incidents) {
+    //             $new_incidents = $worksheet->incidents()->createMany($new_incidents);
+    //             throw_if(
+    //                 empty($new_incidents->toArray()),
+    //                 new Exception("Failed to create new incidents with Worksheet ID {$worksheet->id}", ResponseStatus::HTTP_BAD_REQUEST)
+    //             );
+
+
+    //             $incident_ids = array_unique(array_merge($incident_ids, $new_incidents->pluck('id')->toArray()));
+    //         }
+
+    //         if ($incident_ids) {
+    //             $worksheet->incidents()->whereNotIn('id', $incident_ids)->delete();
+    //             logger()->info("[Worksheet] Attempt to delete incident data with Worksheet ID {$worksheet->id} Not In ID " . implode(',', $incident_ids));
+    //         }
+
+
+    //         $incidents_array = array_merge($incidents, $new_incidents ? $new_incidents->toArray() : []);
+    //         $new_mitigations = [];
+    //         $mitigation_ids = [];
+    //         foreach ($request->mitigations as $index => $item) {
+    //             $incidentIndex = array_search(
+    //                 $item['risk_cause_number'],
+    //                 array_column($incidents_array, 'risk_cause_number')
+    //             );
+
+    //             if ($incidentIndex === false) {
+    //                 continue;
+    //             }
+
+    //             $mitigation = [
+    //                 'worksheet_incident_id' => $item['incident_id'] ?? null
+    //             ];
+
+    //             foreach ($item as $key => $value) {
+    //                 if (in_array($key, ['incident_id', 'key']) || str_contains($key, '_number')) continue;
+    //                 $key =
+    //                     $key == 'risk_treatment_option' ||
+    //                     $key == 'risk_treatment_type' ||
+    //                     $key == 'mitigation_rkap_program_type'
+    //                     ? $key . '_id' : $key;
+
+    //                 if ($value == 'Pilih') {
+    //                     $mitigation[$key] = null;
+    //                 } else {
+    //                     $mitigation[$key] = $key == 'mitigation_cost' ? ($value ?: '0') : $value;
+    //                 }
+    //             }
+
+    //             $mitigation_id = $mitigation['id'];
+    //             unset($mitigation['id']);
+
+    //             if (
+    //                 $mitigation_id && $mitigation['worksheet_incident_id'] == $incidents_array[$incidentIndex]['id']
+    //             ) {
+    //                 $mitigation_ids[] = $mitigation_id;
+    //                 throw_if(
+    //                     !WorksheetMitigation::where('id', $mitigation_id)->update($mitigation),
+    //                     new Exception("Failed to update mitigation data from Worksheet ID {$worksheet->id}: {$mitigation_id}", ResponseStatus::HTTP_BAD_REQUEST)
+    //                 );
+    //             } else {
+    //                 $mitigation['worksheet_incident_id'] = $incidents_array[$incidentIndex]['id'];
+    //                 $mitigation['created_at'] = now();
+    //                 $mitigation['updated_at'] = now();
+    //                 $new_mitigations[] = $mitigation;
+    //             }
+    //         }
+
+    //         if ($mitigation_ids) {
+    //             $mitigation_ids = array_unique($mitigation_ids);
+    //             WorksheetMitigation::whereIn('worksheet_incident_id', $incident_ids)->whereNotIn('id', $mitigation_ids)->delete();
+    //             logger()->info("[Worksheet] Failed to delete mitigation data from Worksheet ID {$worksheet->id} Not In ID " . implode(',', $mitigation_ids));
+    //         }
+
+    //         if ($new_mitigations) {
+    //             throw_if(
+    //                 !WorksheetMitigation::insert($new_mitigations),
+    //                 new Exception("Failed to create mitigations from Worksheet ID {$worksheet->id}", ResponseStatus::HTTP_BAD_REQUEST)
+    //             );
+    //         }
+
+    //         $role = $this->roleService->getCurrentRole();
+    //         $history = [
+    //             'created_by' => auth()->user()->employee_id,
+    //             'created_role' => $role->name,
+    //             'status' => $worksheet->status,
+    //             'note' => 'Memperbarui kertas kerja'
+    //         ];
+
+    //         if ($role->name == 'risk admin') {
+    //             $history = array_merge($history, [
+    //                 'receiver_id' => 3,
+    //                 'receiver_role' => 'risk owner',
+    //             ]);
+    //         } else {
+    //             $history = array_merge($history, [
+    //                 'receiver_id' => $role->id,
+    //                 'receiver_role' => $role->name,
+    //             ]);
+    //         }
+
+    //         if ($hasAlreadyApproved) {
+    //             $history['status'] = DocumentStatus::APPROVED->value;
+    //             $worksheet->update(['status' => DocumentStatus::APPROVED->value]);
+    //         }
+
+    //         $worksheet->last_history()->create($history);
+
+    //         DB::commit();
+    //         flash_message('flash_message', 'Kertas kerja berhasil diperbarui', State::SUCCESS);
+    //         return response()->json([
+    //             'message' => 'Kertas kerja berhasil diperbarui',
+    //             'data' => [
+    //                 'redirect' => route('risk.worksheet.show', $worksheet->getEncryptedId())
+    //             ]
+    //         ])->header('Cache-Control', 'no-store');
+    //     } catch (Exception $e) {
+    //         DB::rollBack();
+    //         logger()->error('[Worksheet] ' . $e->getMessage(), [$e]);
+    //         flash_message('flash_message', 'Gagal memperbarui kertas kerja', State::ERROR);
+    //         return response()
+    //             ->json(['message' => 'Gagal memperbarui kertas kerja'], $e->getCode() ?: ResponseStatus::HTTP_INTERNAL_SERVER_ERROR)
+    //             ->header('Cache-Control', 'no-store');
+    //     }
+    // }
 
     public function destroy(string $worksheetId)
     {
@@ -705,7 +1037,7 @@ class WorksheetController extends Controller
                 throw new Exception("Target role not found: {$rule}");
             }
             DB::beginTransaction();
-            $this->$rule($worksheet, $request->status, $request->note);
+            $this->$rule($worksheet, strip_tags(Purifier::clean($request->status)), Purifier::clean($request->note));
             DB::commit();
 
             flash_message('flash_message', 'Status Kertas Kerja berhasil diperbarui', State::SUCCESS);
