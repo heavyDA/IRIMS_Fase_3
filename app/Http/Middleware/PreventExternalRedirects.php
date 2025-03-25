@@ -18,7 +18,6 @@ class PreventExternalRedirects
         'localhost',
         '127.0.0.1',
         'sierina.injourneyairports.id',
-        'reirims.test'
         // Example: 'example.com',
         // Example: '*.example.com',
     ];
@@ -31,7 +30,10 @@ class PreventExternalRedirects
     public function handle(Request $request, Closure $next): Response
     {
         $response = $next($request);
-        $response->headers->set('Content-Security-Policy', $this->buildCspPolicy());
+
+        // Add security headers
+        $this->addSecurityHeaders($response);
+
         // Check if the response is a redirect
         if ($response->isRedirect()) {
             $targetUrl = $response->headers->get('Location');
@@ -62,6 +64,31 @@ class PreventExternalRedirects
         }
 
         return $response;
+    }
+
+    /**
+     * Add security headers to the response.
+     *
+     * @param Response $response
+     * @return void
+     */
+    protected function addSecurityHeaders(Response $response): void
+    {
+        // Set Content-Security-Policy header
+        $response->headers->set('Content-Security-Policy', $this->buildCspPolicy());
+
+        // Anti-clickjacking headers
+        $response->headers->set('X-Frame-Options', 'SAMEORIGIN'); // Allows framing by same origin only
+
+        // Additional security headers
+        $response->headers->set('X-Content-Type-Options', 'nosniff'); // Prevents MIME type sniffing
+        $response->headers->set('X-XSS-Protection', '1; mode=block'); // Enables XSS filtering
+        $response->headers->set('Referrer-Policy', 'strict-origin-when-cross-origin'); // Controls referrer information
+
+        // Strict Transport Security (only in production and if using HTTPS)
+        if (app()->environment('production') && $response->isSuccessful()) {
+            $response->headers->set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+        }
     }
 
     /**
@@ -157,13 +184,21 @@ class PreventExternalRedirects
         return false;
     }
 
+    /**
+     * Build Content Security Policy.
+     * 
+     * @return string
+     */
     protected function buildCspPolicy(): string
     {
         return "default-src 'self'; " .
-            "img-src 'self'; " .
+            "img-src 'self' data:; " .
             "style-src 'self' 'unsafe-inline'; " .
             "font-src 'self'; " .
             "script-src 'self' 'unsafe-eval' 'unsafe-inline'; " .
-            "object-src 'none';";
+            "object-src 'none'; " .
+            "frame-ancestors 'self'; " . // Anti-clickjacking: Only allow framing by same origin
+            "base-uri 'self'; " .
+            "form-action 'self';";
     }
 }
