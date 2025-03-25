@@ -37,9 +37,9 @@ class MonitoringAlterationExport implements FromCollection, WithTitle,  WithHead
             $worksheet->monitorings->each(function ($monitoring) use ($worksheet, &$data) {
                 $data[] = [
                     'Data Item' => $worksheet->worksheet_number,
-                    'Jenis Perubahan' => str_replace('\n', '\r\n', Html2Text::convert(html_entity_decode($monitoring->alteration?->body ?? ''))),
-                    'Peristiwa Risiko yang Terdampak atas Perubahan' => str_replace('\n', '\r\n', Html2Text::convert(html_entity_decode($monitoring->alteration?->impact ?? ''))),
-                    'Penjelasan' => str_replace('\n', '\r\n', Html2Text::convert(html_entity_decode($monitoring->alteration?->description ?? ''))),
+                    'Jenis Perubahan' => str_replace('\n', '\r\n', Html2Text::convert(html_entity_decode($monitoring->alteration?->body ?? ''), ['ignore_errors' => true])),
+                    'Peristiwa Risiko yang Terdampak atas Perubahan' => str_replace('\n', '\r\n', Html2Text::convert(html_entity_decode($monitoring->alteration?->impact ?? ''), ['ignore_errors' => true])),
+                    'Penjelasan' => str_replace('\n', '\r\n', Html2Text::convert(html_entity_decode($monitoring->alteration?->description ?? ''), ['ignore_errors' => true])),
                 ];
             });
         });

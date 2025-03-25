@@ -69,12 +69,11 @@ class MonitoringResidualExport implements FromCollection, WithTitle, WithHeading
                 if (!array_key_exists($residualKey, $residuals)) {
                     $residuals[$residualKey] = $residualDefault;
                 }
-
                 $item = $residuals[$residualKey];
                 $item = array_merge([
                     'worksheet_number' => $worksheet->worksheet_number,
-                    'risk_chronology_body' => str_replace('\n', '\r\n', Html2Text::convert(html_entity_decode($worksheet->identification->risk_chronology_body))),
-                    'inherent_body' => str_replace('\n', '\r\n', Html2Text::convert(html_entity_decode($worksheet->identification->inherent_body))),
+                    'risk_chronology_body' => str_replace('\n', '\r\n', Html2Text::convert(html_entity_decode($worksheet->identification->risk_chronology_body ?? ''), ['ignore_errors' => true])),
+                    'inherent_body' => str_replace('\n', '\r\n', Html2Text::convert(html_entity_decode($worksheet->identification->inherent_body ?? ''), ['ignore_errors' => true])),
                 ], $item);
                 $item['impact_value'][$residual->quarter] = $residual->impact_value ? money_format((float) $residual->impact_value) : '-';
                 $item['impact_scale'][$residual->quarter] = $residual->impact_scale?->scale;
