@@ -19,7 +19,6 @@ class PreventExternalRedirects
         'localhost',
         '127.0.0.1',
         'sierina.injourneyairports.id',
-        'reirims.test',
         // Example: 'example.com',
         // Example: '*.example.com',
     ];

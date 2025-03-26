@@ -1015,7 +1015,7 @@ class WorksheetController extends Controller
             logger()->error('[Worksheet] ' . $e->getMessage());
 
             flash_message('flash_message', 'Gagal menghapus kertas kerja', State::ERROR);
-            return redirect()->back();
+            return redirect()->intended();
         }
     }
 
