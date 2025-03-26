@@ -590,7 +590,7 @@ class MonitoringController extends Controller
             DB::rollBack();
             logger()->error('[Worksheet Monitoring] Failed to destroy Monitoring Report with ID ' . $monitoring->id . ' ' . $e->getMessage());
             flash_message('flash_message', 'Laporan monitoring gagal dihapus', State::ERROR);
-            return redirect()->back();
+            return redirect()->intended();
         }
     }
 

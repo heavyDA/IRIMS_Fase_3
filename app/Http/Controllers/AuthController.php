@@ -69,9 +69,9 @@ class AuthController extends Controller
         if ($role) {
             session()->put('current_role', $role);
             session()->put('current_menu', null);
-            return redirect()->back();
+            return redirect()->intended();
         }
-        return redirect()->back();
+        return redirect()->intended();
     }
 
     public function change_unit(Request $request)
@@ -82,7 +82,7 @@ class AuthController extends Controller
         if (!$unit) {
             flash_message('flash_message',  'Gagal mengganti unit kerja.', State::ERROR);
             logger()->error("[Authentication] Failed to change user {$user->employee_id} unit, user doesn't have unit with ID {$request->get('unit_target')}");
-            return redirect()->back();
+            return redirect()->intended();
         }
 
         $roles = $unit->roles()->get();
@@ -90,7 +90,7 @@ class AuthController extends Controller
         if (!$role) {
             flash_message('flash_message',  'Gagal mengganti unit kerja.', State::ERROR);
             logger()->error("[Authentication] Failed to change user {$user->employee_id} unit, unit with ID {$request->get('unit_target')} doesn't have assigned roles");
-            return redirect()->back();
+            return redirect()->intended();
         }
 
         session()->put('current_unit', $unit);
@@ -98,7 +98,7 @@ class AuthController extends Controller
         session()->put('current_roles', $roles);
         session()->put('current_menu', null);
         flash_message('flash_message',  'Berhasil mengganti unit kerja', State::SUCCESS);
-        return redirect()->back();
+        return redirect()->intended();
     }
 
     public function get_unit_head()
