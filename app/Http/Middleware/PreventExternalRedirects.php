@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use Closure;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -33,6 +34,18 @@ class PreventExternalRedirects
 
         // Add security headers
         $this->addSecurityHeaders($response);
+
+        // Check if the response is a redirect
+        if ($response instanceof RedirectResponse) {
+            // Get the target URL
+            $targetUrl = $response->getTargetUrl();
+
+            // Validate the URL
+            if (!$this->isSafeUrl($targetUrl)) {
+                // If not safe, redirect to dashboard instead
+                return redirect()->route('dashboard.index');
+            }
+        }
 
         // Check if the response is a redirect
         if ($response->isRedirect()) {
@@ -200,5 +213,19 @@ class PreventExternalRedirects
             "frame-ancestors 'self'; " . // Anti-clickjacking: Only allow framing by same origin
             "base-uri 'self'; " .
             "form-action 'self';";
+    }
+
+    protected function isSafeUrl(string $url): bool
+    {
+        // If the URL is relative (starts with / or doesn't have a scheme), it's safe
+        if (strlen($url) === 0 || $url[0] === '/' || !parse_url($url, PHP_URL_HOST)) {
+            return true;
+        }
+
+        // Parse the URL
+        $parsedUrl = parse_url($url);
+
+        // Check if the host is in the allowed domains
+        return isset($parsedUrl['host']) && in_array($parsedUrl['host'], $this->trustedHosts);
     }
 }
