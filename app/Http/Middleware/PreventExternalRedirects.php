@@ -19,6 +19,7 @@ class PreventExternalRedirects
         'localhost',
         '127.0.0.1',
         'sierina.injourneyairports.id',
+        'reirims.test',
         // Example: 'example.com',
         // Example: '*.example.com',
     ];
@@ -37,28 +38,27 @@ class PreventExternalRedirects
 
         // Check if the response is a redirect
         if ($response instanceof RedirectResponse) {
-            // Get the target URL
-            $targetUrl = $response->getTargetUrl();
-
-            // Validate the URL
-            if (!$this->isSafeUrl($targetUrl)) {
-                // If not safe, redirect to dashboard instead
-                return redirect()->route('dashboard.index');
+            $urls = [$response->getTargetUrl(), $response->headers->get('Location')];
+            foreach ($urls as $targetUrl) {
+                // Validate the URL
+                if (!$this->isSafeUrl($targetUrl)) {
+                    // If not safe, redirect to dashboard instead
+                    return redirect()->route('dashboard.index');
+                }
             }
         }
 
         // Check if the response is a redirect
         if ($response->isRedirect()) {
             $targetUrl = $response->headers->get('Location');
-
             // Apply strict sanitization to prevent URL encoding bypasses
             $targetUrl = $this->sanitizeUrl($targetUrl);
-
             // If it's a relative URL without protocol-relative format, it's safe
             if ($this->isRelativeUrl($targetUrl)) {
                 return $response;
             }
 
+            // dd($targetUrl, !$this->isTrustedUrl($targetUrl));
             // If it's an absolute URL, check if it's pointing to a trusted host
             if (!$this->isTrustedUrl($targetUrl)) {
                 // Log attempted redirect for security auditing
@@ -67,11 +67,9 @@ class PreventExternalRedirects
                     'ip' => $request->ip(),
                     'user_agent' => $request->userAgent(),
                 ]);
-
                 // Redirect to home with error
-                return redirect('/')->with('error', 'Unsafe redirect prevented');
+                return redirect()->intended()->with('error', 'Unsafe redirect prevented');
             }
-
             // Set safe redirect URL back to response
             $response->headers->set('Location', $targetUrl);
         }
