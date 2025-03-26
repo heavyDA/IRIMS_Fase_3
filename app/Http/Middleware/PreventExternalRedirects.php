@@ -37,40 +37,27 @@ class PreventExternalRedirects
 
         // Check if the response is a redirect
         if ($response instanceof RedirectResponse) {
-            $urls = [$response->getTargetUrl(), $response->headers->get('Location')];
-            foreach ($urls as $targetUrl) {
-                // Validate the URL
-                if (!$this->isSafeUrl($targetUrl)) {
-                    // If not safe, redirect to dashboard instead
-                    return redirect()->route('dashboard.index');
-                }
-            }
-        }
+            $targetUrl = $response->getTargetUrl();
 
-        // Check if the response is a redirect
-        if ($response->isRedirect()) {
-            $targetUrl = $response->headers->get('Location');
             // Apply strict sanitization to prevent URL encoding bypasses
             $targetUrl = $this->sanitizeUrl($targetUrl);
-            // If it's a relative URL without protocol-relative format, it's safe
-            if ($this->isRelativeUrl($targetUrl)) {
-                return $response;
-            }
 
-            // dd($targetUrl, !$this->isTrustedUrl($targetUrl));
-            // If it's an absolute URL, check if it's pointing to a trusted host
-            if (!$this->isTrustedUrl($targetUrl)) {
+            // Check if the URL is safe (either relative or trusted host)
+            if (!$this->isSafeUrl($targetUrl)) {
                 // Log attempted redirect for security auditing
                 \Illuminate\Support\Facades\Log::warning('Prevented external redirect attempt', [
                     'url' => $targetUrl,
                     'ip' => $request->ip(),
                     'user_agent' => $request->userAgent(),
                 ]);
-                // Redirect to home with error
-                return redirect()->intended()->with('error', 'Unsafe redirect prevented');
+
+                // Redirect to a known safe URL (dashboard or home)
+                return redirect()->route('dashboard.index')
+                    ->with('error', 'Unsafe redirect prevented');
             }
-            // Set safe redirect URL back to response
-            $response->headers->set('Location', $targetUrl);
+
+            // Set the sanitized URL back to the response
+            $response->setTargetUrl($targetUrl);
         }
 
         return $response;
@@ -126,67 +113,84 @@ class PreventExternalRedirects
     }
 
     /**
-     * Determine if the given URL is relative.
+     * Determine if the given URL is safe.
      *
-     * @param  string  $url
+     * @param  string|null  $url
      * @return bool
      */
-    protected function isRelativeUrl(string $url): bool
+    protected function isSafeUrl(?string $url): bool
     {
-        // Check for protocol-relative URLs (//example.com) which are NOT safe
-        if (str_starts_with($url, '//')) {
-            return false;
-        }
-
-        // Standard protocols to check
-        $protocols = ['http://', 'https://', 'ftp://', 'ftps://', 'mailto:', 'data:', 'file:', 'javascript:'];
-
-        foreach ($protocols as $protocol) {
-            if (str_starts_with(strtolower($url), $protocol)) {
-                return false;
-            }
-        }
-
-        // If URL starts with / (and not //) and doesn't contain ://, it's relative
-        return str_starts_with($url, '/') || strpos($url, '://') === false;
-    }
-
-    /**
-     * Determine if the given URL is pointing to a trusted host.
-     *
-     * @param  string  $url
-     * @return bool
-     */
-    protected function isTrustedUrl(string $url): bool
-    {
-        // Parse URL strictly
-        $parsedUrl = parse_url($url);
-
-        if (!$parsedUrl || !isset($parsedUrl['host'])) {
-            return false;
-        }
-
-        $host = strtolower($parsedUrl['host']);
-
-        // Handle IP addresses specially
-        if (filter_var($host, FILTER_VALIDATE_IP)) {
-            // Only allow specific IP addresses in the trusted hosts list
-            return in_array($host, $this->trustedHosts);
-        }
-
-        // First check if it exactly matches a trusted host
-        if (in_array($host, array_map('strtolower', $this->trustedHosts))) {
+        // If URL is null or empty, consider it safe (will redirect to current URL)
+        if (empty($url)) {
             return true;
         }
 
-        // Then check for wildcard matches
-        foreach ($this->trustedHosts as $trustedHost) {
-            $trustedHost = strtolower($trustedHost);
+        // Parse the URL
+        $parsedUrl = parse_url($url);
 
-            if (str_starts_with($trustedHost, '*.')) {
-                $pattern = '/^(.+\.)?' . preg_quote(substr($trustedHost, 2), '/') . '$/i';
-                if (preg_match($pattern, $host)) {
-                    return true;
+        // If the URL can't be parsed, it's not safe
+        if ($parsedUrl === false) {
+            return false;
+        }
+
+        // If there's no host component (relative URL), it's safe
+        if (!isset($parsedUrl['host'])) {
+            return true;
+        }
+
+        // Check for protocol-relative URLs that start with //
+        if (
+            !isset($parsedUrl['scheme']) && isset($parsedUrl['host']) &&
+            strpos($url, '//') === 0
+        ) {
+            return in_array($parsedUrl['host'], $this->trustedHosts);
+        }
+
+        // Check for absolute URLs
+        if (isset($parsedUrl['scheme']) && isset($parsedUrl['host'])) {
+            // Only allow http and https schemes
+            if (!in_array(strtolower($parsedUrl['scheme']), ['http', 'https'])) {
+                return false;
+            }
+
+            // Check if the host is in our trusted hosts list
+            // Use domain matching that handles subdomains
+            return $this->isHostTrusted($parsedUrl['host']);
+        }
+
+        // If we get here, the URL format is unexpected
+        return false;
+    }
+
+    /**
+     * Check if a host is trusted by comparing against the trusted hosts list
+     * with support for wildcard subdomains
+     *
+     * @param string $host
+     * @return bool
+     */
+    protected function isHostTrusted(string $host): bool
+    {
+        // Convert host to lowercase for case-insensitive comparison
+        $host = strtolower($host);
+
+        foreach ($this->trustedHosts as $trustedHost) {
+            // Check for exact match
+            if ($host === strtolower($trustedHost)) {
+                return true;
+            }
+
+            // Check for wildcard subdomain match
+            if (strpos($trustedHost, '*.') === 0) {
+                $domain = substr($trustedHost, 2); // Remove '*.'
+                if (substr($host, -strlen($domain)) === $domain) {
+                    // Make sure it's a subdomain, not a partial match elsewhere in the domain
+                    if (
+                        substr($host, 0, -strlen($domain)) === '' ||
+                        substr($host, -strlen($domain) - 1, 1) === '.'
+                    ) {
+                        return true;
+                    }
                 }
             }
         }
@@ -210,19 +214,5 @@ class PreventExternalRedirects
             "frame-ancestors 'self'; " . // Anti-clickjacking: Only allow framing by same origin
             "base-uri 'self'; " .
             "form-action 'self';";
-    }
-
-    protected function isSafeUrl(string $url): bool
-    {
-        // If the URL is relative (starts with / or doesn't have a scheme), it's safe
-        if (strlen($url) === 0 || $url[0] === '/' || !parse_url($url, PHP_URL_HOST)) {
-            return true;
-        }
-
-        // Parse the URL
-        $parsedUrl = parse_url($url);
-
-        // Check if the host is in the allowed domains
-        return isset($parsedUrl['host']) && in_array($parsedUrl['host'], $this->trustedHosts);
     }
 }
