@@ -53,7 +53,7 @@ class WorksheetService
 
         $units = Position::whereIn('sub_unit_code', $data->mitigations->pluck('sub_unit_code'))->get();
         foreach ($incidents as $incident) {
-            $incident->mitigations = $this->createMitigations($incident, $units, $data->mitigations->where('risk_cause_number', $incident->risk_cause_number));
+            $incident->mitigations = $this->updateMitigations($incident, $units, $data->mitigations->where('risk_cause_number', $incident->risk_cause_number));
         }
 
         $worksheet->incidents = $incidents;
@@ -147,14 +147,16 @@ class WorksheetService
     protected function updateIncidents(Worksheet $worksheet, IncidentRequestCollection $data)
     {
         $existingIncidents = $worksheet->incidents()->where('worksheet_id', $worksheet->id)->get();
-        $existingIncidents->each(function (WorksheetIncident $incident) use ($data) {
+        $existingIncidents = $existingIncidents->filter(function (WorksheetIncident $incident) use ($data) {
             $requestIncident = $data->where('id', $incident->id)->first();
 
             if ($requestIncident) {
                 $incident->update(array_remove_empty($requestIncident->toArray()));
-            } else {
-                $incident->delete();
+                return true;
             }
+
+            $incident->delete();
+            return false;
         });
 
         $latestIncidents = $worksheet->incidents()
@@ -166,7 +168,7 @@ class WorksheetService
                     ->toArray()
             );
 
-        return $latestIncidents;
+        return $existingIncidents->merge($latestIncidents);
     }
 
     protected function createMitigations(WorksheetIncident $incident, Collection $units, MitigationRequestCollection $data)
@@ -177,15 +179,13 @@ class WorksheetService
                     function (MitigationRequestDTO $mitigation) use ($units) {
                         $unit = $units->where('sub_unit_code', $mitigation->sub_unit_code)->first();
 
-                        return $unit->pluck(
+                        return $unit->only(
                             'unit_code',
                             'unit_name',
                             'sub_unit_code',
                             'sub_unit_name',
-                            'personnel_area_code',
-                            'personnel_area_name',
                             'position_name',
-                        )->toArray() +
+                        ) +
                             [
                                 'risk_cause_number' => $mitigation->risk_cause_number,
                                 'risk_treatment_option_id' => $mitigation->risk_treatment_option_id,
@@ -198,7 +198,9 @@ class WorksheetService
                                 'mitigation_rkap_program_type_id' => $mitigation->mitigation_rkap_program_type_id,
                                 'organization_code' => $unit->sub_unit_code,
                                 'organization_name' => $unit->sub_unit_name,
-                                'mitigation_pic' => "[{$unit->sub_unit_code_doc}] {$unit->sub_unit_name}"
+                                'mitigation_pic' => "[{$unit->sub_unit_code_doc}] {$unit->sub_unit_name}",
+                                'personnel_area_code' => $unit->branch_code,
+                                'personnel_area_name' => '-',
                             ];
                     }
                 )
@@ -215,16 +217,18 @@ class WorksheetService
             if ($requestMitigation) {
                 $unit = $units->where('sub_unit_code', $mitigation->sub_unit_code)->first();
                 $mitigation->update(
-                    $unit->pluck(
+                    $unit->only(
                         'unit_code',
                         'unit_name',
                         'sub_unit_code',
                         'sub_unit_name',
-                        'personnel_area_code',
-                        'personnel_area_name',
                         'position_name',
-                    )->toArray() +
-                        array_remove_empty($requestMitigation->toArray())
+                    ) +
+                        array_remove_empty($requestMitigation->toArray()) +
+                        [
+                            'personnel_area_code' => $unit->branch_code,
+                            'personnel_area_name' => '-',
+                        ]
                 );
             } else {
                 $mitigation->delete();
@@ -237,23 +241,35 @@ class WorksheetService
                     ->map(
                         function (MitigationRequestDTO $mitigation) use ($units) {
                             $unit = $units->where('sub_unit_code', $mitigation->sub_unit_code)->first();
-
-                            return $unit->pluck(
+                            return $unit->only(
                                 'unit_code',
                                 'unit_name',
                                 'sub_unit_code',
                                 'sub_unit_name',
-                                'personnel_area_code',
-                                'personnel_area_name',
                                 'position_name',
-                            )->toArray() +
-                                $mitigation->toArray();
+                            ) +
+                                [
+                                    'risk_cause_number' => $mitigation->risk_cause_number,
+                                    'risk_treatment_option_id' => $mitigation->risk_treatment_option_id,
+                                    'risk_treatment_type_id' => $mitigation->risk_treatment_type_id,
+                                    'mitigation_plan' => $mitigation->mitigation_plan,
+                                    'mitigation_output' => $mitigation->mitigation_output,
+                                    'mitigation_start_date' => $mitigation->mitigation_start_date,
+                                    'mitigation_end_date' => $mitigation->mitigation_end_date,
+                                    'mitigation_cost' => $mitigation->mitigation_cost,
+                                    'mitigation_rkap_program_type_id' => $mitigation->mitigation_rkap_program_type_id,
+                                    'organization_code' => $unit->sub_unit_code,
+                                    'organization_name' => $unit->sub_unit_name,
+                                    'mitigation_pic' => "[{$unit->sub_unit_code_doc}] {$unit->sub_unit_name}",
+                                    'personnel_area_code' => $unit->branch_code,
+                                    'personnel_area_name' => '-',
+                                ];
                         }
                     )
                     ->toArray()
             );
 
-        return $latestMitigations;
+        return $existingMitigations->merge($latestMitigations);
     }
 
     public function createHistory(Worksheet $worksheet): WorksheetHistory
