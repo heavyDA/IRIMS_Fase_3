@@ -56,6 +56,7 @@ final class ContextRequestDTO implements DTOContracts
         return [
             'id' => $this->id,
             'worksheet_code' => $this->worksheet_code,
+            'worksheet_number' => $this->worksheet_number,
             'unit_code' => $this->unit_code,
             'unit_name' => $this->unit_name,
             'sub_unit_code' => $this->sub_unit_code,

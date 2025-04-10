@@ -121,8 +121,8 @@ class AuthController extends Controller
             $data = [
                 'name' => "[{$position->sub_unit_code_doc}] {$position->sub_unit_name}",
                 'position_name' => $position->position_name,
-                'personnel_area_code' => $position->sub_unit_code_doc,
-                'personnel_area_name' => $position->unit_name ?? $position->sub_unit_name ?? '-',
+                'personnel_area_code' => $position->sub_unit_code_doc ?: '-',
+                'personnel_area_name' => $position?->unit_name ?: $position?->sub_unit_name ?: '-',
                 'organization_code' => $position->sub_unit_code,
                 'organization_name' => $position->sub_unit_name,
                 'unit_code' => $position->unit_code,
@@ -140,6 +140,7 @@ class AuthController extends Controller
     public function get_unit_heads()
     {
         $currentUnit = $this->roleService->getCurrentUnit();
+        cache()->delete('current_unit_hierarchy.' . auth()->user()->employee_id . '.' . $currentUnit->sub_unit_code);
         $positions = cache()->remember(
             'current_unit_hierarchy.' . auth()->user()->employee_id . '.' . $currentUnit->sub_unit_code,
             now()->addMinutes(5),
@@ -155,8 +156,8 @@ class AuthController extends Controller
             $positionHeads[] = [
                 'name' => "[{$position->sub_unit_code_doc}] {$position->sub_unit_name}",
                 'position_name' => $position->position_name,
-                'personnel_area_code' => $position->sub_unit_code_doc,
-                'personnel_area_name' => session()->get('current_unit')->personnel_area_name,
+                'personnel_area_code' => session()->get('current_unit')?->personnel_area_code ?: $position?->sub_unit_code_doc ?: '-',
+                'personnel_area_name' => session()->get('current_unit')?->personnel_area_name ?: '-',
                 'organization_code' => $position->sub_unit_code,
                 'organization_name' => $position->sub_unit_name,
                 'unit_code' => $position->unit_code,
