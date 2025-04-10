@@ -16,7 +16,7 @@ class AuthService
 
     public function __construct()
     {
-        $this->eofficeAuthService = new EOfficeAuthService(env('EOFFICE_URL'), env('EOFFICE_TOKEN'));
+        $this->eofficeAuthService = new EOfficeAuthService(config('app.eoffice.url'), config('app.eoffice.token'));
     }
 
     public function login($credentials): bool
