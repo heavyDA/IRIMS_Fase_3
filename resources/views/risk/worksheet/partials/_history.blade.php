@@ -1,4 +1,4 @@
-@hasanyrole('root|risk analis|root')
+@if (in_array(session()->get('current_role')?->name, ['root', 'administrator', 'risk analis']))
     @include('risk.worksheet.partials._risk_analis')
 @else
     @if (!str_contains(request()->route()->getName(), 'edit'))
@@ -10,7 +10,7 @@
                         \App\Enums\DocumentStatus::DRAFT->value,
                         \App\Enums\DocumentStatus::ON_REVIEW->value,
                     ])) ||
-                session()->get('current_role')?->name == 'risk analis')
+                in_array(session()->get('current_role')?->name, ['root', 'administrator', 'risk analis']))
             <a href="{{ route('risk.worksheet.edit', $worksheet->getEncryptedId()) }}" style="min-width: 128px;"
                 class="btn btn-success">
                 <span><i class="ti ti-edit"></i></span>&nbsp;Update
@@ -28,4 +28,4 @@
             @include('risk.worksheet.partials._risk_otorisator')
         @endif
     @endif
-@endhasanyrole
+@endif

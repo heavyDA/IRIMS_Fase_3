@@ -8,6 +8,7 @@ import { defaultConfigChoices } from './components/helper';
 
 window.axios = axios;
 window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
+window.axios.defaults.headers.common['X-CSRF-TOKEN'] = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
 window.alert_message = (state, title, message) => {
     state = state == 'danger' ? 'error' : state
@@ -20,7 +21,7 @@ window.alert_message = (state, title, message) => {
 
 document.addEventListener('DOMContentLoaded', () => {
     document.querySelector('#role-select').addEventListener('change', (e) => {
-        axios.post('/', { role: event.target.value })
+        axios.post('/change-role', { role: e.target.value })
             .then(response => {
                 window.location.reload();
             });
