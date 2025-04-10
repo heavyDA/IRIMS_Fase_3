@@ -72,9 +72,8 @@
                                     @if (
                                         ($monitoring->status == 'draft' &&
                                             in_array(session()->get('current_role')?->name, ['risk admin', 'risk owner', 'risk analis'])) ||
-                                            ($monitoring->status == 'on review' &&
-                                                in_array(session()->get('current_role')?->name, ['risk owner', 'risk analis'])) ||
-                                            session()->get('current_unit')->hasAnyRole('administrator|risk analis|root'))
+                                            ($monitoring->status == 'on review' && session()->get('current_role')?->name == 'risk owner') ||
+                                            in_array(session()->get('current_role')?->name, ['root', 'administrator', 'risk analis']))
                                         <a href="{{ route('risk.monitoring.edit_monitoring', $monitoring->getEncryptedId()) }}"
                                             style="min-width: 128px;" class="btn btn-success">
                                             <span><i class="ti ti-edit"></i></span>&nbsp;Update

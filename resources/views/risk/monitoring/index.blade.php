@@ -52,12 +52,18 @@
                         <div class="accordion-body">
                             <div class="mb-4">
                                 @if ($worksheet->status == \App\Enums\DocumentStatus::APPROVED->value)
-                                    @hasanyrole('risk admin|risk owner|risk analis')
+                                    @if (in_array(session()->get('current_role')?->name, [
+                                            'risk admin',
+                                            'risk owner',
+                                            'risk analis',
+                                            'root',
+                                            'administrator',
+                                        ]))
                                         <a href="{{ route('risk.monitoring.create', $worksheet->getEncryptedId()) }}"
                                             style="min-width: 128px;" class="btn btn-primary-light">
                                             <span><i class="ti ti-plus"></i></span>&nbsp;Laporan Monitoring
                                         </a>
-                                    @endhasanyrole
+                                    @endif
                                 @endif
                             </div>
 
