@@ -123,4 +123,8 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    'eoffice' => [
+        'url' => env('EOFFICE_URL', ''),
+        'token' => env('EOFFICE_TOKEN', ''),
+    ]
 ];

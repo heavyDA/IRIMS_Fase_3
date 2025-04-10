@@ -24,7 +24,7 @@ use App\Http\Controllers\Setting\PositionController;
 use Illuminate\Support\Facades\Route;
 
 Route::group(['prefix' => 'login', 'as' => 'auth.', 'middleware' => 'guest'], function () {
-    Route::get('', fn() => view('auth.index'))->name('login');
+    Route::get('', [AuthController::class, 'index'])->name('login');
     Route::post('', [AuthController::class, 'authenticate'])->name('authenticate');
 });
 Route::group(['middleware' => 'auth'], function () {
