@@ -475,7 +475,7 @@ class WorksheetController extends Controller
                     'risk_cause_code',
                 ])->map(function ($incident) {
                     $incident['key'] = $incident['id'];
-                    $incident['kri_unit'] = $incident['kri_unit']['id'];
+                    $incident['kri_unit'] = (string) $incident['kri_unit']['id'];
                     return $incident;
                 }),
                 'mitigations' => $worksheet->incidents->flatMap(function ($incident) {
@@ -564,6 +564,9 @@ class WorksheetController extends Controller
         try {
             $validated = $request->validated();
             $data['context'] = [
+                'worksheet_number' => strip_tags(Purifier::clean($validated['context']['risk_number'])),
+                'company_code' => 'API',
+                'company_name' => 'PT Angkasa Pura Indonesia',
                 'target_body' => Purifier::clean($validated['context']['target_body']),
                 'risk_number' => strip_tags(Purifier::clean($validated['context']['risk_number'])),
             ];

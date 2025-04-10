@@ -1481,10 +1481,7 @@ const addIncidentRow = (data) => {
         <td>${data.risk_cause_code}</td>
         <td>${data.risk_cause_body}</td>
         <td>${data.kri_body}</td>
-        <td>${incidentForm.querySelector(
-        `select[name="kri_unit"] option[value="${data.kri_unit}"]`
-    )?.textContent ?? ""
-        }</td>
+        <td>${incidentKRIUnitChoices._currentState.choices.find(kri => kri.value == data.kri_unit).label}</td>
         <td>${data.kri_threshold_safe}</td>
         <td>${data.kri_threshold_caution}</td>
         <td>${data.kri_threshold_danger}</td>
