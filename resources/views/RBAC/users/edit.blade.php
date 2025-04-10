@@ -89,7 +89,7 @@
                 </div>
                 <div class="col-12">
                     <label for="expired_at">Tanggal Akhir Berlaku</label>
-                    <input value="{{ $user->expired_at->format('Y-m-d') }}" name="expired_at" type="date" required
+                    <input value="{{ $user->expired_at?->format('Y-m-d') }}" name="expired_at" type="date" required
                         class="form-control {{ $errors->has('expired_at') ? 'is-invalid' : null }}" />
                     @error('expired_at')
                         <x-forms.error :message="$message"></x-forms.error>
@@ -113,7 +113,7 @@
                 </div>
                 <div class="col-12">
                     <label for="password_confirmation">Konfirmasi Kata Sandi</label>
-                    <input name="password_confirmation" type="password_confirmation"
+                    <input name="password_confirmation" type="password"
                         class="form-control {{ $errors->has('password_confirmation') ? 'is-invalid' : null }}" />
                     @error('password_confirmation')
                         <x-forms.error :message="$message"></x-forms.error>

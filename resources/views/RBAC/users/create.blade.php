@@ -111,8 +111,7 @@
                 </div>
                 <div class="col-12">
                     <label for="password_confirmation">Konfirmasi Kata Sandi</label>
-                    <input value="{{ old('password_confirmation') }}" name="password_confirmation"
-                        type="password_confirmation"
+                    <input value="{{ old('password_confirmation') }}" name="password_confirmation" type="password"
                         class="form-control {{ $errors->has('password_confirmation') ? 'is-invalid' : null }}" />
                     @error('password_confirmation')
                         <x-forms.error :message="$message"></x-forms.error>

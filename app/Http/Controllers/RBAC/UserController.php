@@ -13,7 +13,6 @@ use App\Enums\UnitSourceType;
 use App\Models\Master\Position;
 use App\Models\UserUnit;
 use Exception;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
@@ -27,30 +26,29 @@ class UserController extends Controller
     {
         if (request()->ajax()) {
             $users = UserUnit::query()
+                ->select(['user_units.*'])
                 ->with('user', 'roles')
                 ->whereDoesntHave('roles', function ($query) {
                     $query->where('name', 'root');
                 });
-            // $users = User::query()->with('roles')
-            //     ->whereNotIn(
-            //         'username',
-            //         ['rahasia']
-            //     );
 
             return DataTables::eloquent($users)
-                ->editColumn('source_type', function ($user) {
+                ->editColumn('source_type', function (UserUnit $user) {
                     if ($user->source_type == UnitSourceType::SYSTEM->value) {
-                        return '<span class="badge badge-sm bg-info-transparent">Lokal</span>';
+                        return "<span class='text-capitalize badge badge-sm bg-info-transparent'>{$user->source_type}</span>";
                     }
-                    return '<span class="badge badge-sm bg-secondary-transparent">E-Office</span>';
+                    return "<span class='text-capitalize badge badge-sm bg-secondary-transparent'>{$user->source_type}</span>";
                 })
-                ->addColumn('action', function ($user) {
-                    $actions = [
-                        ['id' => $user->getEncryptedId(), 'route' => route('rbac.users.edit', $user->getEncryptedId()), 'type' => 'link', 'text' => 'edit', 'permission' => 'rbac.user.edit'],
-                        ['id' => $user->getEncryptedId(), 'route' => route('rbac.users.destroy', $user->getEncryptedId()), 'type' => 'delete', 'text' => 'hapus', 'permission' => 'rbac.user.destroy'],
-                    ];
+                ->addColumn('action', function (UserUnit $user) {
+                    if ($user->source_type == UnitSourceType::SYSTEM->value) {
+                        $actions = [
+                            ['id' => $user->getEncryptedId(), 'route' => route('rbac.users.edit', $user->getEncryptedId()), 'type' => 'link', 'text' => 'edit', 'permission' => 'rbac.user.edit'],
+                            ['id' => $user->getEncryptedId(), 'route' => route('rbac.users.destroy', $user->getEncryptedId()), 'type' => 'delete', 'text' => 'hapus', 'permission' => 'rbac.user.destroy'],
+                        ];
+                        return view('layouts.partials._table_action', compact('actions'));
+                    }
 
-                    return view('layouts.partials._table_action', compact('actions'));
+                    return '';
                 })
                 ->rawColumns(['action', 'source_type'])
                 ->make(true);
@@ -155,8 +153,12 @@ class UserController extends Controller
     public function edit(string $user)
     {
         $user = UserUnit::findByEncryptedIdOrFail($user);
-        $user->load('user', 'roles');
+        if ($user->source_type == UnitSourceType::EOFFICE->value) {
+            flash_message('flash_message', 'Pengguna E-Office tidak dapat diperbarui', State::ERROR);
+            return redirect()->route('rbac.users.index');
+        }
 
+        $user->load('user', 'roles');
 
         $roles = [];
         foreach ($user->roles as $role) {
@@ -164,7 +166,6 @@ class UserController extends Controller
         }
 
         $user->role = $roles;
-
         $title = 'Edit Pengguna';
         return view('RBAC.users.edit', compact('user', 'title'));
     }
@@ -175,8 +176,12 @@ class UserController extends Controller
     public function update(UserUpdateRequest $request, string $user)
     {
         $user = UserUnit::findByEncryptedIdOrFail($user);
-        $user->load('user');
+        if ($user->source_type == UnitSourceType::EOFFICE->value) {
+            flash_message('flash_message', 'Pengguna E-Office tidak dapat diperbarui', State::ERROR);
+            return redirect()->route('rbac.users.index');
+        }
 
+        $user->load('user');
         $validator = Validator::make($request->only('username', 'employee_id'), [
             'username' => 'unique:users,username,' . $user->user->id,
             'employee_id' => 'unique:users,employee_id,' . $user->user->id,
@@ -264,8 +269,13 @@ class UserController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(User $user)
+    public function destroy(UserUnit $user)
     {
+        if ($user->source_type == UnitSourceType::EOFFICE->value) {
+            flash_message('flash_message', 'Pengguna E-Office tidak dapat dihapus', State::ERROR);
+            return redirect()->route('rbac.users.index');
+        }
+
         if ($user->delete()) {
             flash_message('flash_message', 'Pengguna berhasil dihapus', State::SUCCESS);
         } else {
