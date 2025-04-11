@@ -122,7 +122,7 @@ class AuthService
         } catch (Exception $e) {
             auth()->logout();
             session()->flush();
-            logger()->error('[Authentication] Error when authenticating using E-Office: ' . $e->getMessage(), [$e]);
+            logger()->error("[Authentication] Error when authenticating user {$credentials['username']} using E-Office: " . $e->getMessage(), [$e]);
         }
 
         return false;
