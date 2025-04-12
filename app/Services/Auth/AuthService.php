@@ -63,12 +63,13 @@ class AuthService
             $employee = $this->eofficeAuthService->login($credentials);
             $employee->is_active = true;
 
-            $user = User::firstOrCreate(['employee_id' => $employee->employee_id], (array) $employee);
+            $user = User::firstOrCreate(['username' => $employee->username, 'employee_id' => $employee->employee_id], (array) $employee);
 
             $unit = null;
 
             if ($user->wasRecentlyCreated) {
                 $unit = $user->units()->create((array) $employee + [
+                    'branch_code' => $employee->personnel_area_code,
                     'source_type' => UnitSourceType::EOFFICE->value,
                 ]);
             } else {
@@ -80,10 +81,9 @@ class AuthService
             }
 
             if (auth()->loginUsingId($user->id)) {
-                $user->update((array) $employee);
-
                 if (!$unit) {
                     $unit = $user->units()->create((array) $employee + [
+                        'branch_code' => $employee->personnel_area_code,
                         'source_type' => UnitSourceType::EOFFICE->value,
                     ]);
                 }

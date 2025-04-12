@@ -71,7 +71,10 @@ class FetchEmployeeJob implements ShouldQueue
                 }
 
                 $user = User::updateOrCreate(
-                    ['employee_id' => $official->employee_id],
+                    [
+                        'username' => $official->username,
+                        'employee_id' => $official->employee_id
+                    ],
                     (array) $official
                 );
 
@@ -128,7 +131,10 @@ class FetchEmployeeJob implements ShouldQueue
                 }
 
                 $user = User::updateOrCreate(
-                    ['employee_id' => $staff->employee_id],
+                    [
+                        'username' => $staff->username,
+                        'employee_id' => $staff->employee_id
+                    ],
                     (array) $staff
                 );
 
@@ -176,10 +182,9 @@ class FetchEmployeeJob implements ShouldQueue
             }
 
             foreach ($users as $userId => $units) {
-                $inactiveUnits = UserUnit::where('user_id', $userId)->whereNotIn('id', $units)->get();
-                foreach ($inactiveUnits as $inactiveUnit) {
-                    $inactiveUnit->delete();
-                }
+                $inactiveUnits = UserUnit::where('user_id', $userId)->get();
+                $inactiveUnits->filter(fn($item) => !in_array($item->id, $units))
+                    ->each(fn($item) => $item->delete());
             }
 
             DB::commit();
