@@ -66,22 +66,26 @@ class AuthService
             $user = User::firstOrCreate(['employee_id' => $employee->employee_id], (array) $employee);
 
             $unit = null;
+
             if ($user->wasRecentlyCreated) {
                 $unit = $user->units()->create((array) $employee + [
                     'source_type' => UnitSourceType::EOFFICE->value,
                 ]);
             } else {
                 $user->update((array) $employee);
+                $unit = $user->units()
+                    ->where('sub_unit_code', $employee->sub_unit_code)
+                    ->where('position_name', $employee->position_name)
+                    ->first();
             }
 
             if (auth()->loginUsingId($user->id)) {
                 $user->update((array) $employee);
 
                 if (!$unit) {
-                    $unit = $user->units()
-                        ->where('sub_unit_code', $employee->sub_unit_code)
-                        ->where('position_name', $employee->position_name)
-                        ->firstOrFail();
+                    $unit = $user->units()->create((array) $employee + [
+                        'source_type' => UnitSourceType::EOFFICE->value,
+                    ]);
                 }
 
                 /** 
