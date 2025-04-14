@@ -25,7 +25,6 @@ Artisan::command('fetch:official', function () {
 
 Artisan::command('fetch:position', function () {
     PositionJob::dispatch();
-    Artisan::call('db:seed --class=PositionSeeder');
 })->purpose('Fetch position from API');
 
 Artisan::command('fetch:employee', function () {

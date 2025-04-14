@@ -61,20 +61,20 @@ class RiskMetricsController extends Controller
         }
 
         $years = RiskMetric::select('year')->distinct()->get() ?? collect(['year' => date('Y')]);
-        $units = $this->getLevelOneUnit();
+        $units = Position::getLevelOneAndTwoQuery()->get();
 
         return view('setting.risk_metric.index', compact('years', 'units'));
     }
 
     public function create()
     {
-        $units = $this->getLevelOneUnit();
+        $units = Position::getLevelOneAndTwoQuery()->get();
         return view('setting.risk_metric.create', compact('units'));
     }
 
     public function store(Request $request)
     {
-        $position = Position::hierarchyQuery('ap')->where('sub_unit_code', $request->unit_code)->first();
+        $position = Position::getLevelOneAndTwoQuery($request->unit_code)->first();
 
         if (!$position) {
 
@@ -123,16 +123,5 @@ class RiskMetricsController extends Controller
 
             return back()->withInput();
         }
-    }
-
-    protected function getLevelOneUnit()
-    {
-        return Position::hierarchyQuery('ap')
-            ->where(
-                fn($q) => $q->where('branch_code', 'PST')
-                    ->orWhereLike('branch_code', 'REG%')
-            )
-            ->where('level', 1)
-            ->get();
     }
 }

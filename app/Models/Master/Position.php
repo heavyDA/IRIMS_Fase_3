@@ -192,4 +192,13 @@ class Position extends Model
         return $query->whereLike('unit_code', $unit)
             ->orWhereLike('unit_code', str_replace('.%', '', $unit));
     }
+
+    public static function getLevelOneAndTwoQuery(?string $unit = null)
+    {
+        return self::hierarchyQuery('ap')
+            ->when($unit, fn($q) => $q->where('sub_unit_code', $unit))
+            ->whereIn('level', [1, 2])
+            ->orderBy('level', 'asc')
+            ->orderBy('sub_unit_code', 'asc');
+    }
 }

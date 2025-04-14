@@ -172,13 +172,42 @@ class AuthController extends Controller
 
     public function get_risk_metric()
     {
-        $riskMetric = RiskMetric::withExpression(
-            'ancestor_hierarchy',
-            Position::ancestorHierarchyQuery(session()->get('current_unit')->sub_unit_code == 'ap' ? 'ap.50' : session()->get('current_unit')->sub_unit_code)
-                ->where('level', 1)
-        )
-            ->join('ancestor_hierarchy as ah', 'm_risk_metrics.organization_code', '=', 'ah.sub_unit_code')
+        try {
+            $unit = $this->roleService->getCurrentUnit();
+            $unitLevel = get_unit_level($unit->sub_unit_code);
+
+            if ($unitLevel > 2) {
+                $unit = Position::ancestorHierarchyQuery($unit->sub_unit_code)
+                    ->where('level', 2)
+                    ->first();
+            } else if ($unit->sub_unit_code == 'ap') {
+                $unit = Position::where('sub_unit_code', 'ap.50')
+                    ->first();
+            }
+            return response()->json(['data' => $this->getRiskMetric($unit)])->header('Cache-Control', 'no-store');
+        } catch (Exception $e) {
+            logger()->error('[Risk Metrics] User ID ' . auth()->user()->employee_id . ' Looking for Risk Metric for Unit ' . $this->roleService->getCurrentUnit()->sub_unit_code . ' ' . $e->getMessage());
+            return response()->json(['data' => null])->header('Cache-Control', 'no-store');
+        }
+    }
+
+    protected function getRiskMetric($unit): RiskMetric
+    {
+        $riskMetric = RiskMetric::where('organization_code', $unit->sub_unit_code)->first();
+        if ($riskMetric) {
+            return $riskMetric;
+        }
+
+        $level = get_unit_level($unit->sub_unit_code) - 1;
+
+        if ($level == 0) {
+            throw new Exception('Strategi Matriks Risiko tidak ditemukan');
+        }
+
+        $unit = Position::ancestorHierarchyQuery($unit->sub_unit_code)
+            ->where('level', $level)
             ->first();
-        return response()->json(['data' => $riskMetric])->header('Cache-Control', 'no-store');
+
+        return $this->getRiskMetric($unit);
     }
 }
