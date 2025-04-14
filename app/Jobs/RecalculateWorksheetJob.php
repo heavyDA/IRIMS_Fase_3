@@ -40,7 +40,6 @@ class RecalculateWorksheetJob implements ShouldQueue
             )
             ->join('position_hierarchy as ph', 'ph.sub_unit_code', 'w.sub_unit_code')
             ->whereYear('w.created_at', $this->riskMetric->year)
-            ->where('wi.risk_impact_category', 'kualitatif')
             ->groupBy('w.id')
             ->get();
 
@@ -49,58 +48,15 @@ class RecalculateWorksheetJob implements ShouldQueue
 
             $countUpdated = 0;
             foreach ($worksheets as $worksheet) {
-                $service = new WorksheetCalculateRiskService(
-                    'kualitatif',
-                    $worksheet->inherent_impact_scale,
-                    $worksheet->inherent_impact_probability,
-                    $this->riskMetric->limit
-                );
+                WorksheetStrategy::where('worksheet_id', $worksheet->worksheet_id)
+                    ->update(['risk_value_limit' => $this->riskMetric->limit]);
 
-                $inherent = $service->calculate()->get();
-                $data = [
-                    'inherent_risk_exposure' => $inherent['exposure'],
-                    'inherent_risk_level' => $inherent['probability_scale']->risk_level,
-                    'inherent_risk_scale' => $inherent['probability_scale']->risk_scale,
-                ];
-
-                $previousResidual = null;
-                foreach ([1, 2, 3, 4] as $quarter) {
-                    $residualScale = "residual_{$quarter}_impact_scale";
-                    $residualProbability = "residual_{$quarter}_impact_probability";
-                    $service = new WorksheetCalculateRiskService(
-                        'kualitatif',
-                        $worksheet->{$residualScale},
-                        $worksheet->{$residualProbability},
-                        $this->riskMetric->limit
-                    );
-
-                    if ($quarter == 1) {
-                        $previousResidual = $service->calculate()->get();
-
-                        $data = array_merge(
-                            $data,
-                            [
-                                "residual_{$quarter}_risk_exposure" => $previousResidual['exposure'],
-                                "residual_{$quarter}_risk_level" => $previousResidual['probability_scale']->risk_level,
-                                "residual_{$quarter}_risk_scale" => $previousResidual['probability_scale']->risk_scale,
-                            ]
-                        );
-                    } else {
-                        $residual = $service->calculate(previousRiskScale: $previousResidual['scale'])->get();
-
-                        $data = array_merge(
-                            $data,
-                            [
-                                "residual_{$quarter}_risk_exposure" => $residual['exposure'],
-                                "residual_{$quarter}_risk_level" => $residual['probability_scale']->risk_level,
-                                "residual_{$quarter}_risk_scale" => $residual['probability_scale']->risk_scale,
-                            ]
-                        );
-                    }
+                if ($worksheet->risk_impact_category == 'kualitatif') {
+                    WorksheetIdentification::where('worksheet_id', $worksheet->worksheet_id)
+                        ->update($this->recalculateKualitatif($worksheet));
                 }
 
-                WorksheetStrategy::where('worksheet_id', $worksheet->worksheet_id)->update(['risk_value_limit' => $this->riskMetric->limit]);
-                $countUpdated += WorksheetIdentification::where('worksheet_id', $worksheet->worksheet_id)->update($data);
+                $countUpdated += 1;
             }
             DB::commit();
             logger()->info("[Risk Metric Job] Successfully recalculate worksheets for [{$this->riskMetric->organization_code}] {$this->riskMetric->organization_name}", ['count' => $worksheets->count(), 'updated' => $countUpdated, 'data' => $worksheets->pluck('worksheet_id')]);
@@ -108,5 +64,60 @@ class RecalculateWorksheetJob implements ShouldQueue
             DB::rollBack();
             logger()->error("[Risk Metric Job] Failed to recalculate worksheets for [{$this->riskMetric->organization_code}] {$this->riskMetric->organization_name}", ['error' => $e, 'data' => $worksheets->pluck('worksheet_id')]);
         }
+    }
+
+    protected function recalculateKualitatif($worksheet): array
+    {
+        $service = new WorksheetCalculateRiskService(
+            'kualitatif',
+            $worksheet->inherent_impact_scale,
+            $worksheet->inherent_impact_probability,
+            $this->riskMetric->limit
+        );
+
+        $inherent = $service->calculate()->get();
+        $data = [
+            'inherent_risk_exposure' => $inherent['exposure'],
+            'inherent_risk_level' => $inherent['probability_scale']->risk_level,
+            'inherent_risk_scale' => $inherent['probability_scale']->risk_scale,
+        ];
+
+        $previousResidual = null;
+        foreach ([1, 2, 3, 4] as $quarter) {
+            $residualScale = "residual_{$quarter}_impact_scale";
+            $residualProbability = "residual_{$quarter}_impact_probability";
+            $service = new WorksheetCalculateRiskService(
+                'kualitatif',
+                $worksheet->{$residualScale},
+                $worksheet->{$residualProbability},
+                $this->riskMetric->limit
+            );
+
+            if ($quarter == 1) {
+                $previousResidual = $service->calculate()->get();
+
+                $data = array_merge(
+                    $data,
+                    [
+                        "residual_{$quarter}_risk_exposure" => $previousResidual['exposure'],
+                        "residual_{$quarter}_risk_level" => $previousResidual['probability_scale']->risk_level,
+                        "residual_{$quarter}_risk_scale" => $previousResidual['probability_scale']->risk_scale,
+                    ]
+                );
+            } else {
+                $residual = $service->calculate(previousRiskScale: $previousResidual['scale'])->get();
+
+                $data = array_merge(
+                    $data,
+                    [
+                        "residual_{$quarter}_risk_exposure" => $residual['exposure'],
+                        "residual_{$quarter}_risk_level" => $residual['probability_scale']->risk_level,
+                        "residual_{$quarter}_risk_scale" => $residual['probability_scale']->risk_scale,
+                    ]
+                );
+            }
+        }
+
+        return $data;
     }
 }
