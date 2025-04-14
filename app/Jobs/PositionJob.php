@@ -49,8 +49,12 @@ class PositionJob implements ShouldQueue
                     );
 
                     if ($position->wasRecentlyCreated) {
+                        $position->update(['assigned_roles' => 'risk admin']);
                         $created++;
                     } else {
+                        if (empty($position->assigned_roles)) {
+                            $position->update(['assigned_roles' => 'risk admin']);
+                        }
                         $updated++;
                     }
 

@@ -55,7 +55,10 @@ class RoleService
             );
     }
 
-    public function isRiskViewer() {}
+    public function isRiskReviewer()
+    {
+        return $this->getCurrentRole()->name == 'risk reviewer';
+    }
 
     public function getCurrentRole()
     {
