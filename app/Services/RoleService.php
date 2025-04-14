@@ -20,7 +20,7 @@ class RoleService
 
     public function isRiskAnalis()
     {
-        return $this->getCurrentRole()->name == 'risk analis';
+        return str_contains($this->getCurrentRole()->name, 'risk analis');
     }
 
     public function isRiskOtorisator()
@@ -58,6 +58,11 @@ class RoleService
     public function isRiskReviewer()
     {
         return $this->getCurrentRole()->name == 'risk reviewer';
+    }
+
+    public function isAdministrator()
+    {
+        return in_array($this->getCurrentRole()->name, ['root', 'administrator']);
     }
 
     public function getCurrentRole()
