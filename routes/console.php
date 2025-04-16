@@ -5,19 +5,22 @@ use App\Jobs\OfficialJob;
 use App\Jobs\PositionJob;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Schedule;
 
 Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote')->hourly();
 
-Schedule::job('App\Jobs\PositionJob')->everyFifteenSeconds();
-
 Schedule::call(function () {
-    Artisan::call('fetch:position');
-    Artisan::call('fetch:official');
-    Artisan::call('fetch:employee');
-})->dailyAt('00:00');
+    Bus::chain([
+        new PositionJob,
+        new OfficialJob,
+        new FetchEmployeeJob,
+    ])->dispatch();
+})
+    ->dailyAt('18:00')
+    ->withoutOverlapping(360);
 
 Artisan::command('fetch:official', function () {
     OfficialJob::dispatch();
