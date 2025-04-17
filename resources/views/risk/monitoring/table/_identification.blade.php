@@ -83,11 +83,11 @@
                         <td>{{ $incident->risk_cause_number }}</td>
                         <td>{{ $incident->risk_cause_code }}</td>
                         <td>{!! html_entity_decode($incident->risk_cause_body) !!}</td>
-                        <td>{{ $incident->kri_body }}</td>
+                        <td>{!! html_entity_decode($incident->kri_body) !!}</td>
                         <td>{{ $incident?->kri_unit?->name }}</td>
-                        <td>{{ $incident?->kri_threshold_safe }}</td>
-                        <td>{{ $incident?->kri_threshold_caution }}</td>
-                        <td>{{ $incident?->kri_threshold_danger }}</td>
+                        <td>{!! html_entity_decode($incident?->kri_threshold_safe) !!} asdasdas</td>
+                        <td>{!! html_entity_decode($incident?->kri_threshold_caution) !!}</td>
+                        <td>{!! html_entity_decode($incident?->kri_threshold_danger) !!}</td>
                         <td>{{ $worksheet->identification->existing_control_type_name }}</td>
                         <td>{!! html_entity_decode($worksheet->identification->existing_control_body) !!}</td>
                         <td>{{ $worksheet->identification->control_effectiveness_assessment_name }}</td>
