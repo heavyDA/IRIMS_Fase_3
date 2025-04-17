@@ -84,14 +84,14 @@ class WorksheetService
         $data->residual_2_impact_scale_id = $scales->where('id', $data->residual_2_impact_scale_id)->first()->id;
         $data->residual_3_impact_scale_id = $scales->where('id', $data->residual_3_impact_scale_id)->first()->id;
         $data->residual_4_impact_scale_id = $scales->where('id', $data->residual_4_impact_scale_id)->first()->id;
-
         $inherent = $heatmaps->where('id', $data->inherent_impact_probability_scale_id)->first();
         $data->inherent_impact_probability_scale_id = $inherent->id;
         $data->inherent_risk_scale = $inherent->risk_scale;
         $data->inherent_risk_level = $inherent->risk_level;
 
         for ($i = 1; $i <= 4; $i++) {
-            $residual = $heatmaps->where('id', $data->residual_1_impact_probability_scale_id)->first();
+            $residualKey = "residual_{$i}_impact_probability_scale_id";
+            $residual = $heatmaps->where('id', $data->$residualKey)->first();
             foreach (
                 [
                     'impact_probability_scale_id',
