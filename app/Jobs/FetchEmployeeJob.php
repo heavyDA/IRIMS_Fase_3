@@ -25,8 +25,8 @@ class FetchEmployeeJob implements ShouldQueue
      */
     public function __construct()
     {
-        $this->staffService = new StaffService(env('EOFFICE_URL'), env('EOFFICE_TOKEN'));
-        $this->officialService = new OfficialService(env('EOFFICE_URL'), env('EOFFICE_TOKEN'));
+        $this->staffService = new StaffService(config('app.eoffice.url'), config('app.eoffice.token'));
+        $this->officialService = new OfficialService(config('app.eoffice.url'), config('app.eoffice.token'));
         // $this->onQueue('high');
     }
 

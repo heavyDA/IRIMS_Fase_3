@@ -24,7 +24,7 @@ class PositionJob implements ShouldQueue
      */
     public function __construct()
     {
-        $this->unitService = new UnitService(env('EOFFICE_URL'), env('EOFFICE_TOKEN'));
+        $this->unitService = new UnitService(config('app.eoffice.url'), config('app.eoffice.token'));
     }
 
     /**
