@@ -19,8 +19,7 @@ Schedule::call(function () {
         new FetchEmployeeJob,
     ])->dispatch();
 })
-    ->dailyAt('18:00')
-    ->withoutOverlapping(360);
+    ->dailyAt('18:00');
 
 Artisan::command('fetch:official', function () {
     OfficialJob::dispatch();
