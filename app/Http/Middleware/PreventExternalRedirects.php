@@ -14,14 +14,7 @@ class PreventExternalRedirects
      *
      * @var array
      */
-    protected $trustedHosts = [
-        // Add your application's domains here
-        'localhost',
-        '127.0.0.1',
-        'sierina.injourneyairports.id',
-        // Example: 'example.com',
-        // Example: '*.example.com',
-    ];
+    protected $trustedHosts = [];
 
     /**
      * Handle an incoming request.
@@ -30,6 +23,7 @@ class PreventExternalRedirects
      */
     public function handle(Request $request, Closure $next): Response
     {
+        $this->trustedHosts = config('app.trusted_hosts');
         $response = $next($request);
 
         // Add security headers
@@ -72,7 +66,9 @@ class PreventExternalRedirects
     protected function addSecurityHeaders(Response $response): void
     {
         // Set Content-Security-Policy header
-        $response->headers->set('Content-Security-Policy', $this->buildCspPolicy());
+        if (app()->environment('production')) {
+            $response->headers->set('Content-Security-Policy', $this->buildCspPolicy());
+        }
 
         // Anti-clickjacking headers
         $response->headers->set('X-Frame-Options', 'SAMEORIGIN'); // Allows framing by same origin only
@@ -206,11 +202,13 @@ class PreventExternalRedirects
     protected function buildCspPolicy(): string
     {
         return "default-src 'self'; " .
-            "img-src 'self' data:; " .
+            "img-src 'self' https://*.injourneyairports.id data:; " .
             "style-src 'self' 'unsafe-inline'; " .
             "font-src 'self'; " .
             "script-src 'self' 'unsafe-eval' 'unsafe-inline'; " .
             "object-src 'none'; " .
+            // Uncomment this on development
+            // "connect-src 'self' ws://localhost:5173; " .
             "frame-ancestors 'self'; " . // Anti-clickjacking: Only allow framing by same origin
             "base-uri 'self'; " .
             "form-action 'self';";

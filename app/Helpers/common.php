@@ -28,6 +28,13 @@ if (!function_exists('array_remove_empty')) {
     }
 }
 
+if (!function_exists('array_set_empty_string_to_null')) {
+    function array_set_empty_string_to_null(array $array): array
+    {
+        return array_map(fn($value) => $value === '' ? null : $value, $array);
+    }
+}
+
 if (!function_exists('is_timezone_available')) {
     function is_timezone_available(?string $timezone): bool
     {
@@ -120,6 +127,13 @@ if (!function_exists('replace_pgs_from_position')) {
     }
 }
 
+
+if (!function_exists('replace_id_with_code')) {
+    function replace_id_with_code(string $value): string
+    {
+        return str_replace('_id', '_code', $value);
+    }
+}
 
 if (!function_exists('excel_build_nested_headers')) {
     function excel_build_nested_headers(array $columns = [], array $nested_columns = []): array

@@ -119,7 +119,7 @@ class AuthController extends Controller
         try {
             $position = Position::whereSubUnitCode(session()->get('current_unit')->sub_unit_code)->first();
             $data = [
-                'name' => "[{$position->sub_unit_code_doc}] {$position->sub_unit_name}",
+                'name' => "[{$position->sub_unit_code_doc}] {$position->position_name}",
                 'position_name' => $position->position_name,
                 'personnel_area_code' => $position->sub_unit_code_doc ?: '-',
                 'personnel_area_name' => $position?->unit_name ?: $position?->sub_unit_name ?: '-',
@@ -154,7 +154,7 @@ class AuthController extends Controller
         $positionHeads = [];
         foreach ($positions as $position) {
             $positionHeads[] = [
-                'name' => "[{$position->sub_unit_code_doc}] {$position->sub_unit_name}",
+                'name' => "[{$position->sub_unit_code_doc}] {$position->position_name}",
                 'position_name' => $position->position_name,
                 'personnel_area_code' => session()->get('current_unit')?->personnel_area_code ?: $position?->sub_unit_code_doc ?: '-',
                 'personnel_area_name' => session()->get('current_unit')?->personnel_area_name ?: '-',

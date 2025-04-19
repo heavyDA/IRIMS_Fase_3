@@ -7,7 +7,8 @@ use App\Models\Master\Official;
 use App\Models\Master\Position;
 use App\Models\User;
 use App\Models\UserUnit;
-use App\Services\EOffice\OfficialService;
+use App\Services\Nadia\AuthService;
+use App\Services\Nadia\EmployeeService;
 use Exception;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
@@ -17,20 +18,34 @@ class OfficialJob implements ShouldQueue
 {
     use Queueable;
 
-    protected OfficialService $officialService;
+    protected AuthService $authService;
+    protected EmployeeService $employeeService;
     /**
      * Create a new job instance.
      */
     public function __construct()
     {
-        $this->officialService = new OfficialService(config('app.eoffice.url'), config('app.eoffice.token'));
+        $this->authService = new AuthService(
+            host: config('app.nadia.url'),
+            appId: config('app.nadia.app_id'),
+            appKey: config('app.nadia.app_secret'),
+            timeout: 20
+        );
+
+        $this->employeeService = new EmployeeService(
+            host: config('app.nadia.url'),
+            appId: config('app.nadia.app_id'),
+            appKey: config('app.nadia.app_secret'),
+            token: $this->authService->login_system()->getToken(),
+            timeout: 20
+        );
     }
 
     public function handle(): void
     {
         $start = microtime(true);
         try {
-            $officials = $this->officialService->get_all();
+            $officials = $this->employeeService->official_get_all();
             $created = 0;
             $updated = 0;
 
@@ -38,25 +53,14 @@ class OfficialJob implements ShouldQueue
                 throw new Exception('No data fetched');
             }
 
-            DB::beginTransaction();
+            DB::statement('TRUNCATE m_officials;');
             foreach ($officials as $official) {
-                $official = Official::updateOrCreate(
-                    [
-                        'employee_id' => $official->employee_id,
-                        'sub_unit_code' => $official->sub_unit_code
-                    ],
-                    (array) $official
-                );
+                $official = Official::create($official->toArray());
+                $created += 1;
 
-                if ($official->wasRecentlyCreated) {
-                    $created += 1;
-                } else if ($official) {
-                    $updated += 1;
-                }
-
-                $user = User::updateOrCreate([
-                    'employee_id' => $official->employee_id
-                ], (array) $official);
+                $user = User::firstOrCreate([
+                    'username' => $official->username,
+                ], $official->toArray());
 
                 $unit = UserUnit::updateOrCreate([
                     'user_id' => $user->id,
@@ -76,10 +80,8 @@ class OfficialJob implements ShouldQueue
                 }
             }
 
-            DB::commit();
             logger()->info("[Official Job] successfully fetched data number of created {$created} and updated {$updated} in " . (microtime(true) - $start) . " seconds");
         } catch (Exception $e) {
-            DB::rollBack();
             logger()->error('[Official Job] ' . $e->getMessage() . " in " . (microtime(true) - $start) . " seconds");
         }
     }
