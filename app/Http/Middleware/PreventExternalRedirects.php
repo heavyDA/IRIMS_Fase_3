@@ -207,7 +207,8 @@ class PreventExternalRedirects
             "font-src 'self'; " .
             "script-src 'self' 'unsafe-eval' 'unsafe-inline'; " .
             "object-src 'none'; " .
-            "connect-src 'self' ws://localhost:5173; " .
+            // Uncomment this on development
+            // "connect-src 'self' ws://localhost:5173; " .
             "frame-ancestors 'self'; " . // Anti-clickjacking: Only allow framing by same origin
             "base-uri 'self'; " .
             "form-action 'self';";
