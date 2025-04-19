@@ -126,5 +126,13 @@ return [
     'eoffice' => [
         'url' => env('EOFFICE_URL', ''),
         'token' => env('EOFFICE_TOKEN', ''),
-    ]
+    ],
+
+    'nadia' => [
+        'url' => env('NADIA_URL', ''),
+        'app_id' => env('NADIA_APP_ID', ''),
+        'app_secret' => env('NADIA_APP_SECRET', ''),
+    ],
+
+    'trusted_hosts' => explode(',', env('TRUSTED_HOSTS', '')),
 ];

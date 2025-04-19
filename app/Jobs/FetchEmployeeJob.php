@@ -6,8 +6,8 @@ use App\Enums\UnitSourceType;
 use App\Models\Master\Position;
 use App\Models\User;
 use App\Models\UserUnit;
-use App\Services\EOffice\OfficialService;
-use App\Services\EOffice\StaffService;
+use App\Services\Nadia\AuthService;
+use App\Services\Nadia\EmployeeService;
 use Exception;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
@@ -17,17 +17,28 @@ class FetchEmployeeJob implements ShouldQueue
 {
     use Queueable;
 
-    protected OfficialService $officialService;
-    protected StaffService $staffService;
+    protected AuthService $authService;
+    protected EmployeeService $employeeService;
 
     /**
      * Create a new job instance.
      */
     public function __construct()
     {
-        $this->staffService = new StaffService(config('app.eoffice.url'), config('app.eoffice.token'));
-        $this->officialService = new OfficialService(config('app.eoffice.url'), config('app.eoffice.token'));
-        // $this->onQueue('high');
+        $this->authService = new AuthService(
+            host: config('app.nadia.url'),
+            appId: config('app.nadia.app_id'),
+            appKey: config('app.nadia.app_secret'),
+            timeout: 20
+        );
+
+        $this->employeeService = new EmployeeService(
+            host: config('app.nadia.url'),
+            appId: config('app.nadia.app_id'),
+            appKey: config('app.nadia.app_secret'),
+            token: $this->authService->login_system()->getToken(),
+            timeout: 20
+        );
     }
 
     /**
@@ -37,12 +48,12 @@ class FetchEmployeeJob implements ShouldQueue
     {
         $start = microtime(true);
         try {
-            $officials = $this->officialService->get_all();
+            $officials = $this->employeeService->official_get_all();
             if ($officials->isEmpty()) {
                 logger()->info(['FetchEmployeeJob' => 'No officials data fetched']);
             }
 
-            $staffs = $this->staffService->get_all();
+            $staffs = $this->employeeService->staff_get_all();
             $created = 0;
             $updated = 0;
 
@@ -59,8 +70,6 @@ class FetchEmployeeJob implements ShouldQueue
             $users = [];
 
             DB::beginTransaction();
-
-
             foreach ($officials as $official) {
                 $headUnit = Position::where('sub_unit_code', $official->sub_unit_code)
                     ->first();
@@ -73,7 +82,7 @@ class FetchEmployeeJob implements ShouldQueue
                 $user = User::updateOrCreate(
                     [
                         'username' => $official->username,
-                        'employee_id' => $official->employee_id
+                        'employee_id' => $official->employee_id,
                     ],
                     (array) $official
                 );
@@ -86,8 +95,8 @@ class FetchEmployeeJob implements ShouldQueue
 
                 $unit = $user->units()->updateOrCreate(
                     [
-                        'source_type' => $sourceType,
                         'sub_unit_code' => $official->sub_unit_code,
+                        'source_type' => $sourceType,
                         'position_name' => $official->position_name,
                     ],
                     [
@@ -146,8 +155,8 @@ class FetchEmployeeJob implements ShouldQueue
 
                 $unit = $user->units()->updateOrCreate(
                     [
-                        'source_type' => $sourceType,
                         'sub_unit_code' => $staff->sub_unit_code,
+                        'source_type' => $sourceType,
                         'position_name' => $staff->position_name,
                     ],
                     [
