@@ -15,7 +15,7 @@ class LoginSystemResponse implements DTOContracts
 
     public static function fromArray($response): self
     {
-        return new self($response['token'] ?? '');
+        return new self($response['token'] ?? $response['access_token'] ?? '');
     }
 
     public function toArray(): array
