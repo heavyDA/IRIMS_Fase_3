@@ -67,18 +67,22 @@ abstract class NadiaAbstract
         if (
             $request->failed() || $request->serverError() || $request->clientError() || $response->status == NadiaResponse::STATUS_ERROR
         ) {
+            if (array_key_exists('password', $payload)) {
+                unset($payload['password']);
+            }
+
             $context = [
-                'url' => $path,
+                'url' => (string) $request->effectiveUri(),
                 'payload' => $payload,
                 'response_code' => $request->status(),
                 'response_body' => $request->body(),
             ];
             logger()->error(
-                '[' . self::SERVICE_NAME . '] ' . ($response->message ?? 'Failed to get data from Nadia Service.'),
+                '[' . self::SERVICE_NAME . '] ' . ($response?->message ?? 'Failed to get data from Nadia Service.'),
                 $context
             );
             throw new NadiaException(
-                '[' . self::SERVICE_NAME . '] Failed to get data from ' . $path . ' from Nadia Service. ' .
+                '[' . self::SERVICE_NAME . '] Failed to get data from ' . (string) $request->effectiveUri() . ' from Nadia Service. ' .
                     ($response->message ? "Error: {$response->message}" : ""),
                 $request->status()
             );
