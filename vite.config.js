@@ -3,6 +3,10 @@ import laravel from 'laravel-vite-plugin';
 import path from 'path';
 
 export default defineConfig({
+    server: {
+        host: 'localhost',
+        port: 5173,
+    },
     plugins: [
         laravel({
             input: [
@@ -26,6 +30,8 @@ export default defineConfig({
 
                 'resources/js/pages/report/risk_profile/index.js',
                 'resources/js/pages/report/risk_monitoring/index.js',
+                'resources/js/pages/report/alteration/form.js',
+                'resources/js/pages/report/loss_event/form.js',
 
                 'resources/js/pages/risk/monitoring/index.js',
                 'resources/js/pages/risk/monitoring/create.js',
