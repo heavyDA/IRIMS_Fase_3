@@ -2,6 +2,10 @@
 
 namespace App\Providers;
 
+use App\Models\Risk\WorksheetAlteration;
+use App\Models\Risk\WorksheetLossEvent;
+use App\Policies\Risk\WorksheetAlterationPolicy;
+use App\Policies\Risk\WorksheetLossEventPolicy;
 use App\Services\RoleService;
 use Carbon\Carbon;
 use Illuminate\Session\SessionManager;
@@ -28,6 +32,9 @@ class AppServiceProvider extends ServiceProvider
         Gate::before(function ($user, $ability) {
             return $user->hasRole('root') || $user->hasRole('administrator') ? true : null;
         });
+
+        Gate::policy(WorksheetAlteration::class, WorksheetAlterationPolicy::class);
+        Gate::policy(WorksheetLossEvent::class, WorksheetLossEventPolicy::class);
 
         setlocale(LC_ALL, 'id_ID');
         Carbon::setLocale('id');

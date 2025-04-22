@@ -14,6 +14,8 @@ use App\Http\Controllers\Master\{
     RiskTreatmentOptionController,
     RiskTreatmentTypeController
 };
+use App\Http\Controllers\Report\AlterationController;
+use App\Http\Controllers\Report\LossEventController;
 use App\Http\Controllers\Report\RiskProfileController;
 use App\Http\Controllers\Report\RiskMonitoringController;
 use App\Http\Controllers\Risk\AssessmentController;
@@ -103,6 +105,11 @@ Route::group(['middleware' => 'auth'], function () {
             Route::get('', [RiskMonitoringController::class, 'index'])->name('index');
             Route::get('export', [RiskMonitoringController::class, 'export'])->name('export');
         });
+
+        Route::get('alterations/export', [AlterationController::class, 'export'])->name('alterations.export');
+        Route::resource('alterations', AlterationController::class, ['names' => custom_route_names('alterations')])->except(['show']);
+        Route::get('loss-events/export', [LossEventController::class, 'export'])->name('alterations.export');
+        Route::resource('loss-events', LossEventController::class, ['names' => custom_route_names('loss_events')])->except(['show']);
     });
 
     Route::group(['as' => 'master.', 'prefix' => 'master'], function () {

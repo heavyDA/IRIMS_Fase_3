@@ -5,13 +5,13 @@
                 <div class="card-title">
                     Skala Risiko Inheren
                 </div>
-                <a href="javascript:void(0);" data-bs-toggle="collapse" data-bs-target="#inherent-risk-level-collapse"
-                    aria-expanded="false" aria-controls="inherent-risk-level-collapse">
+                <a href="javascript:void(0);" data-bs-toggle="collapse" data-bs-target="#inherent-risk-map-collapse"
+                    aria-expanded="false" aria-controls="inherent-risk-map-collapse">
                     <i class="ri-arrow-down-s-line fs-18 collapse-open"></i>
                     <i class="ri-arrow-up-s-line collapse-close fs-18"></i>
                 </a>
             </div>
-            <div class="collapse show border-top" id="inherent-risk-level-collapse">
+            <div class="collapse show border-top" id="inherent-risk-map-collapse">
                 <div class="card-body">
                     <div id="inherent-risk-level-chart"></div>
                 </div>
@@ -40,13 +40,13 @@
                         </div>
                     </div>
                 </div>
-                <a href="javascript:void(0);" data-bs-toggle="collapse" data-bs-target="#residual-risk-level-collapse"
-                    aria-expanded="false" aria-controls="residual-risk-level-collapse">
+                <a href="javascript:void(0);" data-bs-toggle="collapse" data-bs-target="#residual-risk-map-collapse"
+                    aria-expanded="false" aria-controls="residual-risk-map-collapse">
                     <i class="ri-arrow-down-s-line fs-18 collapse-open"></i>
                     <i class="ri-arrow-up-s-line collapse-close fs-18"></i>
                 </a>
             </div>
-            <div class="collapse show border-top" id="residual-risk-level-collapse">
+            <div class="collapse show border-top" id="residual-risk-map-collapse">
                 <div class="card-body">
                     <div id="residual-risk-level-chart"></div>
                 </div>
