@@ -39,7 +39,9 @@ class AuthService extends NadiaAbstract
             throw new NadiaException('Failed to login user, success with empty data');
         }
 
-        $data = array_key_exists('username', $data) ?: $data[0];
+        if (!array_key_exists('username', $data)) {
+            $data = reset($data);
+        }
 
         return EmployeeResponse::fromArray($data);
     }
