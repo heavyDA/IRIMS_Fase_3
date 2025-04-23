@@ -546,7 +546,7 @@ const calculateRisk = (quarter) => {
 			residualRiskMitigationEffectivenessChoices.setChoiceByValue('0')
 		}
 	} else {
-		residualRiskMitigationEffectivenessChoices.setChoiceByValue('Pilih')
+		residualRiskMitigationEffectivenessChoices.setChoiceByValue('')
 	}
 };
 
