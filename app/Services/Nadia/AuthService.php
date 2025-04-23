@@ -31,17 +31,19 @@ class AuthService extends NadiaAbstract
             'Authorization' => $this->getToken()
         ]);
 
-        logger()->info('[' . self::SERVICE_NAME . '] Login User: ' . $response->message, ['payload' => ['username' => $payload['username']]]);
-
         $data = $response->toArray()['data'];
-        if (count($data) == 0) {
+        if (empty($data)) {
             logger()->info('[' . self::SERVICE_NAME . '] Login User: ' . $response->message . ', with empty data', ['payload' => ['username' => $payload['username']]]);
             throw new NadiaException('Failed to login user, success with empty data');
         }
 
-        if (!array_key_exists('username', $data)) {
-            $data = reset($data);
+        $data = is_associative_array($data) ? $data : reset($data);
+        if ($data === false) {
+            logger()->info('[' . self::SERVICE_NAME . '] Login User: ' . $response->message . ', with empty data', ['payload' => ['username' => $payload['username'], 'data' => $data]]);
+            throw new NadiaException('Failed to login user, success with empty data');
         }
+
+        logger()->info('[' . self::SERVICE_NAME . '] Login User: ' . $response->message, ['data' => $data]);
 
         return EmployeeResponse::fromArray($data);
     }

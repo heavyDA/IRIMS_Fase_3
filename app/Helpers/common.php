@@ -3,6 +3,8 @@
 use App\Enums\State;
 use Carbon\Carbon;
 
+use function Aws\is_associative;
+
 if (!function_exists('format_date')) {
     function format_date(string $date): Carbon
     {
@@ -39,6 +41,17 @@ if (!function_exists('is_timezone_available')) {
     function is_timezone_available(?string $timezone): bool
     {
         return in_array($timezone, timezone_identifiers_list(DateTimeZone::PER_COUNTRY, countryCode: 'ID'));
+    }
+}
+
+if (!function_exists('is_associative_array')) {
+    function is_associative_array(array $array): bool
+    {
+        if (empty($array)) {
+            return false;
+        }
+
+        return array_keys($array) !== range(0, count($array) - 1);
     }
 }
 
