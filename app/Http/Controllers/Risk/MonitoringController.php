@@ -179,7 +179,7 @@ class MonitoringController extends Controller
                 $residualTargets[] = [
                     'quarter' => $i,
                     'risk_level' => $worksheet->identification->$riskLevel,
-                    'risk_scale' => $worksheet->identification->$riskScale,
+                    'risk_scale' => (int) $worksheet->identification->$riskScale ?? '',
                 ];
             }
 
@@ -452,7 +452,7 @@ class MonitoringController extends Controller
                 $residualTargets[] = [
                     'quarter' => $i,
                     'risk_level' => $worksheet->identification->$riskLevel,
-                    'risk_scale' => $worksheet->identification->$riskScale,
+                    'risk_scale' => (int) $worksheet->identification->$riskScale ?? '',
                 ];
             }
 
