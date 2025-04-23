@@ -136,7 +136,7 @@ class RiskProfileController extends Controller
                 )
             )
             ->join('position_hierarchy as ph', 'ph.sub_unit_code', 'worksheet.sub_unit_code')
-            ->when(request('year'), fn($q) => $q->whereYear('worksheet.created_at', request('year')))
+            ->whereYear('worksheet.created_at', request('year', date('Y')))
             ->when(
                 request('document_status'),
                 function ($q) {

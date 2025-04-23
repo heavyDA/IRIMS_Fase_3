@@ -44,8 +44,7 @@ class DashboardController extends Controller
             ->join('position_hierarchy as ph', 'ra_worksheets.sub_unit_code', 'ph.sub_unit_code')
             ->when(
                 $this->roleService->isRiskAdmin(),
-                fn($q) => $q->where('ra_worksheets.created_by', auth()->user()->employee_id)
-                    ->whereBetween('ph.level', $levels)
+                fn($q) => $q->whereBetween('ph.level', $levels)
             )
             ->whereYear('ra_worksheets.created_at', request('year', date('Y')))
             ->first();
@@ -63,8 +62,7 @@ class DashboardController extends Controller
                 ->join('position_hierarchy as ph', 'ra_worksheets.sub_unit_code', 'ph.sub_unit_code')
                 ->when(
                     $this->roleService->isRiskAdmin(),
-                    fn($q) => $q->where('ra_worksheets.created_by', auth()->user()->employee_id)
-                        ->whereBetween('ph.level', $levels)
+                    fn($q) => $q->whereBetween('ph.level', $levels)
                 )
                 ->whereYear('ra_worksheets.created_at', request('year', date('Y')))
         )
@@ -81,8 +79,7 @@ class DashboardController extends Controller
             ->join('position_hierarchy as ph', 'w.sub_unit_code', 'ph.sub_unit_code')
             ->when(
                 $this->roleService->isRiskAdmin(),
-                fn($q) => $q->where('w.created_by', auth()->user()->employee_id)
-                    ->whereBetween('ph.level', $levels)
+                fn($q) => $q->whereBetween('ph.level', $levels)
             )
             ->whereYear('w.created_at', request('year', date('Y')))
             ->first();
@@ -142,8 +139,7 @@ class DashboardController extends Controller
                             ->where('status', '!=', DocumentStatus::DRAFT->value)
                             ->when(
                                 $this->roleService->isRiskAdmin(),
-                                fn($q) => $q->where('created_by', auth()->user()->employee_id)
-                                    ->whereBetween('ph.level', $levels)
+                                fn($q) => $q->whereBetween('ph.level', $levels)
                             )
                             ->whereYear('created_at', request('year', date('Y')))
                     )
@@ -200,8 +196,7 @@ class DashboardController extends Controller
                     ->where('w.status', '!=', DocumentStatus::DRAFT->value)
                     ->when(
                         $this->roleService->isRiskAdmin(),
-                        fn($q) => $q->where('created_by', auth()->user()->employee_id)
-                            ->whereBetween('ph.level', $levels)
+                        fn($q) => $q->whereBetween('ph.level', $levels)
                     )
                     ->whereYear('w.created_at', request('year', date('Y')))
             )
@@ -251,8 +246,7 @@ class DashboardController extends Controller
                     ->where('w.status', '!=', DocumentStatus::DRAFT->value)
                     ->when(
                         $this->roleService->isRiskAdmin(),
-                        fn($q) => $q->where('created_by', auth()->user()->employee_id)
-                            ->whereBetween('ph.level', $levels)
+                        fn($q) => $q->whereBetween('ph.level', $levels)
                     )
                     ->whereYear('w.created_at', request('year', date('Y')))
             )

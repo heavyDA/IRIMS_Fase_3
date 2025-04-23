@@ -28,6 +28,7 @@ let currentStep = 0;
 const totalStep = 6;
 const monitoring = {
 	residual: {},
+	residual_target: [],
 	actualizations: [],
 	alteration: {},
 	incident: {},
@@ -218,6 +219,7 @@ const fetchData = async () => {
 				const data = response.data.data;
 				inherent = data.inherent;
 				monitoring.residual = data.residual;
+				monitoring.residual_target = data.residual_target;
 				monitoring.actualizations = data.actualizations;
 			}
 		}
@@ -248,13 +250,25 @@ const residualBlockOnMap = () => {
 
 	if (monitoring.residual) {
 		const block = document.querySelector(
-			`#inherent-${monitoring.residual.risk_scale}`
+			`#inherent-${monitoring.residual?.risk_scale}`
 		);
 		if (block) {
+			let [x, y] = [8, -4];
+
+			if (
+				monitoring.residual?.risk_scale ==
+				inherent?.risk_scale
+			) {
+				x += parseInt(block.x.baseVal[0].value) + 12;
+				y += parseInt(block.y.baseVal[0].value);
+			} else {
+				x += parseInt(block.x.baseVal[0].value);
+				y += parseInt(block.y.baseVal[0].value);
+			}
+
 			block.parentNode.insertAdjacentHTML(
 				`beforeend`,
-				`<circle fill="#9A9B9D" r="6" cx="${block.x.baseVal[0].value + 6
-				}" cy="${block.y.baseVal[0].value - 4}"></circle>`
+				`<circle fill="#9A9B9D" r="6" cx="${x}" cy="${y}"/>`
 			);
 		}
 	}
@@ -286,7 +300,6 @@ const monitoringPeriodPicker = flatpickr(monitoringPeriodDate, {
 	onChange: (selectedDates, dateStr, instance) => {
 		const value = dayjs(dateStr);
 		currentQuarter = Math.ceil((value.month() + 1) / 3);
-
 		monitoring.residual.period_date = value.format('YYYY-MM-DD');
 		monitoring.residual.quarter = currentQuarter;
 		monitoringEnableQuarter(currentQuarter);
@@ -297,10 +310,11 @@ const monitoringPeriodPicker = flatpickr(monitoringPeriodDate, {
 const residualRiskMitigationEffectiveness = residualForm.querySelector(
 	'[name="risk_mitigation_effectiveness"]'
 );
-new Choices(residualRiskMitigationEffectiveness, {
+const residualRiskMitigationEffectivenessChoices = new Choices(residualRiskMitigationEffectiveness, {
 	...defaultConfigChoices,
 	searchEnabled: false,
 });
+residualRiskMitigationEffectivenessChoices.disable();
 residualRiskMitigationEffectiveness.addEventListener('change', (e) => {
 	monitoring.residual.risk_mitigation_effectiveness = e.target.value;
 });
@@ -523,6 +537,17 @@ const calculateRisk = (quarter) => {
 		risk_scale: residualRiskScale[`residual[${quarter}][risk_scale]`].value,
 		risk_level: residualRiskLevel[`residual[${quarter}][risk_level]`].value,
 	};
+
+	const residualTarget = monitoring.residual_target.find(item => item.quarter == quarter)
+	if (residualTarget && monitoring.residual.risk_scale) {
+		if (monitoring.residual.risk_scale < residualTarget.risk_scale) {
+			residualRiskMitigationEffectivenessChoices.setChoiceByValue('1')
+		} else {
+			residualRiskMitigationEffectivenessChoices.setChoiceByValue('0')
+		}
+	} else {
+		residualRiskMitigationEffectivenessChoices.setChoiceByValue('Pilih')
+	}
 };
 
 let residual = {};
@@ -1233,7 +1258,7 @@ const enableQuarterQuantitative = (quarter) => {
 	}
 };
 
-monitoringEnableQuarter(currentQuarter);
+// monitoringEnableQuarter(currentQuarter);
 
 const alterationForm = document.querySelector('#alterationForm');
 const alterationTextareas = {};
@@ -1324,6 +1349,10 @@ const incidentFormSubmit = () => {
 
 const save = async () => {
 	const data = { ...monitoring };
+	data.residual.risk_exposure = unformatNumeral(
+		data.residual.risk_exposure,
+		defaultConfigFormatNumeral
+	);
 	data.actualizations = data.actualizations.map((actualization) => {
 		actualization.actualization_plan_progress =
 			actualization[`actualization_plan_progress[${currentQuarter}]`];
@@ -1387,3 +1416,5 @@ const save = async () => {
 		}
 	})
 };
+
+monitoringPeriodPicker.setDate(monitoringPeriodDate.value, true)

@@ -47,8 +47,7 @@ class AssessmentController extends Controller
                 )
                 ->when(
                     $this->roleService->isRiskAdmin(),
-                    fn($q) => $q->where('w.created_by', auth()->user()->employee_id)
-                        ->where('w.sub_unit_code', $unit?->sub_unit_code ?? '')
+                    fn($q) => $q->where('w.sub_unit_code', $unit?->sub_unit_code ?? '')
                 )
                 ->when(
                     request('document_status'),

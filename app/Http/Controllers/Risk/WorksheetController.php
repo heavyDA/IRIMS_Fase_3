@@ -363,14 +363,6 @@ class WorksheetController extends Controller
     public function show(string $worksheet)
     {
         $worksheet = Worksheet::findByEncryptedIdOrFail($worksheet);
-
-        if (
-            $this->roleService->getCurrentRole()?->name == 'risk admin' &&
-            $worksheet->created_by != auth()->user()->employee_id
-        ) {
-            abort(404, 'Data tidak ditemukan');
-        }
-
         $worksheet->identification = WorksheetIdentification::identificationQuery()->whereWorksheetId($worksheet->id)->firstOrFail();
         $worksheet->load('strategies', 'incidents.mitigations');
 
@@ -522,12 +514,6 @@ class WorksheetController extends Controller
     public function edit(string $worksheet)
     {
         $worksheet = Worksheet::findByEncryptedIdOrFail($worksheet);
-        if (
-            $this->roleService->getCurrentRole()?->name == 'risk admin' &&
-            $worksheet->created_by != auth()->user()->employee_id
-        ) {
-            abort(404, 'Data tidak ditemukan');
-        }
         $worksheet->identification = WorksheetIdentification::identificationQuery()->first();
         $worksheet->load('incidents.mitigations');
 
@@ -993,13 +979,6 @@ class WorksheetController extends Controller
     {
         try {
             $worksheet = Worksheet::findByEncryptedIdOrFail($worksheetId);
-            if (
-                $this->roleService->getCurrentRole()?->name == 'risk admin' &&
-                $worksheet->created_by != auth()->user()->employee_id
-            ) {
-                abort(404, 'Data tidak ditemukan');
-            }
-
             if (!in_array($worksheet->status, [DocumentStatus::DRAFT->value, DocumentStatus::ON_REVIEW->value])) {
                 throw_if(
                     !$worksheet->delete(),
@@ -1026,13 +1005,6 @@ class WorksheetController extends Controller
     {
         $worksheet = Worksheet::findByEncryptedIdOrFail($worksheetId);
         $currentRole = $this->roleService->getCurrentRole();
-
-        if (
-            $currentRole?->name == 'risk admin' &&
-            $worksheet->created_by != auth()->user()->employee_id
-        ) {
-            abort(404, 'Data tidak ditemukan');
-        }
 
         try {
             $rule = Str::snake($currentRole->name == 'risk analis' ? $request->role : $currentRole->name) . '_rule';

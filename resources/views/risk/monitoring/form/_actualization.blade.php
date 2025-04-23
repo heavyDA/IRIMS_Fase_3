@@ -179,7 +179,8 @@
                                 Presentase Serapan Biaya<span class="text-danger">*</span>
                             </div>
                             <div class="col">
-                                <input type="number" max=100 class="form-control" name="actualization_cost_absorption">
+                                <input type="number" step="0.01" max=100 class="form-control"
+                                    name="actualization_cost_absorption">
                             </div>
                         </div>
                         <div class="row mb-2">
@@ -259,7 +260,7 @@
                                     <div class="col">
                                         <label
                                             for="actualization_plan_progress[{{ $i }}]">Q{{ $i }}</label>
-                                        <input type="number" class="form-control not-allowed"
+                                        <input type="number" step="0.01" class="form-control not-allowed"
                                             name="actualization_plan_progress[{{ $i }}]" disabled>
                                     </div>
                                 @endfor

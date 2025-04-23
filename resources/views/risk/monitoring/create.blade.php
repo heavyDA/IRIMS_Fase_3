@@ -1,4 +1,17 @@
 @extends('layouts.app')
+@push('top-script')
+    <style>
+        .table {
+            th {
+                vertical-align: bottom;
+            }
+
+            td {
+                vertical-align: top;
+            }
+        }
+    </style>
+@endpush
 @push('bottom-script')
     @vite(['resources/js/pages/risk/monitoring/create.js', 'resources/js/pages/risk/worksheet/table_view.js'])
 @endpush
