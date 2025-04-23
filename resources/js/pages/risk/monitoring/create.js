@@ -155,7 +155,6 @@ monitoringTabPreviousButton.addEventListener('click', (e) => {
 const residualValidate = () => {
 	for (let key of Object.keys(monitoring.residual)) {
 		if (key == 'impact_value') continue;
-
 		if (!monitoring.residual[key] || monitoring.residual[key] == 'Pilih') {
 			return false;
 		}
@@ -315,9 +314,7 @@ const residualRiskMitigationEffectivenessChoices = new Choices(residualRiskMitig
 	searchEnabled: false,
 });
 residualRiskMitigationEffectivenessChoices.disable();
-residualRiskMitigationEffectiveness.addEventListener('change', (e) => {
-	monitoring.residual.risk_mitigation_effectiveness = e.target.value;
-});
+
 const residualImpactValue = {};
 const residualImpactScale = {};
 const residualImpactScaleSelects = {};
@@ -541,11 +538,14 @@ const calculateRisk = (quarter) => {
 	const residualTarget = monitoring.residual_target.find(item => item.quarter == quarter)
 	if (residualTarget && monitoring.residual.risk_scale) {
 		if (monitoring.residual.risk_scale < residualTarget.risk_scale) {
+			monitoring.residual.risk_mitigation_effectiveness = '1'
 			residualRiskMitigationEffectivenessChoices.setChoiceByValue('1')
 		} else {
+			monitoring.residual.risk_mitigation_effectiveness = '0'
 			residualRiskMitigationEffectivenessChoices.setChoiceByValue('0')
 		}
 	} else {
+		monitoring.residual.risk_mitigation_effectiveness = ''
 		residualRiskMitigationEffectivenessChoices.setChoiceByValue('')
 	}
 };
