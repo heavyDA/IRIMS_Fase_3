@@ -108,7 +108,7 @@ Route::group(['middleware' => 'auth'], function () {
 
         Route::get('alterations/export', [AlterationController::class, 'export'])->name('alterations.export');
         Route::resource('alterations', AlterationController::class, ['names' => custom_route_names('alterations')])->except(['show']);
-        Route::get('loss-events/export', [LossEventController::class, 'export'])->name('alterations.export');
+        Route::get('loss-events/export', [LossEventController::class, 'export'])->name('loss_events.export');
         Route::resource('loss-events', LossEventController::class, ['names' => custom_route_names('loss_events')])->except(['show']);
     });
 
