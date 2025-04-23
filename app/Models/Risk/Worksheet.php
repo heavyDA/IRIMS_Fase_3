@@ -148,6 +148,11 @@ class Worksheet extends Model
         );
     }
 
+    public function alterations()
+    {
+        return $this->hasMany(WorksheetAlteration::class);
+    }
+
     public static function risk_map_inherent_query(string $unit, int $year)
     {
         return DB::table('m_heatmaps as h')

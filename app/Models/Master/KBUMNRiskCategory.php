@@ -14,4 +14,9 @@ class KBUMNRiskCategory extends Model
         'type',
         'name',
     ];
+
+    public function children()
+    {
+        return $this->hasMany(self::class, 'parent_id', 'id');
+    }
 }

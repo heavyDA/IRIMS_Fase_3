@@ -2,6 +2,9 @@
 
 namespace App\Models;
 
+use App\Models\Risk\Worksheet;
+use App\Models\Risk\WorksheetAlteration;
+use App\Models\Risk\WorksheetLossEvent;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -71,5 +74,20 @@ class User extends Authenticatable
     public function units()
     {
         return $this->hasMany(UserUnit::class)->filterByScopeAndExpiredAt();
+    }
+
+    public function worksheet()
+    {
+        return $this->hasMany(Worksheet::class, 'created_by', 'employee_id');
+    }
+
+    public function worksheet_alterations()
+    {
+        return $this->hasMany(WorksheetAlteration::class, 'created_by', 'employee_id');
+    }
+
+    public function worksheet_loss_events()
+    {
+        return $this->hasMany(WorksheetLossEvent::class, 'created_by', 'employee_id');
     }
 }
