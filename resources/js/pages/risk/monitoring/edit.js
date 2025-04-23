@@ -28,6 +28,7 @@ let currentStep = 0;
 const totalStep = 6;
 const monitoring = {
 	residual: {},
+	residual_target: {},
 	actualizations: [],
 	alteration: {},
 	incident: {},
@@ -218,6 +219,7 @@ const fetchData = async () => {
 
 				inherent = data.inherent;
 				monitoring.residual = data.residual;
+				monitoring.residual_target = data.residual_target;
 				monitoring.actualizations = data.actualizations;
 				monitoring.alteration = data.alteration;
 				monitoring.incident = data.incident;
@@ -248,16 +250,16 @@ const residualBlockOnMap = () => {
 
 	if (monitoring.residual) {
 		const block = document.querySelector(
-			`#inherent-${monitoring.residual?.residual[currentQuarter]?.risk_scale}`
+			`#inherent-${monitoring.residual?.risk_scale}`
 		);
 		if (block) {
-			let [x, y] = [6, -4];
+			let [x, y] = [8, -4];
 
 			if (
-				monitoring.residual?.residual[currentQuarter]?.risk_scale ==
+				monitoring.residual?.risk_scale ==
 				inherent?.risk_scale
 			) {
-				x += parseInt(block.x.baseVal[0].value) + 14;
+				x += parseInt(block.x.baseVal[0].value) + 12;
 				y += parseInt(block.y.baseVal[0].value);
 			} else {
 				x += parseInt(block.x.baseVal[0].value);
@@ -313,10 +315,11 @@ const residualRiskMitigationEffectiveness = residualForm.querySelector(
 );
 residualRiskMitigationEffectiveness.value =
 	monitoring.residual.risk_mitigation_effectiveness;
-new Choices(residualRiskMitigationEffectiveness, {
+const residualRiskMitigationEffectivenessChoices = new Choices(residualRiskMitigationEffectiveness, {
 	...defaultConfigChoices,
 	searchEnabled: false,
 });
+residualRiskMitigationEffectivenessChoices.disable();
 residualRiskMitigationEffectiveness.addEventListener('change', (e) => {
 	monitoring.residual.risk_mitigation_effectiveness = e.target.value;
 });
@@ -511,14 +514,42 @@ const calculateRisk = (quarter) => {
 		residualRiskExposure[`residual[${quarter}][risk_exposure]`].value =
 			null;
 	}
+
+	monitoring.residual = {
+		...monitoring.residual,
+		impact_value:
+			residualRiskImpactCategory.value.toLowerCase() == 'kualitatif'
+				? ''
+				: impactValue,
+		impact_scale:
+			residualImpactScale[`residual[${quarter}][impact_scale]`].value,
+		impact_probability:
+			residualImpactProbability[
+				`residual[${quarter}][impact_probability]`
+			].value,
+		impact_probability_scale:
+			residualImpactProbabilityScale[
+				`residual[${quarter}][impact_probability_scale]`
+			].value,
+		risk_exposure:
+			residualRiskExposure[`residual[${quarter}][risk_exposure]`].value,
+		risk_scale: residualRiskScale[`residual[${quarter}][risk_scale]`].value,
+		risk_level: residualRiskLevel[`residual[${quarter}][risk_level]`].value,
+	};
+
+	const residualTarget = monitoring.residual_target.find(item => item.quarter == quarter)
+	if (residualTarget && monitoring.residual.risk_scale) {
+		if (monitoring.residual.risk_scale < residualTarget.risk_scale) {
+			residualRiskMitigationEffectivenessChoices.setChoiceByValue('1')
+		} else {
+			residualRiskMitigationEffectivenessChoices.setChoiceByValue('0')
+		}
+	} else {
+		residualRiskMitigationEffectivenessChoices.setChoiceByValue('Pilih')
+	}
 };
 
-let residual = {};
-monitoring?.residual?.residual.forEach((item, key) => {
-	if (key == currentQuarter) {
-		residual = item;
-	}
-});
+let residual = monitoring?.residual;
 
 residualImpactValue[`residual[${currentQuarter}][impact_value]`].value =
 	residual?.impact_value
@@ -779,8 +810,7 @@ monitoring.actualizations.forEach((actualization, index) => {
 	);
 	let picRelatedLabel = '';
 	if (picRelated) {
-		monitoring.actualizations[index].actualization_pic_related =
-			picRelated.id;
+		monitoring.actualizations[index].actualization_pic_related = picRelated.unit_code;
 		picRelatedLabel = `[${picRelated.personnel_area_code}] ${picRelated.position_name}`;
 	}
 	row.innerHTML = `
@@ -1231,8 +1261,6 @@ const enableQuarterQuantitative = (quarter) => {
 	}
 };
 
-monitoringEnableQuarter(currentQuarter);
-
 const alterationForm = document.querySelector('#alterationForm');
 const alterationTextareas = {};
 const alterationQuills = {};
@@ -1351,6 +1379,10 @@ const incidentFormSubmit = () => {
 
 const save = async () => {
 	const data = { ...monitoring };
+	data.residual.risk_exposure = unformatNumeral(
+		data.residual.risk_exposure,
+		defaultConfigFormatNumeral
+	);
 	data.actualizations = data.actualizations.map((actualization) => {
 		actualization.actualization_plan_progress =
 			actualization[`actualization_plan_progress[${currentQuarter}]`];
@@ -1415,3 +1447,5 @@ const save = async () => {
 		}
 	})
 };
+
+monitoringPeriodPicker.setDate(monitoringPeriodDate.value, true)

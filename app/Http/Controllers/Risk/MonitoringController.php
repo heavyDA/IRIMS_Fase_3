@@ -172,6 +172,17 @@ class MonitoringController extends Controller
                 });
             });
 
+            $residualTargets = [];
+            for ($i = 1; $i <= 4; $i++) {
+                $riskLevel = "residual_{$i}_risk_level";
+                $riskScale = "residual_{$i}_risk_scale";
+                $residualTargets[] = [
+                    'quarter' => $i,
+                    'risk_level' => $worksheet->identification->$riskLevel,
+                    'risk_scale' => $worksheet->identification->$riskScale,
+                ];
+            }
+
             return response()->json([
                 'data' => [
                     'inherent' => [
@@ -179,6 +190,7 @@ class MonitoringController extends Controller
                         'risk_scale' => $worksheet->identification->inherent_risk_scale,
                     ],
                     'residual' => $residual,
+                    'residual_target' => $residualTargets,
                     'actualizations' => $actualizations
                 ]
             ])->header('Cache-Control', 'no-store');
@@ -355,26 +367,28 @@ class MonitoringController extends Controller
                 'risk_chronology_body' => $worksheet->identification->risk_chronology_body,
                 'risk_impact_category' => $worksheet->identification->risk_impact_category,
                 'risk_mitigation_effectiveness' => $monitoring->residual->risk_mitigation_effectiveness,
+                'impact_probability' => 0,
+                'impact_probability_scale' => null,
+                'impact_scale' => null,
+                'impact_value' => 0,
+                'risk_exposure' => '',
+                'risk_level' => '',
+                'risk_scale' => '',
                 'quarter' => $monitoring->residual->quarter,
             ];
-            $values = [];
+
             for ($i = 0; $i <= 4; $i++) {
                 if ($i == $monitoring->residual->quarter) {
-                    $values[] =
-                        [
-                            'impact_probability' =>     $monitoring->residual->impact_probability,
-                            'impact_probability_scale' => $monitoring->residual->impact_probability_scale_id ?? '',
-                            'impact_scale' => $monitoring->residual->impact_scale_id ?? '',
-                            'impact_value' => $monitoring->residual->impact_value,
-                            'risk_exposure' => $monitoring->residual->risk_exposure,
-                            'risk_level' => $monitoring->residual->risk_level,
-                            'risk_scale' => $monitoring->residual->risk_scale,
-                        ];
-                } else {
-                    $values[] = [];
+                    $residual['impact_probability'] =     $monitoring->residual->impact_probability;
+                    $residual['impact_probability_scale'] = $monitoring->residual->impact_probability_scale_id ?? '';
+                    $residual['impact_scale'] = $monitoring->residual->impact_scale_id ?? '';
+                    $residual['impact_value'] = $monitoring->residual->impact_value;
+                    $residual['risk_exposure'] = $monitoring->residual->risk_exposure;
+                    $residual['risk_level'] = $monitoring->residual->risk_level;
+                    $residual['risk_scale'] = $monitoring->residual->risk_scale;
+                    break;
                 }
             }
-            $residual['residual'] = $values;
 
             $actualizations = [];
             foreach ($monitoring->actualizations as $index => $actualization) {
@@ -431,6 +445,17 @@ class MonitoringController extends Controller
                 'insurance_claim' => $monitoring->incident->insurance_claim,
             ];
 
+            $residualTargets = [];
+            for ($i = 1; $i <= 4; $i++) {
+                $riskLevel = "residual_{$i}_risk_level";
+                $riskScale = "residual_{$i}_risk_scale";
+                $residualTargets[] = [
+                    'quarter' => $i,
+                    'risk_level' => $worksheet->identification->$riskLevel,
+                    'risk_scale' => $worksheet->identification->$riskScale,
+                ];
+            }
+
             return response()->json([
                 'data' => [
                     'inherent' => [
@@ -438,6 +463,7 @@ class MonitoringController extends Controller
                         'risk_scale' => $worksheet->identification->inherent_risk_scale,
                     ],
                     'residual' => $residual,
+                    'residual_target' => $residualTargets,
                     'actualizations' => $actualizations,
                     'alteration' => $alteration,
                     'incident' => $incident,
@@ -468,9 +494,11 @@ class MonitoringController extends Controller
         $user = auth()->user();
         $monitoring = Monitoring::findByEncryptedIdOrFail($monitoring_id);
         $monitoring->load('last_history');
+
         try {
             DB::beginTransaction();
             $monitoring->update(['period_date' => $request->residual['period_date']]);
+            $monitoring->residual()->delete();
             $monitoring->residual()->create($this->residualRequestMapping($request->residual));
             $monitoring->alteration()->update([
                 'body' => $request->alteration['alteration_body'] ?? '',
@@ -730,7 +758,7 @@ class MonitoringController extends Controller
             'worksheet_mitigation_id' => $data['actualization_mitigation_id'] ?? null,
             'actualization_mitigation_plan' => Purifier::clean($data['actualization_mitigation_plan'] ?? ''),
             'actualization_cost' => (float) $data['actualization_cost'] ?? 0,
-            'actualization_cost_absorption' => (int) $data['actualization_cost_absorption'] ?? 0,
+            'actualization_cost_absorption' => (float) $data['actualization_cost_absorption'] ?? 0,
             'quarter' => (int) $data['quarter'] ?? '',
             'documents' => '',
             'kri_unit_id' => null,
@@ -738,9 +766,9 @@ class MonitoringController extends Controller
             'kri_threshold_score' => strip_tags(Purifier::clean($data['actualization_kri_threshold_score'] ?? '')),
             'actualization_plan_body' => Purifier::clean($data['actualization_plan_body'] ?? ''),
             'actualization_plan_output' => Purifier::clean($data['actualization_plan_output'] ?? ''),
-            'actualization_plan_status' => Purifier::clean($data['actualization_plan_status'] ?? ''),
+            'actualization_plan_status' => strip_tags(Purifier::clean($data['actualization_plan_status'] ?? '')),
             'actualization_plan_explanation' => Purifier::clean($data['actualization_plan_explanation'] ?? ''),
-            'actualization_plan_progress' => (int) $data['actualization_plan_progress'] ?? '',
+            'actualization_plan_progress' => (float) $data['actualization_plan_progress'] ?? '',
             'unit_code' => strip_tags(Purifier::clean($data['unit_code'] ?? '')),
             'unit_name' => strip_tags(Purifier::clean($data['unit_name'] ?? '')),
             'personnel_area_code' => strip_tags(Purifier::clean($data['personnel_area_code'] ?? '')),
