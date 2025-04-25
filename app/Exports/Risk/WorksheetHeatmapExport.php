@@ -6,24 +6,23 @@ class WorksheetHeatmapExport extends BaseHeatmapExport
 {
     public function __construct($worksheets)
     {
-        $rows = [];
-        $worksheets = $worksheets->map(function ($item) use (&$rows) {
-            if (array_key_exists($item->id, $rows)) {
-                $rows[$item->id] += 1;
-            } else {
-                $rows[$item->id] = 1;
+        $data = [];
+        foreach ($worksheets as $worksheet) {
+            if (array_search($worksheet->worksheet_number, array_column($data, 'worksheet_id')) !== false) {
+                continue;
             }
 
-            return (object) [
-                'worksheet_id' => $rows[$item->id],
+            $data[] = (object) [
+                'worksheet_id' => $worksheet->worksheet_number,
                 'risk_type' => 'inherent',
-                'risk_scale' => $item->identification->inherent_impact_probability_scale,
-                'risk_level' => $item->identification->inherent_impact_probability_level,
-                'impact_scale' => $item->identification->inherent_impact_probability_impact_scale,
-                'impact_probability' => $item->identification->inherent_impact_probability_probability_scale,
+                'risk_scale' => $worksheet->identification->inherent_impact_probability_scale,
+                'risk_level' => $worksheet->identification->inherent_impact_probability_level,
+                'impact_scale' => $worksheet->identification->inherent_impact_probability_impact_scale,
+                'impact_probability' => $worksheet->identification->inherent_impact_probability_probability_scale,
             ];
-        });
-        parent::__construct($worksheets);
+        }
+
+        parent::__construct($data);
     }
 
     public function title(): string
