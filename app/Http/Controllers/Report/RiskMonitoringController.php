@@ -36,24 +36,14 @@ class RiskMonitoringController extends Controller
             }
 
             $worksheets = Worksheet::latestMonitoringWithMitigationQuery()
-                ->when(
-                    !$this->roleService->isRiskAdmin(),
-                    fn($q) => $q
-                        ->withExpression(
-                            'position_hierarchy',
-                            Position::hierarchyQuery(
-                                $unit?->sub_unit_code,
-                                $this->roleService->isRiskOwner() || $this->roleService->isRiskAdmin()
-                            )
-                        )
-                        ->join('position_hierarchy as ph', 'ph.sub_unit_code', 'w.sub_unit_code')
+                ->withExpression(
+                    'position_hierarchy',
+                    Position::hierarchyQuery(
+                        $unit?->sub_unit_code,
+                        $this->roleService->isRiskOwner() || $this->roleService->isRiskAdmin()
+                    )
                 )
-                ->when(
-                    $this->roleService->isRiskAdmin(),
-                    fn($q) => $q
-                        ->where('w.sub_unit_code', $unit?->sub_unit_code)
-                        ->where('w.created_by', auth()->user()->employee_id)
-                )
+                ->join('position_hierarchy as ph', 'ph.sub_unit_code', 'w.sub_unit_code')
                 ->when(request('document_status'), fn($q) => $q->where('w.status_monitoring', request('document_status')))
                 ->where('worksheet_year', request('year', date('Y')));
 
