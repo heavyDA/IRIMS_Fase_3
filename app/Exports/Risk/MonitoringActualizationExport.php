@@ -94,8 +94,8 @@ class MonitoringActualizationExport implements FromCollection, WithHeadings, Wit
                         'Key Risk Indicators' => str_replace('\n', '\r\n', Html2Text::convert(html_entity_decode($actualization->mitigation?->incident?->kri_body) ?? '', ['ignore_errors' => true])),
                         'Realisasi KRI Threshold' => $actualization->kri_threshold,
                         'Realisasi KRI Threshold Skor' => $actualization->kri_threshold_score,
-                        'Status Rencana Perlakuan Risiko' => $actualization->actualization_plan_status,
-                        'Penjelasan Status Rencana Perlakuan Risiko' => $actualization->actualization_plan_explanation,
+                        'Status Rencana Perlakuan Risiko' => strip_html($actualization->actualization_plan_status),
+                        'Penjelasan Status Rencana Perlakuan Risiko' => strip_html($actualization->actualization_plan_explanation),
                         ...array_values($plan_progress[$actualization->worksheet_mitigation_id]),
                     ];
 

@@ -20,6 +20,7 @@ class WorksheetExport implements WithMultipleSheets
             new WorksheetResidualExport($this->worksheets),
             new WorksheetResidualExport($this->worksheets, 'kualitatif'),
             new WorksheetTreatmentExport($this->worksheets),
+            new WorksheetHeatmapExport($this->worksheets),
         ];
     }
 }

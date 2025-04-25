@@ -16,6 +16,7 @@ class MonitoringExport implements WithMultipleSheets
             new MonitoringActualizationExport($this->worksheets),
             new MonitoringAlterationExport($this->worksheets),
             new MonitoringIncidentExport($this->worksheets),
+            new MonitoringHeatmapExport($this->worksheets),
         ];
     }
 }
