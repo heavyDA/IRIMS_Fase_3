@@ -126,7 +126,7 @@
                         </div>
                         <div class="d-flex flex-column mb-2">
                             <div>
-                                Hasil yang diharapkan dapat diterima perusahaan<span class="text-danger">*</span>
+                                Hasil yang diharapkan dapat diterima perusahaan
                                 <a tabindex="0"
                                     class="link-secondary link-offset-2 link-underline-opacity-0 link-underline-opacity-50-hover text-decoration-underline mx-1"
                                     role="button" data-bs-toggle="popover" data-bs-trigger="focus"
@@ -144,7 +144,7 @@
                         </div>
                         <div class="d-flex flex-column mb-2">
                             <div>
-                                Nilai Risiko Yang Akan Timbul<span class="text-danger">*</span>
+                                Nilai Risiko Yang Akan Timbul
                                 <a tabindex="0"
                                     class="link-secondary link-offset-2 link-underline-opacity-0 link-underline-opacity-50-hover text-decoration-underline mx-1"
                                     role="button" data-bs-toggle="popover" data-bs-trigger="focus"
