@@ -43,7 +43,6 @@ class RiskProfileController extends Controller
                     )
                 )
                 ->join('position_hierarchy as ph', 'ph.sub_unit_code', 'w.sub_unit_code')
-                ->when(session()->get('current_role')?->name == 'risk admin', fn($q) => $q->where('w.created_by', auth()->user()->employee_id))
                 ->when(
                     request('document_status'),
                     function ($q) {
