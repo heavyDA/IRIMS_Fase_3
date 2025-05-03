@@ -27,13 +27,13 @@ const exportButton = document.querySelector('#alteration-export')
 const columns = [
     {
         orderable: true,
-        data: 'worksheet.worksheet_number',
+        data: 'worksheet_number',
         name: 'worksheet_number',
         width: '96px'
     },
     {
         orderable: true,
-        data: 'worksheet.sub_unit_name',
+        data: 'sub_unit_name',
         name: 'sub_unit_name',
         width: '128px',
         render: function (data, type, row) {
@@ -41,12 +41,12 @@ const columns = [
                 return data
             }
 
-            return `[${row.personnel_area_code}] ${row.sub_unit_name}`
+            return `[${row.sub_unit_code_doc}] ${row.sub_unit_name}`
         }
     },
     {
         orderable: true,
-        data: 'worksheet.target_body',
+        data: 'target_body',
         name: 'target_body',
         width: '128px',
         render: function (data, type, row) {
@@ -126,16 +126,24 @@ const columns = [
     },
     {
         orderable: true,
-        data: 'creator.employee_name',
-        name: 'creator.employee_name',
+        data: 'employee_name',
+        name: 'employee_name',
         visible: false  // Hidden but used for default sorting
+    },
+    {
+        defaultContent: "Aksi",
+        data: 'action',
+        name: 'action',
+        searchable: false,
+        sortable: false,
+        responsivePriority: 1
     },
     {
         orderable: true,
         data: 'created_at',
         name: 'created_at',
         visible: false  // Hidden but used for default sorting
-    }
+    },
 ]
 
 const datatable = createDatatable('#alteration-table', {
@@ -166,7 +174,7 @@ const datatable = createDatatable('#alteration-table', {
         const api = this.api();
 
         // Your existing row merging logic
-        const columnsToMerge = [0, 1, 2, 3, 4, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16];
+        const columnsToMerge = [0,];
 
         // Reset all cells visibility first
         api.cells().every(function () {
@@ -199,20 +207,14 @@ const datatable = createDatatable('#alteration-table', {
                     const value = api.cell(rowIdx, colIdx).data();
                     const currentCell = api.cell(rowIdx, colIdx).node();
 
-                    let equalStatusButton = false;
-
                     if (lastValue === null) {
                         lastValue = value;
                         firstRow = rowIdx;
                         return;
                     }
 
-                    if (colIdx == 1) {
-                        equalStatusButton = value.includes(`worksheet_number="${currentCell.children[0]?.dataset.worksheet_number ?? 'x'}"`)
-                    }
-
                     // Strict comparison for values
-                    if (JSON.stringify(lastValue) === JSON.stringify(value) || equalStatusButton) {
+                    if (JSON.stringify(lastValue) === JSON.stringify(value)) {
                         rowsToMerge++;
                         if (currentCell) {
                             currentCell.style.display = 'none';

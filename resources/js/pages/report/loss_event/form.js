@@ -4,8 +4,14 @@ import Choices from "choices.js";
 import Quill from "quill";
 import "quill/dist/quill.snow.css";
 import "~css/quill.css";
+import flatpickr from "flatpickr";
+import { defaultLocaleFlatpickr } from "~js/components/helper";
 
 const lossEventForm = document.querySelector('#loss-event-form');
+
+const incidentDate = lossEventForm.querySelector('input[name="incident_date"]');
+const incidentDatePicker = flatpickr(incidentDate, { ...defaultLocaleFlatpickr, dateFormat: 'Z', enableTime: true, altFormat: 'd M Y H:i', altInput: true, time_24hr: true });
+
 const selects = lossEventForm.querySelectorAll('select');
 const choices = [];
 
@@ -13,7 +19,6 @@ for (const select of selects) {
     choices[select.name] = new Choices(select, defaultConfigChoices);
 }
 
-choices['incident_frequency_id'].disable();
 choices['risk_category_t3_id'].disable();
 
 const textareas = lossEventForm.querySelectorAll('textarea');
@@ -50,17 +55,6 @@ if (choices['risk_category_t2_id'].getValue(true) != 'Pilih') {
     choices['risk_category_t2_id'].passedElement.element.dispatchEvent(new Event('change'));
 }
 
-const incidentRepetitives = lossEventForm.querySelectorAll('input[name="incident_repetitive"]');
-incidentRepetitives.forEach(el =>
-    el.addEventListener('click', e => {
-        if (e.target.value == '1') {
-            choices['incident_frequency_id'].enable()
-        } else {
-            choices['incident_frequency_id'].disable().setChoiceByValue('')
-        }
-    })
-)
-
 const lossValueInput = lossEventForm.querySelector('input[name="loss_value"]');
 const lossValueFormatInput = lossEventForm.querySelector('input[name="loss_value_format"]');
 
@@ -83,4 +77,10 @@ insurancePermitFormatInput.addEventListener('input', (e) => {
 insuranceClaimFormatInput.addEventListener('input', (e) => {
     e.target.value = formatNumeral(e.target.value, defaultConfigFormatNumeral);
     insuranceClaimInput.value = unformatNumeral(e.target.value, defaultConfigFormatNumeral);
+})
+
+document.addEventListener('DOMContentLoaded', () => {
+    lossValueFormatInput.value = formatNumeral(lossValueInput.value, defaultConfigFormatNumeral);
+    insurancePermitFormatInput.value = formatNumeral(insurancePermitInput.value, defaultConfigFormatNumeral);
+    insuranceClaimFormatInput.value = formatNumeral(insuranceClaimInput.value, defaultConfigFormatNumeral);
 })

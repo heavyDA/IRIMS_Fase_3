@@ -17,7 +17,7 @@
         </div>
     </div>
     <div class="btn-list">
-        @if (session()->get('current_unit')->can('create', App\Models\Risk\WorksheetAlteration::class))
+        @if (Gate::allows('create', App\Models\Risk\WorksheetAlteration::class))
             <a href="{{ route('risk.report.alterations.create') }}"
                 class="btn btn-primary-light btn-wave me-2 waves-effect waves-light">
                 <i class="ti ti-plus align-middle"></i> Tambah Ikhtisar Perubahan
@@ -65,6 +65,7 @@
                             atas Perubahan</th>
                         <th class="table-dark-custom" style="text-align: center !important;">Penjelasan</th>
                         <th class="table-dark-custom" style="text-align: center !important;">Dibuat Oleh</th>
+                        <th class="table-dark-custom" style="text-align: center !important;">Aksi</th>
                     </tr>
                 </thead>
             </table>

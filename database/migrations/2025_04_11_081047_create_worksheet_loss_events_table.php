@@ -15,15 +15,9 @@ return new class extends Migration
             $table->id();
             $table->foreignId('worksheet_id')->constrained('ra_worksheets', null, 'worksheet_loss_events_idx')->cascadeOnDelete();
             $table->text('incident_body')->nullable()->default('');
-            $table->text('incident_identification')->nullable()->default('');
-            $table->foreignId('incident_category_id')
-                ->nullable()
-                ->constrained('m_incident_categories', null, 'worksheet_loss_events_category_idx')
-                ->nullOnDelete();
+            $table->dateTimeTz('incident_date')->nullable();
             $table->string('incident_source')->nullable()->default('');
-            $table->text('incident_cause')->nullable()->default('');
             $table->text('incident_handling')->nullable()->default('');
-            $table->text('incident_description')->nullable()->default('');
 
             $table->foreignId('risk_category_t2_id')
                 ->nullable()
@@ -34,19 +28,10 @@ return new class extends Migration
                 ->constrained('m_kbumn_risk_categories', 'id', 'worksheet_loss_events_risk_category_t3_idx')
                 ->nullOnDelete();
 
-            $table->text('loss_description')->nullable()->default('');
             $table->string('loss_value')->nullable()->default('');
 
-            $table->boolean('incident_repetitive')->nullable();
-            $table->foreignId('incident_frequency_id')
-                ->nullable()
-                ->constrained('m_incident_frequencies', null, 'worksheet_loss_events_frequency_idx')
-                ->nullOnDelete();
-
-            $table->text('mitigation_plan')->nullable()->default('');
-            $table->text('actualization_plan')->nullable()->default('');
-            $table->text('follow_up_plan')->nullable()->default('');
             $table->text('related_party')->nullable()->default('');
+            $table->text('restoration_status')->nullable()->default('');
 
             $table->boolean('insurance_status')->nullable();
             $table->string('insurance_permit')->nullable()->default('');

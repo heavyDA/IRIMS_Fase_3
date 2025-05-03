@@ -4,21 +4,27 @@ namespace App\Http\Controllers\Report;
 
 use App\Enums\DocumentStatus;
 use App\Enums\State;
+use App\Exports\Risk\WorksheetAlterationExport;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Risk\WorksheetAlterationRequest;
 use App\Models\Master\Position;
 use App\Models\Risk\Worksheet;
 use App\Models\Risk\WorksheetAlteration;
+use App\Services\PositionService;
 use App\Services\RoleService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Maatwebsite\Excel\Facades\Excel;
 use Mews\Purifier\Facades\Purifier;
 use Yajra\DataTables\Facades\DataTables;
 
 class AlterationController extends Controller
 {
     public function __construct(
-        private RoleService $roleService
+        private RoleService $roleService,
+        private PositionService $positionService
     ) {}
 
     /**
@@ -26,12 +32,53 @@ class AlterationController extends Controller
      */
     public function index()
     {
-        Gate::authorize('viewAny', new WorksheetAlteration());
+        Gate::authorize('viewAny', new WorksheetAlteration);
 
         if (request()->ajax()) {
-            $alterations = WorksheetAlteration::with(['worksheet', 'creator']);
+            $unit = $this->roleService->getCurrentUnit();
 
-            return DataTables::of($alterations)
+            if (request()->has('unit') && !$this->roleService->isRiskAdmin()) {
+                $unit = $this->positionService->getUnitBelow(
+                    $unit?->sub_unit_code,
+                    request('unit')
+                ) ?: $unit;
+            }
+
+            $alterations = WorksheetAlteration::getAlterations($unit->sub_unit_code)
+                ->whereYear('ra_worksheet_alterations.created_at', request('year', date('Y')));
+
+            return DataTables::query($alterations)
+                ->filter(function ($q) {
+                    $value = strip_html(Purifier::clean(request('search.value')));
+
+                    if ($value) {
+                        $value = "%{$value}%";
+                        $q->where(
+                            fn($q) => $q->orWhereLike('body', $value)
+                                ->orWhereLike('impact', $value)
+                                ->orWhereLike('description', $value)
+                                ->orWhereLike('ra_worksheets.target_body', $value)
+                                ->orWhereLike('ph.sub_unit_code_doc', $value)
+                                ->orWhereLike('ph.sub_unit_name', $value)
+                        );
+                    }
+                })
+                ->addColumn('action', function ($alteration) {
+                    $id = Crypt::encryptString($alteration->id);
+                    $actions = [];
+                    if (Gate::allows('update', new WorksheetAlteration(['id' => $alteration->id, 'created_by' => $alteration->created_by]))) {
+                        $actions[] = ['id' => $id, 'route' => route('risk.report.alterations.edit', $id), 'type' => 'link', 'text' => 'edit', 'permission' => true];
+                    }
+                    if (Gate::allows('delete', new WorksheetAlteration(['id' => $alteration->id, 'created_by' => $alteration->created_by]))) {
+                        $actions[] = ['id' => $id, 'route' => route('risk.report.alterations.destroy', $id), 'type' => 'delete', 'text' => 'hapus', 'permission' => true];
+                    }
+
+                    if (empty($actions)) {
+                        return '';
+                    }
+
+                    return view('layouts.partials._table_action', compact('actions'));
+                })
                 ->make(true);
         }
 
@@ -43,7 +90,7 @@ class AlterationController extends Controller
      */
     public function create()
     {
-        Gate::authorize('create', new WorksheetAlteration());
+        Gate::authorize('create', new WorksheetAlteration);
         return view('report.alteration.create');
     }
 
@@ -52,7 +99,7 @@ class AlterationController extends Controller
      */
     public function store(WorksheetAlterationRequest $request)
     {
-        Gate::authorize('create', new WorksheetAlteration());
+        Gate::authorize('create', new WorksheetAlteration);
 
         $alteration = $request->user()
             ->worksheet_alterations()
@@ -83,7 +130,7 @@ class AlterationController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $alteration)
+    public function update(WorksheetAlterationRequest $request, string $alteration)
     {
         $alteration = WorksheetAlteration::findByEncryptedIdOrFail($alteration);
         Gate::authorize('update', $alteration);
@@ -114,6 +161,37 @@ class AlterationController extends Controller
 
     public function export()
     {
-        return '';
+        Gate::authorize('viewAny', new WorksheetAlteration);
+        $unit = $this->roleService->getCurrentUnit();
+
+        if (request()->has('unit') && !$this->roleService->isRiskAdmin()) {
+            $unit = $this->positionService->getUnitBelow(
+                $unit?->sub_unit_code,
+                request('unit')
+            ) ?: $unit;
+        }
+
+        $year = request('year', date('Y'));
+        $value = '%' . strip_html(Purifier::clean(request('search'))) . '%';
+        $alterations = WorksheetAlteration::getAlterations($unit->sub_unit_code)
+            ->whereYear('ra_worksheet_alterations.created_at', $year)
+            ->when(
+                $value,
+                fn($q) => $q->where(
+                    fn($q) => $q->whereLike('body', $value)
+                        ->orWhereLike('impact', $value)
+                        ->orWhereLike('description', $value)
+                        ->orWhereLike('ra_worksheets.target_body', $value)
+                        ->orWhereLike('ph.sub_unit_code_doc', $value)
+                        ->orWhereLike('ph.sub_unit_name', $value)
+                )
+            )
+            ->orderBy('ra_worksheets.worksheet_number', 'asc')
+            ->orderBy('ra_worksheet_alterations.created_at', 'asc')
+            ->simplePaginate(request('per_page', 10));
+        $alterations = collect($alterations->items());
+
+        $date = now()->translatedFormat('d F Y');
+        return Excel::download(new WorksheetAlterationExport($alterations), "Laporan Ikhtisar Perubahan Profil Risiko {$year} - {$date}.xlsx");
     }
 }

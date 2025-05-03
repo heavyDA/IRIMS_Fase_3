@@ -17,7 +17,7 @@
         </div>
     </div>
     <div class="btn-list">
-        @if (session()->get('current_unit')->can('create', App\Models\Risk\WorksheetLossEvent::class))
+        @if (Gate::allows('create', App\Models\Risk\WorksheetLossEvent::class))
             <a href="{{ route('risk.report.loss_events.create') }}"
                 class="btn btn-primary-light btn-wave me-2 waves-effect waves-light">
                 <i class="ti ti-plus align-middle"></i> Tambah Catatan
@@ -58,12 +58,21 @@
                 <thead class="table-dark">
                     <tr>
                         <th class="table-dark-custom" style="text-align: center !important;">No.</th>
-                        <th class="table-dark-custom" style="text-align: center !important;">Organisasi</th>
+                        <th class="table-dark-custom" style="text-align: center !important;">Unit</th>
                         <th class="table-dark-custom" style="text-align: center !important;">Pilihan Sasaran</th>
-                        <th class="table-dark-custom" style="text-align: center !important;">Nama Kejadian</th>
-                        <th class="table-dark-custom" style="text-align: center !important;">Identifikasi Kejadian</th>
-                        <th class="table-dark-custom" style="text-align: center !important;">Kategori Kejadian</th>
+                        <th class="table-dark-custom" style="text-align: center !important;">Peristiwa Risiko</th>
+                        <th class="table-dark-custom" style="text-align: center !important;">Waktu Kejadian</th>
+                        <th class="table-dark-custom" style="text-align: center !important;">Sumber Penyebab Kejadian</th>
+                        <th class="table-dark-custom" style="text-align: center !important;">Perlakuan atas Kejadian</th>
+                        <th class="table-dark-custom" style="text-align: center !important;">Kategori Risiko</th>
+                        <th class="table-dark-custom" style="text-align: center !important;">Nilai Kerugian</th>
+                        <th class="table-dark-custom" style="text-align: center !important;">Pihak Terkait</th>
+                        <th class="table-dark-custom" style="text-align: center !important;">Status Pemulihan Saat Ini</th>
+                        <th class="table-dark-custom" style="text-align: center !important;">Status Premi</th>
+                        <th class="table-dark-custom" style="text-align: center !important;">Nilai Premi</th>
+                        <th class="table-dark-custom" style="text-align: center !important;">Nilai Klaim</th>
                         <th class="table-dark-custom" style="text-align: center !important;">Dibuat Oleh</th>
+                        <th class="table-dark-custom" style="text-align: center !important;">Aksi</th>
                     </tr>
                 </thead>
             </table>

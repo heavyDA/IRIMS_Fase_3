@@ -55,11 +55,11 @@
                 </div>
                 <div class="row mb-1">
                     <div class="col-3">
-                        Nama Kejadian
+                        Peristiwa Risiko
                     </div>
                     <div class="col">
                         <div id="incident_body-editor" class="textarea"></div>
-                        <textarea type="text" name="incident_body" class="d-none {{ $errors->has('incident_body') ? 'is-invalid' : null }}"></textarea>
+                        <textarea type="text" name="incident_body" class="d-none {{ $errors->has('incident_body') ? 'is-invalid' : null }}">{{ old('incident_body') }}</textarea>
                         @error('incident_body')
                             <x-forms.error :message="$message"></x-forms.error>
                         @enderror
@@ -67,42 +67,25 @@
                 </div>
                 <div class="row mb-1">
                     <div class="col-3">
-                        Identifikasi Kejadian
+                        Waktu Kejadian
                     </div>
                     <div class="col">
-                        <div id="incident_identification-editor" class="textarea"></div>
-                        <textarea type="text" name="incident_identification"
-                            class="d-none {{ $errors->has('incident_identification') ? 'is-invalid' : null }}"></textarea>
-                        @error('incident_identification')
+                        <input type="datetime-local"
+                            class="form-control {{ $errors->has('incident_date') ? 'is-invalid' : null }}"
+                            name="incident_date" value="{{ old('incident_date') }}">
+                        @error('incident_date')
                             <x-forms.error :message="$message"></x-forms.error>
                         @enderror
                     </div>
                 </div>
-                <div class="row mb-3">
-                    <div class="col-3">Kategori Kejadian</div>
-                    <div class="col">
-                        <select class="form-select {{ $errors->has('incident_category') ? 'is-invalid' : null }}"
-                            name="incident_category">
-                            <option value>Pilih</option>
-                            @foreach ($incident_categories as $item)
-                                <option {{ old('incident_category') == $item->id ? 'selected' : null }}
-                                    value="{{ $item->id }}">{{ $item->name }}</option>
-                            @endforeach
-                        </select>
-                        @error('incident_category')
-                            <x-forms.error :message="$message"></x-forms.error>
-                        @enderror
+                <div class="row mb-1">
+                    <div class="col-3">
+                        Sumber Penyebab Kejadian
                     </div>
-                </div>
-                <div class="row mb-3">
-                    <div class="col-3">Sumber Penyebab Kejadian</div>
                     <div class="col">
-                        <select class="form-select {{ $errors->has('incident_source') ? 'is-invalid' : null }}"
-                            name="incident_source">
-                            <option value>Pilih</option>
-                            <option value="internal">Internal</option>
-                            <option value="eksternal">Eksternal</option>
-                        </select>
+                        <div id="incident_source-editor" class="textarea"></div>
+                        <textarea type="text" name="incident_source"
+                            class="d-none {{ $errors->has('incident_source') ? 'is-invalid' : null }}">{{ old('incident_source') }}</textarea>
                         @error('incident_source')
                             <x-forms.error :message="$message"></x-forms.error>
                         @enderror
@@ -110,39 +93,13 @@
                 </div>
                 <div class="row mb-1">
                     <div class="col-3">
-                        Penyebab Kejadian
-                    </div>
-                    <div class="col">
-                        <div id="incident_cause-editor" class="textarea"></div>
-                        <textarea type="text" name="incident_cause"
-                            class="d-none {{ $errors->has('incident_cause') ? 'is-invalid' : null }}"></textarea>
-                        @error('incident_cause')
-                            <x-forms.error :message="$message"></x-forms.error>
-                        @enderror
-                    </div>
-                </div>
-                <div class="row mb-1">
-                    <div class="col-3">
-                        Penanganan Saat Kejadian
+                        Perlakuan atas Kejadian
                     </div>
                     <div class="col">
                         <div id="incident_handling-editor" class="textarea"></div>
                         <textarea type="text" name="incident_handling"
-                            class="d-none {{ $errors->has('incident_handling') ? 'is-invalid' : null }}"></textarea>
+                            class="d-none {{ $errors->has('incident_handling') ? 'is-invalid' : null }}">{{ old('incident_handling') }}</textarea>
                         @error('incident_handling')
-                            <x-forms.error :message="$message"></x-forms.error>
-                        @enderror
-                    </div>
-                </div>
-                <div class="row mb-1">
-                    <div class="col-3">
-                        Deskripsi Kejadian
-                    </div>
-                    <div class="col">
-                        <div id="incident_description-editor" class="textarea"></div>
-                        <textarea type="text" name="incident_description"
-                            class="d-none {{ $errors->has('incident_description') ? 'is-invalid' : null }}"></textarea>
-                        @error('incident_description')
                             <x-forms.error :message="$message"></x-forms.error>
                         @enderror
                     </div>
@@ -184,104 +141,14 @@
                 </div>
                 <div class="row mb-1">
                     <div class="col-3">
-                        Penjelasan Kerugian
-                    </div>
-                    <div class="col">
-                        <div id="loss_description-editor" class="textarea"></div>
-                        <textarea type="text" name="loss_description"
-                            class="d-none {{ $errors->has('loss_description') ? 'is-invalid' : null }}"></textarea>
-                        @error('loss_description')
-                            <x-forms.error :message="$message"></x-forms.error>
-                        @enderror
-                    </div>
-                </div>
-                <div class="row mb-1">
-                    <div class="col-3">
                         Nilai Kerugian
                     </div>
                     <div class="col">
                         <input type="text" class="form-control {{ $errors->has('loss_value') ? 'is-invalid' : null }}"
                             name="loss_value_format">
-                        <input type="number" class="d-none" name="loss_value">
+                        <input type="number" step=".01" class="d-none" name="loss_value"
+                            value="{{ old('loss_value') }}">
                         @error('loss_value')
-                            <x-forms.error :message="$message"></x-forms.error>
-                        @enderror
-                    </div>
-                </div>
-                <div class="row mb-3">
-                    <div class="col-3">Kejadian Berulang</div>
-                    <div class="col">
-                        <div class="d-flex gap-4 {{ $errors->has('incident_repetitive') ? 'is-invalid' : null }}">
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="incident_repetitive"
-                                    id="incident_repetitive_true" value="1">
-                                <label class="form-check-label" for="incident_repetitive_true">
-                                    Ya
-                                </label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="incident_repetitive"
-                                    id="incident_repetitive_false" value="0">
-                                <label class="form-check-label" for="incident_repetitive_false">
-                                    Tidak
-                                </label>
-                            </div>
-                        </div>
-                        @error('incident_repetitive')
-                            <x-forms.error :message="$message"></x-forms.error>
-                        @enderror
-                    </div>
-                </div>
-                <div class="row mb-3">
-                    <div class="col-3">Frekuensi Kejadian</div>
-                    <div class="col">
-                        <select class="form-select {{ $errors->has('incident_frequency_id') ? 'is-invalid' : null }}"
-                            name="incident_frequency_id">
-                            <option value>Pilih</option>
-                            @foreach ($frequencies as $item)
-                                <option value="{{ $item->id }}">{{ $item->name }}</option>
-                            @endforeach
-                        </select>
-                        @error('incident_frequency_id')
-                            <x-forms.error :message="$message"></x-forms.error>
-                        @enderror
-                    </div>
-                </div>
-                <div class="row mb-1">
-                    <div class="col-3">
-                        Mitigasi yang Direncanakan
-                    </div>
-                    <div class="col">
-                        <div id="mitigation_plan-editor" class="textarea"></div>
-                        <textarea type="text" name="mitigation_plan"
-                            class="d-none {{ $errors->has('mitigation_plan') ? 'is-invalid' : null }}"></textarea>
-                        @error('mitigation_plan')
-                            <x-forms.error :message="$message"></x-forms.error>
-                        @enderror
-                    </div>
-                </div>
-                <div class="row mb-1">
-                    <div class="col-3">
-                        Realisasi Mitigasi
-                    </div>
-                    <div class="col">
-                        <div id="actualization_plan-editor" class="textarea"></div>
-                        <textarea type="text" name="actualization_plan"
-                            class="d-none {{ $errors->has('actualization_plan') ? 'is-invalid' : null }}"></textarea>
-                        @error('actualization_plan')
-                            <x-forms.error :message="$message"></x-forms.error>
-                        @enderror
-                    </div>
-                </div>
-                <div class="row mb-1">
-                    <div class="col-3">
-                        Perbaikan Mendatang
-                    </div>
-                    <div class="col">
-                        <div id="follow_up_plan-editor" class="textarea"></div>
-                        <textarea type="text" name="follow_up_plan"
-                            class="d-none {{ $errors->has('follow_up_plan') ? 'is-invalid' : null }}"></textarea>
-                        @error('follow_up_plan')
                             <x-forms.error :message="$message"></x-forms.error>
                         @enderror
                     </div>
@@ -292,9 +159,21 @@
                     </div>
                     <div class="col">
                         <div id="related_party-editor" class="textarea"></div>
-                        <textarea type="text" name="related_party"
-                            class="d-none {{ $errors->has('related_party') ? 'is-invalid' : null }}"></textarea>
+                        <textarea type="text" name="related_party" class="d-none {{ $errors->has('related_party') ? 'is-invalid' : null }}">{{ old('related_party') }}</textarea>
                         @error('related_party')
+                            <x-forms.error :message="$message"></x-forms.error>
+                        @enderror
+                    </div>
+                </div>
+                <div class="row mb-1">
+                    <div class="col-3">
+                        Status Pemulihan Saat Ini
+                    </div>
+                    <div class="col">
+                        <div id="restoration_status-editor" class="textarea"></div>
+                        <textarea type="text" name="restoration_status"
+                            class="d-none {{ $errors->has('restoration_status') ? 'is-invalid' : null }}">{{ old('restoration_status') }}</textarea>
+                        @error('restoration_status')
                             <x-forms.error :message="$message"></x-forms.error>
                         @enderror
                     </div>
@@ -305,14 +184,16 @@
                         <div class="d-flex gap-4 {{ $errors->has('insurance_status') ? 'is-invalid' : null }}">
                             <div class="form-check">
                                 <input class="form-check-input" type="radio" name="insurance_status"
-                                    id="insurance_status_true" value="1">
+                                    id="insurance_status_true" value="1"
+                                    {{ old('insurance_status') == 1 ? 'checked' : null }}>
                                 <label class="form-check-label" for="insurance_status_true">
                                     Ya
                                 </label>
                             </div>
                             <div class="form-check">
                                 <input class="form-check-input" type="radio" name="insurance_status"
-                                    id="insurance_status_false" value="0">
+                                    id="insurance_status_false" value="0"
+                                    {{ old('insurance_status') == 0 ? 'checked' : null }}>
                                 <label class="form-check-label" for="insurance_status_false">
                                     Tidak
                                 </label>
@@ -331,7 +212,8 @@
                         <input type="text"
                             class="form-control {{ $errors->has('insurance_permit') ? 'is-invalid' : null }}"
                             name="insurance_permit_format">
-                        <input type="number" class="d-none" name="insurance_permit">
+                        <input type="number" step=".01" class="d-none" name="insurance_permit"
+                            value="{{ old('insurance_permit') }}">
                         @error('insurance_permit')
                             <x-forms.error :message="$message"></x-forms.error>
                         @enderror
@@ -345,7 +227,8 @@
                         <input type="text"
                             class="form-control {{ $errors->has('insurance_claim') ? 'is-invalid' : null }}"
                             name="insurance_claim_format">
-                        <input type="number" class="d-none" name="insurance_claim">
+                        <input type="number" step=".01" class="d-none" name="insurance_claim"
+                            value="{{ old('insurance_claim') }}">
                         @error('insurance_claim')
                             <x-forms.error :message="$message"></x-forms.error>
                         @enderror
