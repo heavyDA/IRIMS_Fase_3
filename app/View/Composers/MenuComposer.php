@@ -16,7 +16,7 @@ class MenuComposer
 {
     public function compose(View $view)
     {
-        $role = session()->get('current_role') ?? null;
+        $role = role()->getCurrentRole() ?? null;
         $menus = session()->get('current_menu');
 
         if (!$menus) {

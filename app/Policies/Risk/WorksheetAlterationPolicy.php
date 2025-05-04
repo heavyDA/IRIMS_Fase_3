@@ -21,7 +21,7 @@ class WorksheetAlterationPolicy
      */
     public function viewAny(User|UserUnit $user): Response
     {
-        return $this->roleService->authorizeCurrentRole('risk.report.alterations.index') ?
+        return $this->roleService->checkPermission('risk.report.alterations.index') ?
             Response::allow() : Response::denyAsNotFound(code: HttpFoundationResponse::HTTP_NOT_FOUND);
     }
 
@@ -30,7 +30,7 @@ class WorksheetAlterationPolicy
      */
     public function view(User|UserUnit $user, WorksheetAlteration $worksheetAlteration): Response
     {
-        return $this->roleService->authorizeCurrentRole('risk.report.alterations.index') ?
+        return $this->roleService->checkPermission('risk.report.alterations.index') ?
             Response::allow() : Response::denyAsNotFound(code: HttpFoundationResponse::HTTP_NOT_FOUND);
     }
 
@@ -40,7 +40,7 @@ class WorksheetAlterationPolicy
     public function create(User|UserUnit $user): Response|bool
     {
         return
-            $this->roleService->authorizeCurrentRole('risk.report.alterations.create') ?
+            $this->roleService->checkPermission('risk.report.alterations.create') ?
             Response::allow() : Response::denyAsNotFound(code: HttpFoundationResponse::HTTP_NOT_FOUND);
     }
 
@@ -49,7 +49,7 @@ class WorksheetAlterationPolicy
      */
     public function update(User|UserUnit $user, WorksheetAlteration $worksheetAlteration): Response
     {
-        return $this->roleService->authorizeCurrentRole('risk.report.alterations.update') &&
+        return $this->roleService->checkPermission('risk.report.alterations.update') &&
             $this->isRiskAdmin($user, $worksheetAlteration) ?
             Response::allow() : Response::denyAsNotFound(code: HttpFoundationResponse::HTTP_NOT_FOUND);
     }
@@ -59,7 +59,7 @@ class WorksheetAlterationPolicy
      */
     public function delete(User|UserUnit $user, WorksheetAlteration $worksheetAlteration): Response
     {
-        return $this->roleService->authorizeCurrentRole('risk.report.alterations.destroy') &&
+        return $this->roleService->checkPermission('risk.report.alterations.destroy') &&
             $this->isRiskAdmin($user, $worksheetAlteration) ? Response::allow() : Response::denyAsNotFound(code: HttpFoundationResponse::HTTP_NOT_FOUND);
     }
 
@@ -68,7 +68,7 @@ class WorksheetAlterationPolicy
      */
     public function restore(User|UserUnit $user, WorksheetAlteration $worksheetAlteration): Response
     {
-        return $this->roleService->authorizeCurrentRole('risk.report.alterations.destroy') &&
+        return $this->roleService->checkPermission('risk.report.alterations.destroy') &&
             $this->isRiskAdmin($user, $worksheetAlteration) ? Response::allow() : Response::denyAsNotFound(code: HttpFoundationResponse::HTTP_NOT_FOUND);
     }
 
@@ -77,7 +77,7 @@ class WorksheetAlterationPolicy
      */
     public function forceDelete(User|UserUnit $user, WorksheetAlteration $worksheetAlteration): Response
     {
-        return $this->roleService->authorizeCurrentRole('risk.report.alterations.destroy') &&
+        return $this->roleService->checkPermission('risk.report.alterations.destroy') &&
             $this->isRiskAdmin($user, $worksheetAlteration) ? Response::allow() : Response::denyAsNotFound(code: HttpFoundationResponse::HTTP_NOT_FOUND);
     }
 

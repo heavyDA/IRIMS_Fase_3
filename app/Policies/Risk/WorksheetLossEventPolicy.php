@@ -22,7 +22,7 @@ class WorksheetLossEventPolicy
      */
     public function viewAny(User $user): Response
     {
-        return $this->roleService->authorizeCurrentRole('risk.report.loss_events.index') ?
+        return $this->roleService->checkPermission('risk.report.loss_events.index') ?
             Response::allow() : Response::denyAsNotFound(code: HttpFoundationResponse::HTTP_NOT_FOUND);
     }
 
@@ -31,7 +31,7 @@ class WorksheetLossEventPolicy
      */
     public function view(User $user, WorksheetLossEvent $worksheetLossEvent): Response
     {
-        return $this->roleService->authorizeCurrentRole('risk.report.loss_events.index') ?
+        return $this->roleService->checkPermission('risk.report.loss_events.index') ?
             Response::allow() : Response::denyAsNotFound(code: HttpFoundationResponse::HTTP_NOT_FOUND);
     }
 
@@ -40,7 +40,7 @@ class WorksheetLossEventPolicy
      */
     public function create(User $user): Response|bool
     {
-        return $this->roleService->authorizeCurrentRole('risk.report.loss_events.create') ?
+        return $this->roleService->checkPermission('risk.report.loss_events.create') ?
             Response::allow() : Response::denyAsNotFound(code: HttpFoundationResponse::HTTP_NOT_FOUND);
     }
 
@@ -49,7 +49,7 @@ class WorksheetLossEventPolicy
      */
     public function update(User $user, WorksheetLossEvent $worksheetLossEvent): Response
     {
-        $allow = $this->roleService->authorizeCurrentRole('risk.report.loss_events.update');
+        $allow = $this->roleService->checkPermission('risk.report.loss_events.update');
         $allow = $this->isRiskAdmin($user, $worksheetLossEvent) ? false : $allow;
 
         return $allow ?
@@ -61,7 +61,7 @@ class WorksheetLossEventPolicy
      */
     public function delete(User $user, WorksheetLossEvent $worksheetLossEvent): Response
     {
-        $allow = $this->roleService->authorizeCurrentRole('risk.report.loss_events.destroy');
+        $allow = $this->roleService->checkPermission('risk.report.loss_events.destroy');
         $allow = $this->isRiskAdmin($user, $worksheetLossEvent) ? false : $allow;
 
         return $allow ? Response::allow() : Response::denyAsNotFound(code: HttpFoundationResponse::HTTP_NOT_FOUND);
@@ -72,7 +72,7 @@ class WorksheetLossEventPolicy
      */
     public function restore(User $user, WorksheetLossEvent $worksheetLossEvent): Response
     {
-        $allow = $this->roleService->authorizeCurrentRole('risk.report.loss_events.destroy');
+        $allow = $this->roleService->checkPermission('risk.report.loss_events.destroy');
         $allow = $this->isRiskAdmin($user, $worksheetLossEvent) ? false : $allow;
 
         return $allow ? Response::allow() : Response::denyAsNotFound(code: HttpFoundationResponse::HTTP_NOT_FOUND);
@@ -83,7 +83,7 @@ class WorksheetLossEventPolicy
      */
     public function forceDelete(User $user, WorksheetLossEvent $worksheetLossEvent): Response
     {
-        $allow = $this->roleService->authorizeCurrentRole('risk.report.loss_events.destroy');
+        $allow = $this->roleService->checkPermission('risk.report.loss_events.destroy');
         $allow = $this->isRiskAdmin($user, $worksheetLossEvent) ? false : $allow;
 
         return $allow ? Response::allow() : Response::denyAsNotFound(code: HttpFoundationResponse::HTTP_NOT_FOUND);

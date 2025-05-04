@@ -65,7 +65,7 @@ class AuthController extends Controller
 
     public function change_role(Request $request)
     {
-        $role = session()->get('current_roles')->where('id', $request->role)->first();
+        $role = session()->get('current_roles')->where('id', $request->role)->firstOrFail();
         if ($role) {
             session()->put('current_role', $role);
             session()->put('current_menu', null);

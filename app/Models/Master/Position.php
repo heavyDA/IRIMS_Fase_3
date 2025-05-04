@@ -3,10 +3,13 @@
 namespace App\Models\Master;
 
 use App\Models\RBAC\Role;
+use App\Observers\PositionObserver;
 use App\Traits\HasEncryptedId;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 
+#[ObservedBy(PositionObserver::class)]
 class Position extends Model
 {
     use HasEncryptedId;

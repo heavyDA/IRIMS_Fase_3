@@ -46,17 +46,23 @@ class AuthService
                 session()->flush();
                 throw new AuthServiceException("User with {$user->username} ({$user->employee_id}) doesn't have assigned units");
             }
-            session()->put('current_unit', $unit);
+            role()->setCurrentUnit($unit);
 
             $roles = $unit->roles()->get();
+            if ($roles->isEmpty()) {
+                $unit->syncRoles(['risk admin']);
+                $roles = $unit->roles()->get();
+            }
+
             $role = $roles->first();
             if (!$role) {
                 auth()->logout();
                 session()->flush();
                 throw new AuthServiceException("User with {$user->username} ({$user->employee_id}) for User Unit ID {$unit->id} {$unit->position_name} doesn't have assigned roles.");
             }
-            session()->put('current_role', $role);
-            session()->put('current_roles', $roles);
+
+            role()->setCurrentRole($role);
+            role()->setCurrentRoles($roles);
 
             return true;
         }
@@ -124,9 +130,10 @@ class AuthService
                     session()->flush();
                     throw new AuthServiceException("User with {$user->username} ({$user->employee_id}) for User Unit ID {$unit->id} {$unit->position_name} doesn't have assigned roles.");
                 }
-                session()->put('current_unit', $unit);
-                session()->put('current_role', $role);
-                session()->put('current_roles', $roles);
+
+                role()->setCurrentRoles($roles);
+                role()->setCurrentRole($role);
+                role()->setCurrentUnit($unit);
             }
 
             return true;
@@ -207,9 +214,10 @@ class AuthService
                     session()->flush();
                     throw new AuthServiceException("User with {$user->username} ({$user->employee_id}) for User Unit ID {$unit->id} {$unit->position_name} doesn't have assigned roles.");
                 }
-                session()->put('current_unit', $unit);
-                session()->put('current_role', $role);
-                session()->put('current_roles', $roles);
+
+                role()->setCurrentUnit($unit);
+                role()->setCurrentRole($role);
+                role()->setCurrentRoles($roles);
             }
 
             return true;
