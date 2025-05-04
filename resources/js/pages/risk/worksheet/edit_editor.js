@@ -505,7 +505,7 @@ const updateStrategyRow = (data) => {
 
 const onStrategySave = (data) => {
     for (let key of Object.keys(data)) {
-        if (key == "key" || key == "id" || key == "strategy_risk_value" || key == "strategy_expected_feedback") {
+        if (key == "key" || key == "id" || key == "strategy_risk_value" || key == "strategy_expected_feedback" || key == "strategy_decision") {
             continue;
         }
 

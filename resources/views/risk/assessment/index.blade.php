@@ -17,8 +17,7 @@
         </div>
     </div>
     <div class="btn-list">
-        @if (session()->get('current_unit')->can('risk.worksheet.store') &&
-                session()->get('current_unit')->can('risk.worksheet.create'))
+        @if (role()->checkPermission('risk.worksheet.create'))
             <a href="{{ route('risk.worksheet.index') }}"
                 class="btn btn-primary-light btn-wave me-2 waves-effect waves-light">
                 <i class="ti ti-plus align-middle"></i> Tambah Kertas Kerja

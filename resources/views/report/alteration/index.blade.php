@@ -58,7 +58,7 @@
                 <thead class="table-dark">
                     <tr>
                         <th class="table-dark-custom" style="text-align: center !important;">No.</th>
-                        <th class="table-dark-custom" style="text-align: center !important;">Organisasi</th>
+                        <th class="table-dark-custom" style="text-align: center !important;">Unit</th>
                         <th class="table-dark-custom" style="text-align: center !important;">Pilihan Sasaran</th>
                         <th class="table-dark-custom" style="text-align: center !important;">Jenis Perubahan</th>
                         <th class="table-dark-custom" style="text-align: center !important;">Peristiwa Risiko yang Terdampak

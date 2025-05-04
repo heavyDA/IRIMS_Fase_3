@@ -47,7 +47,7 @@
                     <tr>
                         <th class="table-dark-custom" style="text-align: center !important;" rowspan="2">No.</th>
                         <th class="table-dark-custom" style="text-align: center !important;" rowspan="2">Status</th>
-                        <th class="table-dark-custom" style="text-align: center !important;" rowspan="2">Organisasi</th>
+                        <th class="table-dark-custom" style="text-align: center !important;" rowspan="2">Unit</th>
                         <th class="table-dark-custom" style="text-align: center !important;" rowspan="2">Pilihan Sasaran
                         </th>
                         <th class="table-dark-custom" style="text-align: center !important;" rowspan="2">Peristiwa Risiko

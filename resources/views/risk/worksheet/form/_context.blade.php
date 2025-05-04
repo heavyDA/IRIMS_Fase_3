@@ -187,7 +187,7 @@
                         </div>
                         <div class="d-flex flex-column mb-2">
                             <div>
-                                Keputusan Penetapan<span class="text-danger">*</span>
+                                Keputusan Penetapan
                                 <a tabindex="0"
                                     class="link-secondary link-offset-2 link-underline-opacity-0 link-underline-opacity-50-hover text-decoration-underline mx-1"
                                     role="button" data-bs-toggle="popover" data-bs-trigger="focus"
@@ -204,7 +204,7 @@
                             </div>
                             <div>
                                 <select class="form-select" name="strategy_decision">
-                                    <option>Pilih</option>
+                                    <option value="">Pilih</option>
                                     <option value="accept">Accept</option>
                                     <option value="avoid">Avoid</option>
                                 </select>
