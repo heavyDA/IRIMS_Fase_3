@@ -31,7 +31,9 @@ export default defineConfig({
                 'resources/js/pages/report/risk_profile/index.js',
                 'resources/js/pages/report/risk_monitoring/index.js',
                 'resources/js/pages/report/alteration/form.js',
+                'resources/js/pages/report/alteration/index.js',
                 'resources/js/pages/report/loss_event/form.js',
+                'resources/js/pages/report/loss_event/index.js',
 
                 'resources/js/pages/risk/monitoring/index.js',
                 'resources/js/pages/risk/monitoring/create.js',
@@ -47,6 +49,7 @@ export default defineConfig({
                 'resources/js/pages/setting/risk_metric/index.js',
                 'resources/js/pages/setting/risk_metric/form.js',
                 'resources/js/pages/setting/position/index.js',
+                'resources/js/pages/setting/position/form.js',
             ],
             refresh: true,
         }),
