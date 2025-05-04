@@ -155,11 +155,11 @@ class DefaultSeeder extends Seeder
             ],
         ];
 
+        DB::statement('SET FOREIGN_KEY_CHECKS=0');
         DB::statement('delete from menu_role');
         Menu::whereRaw('1 = 1')->delete();
         Permission::whereRaw('1 = 1')->delete();
 
-        DB::statement('SET FOREIGN_KEY_CHECKS=0');
         DB::statement('TRUNCATE menu_role');
         DB::statement('TRUNCATE menus');
         DB::statement('TRUNCATE permissions');
