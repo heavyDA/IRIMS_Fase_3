@@ -9,7 +9,6 @@ use App\Models\RBAC\Role;
 use App\Models\Risk\Worksheet;
 use App\Models\Risk\WorksheetTopRisk;
 use App\Services\PositionService;
-use App\Services\RoleService;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
@@ -20,21 +19,20 @@ use Yajra\DataTables\Facades\DataTables;
 class TopRiskController extends Controller
 {
     public function __construct(
-        private RoleService $roleService,
         private PositionService $positionService
     ) {}
 
     public function index()
     {
         if (request()->ajax()) {
-            $unit = $this->roleService->getCurrentUnit();
-            $currentLevel = $this->roleService->getUnitLevel();
+            $unit = role()->getCurrentUnit();
+            $currentLevel = role()->getUnitLevel();
 
             if (request('unit')) {
                 $unit = $this->positionService->getUnitBelow(
                     $unit?->sub_unit_code,
                     request('unit'),
-                    $this->roleService->isRiskOwner() || $this->roleService->isRiskAdmin()
+                    role()->isRiskOwner() || role()->isRiskAdmin()
                 ) ?: $unit;
             }
 
@@ -61,7 +59,7 @@ class TopRiskController extends Controller
                         'position_hierarchy',
                         Position::hierarchyQuery(
                             $unit?->sub_unit_code ?? '-',
-                            $this->roleService->isRiskOwner() || $this->roleService->isRiskAdmin()
+                            role()->isRiskOwner() || role()->isRiskAdmin()
                         )
                     )
                     ->join('position_hierarchy as ph', 'ph.sub_unit_code', 'w.sub_unit_code')
@@ -115,8 +113,8 @@ class TopRiskController extends Controller
                     }
 
                     if (
-                        $this->roleService->isRiskOtorisatorTopRiskApproval() ||
-                        ($this->roleService->isRiskAnalis() && $currentLevel <= 2)
+                        role()->isRiskOtorisatorTopRiskApproval() ||
+                        (role()->isRiskAnalis() && $currentLevel <= 2)
                     ) {
                         return view('risk.top_risk._table_checkbox', ['id' => $worksheet->id]);
                     }
@@ -134,15 +132,15 @@ class TopRiskController extends Controller
 
     public function get_for_dashboard()
     {
-        $unit = $this->roleService->getCurrentUnit();
-        $currentUnit = $this->roleService->getCurrentUnit();
-        $currentLevel = $this->roleService->getUnitLevel();
+        $unit = role()->getCurrentUnit();
+        $currentUnit = role()->getCurrentUnit();
+        $currentLevel = role()->getUnitLevel();
 
         if (request('unit')) {
             $unit = $this->positionService->getUnitBelow(
                 $unit?->sub_unit_code,
                 request('unit'),
-                $this->roleService->isRiskOwner() || $this->roleService->isRiskAdmin()
+                role()->isRiskOwner() || role()->isRiskAdmin()
             ) ?: $unit;
         }
 
@@ -239,7 +237,7 @@ class TopRiskController extends Controller
 
         try {
             throw_if(
-                !Role::risk_otorisator_top_risk_approval() && !$this->roleService->getCurrentUnit()->hasAnyRole('root', 'risk analis', 'risk otorisator'),
+                !Role::risk_otorisator_top_risk_approval() && !role()->getCurrentUnit()->hasAnyRole('root', 'risk analis', 'risk otorisator'),
                 new Exception('Failed to submit top risk, User ID: ' . auth()->user()->employee_id . ' doesn\'t have access')
             );
 

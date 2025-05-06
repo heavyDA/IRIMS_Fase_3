@@ -23,7 +23,6 @@ use App\Models\Master\RKAPProgramType;
 use App\Models\Risk\Worksheet;
 use App\Models\Risk\WorksheetHistory;
 use App\Models\Risk\WorksheetIdentification;
-use App\Models\Risk\WorksheetMitigation;
 use App\Services\PositionService;
 use App\Services\RoleService;
 use App\Services\Worksheet\WorksheetService;
@@ -32,13 +31,11 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
-use Mews\Purifier\Facades\Purifier;
 use Yajra\DataTables\Facades\DataTables;
 
 class WorksheetController extends Controller
 {
     public function __construct(
-        private RoleService $roleService,
         private PositionService $positionService,
         private WorksheetService $worksheetService
     ) {
@@ -81,15 +78,15 @@ class WorksheetController extends Controller
         $validated = $request->validated();
 
         $data['context'] = [
-            'worksheet_number' => strip_tags(Purifier::clean($validated['context']['risk_number'])),
+            'worksheet_number' => strip_tags(purify($validated['context']['risk_number'])),
             'company_code' => 'API',
             'company_name' => 'PT Angkasa Pura Indonesia',
             'status' => DocumentStatus::DRAFT->value,
             'status_monitoring' => DocumentStatus::ON_MONITORING->value,
             'created_by' => auth()->user()->employee_id,
-            'target_body' => Purifier::clean($validated['context']['target_body']),
-            'risk_number' => strip_tags(Purifier::clean($validated['context']['risk_number'])),
-        ] + $this->roleService->getCurrentUnit()->only([
+            'target_body' => purify($validated['context']['target_body']),
+            'risk_number' => strip_tags(purify($validated['context']['risk_number'])),
+        ] + role()->getCurrentUnit()->only([
             'unit_code',
             'unit_name',
             'sub_unit_code',
@@ -102,9 +99,9 @@ class WorksheetController extends Controller
 
         $data['strategies'] = array_map(function ($strategy) {
             return [
-                'body' => Purifier::clean($strategy['strategy_body'] ?? ''),
-                'expected_feedback' => Purifier::clean($strategy['strategy_expected_feedback'] ?? ''),
-                'risk_value' => Purifier::clean($strategy['strategy_risk_value'] ?? ''),
+                'body' => purify($strategy['strategy_body'] ?? ''),
+                'expected_feedback' => purify($strategy['strategy_expected_feedback'] ?? ''),
+                'risk_value' => purify($strategy['strategy_risk_value'] ?? ''),
                 'risk_value_limit' => $strategy['strategy_risk_value_limit'],
                 'decision' => $strategy['strategy_decision'],
             ];
@@ -115,16 +112,16 @@ class WorksheetController extends Controller
             'company_name' => 'PT Angkasa Pura Indonesia',
             'risk_category_t2_id' => $validated['identification']['risk_category_t2'],
             'risk_category_t3_id' => $validated['identification']['risk_category_t3'],
-            'risk_chronology_body' => Purifier::clean($validated['identification']['risk_chronology_body'] ?? ''),
-            'risk_chronology_description' => Purifier::clean($validated['identification']['risk_chronology_description'] ?? ''),
+            'risk_chronology_body' => purify($validated['identification']['risk_chronology_body'] ?? ''),
+            'risk_chronology_description' => purify($validated['identification']['risk_chronology_description'] ?? ''),
             'existing_control_type_id' => $validated['identification']['existing_control_type'],
-            'existing_control_body' => Purifier::clean($validated['identification']['existing_control_body'] ?? ''),
+            'existing_control_body' => purify($validated['identification']['existing_control_body'] ?? ''),
             'control_effectiveness_assessment_id' => $validated['identification']['control_effectiveness_assessment'],
             'risk_impact_category' => $validated['identification']['risk_impact_category'],
-            'risk_impact_body' => Purifier::clean($validated['identification']['risk_impact_body'] ?? ''),
+            'risk_impact_body' => purify($validated['identification']['risk_impact_body'] ?? ''),
             'risk_impact_start_date' => $validated['identification']['risk_impact_start_date'],
             'risk_impact_end_date' => $validated['identification']['risk_impact_end_date'],
-            'inherent_body' => Purifier::clean($validated['identification']['inherent_body'] ?? ''),
+            'inherent_body' => purify($validated['identification']['inherent_body'] ?? ''),
             'inherent_impact_value' => (float) $validated['identification']['inherent_impact_value'],
             'inherent_impact_scale_id' => $validated['identification']['inherent_impact_scale'],
             'inherent_impact_probability' => (int) $validated['identification']['inherent_impact_probability'],
@@ -146,23 +143,23 @@ class WorksheetController extends Controller
 
         $data['incidents'] = array_map(function ($incident) {
             return [
-                'risk_cause_number' => strip_tags(Purifier::clean($incident['risk_cause_number'] ?? '')),
-                'risk_cause_code' => strip_tags(Purifier::clean($incident['risk_cause_code'] ?? '')),
-                'risk_cause_body' => Purifier::clean($incident['risk_cause_body'] ?? ''),
-                'kri_body' => strip_tags(Purifier::clean($incident['kri_body'] ?? '')),
+                'risk_cause_number' => strip_tags(purify($incident['risk_cause_number'] ?? '')),
+                'risk_cause_code' => strip_tags(purify($incident['risk_cause_code'] ?? '')),
+                'risk_cause_body' => purify($incident['risk_cause_body'] ?? ''),
+                'kri_body' => strip_tags(purify($incident['kri_body'] ?? '')),
                 'kri_unit_id' => $incident['kri_unit'],
-                'kri_threshold_safe' => strip_tags(Purifier::clean($incident['kri_threshold_safe'] ?? '')),
-                'kri_threshold_caution' => strip_tags(Purifier::clean($incident['kri_threshold_caution'] ?? '')),
-                'kri_threshold_danger' => strip_tags(Purifier::clean($incident['kri_threshold_danger'] ?? '')),
+                'kri_threshold_safe' => strip_tags(purify($incident['kri_threshold_safe'] ?? '')),
+                'kri_threshold_caution' => strip_tags(purify($incident['kri_threshold_caution'] ?? '')),
+                'kri_threshold_danger' => strip_tags(purify($incident['kri_threshold_danger'] ?? '')),
             ];
         }, $validated['incidents'] ?? []);
         $data['mitigations'] = array_map(function ($mitigation) {
             return [
-                'risk_cause_number' => strip_tags(Purifier::clean($mitigation['risk_cause_number'] ?? '')),
+                'risk_cause_number' => strip_tags(purify($mitigation['risk_cause_number'] ?? '')),
                 'risk_treatment_option_id' => (int) $mitigation['risk_treatment_option'],
                 'risk_treatment_type_id' => (int) $mitigation['risk_treatment_type'],
-                'mitigation_plan' => Purifier::clean($mitigation['mitigation_plan'] ?? ''),
-                'mitigation_output' => Purifier::clean($mitigation['mitigation_output'] ?? ''),
+                'mitigation_plan' => purify($mitigation['mitigation_plan'] ?? ''),
+                'mitigation_output' => purify($mitigation['mitigation_output'] ?? ''),
                 'mitigation_start_date' => $mitigation['mitigation_start_date'],
                 'mitigation_end_date' => $mitigation['mitigation_end_date'],
                 'mitigation_cost' => (float) $mitigation['mitigation_cost'],
@@ -178,20 +175,20 @@ class WorksheetController extends Controller
             $worksheet = $this->worksheetService->create($dto);
             $history = [
                 'created_by' => auth()->user()->employee_id,
-                'created_role' => $this->roleService->getCurrentRole()->name,
+                'created_role' => role()->getCurrentRole()->name,
                 'status' => DocumentStatus::DRAFT->value,
                 'note' => 'Membuat kertas kerja baru'
             ];
 
-            if ($this->roleService->getCurrentRole()->name == 'risk admin') {
+            if (role()->getCurrentRole()->name == 'risk admin') {
                 $history = array_merge($history, [
                     'receiver_id' => 3,
                     'receiver_role' => 'risk owner',
                 ]);
             } else {
                 $history = array_merge($history, [
-                    'receiver_id' => $this->roleService->getCurrentRole()->id,
-                    'receiver_role' => $this->roleService->getCurrentRole()->name,
+                    'receiver_id' => role()->getCurrentRole()->id,
+                    'receiver_role' => role()->getCurrentRole()->name,
                 ]);
             }
 
@@ -403,19 +400,19 @@ class WorksheetController extends Controller
         try {
             $validated = $request->validated();
             $data['context'] = [
-                'worksheet_number' => strip_tags(Purifier::clean($validated['context']['risk_number'])),
+                'worksheet_number' => strip_tags(purify($validated['context']['risk_number'])),
                 'company_code' => 'API',
                 'company_name' => 'PT Angkasa Pura Indonesia',
-                'target_body' => Purifier::clean($validated['context']['target_body']),
-                'risk_number' => strip_tags(Purifier::clean($validated['context']['risk_number'])),
+                'target_body' => purify($validated['context']['target_body']),
+                'risk_number' => strip_tags(purify($validated['context']['risk_number'])),
             ];
 
             $data['strategies'] = array_map(function ($strategy) {
                 return [
                     'id' => (int) $strategy['id'] ?? null,
-                    'body' => Purifier::clean($strategy['strategy_body'] ?? ''),
-                    'expected_feedback' => Purifier::clean($strategy['strategy_expected_feedback'] ?? ''),
-                    'risk_value' => Purifier::clean($strategy['strategy_risk_value'] ?? ''),
+                    'body' => purify($strategy['strategy_body'] ?? ''),
+                    'expected_feedback' => purify($strategy['strategy_expected_feedback'] ?? ''),
+                    'risk_value' => purify($strategy['strategy_risk_value'] ?? ''),
                     'risk_value_limit' => (float) $strategy['strategy_risk_value_limit'],
                     'decision' => $strategy['strategy_decision'],
                 ];
@@ -424,16 +421,16 @@ class WorksheetController extends Controller
             $data['identification'] = [
                 'risk_category_t2_id' => $validated['identification']['risk_category_t2'],
                 'risk_category_t3_id' => $validated['identification']['risk_category_t3'],
-                'risk_chronology_body' => Purifier::clean($validated['identification']['risk_chronology_body'] ?? ''),
-                'risk_chronology_description' => Purifier::clean($validated['identification']['risk_chronology_description'] ?? ''),
+                'risk_chronology_body' => purify($validated['identification']['risk_chronology_body'] ?? ''),
+                'risk_chronology_description' => purify($validated['identification']['risk_chronology_description'] ?? ''),
                 'existing_control_type_id' => $validated['identification']['existing_control_type'],
-                'existing_control_body' => Purifier::clean($validated['identification']['existing_control_body'] ?? ''),
+                'existing_control_body' => purify($validated['identification']['existing_control_body'] ?? ''),
                 'control_effectiveness_assessment_id' => $validated['identification']['control_effectiveness_assessment'],
                 'risk_impact_category' => $validated['identification']['risk_impact_category'],
-                'risk_impact_body' => Purifier::clean($validated['identification']['risk_impact_body'] ?? ''),
+                'risk_impact_body' => purify($validated['identification']['risk_impact_body'] ?? ''),
                 'risk_impact_start_date' => $validated['identification']['risk_impact_start_date'],
                 'risk_impact_end_date' => $validated['identification']['risk_impact_end_date'],
-                'inherent_body' => Purifier::clean($validated['identification']['inherent_body'] ?? ''),
+                'inherent_body' => purify($validated['identification']['inherent_body'] ?? ''),
                 'inherent_impact_value' => (float) $validated['identification']['inherent_impact_value'],
                 'inherent_impact_scale_id' => $validated['identification']['inherent_impact_scale'],
                 'inherent_impact_probability' => (int) $validated['identification']['inherent_impact_probability'],
@@ -452,24 +449,24 @@ class WorksheetController extends Controller
             $data['incidents'] = array_map(function ($incident) {
                 return [
                     'id' => (int) $incident['id'] ?? null,
-                    'risk_cause_number' => strip_tags(Purifier::clean($incident['risk_cause_number'] ?? '')),
-                    'risk_cause_code' => strip_tags(Purifier::clean($incident['risk_cause_code'] ?? '')),
-                    'risk_cause_body' => Purifier::clean($incident['risk_cause_body'] ?? ''),
-                    'kri_body' => strip_tags(Purifier::clean($incident['kri_body'] ?? '')),
+                    'risk_cause_number' => strip_tags(purify($incident['risk_cause_number'] ?? '')),
+                    'risk_cause_code' => strip_tags(purify($incident['risk_cause_code'] ?? '')),
+                    'risk_cause_body' => purify($incident['risk_cause_body'] ?? ''),
+                    'kri_body' => strip_tags(purify($incident['kri_body'] ?? '')),
                     'kri_unit_id' => $incident['kri_unit'] ?? null,
-                    'kri_threshold_safe' => strip_tags(Purifier::clean($incident['kri_threshold_safe'] ?? '')),
-                    'kri_threshold_caution' => strip_tags(Purifier::clean($incident['kri_threshold_caution'] ?? '')),
-                    'kri_threshold_danger' => strip_tags(Purifier::clean($incident['kri_threshold_danger'] ?? '')),
+                    'kri_threshold_safe' => strip_tags(purify($incident['kri_threshold_safe'] ?? '')),
+                    'kri_threshold_caution' => strip_tags(purify($incident['kri_threshold_caution'] ?? '')),
+                    'kri_threshold_danger' => strip_tags(purify($incident['kri_threshold_danger'] ?? '')),
                 ];
             }, $validated['incidents'] ?? []);
             $data['mitigations'] = array_map(function ($mitigation) {
                 return [
                     'id' => (int) $mitigation['id'] ?? null,
-                    'risk_cause_number' => strip_tags(Purifier::clean($mitigation['risk_cause_number'] ?? '')),
+                    'risk_cause_number' => strip_tags(purify($mitigation['risk_cause_number'] ?? '')),
                     'risk_treatment_option_id' => (int) $mitigation['risk_treatment_option'],
                     'risk_treatment_type_id' => (int) $mitigation['risk_treatment_type'],
-                    'mitigation_plan' => Purifier::clean($mitigation['mitigation_plan'] ?? ''),
-                    'mitigation_output' => Purifier::clean($mitigation['mitigation_output'] ?? ''),
+                    'mitigation_plan' => purify($mitigation['mitigation_plan'] ?? ''),
+                    'mitigation_output' => purify($mitigation['mitigation_output'] ?? ''),
                     'mitigation_start_date' => $mitigation['mitigation_start_date'],
                     'mitigation_end_date' => $mitigation['mitigation_end_date'],
                     'mitigation_cost' => (float) $mitigation['mitigation_cost'],
@@ -500,9 +497,9 @@ class WorksheetController extends Controller
             } else {
                 $worksheet->histories()->create([
                     'created_by' => auth()->user()->employee_id,
-                    'created_role' => $this->roleService->getCurrentRole()->name,
-                    'receiver_id' => $this->roleService->getCurrentRole()->id,
-                    'receiver_role' => $this->roleService->getCurrentRole()->name,
+                    'created_role' => role()->getCurrentRole()->name,
+                    'receiver_id' => role()->getCurrentRole()->id,
+                    'receiver_role' => role()->getCurrentRole()->name,
                     'status' => $worksheet->status,
                     'note' => 'Kertas kerja berhasil diperbarui'
                 ]);
@@ -527,42 +524,32 @@ class WorksheetController extends Controller
 
     public function destroy(string $worksheetId)
     {
-        try {
-            $worksheet = Worksheet::findByEncryptedIdOrFail($worksheetId);
-            if (!in_array($worksheet->status, [DocumentStatus::DRAFT->value, DocumentStatus::ON_REVIEW->value])) {
-                throw_if(
-                    !$worksheet->delete(),
-                    new Exception("Failed to delete worksheet with ID {$worksheet->id}, document is on progress")
-                );
+        $worksheet = Worksheet::findByEncryptedIdOrFail($worksheetId);
+        if (in_array($worksheet->status, [DocumentStatus::DRAFT->value, DocumentStatus::ON_REVIEW->value])) {
+            if ($worksheet->delete()) {
+                flash_message('flash_message', 'Kertas kerja berhasil dihapus', State::SUCCESS);
+                return redirect()->route('risk.assessment.index');
             }
 
-            DB::beginTransaction();
-            throw_if(!$worksheet->delete(), new Exception("Failed to delete worksheet with ID {$worksheet->id}"));
-            DB::commit();
-
-            flash_message('flash_message', 'Kertas kerja berhasil dihapus', State::SUCCESS);
-            return redirect()->route('risk.assessment.index');
-        } catch (Exception $e) {
-            DB::rollBack();
-            logger()->error('[Worksheet] ' . $e->getMessage());
-
             flash_message('flash_message', 'Gagal menghapus kertas kerja', State::ERROR);
-            return redirect()->intended();
+        } else {
+            flash_message('flash_message', 'Gagal menghapus kertas kerja, kertas kerja sedang dalam proses atau sudah disetujui', State::ERROR);
         }
+
+        return redirect()->back();
     }
 
     public function update_status(string $worksheetId, Request $request)
     {
         $worksheet = Worksheet::findByEncryptedIdOrFail($worksheetId);
-        $currentRole = $this->roleService->getCurrentRole();
 
         try {
-            $rule = Str::snake($currentRole->name == 'risk analis' ? $request->role : $currentRole->name) . '_rule';
+            $rule = Str::snake(role()->isRiskAnalis() || role()->isAdministrator() ? $request->role : role()->getCurrentRole()->name) . '_rule';
             if (!method_exists($this, $rule)) {
                 throw new Exception("Target role not found: {$rule}");
             }
             DB::beginTransaction();
-            $this->$rule($worksheet, strip_tags(Purifier::clean($request->status)), Purifier::clean($request->note));
+            $this->$rule($worksheet, strip_tags(purify($request->status)), purify($request->note));
             DB::commit();
 
             flash_message('flash_message', 'Status Kertas Kerja berhasil diperbarui', State::SUCCESS);
@@ -672,29 +659,29 @@ class WorksheetController extends Controller
 
     public function get_by_inherent_risk_scale(int $riskScale)
     {
-        $unit = $this->roleService->getCurrentUnit();
+        $unit = role()->getCurrentUnit();
         if (request('unit')) {
             $unit = $this->positionService->getUnitBelow(
                 $unit?->sub_unit_code,
                 request('unit'),
-                $this->roleService->isRiskOwner() || $this->roleService->isRiskAdmin()
+                role()->isRiskOwner() || role()->isRiskAdmin()
             ) ?: $unit;
         }
 
         $worksheets = Worksheet::assessmentQuery()
             ->when(
-                !$this->roleService->isRiskAdmin(),
+                !role()->isRiskAdmin(),
                 fn($q) => $q->withExpression(
                     'position_hierarchy',
                     Position::hierarchyQuery(
                         $unit?->sub_unit_code ?? '-',
-                        $this->roleService->isRiskOwner() || $this->roleService->isRiskAdmin()
+                        role()->isRiskOwner() || role()->isRiskAdmin()
                     )
                 )
                     ->join('position_hierarchy as ph', 'ph.sub_unit_code', 'w.sub_unit_code')
             )
             ->when(
-                $this->roleService->isRiskAdmin(),
+                role()->isRiskAdmin(),
                 fn($q) => $q->where('w.created_by', auth()->user()->employee_id)
                     ->where('w.sub_unit_code', $unit?->sub_unit_code ?? '')
             )
@@ -711,12 +698,12 @@ class WorksheetController extends Controller
 
     public function get_by_target_risk_scale(int $riskScale)
     {
-        $unit = $this->roleService->getCurrentUnit();
+        $unit = role()->getCurrentUnit();
         if (request('unit')) {
             $unit = $this->positionService->getUnitBelow(
                 $unit?->sub_unit_code,
                 request('unit'),
-                $this->roleService->isRiskOwner() || $this->roleService->isRiskAdmin()
+                role()->isRiskOwner() || role()->isRiskAdmin()
             ) ?: $unit;
         }
 
@@ -725,18 +712,18 @@ class WorksheetController extends Controller
 
         $worksheets = Worksheet::residualMapQuery($quarter)
             ->when(
-                !$this->roleService->isRiskAdmin(),
+                !role()->isRiskAdmin(),
                 fn($q) => $q->withExpression(
                     'position_hierarchy',
                     Position::hierarchyQuery(
                         $unit?->sub_unit_code ?? '-',
-                        $this->roleService->isRiskOwner() || $this->roleService->isRiskAdmin()
+                        role()->isRiskOwner() || role()->isRiskAdmin()
                     )
                 )
                     ->join('position_hierarchy as ph', 'ph.sub_unit_code', 'w.sub_unit_code')
             )
             ->when(
-                $this->roleService->isRiskAdmin(),
+                role()->isRiskAdmin(),
                 fn($q) => $q->where('w.created_by', auth()->user()->employee_id)
                     ->where('w.sub_unit_code', $unit?->sub_unit_code ?? '')
             )
@@ -753,29 +740,29 @@ class WorksheetController extends Controller
 
     public function get_by_actualization_risk_scale(int $riskScale)
     {
-        $unit = $this->roleService->getCurrentUnit();
+        $unit = role()->getCurrentUnit();
         if (request('unit')) {
             $unit = $this->positionService->getUnitBelow(
                 $unit?->sub_unit_code,
                 request('unit'),
-                $this->roleService->isRiskOwner() || $this->roleService->isRiskAdmin()
+                role()->isRiskOwner() || role()->isRiskAdmin()
             ) ?: $unit;
         }
 
         $worksheets = Worksheet::latestMonitoringWithMitigationQuery()
             ->when(
-                !$this->roleService->isRiskAdmin(),
+                !role()->isRiskAdmin(),
                 fn($q) => $q->withExpression(
                     'position_hierarchy',
                     Position::hierarchyQuery(
                         $unit?->sub_unit_code ?? '-',
-                        $this->roleService->isRiskOwner() || $this->roleService->isRiskAdmin()
+                        role()->isRiskOwner() || role()->isRiskAdmin()
                     )
                 )
                     ->join('position_hierarchy as ph', 'ph.sub_unit_code', 'w.sub_unit_code')
             )
             ->when(
-                $this->roleService->isRiskAdmin(),
+                role()->isRiskAdmin(),
                 fn($q) => $q->where('w.created_by', auth()->user()->employee_id)
                     ->where('w.sub_unit_code', $unit?->sub_unit_code ?? '-')
             )

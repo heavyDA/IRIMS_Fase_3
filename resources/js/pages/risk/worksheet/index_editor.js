@@ -22,7 +22,7 @@ import Swal from "sweetalert2";
 dayjs.locale("id");
 
 let currentStep = 0;
-const totalStep = 4;
+const totalStep = 3;
 
 const worksheetTab = document.querySelector("#worksheetTab");
 const worksheetTabList = worksheetTab.querySelectorAll("li");

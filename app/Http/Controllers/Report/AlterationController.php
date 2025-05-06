@@ -49,7 +49,7 @@ class AlterationController extends Controller
 
             return DataTables::query($alterations)
                 ->filter(function ($q) {
-                    $value = strip_html(Purifier::clean(request('search.value')));
+                    $value = strip_html(purify(request('search.value')));
 
                     if ($value) {
                         $value = "%{$value}%";
@@ -104,7 +104,7 @@ class AlterationController extends Controller
         $alteration = $request->user()
             ->worksheet_alterations()
             ->create(
-                collect($request->validated())->map(fn($v, $k) => $k == 'worksheet_id' ? $v : Purifier::clean($v))->toArray()
+                collect($request->validated())->map(fn($v, $k) => $k == 'worksheet_id' ? $v : purify($v))->toArray()
             );
 
         $alteration ?
@@ -136,7 +136,7 @@ class AlterationController extends Controller
         Gate::authorize('update', $alteration);
 
         $alteration->update(
-            collect($request->validated())->map(fn($v, $k) => $k == 'worksheet_id' ? $v : Purifier::clean($v))->toArray()
+            collect($request->validated())->map(fn($v, $k) => $k == 'worksheet_id' ? $v : purify($v))->toArray()
         ) ?
             flash_message(message: 'Perubahan Strategi Risiko berhasil diperbarui') :
             flash_message(message: 'Gagal menyimpan pembaruan Perubahan Strategi Risiko', type: State::ERROR);
@@ -172,7 +172,7 @@ class AlterationController extends Controller
         }
 
         $year = request('year', date('Y'));
-        $value = '%' . strip_html(Purifier::clean(request('search'))) . '%';
+        $value = '%' . strip_html(purify(request('search'))) . '%';
         $alterations = WorksheetAlteration::getAlterations($unit->sub_unit_code)
             ->whereYear('ra_worksheet_alterations.created_at', $year)
             ->when(

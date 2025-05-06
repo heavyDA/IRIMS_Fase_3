@@ -28,3 +28,10 @@ if (!function_exists('get_current_timezone')) {
         return in_array($timezone, $timezones) ? $timezone : 'Asia/Jakarta';
     }
 }
+
+if (!function_exists('purify')) {
+    function purify(?string $string = ''): string
+    {
+        return empty($string) ? '' : clean(html_entity_decode($string));
+    }
+}

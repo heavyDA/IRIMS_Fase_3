@@ -138,12 +138,12 @@ const columns = [
         sortable: false,
         responsivePriority: 1
     },
-    {
-        orderable: true,
-        data: 'created_at',
-        name: 'created_at',
-        visible: false  // Hidden but used for default sorting
-    },
+    // {
+    //     orderable: true,
+    //     data: 'created_at',
+    //     name: 'created_at',
+    //     visible: false  // Hidden but used for default sorting
+    // },
 ]
 
 const datatable = createDatatable('#alteration-table', {

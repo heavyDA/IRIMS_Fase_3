@@ -6,12 +6,12 @@
 
 @section('header-content')
     <div>
-        <h1 class="page-title fw-medium fs-18 mb-2">Catatan Kejadian Kerugian</h1>
+        <h1 class="page-title fw-medium fs-18 mb-2">Loss Event Database</h1>
         <div class="">
             <nav>
                 <ol class="breadcrumb mb-0">
                     <li class="breadcrumb-item"><a href="javascript:void(0);">Risk Report</a></li>
-                    <li class="breadcrumb-item active" aria-current="page">Catatan Kejadian Kerugian</li>
+                    <li class="breadcrumb-item active" aria-current="page">Loss Event Database</li>
                 </ol>
             </nav>
         </div>
@@ -20,7 +20,7 @@
         @if (Gate::allows('create', App\Models\Risk\WorksheetLossEvent::class))
             <a href="{{ route('risk.report.loss_events.create') }}"
                 class="btn btn-primary-light btn-wave me-2 waves-effect waves-light">
-                <i class="ti ti-plus align-middle"></i> Tambah Catatan
+                <i class="ti ti-plus align-middle"></i> Tambah Loss Event
             </a>
         @endif
     </div>
@@ -68,7 +68,7 @@
                         <th class="table-dark-custom" style="text-align: center !important;">Nilai Kerugian</th>
                         <th class="table-dark-custom" style="text-align: center !important;">Pihak Terkait</th>
                         <th class="table-dark-custom" style="text-align: center !important;">Status Pemulihan Saat Ini</th>
-                        <th class="table-dark-custom" style="text-align: center !important;">Status Premi</th>
+                        <th class="table-dark-custom" style="text-align: center !important;">Status Asuransi</th>
                         <th class="table-dark-custom" style="text-align: center !important;">Nilai Premi</th>
                         <th class="table-dark-custom" style="text-align: center !important;">Nilai Klaim</th>
                         <th class="table-dark-custom" style="text-align: center !important;">Dibuat Oleh</th>

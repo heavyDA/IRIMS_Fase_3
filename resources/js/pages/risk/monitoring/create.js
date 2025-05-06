@@ -25,13 +25,11 @@ import Swal from 'sweetalert2';
 dayjs.locale('id');
 
 let currentStep = 0;
-const totalStep = 6;
+const totalStep = 3;
 const monitoring = {
 	residual: {},
 	residual_target: [],
 	actualizations: [],
-	alteration: {},
-	incident: {},
 };
 
 let inherent = {};
@@ -94,10 +92,6 @@ monitoringTabNextButton.addEventListener('click', (e) => {
 			currentStep -= 1;
 			return;
 		}
-	} else if (currentStep == 4) {
-		alterationFormSubmit();
-	} else if (currentStep == 5) {
-		incidentFormSubmit();
 	}
 
 	const previousTab = monitoringTabList[currentStep - 1].querySelector('h2');
@@ -1256,95 +1250,6 @@ const enableQuarterQuantitative = (quarter) => {
 			}
 		});
 	}
-};
-
-// monitoringEnableQuarter(currentQuarter);
-
-const alterationForm = document.querySelector('#alterationForm');
-const alterationTextareas = {};
-const alterationQuills = {};
-
-for (const textarea of alterationForm.querySelectorAll('textarea')) {
-	alterationTextareas[textarea.name] = textarea;
-	alterationQuills[textarea.name] = new Quill(
-		alterationForm.querySelector('#' + textarea.name + '-editor'),
-		defaultConfigQuill
-	);
-	alterationQuills[textarea.name].on(
-		'text-change',
-		(delta, oldDelta, source) => {
-			alterationTextareas[textarea.name].innerHTML =
-				alterationQuills[textarea.name].root.innerHTML;
-		}
-	);
-}
-
-const alterationFormSubmit = () => {
-	const data = Object.fromEntries(new FormData(alterationForm));
-	monitoring.alteration = data;
-};
-
-const incidentForm = document.querySelector('#incidentForm');
-const incidentTextareas = {};
-const incidentQuills = {};
-
-for (const textarea of incidentForm.querySelectorAll('textarea')) {
-	incidentTextareas[textarea.name] = textarea;
-	incidentQuills[textarea.name] = new Quill(
-		incidentForm.querySelector('#' + textarea.name + '-editor'),
-		defaultConfigQuill
-	);
-	incidentQuills[textarea.name].on(
-		'text-change',
-		(delta, oldDelta, source) => {
-			incidentTextareas[textarea.name].innerHTML =
-				incidentQuills[textarea.name].root.innerHTML;
-		}
-	);
-}
-
-const incidentSelects = {};
-const incidentChoices = {};
-for (let select of incidentForm.querySelectorAll('.form-select')) {
-	incidentSelects[select.name] = select;
-	incidentChoices[select.name] = new Choices(select, defaultConfigChoices);
-}
-
-const incidentLossValue = incidentForm.querySelector('[name="loss_value"]');
-incidentLossValue.addEventListener('input', (e) => {
-	e.target.value = formatNumeral(e.target.value, defaultConfigFormatNumeral);
-});
-
-const incidentInsurancePermit = incidentForm.querySelector(
-	'[name="insurance_permit"]'
-);
-incidentInsurancePermit.addEventListener('input', (e) => {
-	e.target.value = formatNumeral(e.target.value, defaultConfigFormatNumeral);
-});
-
-const incidentInsuranceClaim = incidentForm.querySelector(
-	'[name="insurance_claim"]'
-);
-incidentInsuranceClaim.addEventListener('input', (e) => {
-	e.target.value = formatNumeral(e.target.value, defaultConfigFormatNumeral);
-});
-
-const incidentFormSubmit = () => {
-	const data = Object.fromEntries(new FormData(incidentForm));
-	data.loss_value = unformatNumeral(
-		data.loss_value,
-		defaultConfigFormatNumeral
-	);
-	data.insurance_permit = unformatNumeral(
-		data.insurance_permit,
-		defaultConfigFormatNumeral
-	);
-	data.insurance_claim = unformatNumeral(
-		data.insurance_claim,
-		defaultConfigFormatNumeral
-	);
-
-	monitoring.incident = data;
 };
 
 const save = async () => {

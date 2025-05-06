@@ -50,40 +50,12 @@ const columns = [
         data: 'target_body',
         name: 'target_body',
         width: '128px',
-        render: function (data, type, row) {
-            if (type !== 'display') {
-                return data
-            }
-
-            if (!data) {
-                return '';
-            }
-
-            const decodeData = decodeHtml(decodeHtml(data))
-            const parsedData = new DOMParser().parseFromString(decodeData, 'text/html');
-
-            return parsedData.body ? parsedData.body.innerHTML : '';
-        }
     },
     {
         orderable: true,
         data: 'incident_body',
         name: 'incident_body',
         width: '256px',
-        render: function (data, type, row) {
-            if (type !== 'display') {
-                return data
-            }
-
-            if (!data) {
-                return '';
-            }
-
-            const decodeData = decodeHtml(decodeHtml(data))
-            const parsedData = new DOMParser().parseFromString(decodeData, 'text/html');
-
-            return parsedData.body ? parsedData.body.innerHTML : '';
-        }
     },
     {
         orderable: true,
@@ -96,40 +68,12 @@ const columns = [
         data: 'incident_source',
         name: 'incident_source',
         width: '160px',
-        render: function (data, type, row) {
-            if (type !== 'display') {
-                return data
-            }
-
-            if (!data) {
-                return '';
-            }
-
-            const decodeData = decodeHtml(decodeHtml(data))
-            const parsedData = new DOMParser().parseFromString(decodeData, 'text/html');
-
-            return parsedData.body ? parsedData.body.innerHTML : '';
-        }
     },
     {
         orderable: true,
         data: 'incident_handling',
         name: 'incident_handling',
         width: '256px',
-        render: function (data, type, row) {
-            if (type !== 'display') {
-                return data
-            }
-
-            if (!data) {
-                return '';
-            }
-
-            const decodeData = decodeHtml(decodeHtml(data))
-            const parsedData = new DOMParser().parseFromString(decodeData, 'text/html');
-
-            return parsedData.body ? parsedData.body.innerHTML : '';
-        }
     },
     {
         orderable: true,
@@ -154,8 +98,8 @@ const columns = [
     },
     {
         orderable: true,
-        data: 'restoration_status',
-        name: 'restoration_status',
+        data: 'related_party',
+        name: 'related_party',
         width: '256px',
     },
     {
@@ -241,6 +185,82 @@ const datatable = createDatatable('#loss_event-table', {
     pageLength: 10,
     columns: columns,
     order: [[columns.length - 1, 'desc']],
+    drawCallback: function (settings) {
+        const api = this.api();
+
+        // Your existing row merging logic
+        const columnsToMerge = [0,];
+
+        // Reset all cells visibility first
+        api.cells().every(function () {
+            const node = this.node();
+            if (node) {
+                node.style.display = '';
+                node.setAttribute('rowspan', 1);
+            }
+        });
+
+        // Group rows by worksheet ID
+        const groups = {};
+        api.rows({ page: 'current' }).every(function (rowIdx) {
+            const data = this.data();
+            const worksheetNumber = data.worksheet_number;
+            if (!groups[worksheetNumber]) {
+                groups[worksheetNumber] = [];
+            }
+            groups[worksheetNumber].push(rowIdx);
+        });
+
+        // Process each column for each worksheet group separately
+        Object.values(groups).forEach(groupRows => {
+            columnsToMerge.forEach(colIdx => {
+                let lastValue = null;
+                let rowsToMerge = 1;
+                let firstRow = null;
+
+                groupRows.forEach(rowIdx => {
+                    const value = api.cell(rowIdx, colIdx).data();
+                    const currentCell = api.cell(rowIdx, colIdx).node();
+
+                    if (lastValue === null) {
+                        lastValue = value;
+                        firstRow = rowIdx;
+                        return;
+                    }
+
+                    // Strict comparison for values
+                    if (JSON.stringify(lastValue) === JSON.stringify(value)) {
+                        rowsToMerge++;
+                        if (currentCell) {
+                            currentCell.style.display = 'none';
+                        }
+                    } else {
+                        if (rowsToMerge > 1) {
+                            const firstCell = api.cell(firstRow, colIdx).node();
+                            if (firstCell) {
+                                firstCell.setAttribute('rowspan', rowsToMerge);
+                            }
+                        }
+                        lastValue = value;
+                        firstRow = rowIdx;
+                        rowsToMerge = 1;
+                    }
+                });
+
+                // Handle the last group
+                if (rowsToMerge > 1) {
+                    const firstCell = api.cell(firstRow, colIdx).node();
+                    if (firstCell) {
+                        firstCell.setAttribute('rowspan', rowsToMerge);
+                    }
+                }
+            });
+        });
+
+        // Ensure proper header rendering
+        // api.fixedHeader.adjust();
+        // api.columns.adjust();
+    },
 })
 
 datatable.on('draw.dt', e => {

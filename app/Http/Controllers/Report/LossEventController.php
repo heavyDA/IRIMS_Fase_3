@@ -13,7 +13,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Gate;
 use Maatwebsite\Excel\Facades\Excel;
-use Mews\Purifier\Facades\Purifier;
 use Yajra\DataTables\Facades\DataTables;
 
 class LossEventController extends Controller
@@ -43,7 +42,7 @@ class LossEventController extends Controller
                 ->whereYear('ra_worksheet_loss_events.created_at', request('year', date('Y')));
 
             return DataTables::query($lossEvents)->filter(function ($q) {
-                $value = strip_html(Purifier::clean(request('search.value')));
+                $value = strip_html(purify(request('search.value')));
 
                 if ($value) {
                     $value = "%{$value}%";
@@ -87,12 +86,12 @@ class LossEventController extends Controller
                     return format_date($lossEvent->incident_date)->translatedFormat('d F Y H:i');
                 })
                 ->rawColumns([
+                    'target_body',
                     'incident_body',
                     'incident_source',
                     'incident_handling',
                     'related_party',
                     'restoration_status',
-                    'target_body',
                 ])
                 ->make(true);
         }
@@ -119,11 +118,11 @@ class LossEventController extends Controller
             'risk_category_t2_id' => $request->risk_category_t2_id,
             'risk_category_t3_id' => $request->risk_category_t3_id,
             'incident_date' => $request->incident_date,
-            'incident_body' => Purifier::clean($request->incident_body),
-            'incident_source' => Purifier::clean($request->incident_source),
-            'incident_handling' => Purifier::clean($request->incident_handling),
-            'related_party' => Purifier::clean($request->related_party),
-            'restoration_status' => Purifier::clean($request->restoration_status),
+            'incident_body' => purify($request->incident_body),
+            'incident_source' => purify($request->incident_source),
+            'incident_handling' => purify($request->incident_handling),
+            'related_party' => purify($request->related_party),
+            'restoration_status' => purify($request->restoration_status),
             'insurance_status' => $request->insurance_status,
             'insurance_permit' => $request->insurance_permit,
             'insurance_claim' => $request->insurance_claim,
@@ -160,7 +159,7 @@ class LossEventController extends Controller
         Gate::authorize('update', $lossEvent);
 
         $lossEvent->update(
-            collect($request->validated())->map(fn($v, $k) => in_array($k, ['worksheet_id', 'risk_category_t2_id', 'risk_category_t3_id', 'incident_date']) ? $v : Purifier::clean($v))->toArray()
+            collect($request->validated())->map(fn($v, $k) => in_array($k, ['worksheet_id', 'risk_category_t2_id', 'risk_category_t3_id', 'incident_date']) ? $v : purify($v))->toArray()
         ) ?
             flash_message(message: 'Catatan Kejadian Kerugian berhasil diperbarui') :
             flash_message(message: 'Gagal menyimpan pembaruan Catatan Kejadian Kerugian', type: State::ERROR);
@@ -196,7 +195,7 @@ class LossEventController extends Controller
         }
 
         $year = request('year', date('Y'));
-        $value = '%' . strip_html(Purifier::clean(request('search'))) . '%';
+        $value = '%' . strip_html(purify(request('search'))) . '%';
         $value = "%{$value}%";
         $lossEvents = WorksheetLossEvent::getLossEvents($unit->sub_unit_code)
             ->whereYear('ra_worksheet_loss_events.created_at', $year)

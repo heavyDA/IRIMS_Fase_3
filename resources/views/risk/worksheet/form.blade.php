@@ -45,15 +45,6 @@
                     Treatment</a>
             </div>
         </li>
-        <li class="not-allowed nav-item" role="presentation">
-            <div class="d-flex flex-column flex-lg-row gap-2 align-items-center justify-content-center">
-                <h2 style="width: 48px !important; height: 48px;"
-                    class="bg-light rounded-circle d-flex px-4 py-1 align-items-center justify-content-center">4</h2>
-                <a class="not-allowed" role="tab" href="#stepperMonitoring" aria-selected="false"
-                    tabindex="-1">Risk
-                    Monitoring & Review</a>
-            </div>
-        </li>
     </ul>
     <div class="tab-content">
         <div class="tab-pane border-0 p-2 show active" id="stepperContext" role="tabpanel">
@@ -68,9 +59,6 @@
             @else
                 @include('risk.worksheet.form._treatment')
             @endif
-        </div>
-        <div class="tab-pane border-0 p-2" id="stepperMonitoring" role="tabpanel">
-            @include('risk.worksheet.form._monitoring')
         </div>
     </div>
     <div class="row mt-2">

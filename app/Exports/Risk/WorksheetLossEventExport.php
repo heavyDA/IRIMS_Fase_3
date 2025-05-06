@@ -19,7 +19,6 @@ class WorksheetLossEventExport implements FromCollection, WithHeadings, WithTitl
         'No.',
         'Unit',
         'Sasaran Perusahaan',
-        'Profil Risiko',
         'Peristiwa Risiko',
         'Waktu Kejadian',
         'Sumber Penyebab Kejadian',
@@ -34,32 +33,31 @@ class WorksheetLossEventExport implements FromCollection, WithHeadings, WithTitl
     ];
     protected $mergedCells = [];
 
-    public function __construct(protected $alterations)
+    public function __construct(protected $lossEvents)
     {
-        $this->alterations = $alterations->map(
-            function ($alteration) {
-                if (array_key_exists($alteration->worksheet_number, $this->mergedCells)) {
-                    $this->mergedCells[$alteration->worksheet_number]++;
+        $this->lossEvents = $lossEvents->map(
+            function ($lossEvent) {
+                if (array_key_exists($lossEvent->worksheet_number, $this->mergedCells)) {
+                    $this->mergedCells[$lossEvent->worksheet_number]++;
                 } else {
-                    $this->mergedCells[$alteration->worksheet_number] = 0;
+                    $this->mergedCells[$lossEvent->worksheet_number] = 0;
                 }
 
                 return [
-                    'worksheet_number' => $alteration->worksheet_number,
-                    'unit' => "[{$alteration->sub_unit_code_doc}] {$alteration->sub_unit_name}",
-                    'target_body' => strip_html(Purifier::clean($alteration->target_body ?? '')),
-                    'incident_body' => strip_html(Purifier::clean($alteration->incident_body ?? '')),
-                    'incident_date' => strip_html(Purifier::clean($alteration->incident_date ?? '')),
-                    'incident_source' => strip_html(Purifier::clean($alteration->incident_source ?? '')),
-                    'incident_handling' => strip_html(Purifier::clean($alteration->incident_handling ?? '')),
-                    'risk_category_t2_id' => strip_html(Purifier::clean($alteration->risk_category_t2_id ?? '')),
-                    'risk_category_t3_id' => strip_html(Purifier::clean($alteration->risk_category_t3_id ?? '')),
-                    'loss_value' => money_format((float) $alteration->loss_value ?? 0),
-                    'related_party' => strip_html(Purifier::clean($alteration->related_party ?? '')),
-                    'restoration_status' => strip_html(Purifier::clean($alteration->restoration_status ?? '')),
-                    'insurance_status' => $alteration->insurance_status ? 'Ya' : 'Tidak',
-                    'insurance_permit' => money_format((float) $alteration->insurance_permit ?? 0),
-                    'insurance_claim' => money_format((float) $alteration->insurance_claim ?? 0),
+                    'worksheet_number' => $lossEvent->worksheet_number,
+                    'unit' => "[{$lossEvent->sub_unit_code_doc}] {$lossEvent->sub_unit_name}",
+                    'target_body' => strip_html(purify($lossEvent->target_body ?? '')),
+                    'incident_body' => strip_html(purify($lossEvent->incident_body ?? '')),
+                    'incident_date' => format_date($lossEvent->incident_date)->translatedFormat('d F Y H:i'),
+                    'incident_source' => strip_html(purify($lossEvent->incident_source ?? '')),
+                    'incident_handling' => strip_html(purify($lossEvent->incident_handling ?? '')),
+                    'risk_category_name' => "{$lossEvent->risk_category_t2_name} & {$lossEvent->risk_category_t3_name}",
+                    'loss_value' => money_format((float) $lossEvent->loss_value ?? 0),
+                    'related_party' => strip_html(purify($lossEvent->related_party ?? '')),
+                    'restoration_status' => strip_html(purify($lossEvent->restoration_status ?? '')),
+                    'insurance_status' => $lossEvent->insurance_status ? 'Ya' : 'Tidak',
+                    'insurance_permit' => money_format((float) $lossEvent->insurance_permit ?? 0),
+                    'insurance_claim' => money_format((float) $lossEvent->insurance_claim ?? 0),
                 ];
             }
         );
@@ -70,7 +68,7 @@ class WorksheetLossEventExport implements FromCollection, WithHeadings, WithTitl
      */
     public function collection()
     {
-        return $this->alterations;
+        return $this->lossEvents;
     }
 
     public function columnWidths(): array
@@ -90,16 +88,15 @@ class WorksheetLossEventExport implements FromCollection, WithHeadings, WithTitl
             'L' => 48,
             'M' => 48,
             'N' => 32,
-            'O' => 32,
         ];
     }
 
     public function styles(Worksheet $sheet)
     {
-        $count = $this->alterations->count() + 1;
+        $count = $this->lossEvents->count() + 1;
 
         $styles = [
-            'A1:O1' => [
+            'A1:N1' => [
                 'font' => [
                     'bold' => true,
                     'color' => [
@@ -125,7 +122,7 @@ class WorksheetLossEventExport implements FromCollection, WithHeadings, WithTitl
         ];
 
         if ($count > 1) {
-            $styles["A2:O{$count}"] = [
+            $styles["A2:N{$count}"] = [
                 'alignment' => [
                     'horizontal' => Alignment::HORIZONTAL_LEFT,
                     'vertical' => Alignment::VERTICAL_TOP,
