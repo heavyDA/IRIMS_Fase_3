@@ -46,6 +46,7 @@ class OfficialJob implements ShouldQueue
         $start = microtime(true);
         try {
             $officials = $this->employeeService->official_get_all();
+            $personnelAreas = [];
             $created = 0;
             $updated = 0;
 
@@ -77,6 +78,15 @@ class OfficialJob implements ShouldQueue
                     $unit->syncRoles(explode(',', $position->assigned_roles) ?? ['risk admin']);
                 } else {
                     $unit->syncRoles(['risk admin']);
+                }
+
+                $personnelAreas = array_merge($personnelAreas, [$official->personnel_area_code => $official->personnel_area_name]);
+            }
+
+            if (!empty($personnelAreas)) {
+                foreach ($personnelAreas as $code => $name) {
+                    $code = $code == 'HO' ? 'PST' : $code;
+                    Position::where('branch_code', $code)->update(['branch_name' => $name]);
                 }
             }
 

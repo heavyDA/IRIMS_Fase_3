@@ -25,6 +25,7 @@ class Position extends Model
         'sub_unit_code_doc',
         'sub_unit_name',
         'branch_code',
+        'branch_name',
         'regional_category',
         'position_name',
         'assigned_roles',
@@ -45,6 +46,7 @@ class Position extends Model
                 DB::table(app(self::class)->getTable())
                     ->selectRaw("
                         branch_code,
+                        branch_name,
                         branch_code as personnel_area_code,
                         unit_code,
                         unit_code_doc,
@@ -52,6 +54,7 @@ class Position extends Model
                         sub_unit_code,
                         sub_unit_code_doc,
                         sub_unit_name,
+                        regional_category,
                         position_name,
                         (LENGTH(sub_unit_code) - length(replace(sub_unit_code, '.', ''))) as level
                 ")
@@ -60,6 +63,7 @@ class Position extends Model
                         DB::table(app(self::class)->getTable() . ' as p')
                             ->selectRaw("
                                 p.branch_code,
+                                p.branch_name,
                                 p.branch_code as personnel_area_code,
                                 p.unit_code,
                                 p.unit_code_doc,
@@ -67,6 +71,7 @@ class Position extends Model
                                 p.sub_unit_code,
                                 p.sub_unit_code_doc,
                                 p.sub_unit_name,
+                                p.regional_category,
                                 p.position_name,
                                 (LENGTH(p.sub_unit_code) - length(replace(p.sub_unit_code, '.', ''))) as level
                             ")
@@ -87,6 +92,7 @@ class Position extends Model
                 DB::table(app(self::class)->getTable())
                     ->selectRaw("
                         branch_code,
+                        branch_name,
                         unit_code,
                         unit_code_doc,
                         unit_name,
@@ -101,6 +107,7 @@ class Position extends Model
                         DB::table(app(self::class)->getTable() . ' as p')
                             ->selectRaw("
                                 p.branch_code,
+                                p.branch_name,
                                 p.unit_code,
                                 p.unit_code_doc,
                                 p.unit_name,
@@ -131,6 +138,7 @@ class Position extends Model
             DB::table('children')
                 ->selectRaw("
                     branch_code,
+                    branch_name,
                     sub_unit_code_doc as unit_code_doc,
                     sub_unit_code as unit_code,
                     sub_unit_name as unit_name,
@@ -145,6 +153,7 @@ class Position extends Model
                     DB::table('position_hierarchy as ph')
                         ->selectRaw("
                             ph.branch_code,
+                            ph.branch_name,
                             ph.unit_code_doc,
                             ph.unit_code,
                             ph.unit_name,
