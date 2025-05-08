@@ -39,6 +39,7 @@ class LossEventController extends Controller
             }
 
             $lossEvents = WorksheetLossEvent::getLossEvents($unit->sub_unit_code)
+                ->when(role()->isRiskAdmin(), fn($q) => $q->where('ra_worksheets.sub_unit_code', $unit->sub_unit_code))
                 ->whereYear('ra_worksheet_loss_events.created_at', request('year', date('Y')));
 
             return DataTables::query($lossEvents)->filter(function ($q) {
@@ -198,6 +199,7 @@ class LossEventController extends Controller
         $value = '%' . strip_html(purify(request('search'))) . '%';
         $value = "%{$value}%";
         $lossEvents = WorksheetLossEvent::getLossEvents($unit->sub_unit_code)
+            ->when(role()->isRiskAdmin(), fn($q) => $q->where('ra_worksheets.sub_unit_code', $unit->sub_unit_code))
             ->whereYear('ra_worksheet_loss_events.created_at', $year)
             ->when(
                 fn($q) => $q->where(

@@ -69,6 +69,7 @@ class AuthController extends Controller
         if ($role) {
             session()->put('current_role', $role);
             session()->put('current_menu', null);
+            cache()->forget('current_unit_hierarchy.' . auth()->user()->employee_id . '.' . role()->getCurrentUnit()->sub_unit_code);
             return redirect()->intended();
         }
         return redirect()->intended();
@@ -96,6 +97,7 @@ class AuthController extends Controller
         session()->put('current_unit', $unit);
         session()->put('current_role', $role);
         session()->put('current_roles', $roles);
+        cache()->forget('current_unit_hierarchy.' . auth()->user()->employee_id . '.' . role()->getCurrentUnit()->sub_unit_code);
         session()->put('current_menu', null);
         flash_message('flash_message',  'Berhasil mengganti unit kerja', State::SUCCESS);
         return redirect()->intended();

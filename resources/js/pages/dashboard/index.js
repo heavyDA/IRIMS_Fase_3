@@ -107,7 +107,7 @@ const openModalInherent = (inherentScale) => {
         table.innerHTML = `<thead class="table-dark">
                             <tr>
                                 <th class="table-dark-custom" rowspan="2">No. Risiko</th>
-                                <th class="table-dark-custom" rowspan="2">Organisasi</th>
+                                <th class="table-dark-custom" rowspan="2">Unit</th>
                                 <th class="table-dark-custom" rowspan="2">Peristiwa Risiko</th>
                                 <th class="table-dark-custom" rowspan="2">Kategori Risiko T2 & T3</th>
                                 <th class="table-dark-custom" style="text-align: center !important;" colspan="3">Inheren</th>
@@ -370,7 +370,7 @@ const openModalResidual = (residualScale) => {
         table.innerHTML = `<thead>
                                 <tr>
                                     <th class="table-dark-custom" rowspan="2">No. Risiko</th>
-                                    <th class="table-dark-custom" rowspan="2">Organisasi</th>
+                                    <th class="table-dark-custom" rowspan="2">Unit</th>
                                     <th class="table-dark-custom" rowspan="2">Peristiwa Risiko</th>
                                     <th class="table-dark-custom" rowspan="2">Kategori Risiko T2 & T3</th>
                                     <th class="table-dark-custom" style="text-align: center !important;" colspan="3">Inheren</th>

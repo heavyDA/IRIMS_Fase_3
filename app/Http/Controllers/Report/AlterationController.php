@@ -45,6 +45,7 @@ class AlterationController extends Controller
             }
 
             $alterations = WorksheetAlteration::getAlterations($unit->sub_unit_code)
+                ->when(role()->isRiskAdmin(), fn($q) => $q->where('ra_worksheets.sub_unit_code', $unit->sub_unit_code))
                 ->whereYear('ra_worksheet_alterations.created_at', request('year', date('Y')));
 
             return DataTables::query($alterations)
@@ -174,6 +175,7 @@ class AlterationController extends Controller
         $year = request('year', date('Y'));
         $value = '%' . strip_html(purify(request('search'))) . '%';
         $alterations = WorksheetAlteration::getAlterations($unit->sub_unit_code)
+            ->when(role()->isRiskAdmin(), fn($q) => $q->where('ra_worksheets.sub_unit_code', $unit->sub_unit_code))
             ->whereYear('ra_worksheet_alterations.created_at', $year)
             ->when(
                 $value,

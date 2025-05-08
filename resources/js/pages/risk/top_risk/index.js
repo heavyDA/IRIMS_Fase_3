@@ -21,11 +21,36 @@ const worksheetTableFilter = worksheetOffcanvas.querySelector('#worksheet-table-
 const selectLength = worksheetTableFilter.querySelector('select[name="length"]')
 const selectYear = worksheetTableFilter.querySelector('select[name="year"]')
 const selectUnit = worksheetTableFilter.querySelector('select[name="unit"]')
+const selectLocation = worksheetTableFilter.querySelector('select[name="location"]')
 
 const selectLengthChoices = new Choices(selectLength, defaultConfigChoices)
 const selectYearChoices = new Choices(selectYear, defaultConfigChoices)
 const selectUnitChoices = new Choices(selectUnit, defaultConfigChoices)
+const selectLocationChoices = new Choices(selectLocation, defaultConfigChoices)
 
+const units = selectUnitChoices._currentState.choices;
+const placeholder = { label: 'Semua', value: '', placeholder: true, selected: true };
+selectUnitChoices.disable()
+selectLocation.addEventListener('change', (e) => {
+    const item = selectLocationChoices.getValue();
+
+    if (item.value) {
+        selectUnitChoices.clearChoices()
+        selectUnitChoices.setChoices([
+            placeholder,
+            ...units.filter(
+                (choice) => choice.customProperties.parent == item.value
+            )
+        ])
+            .enable()
+        return
+    }
+
+    selectUnitChoices.clearChoices()
+    selectUnitChoices.setChoices([placeholder])
+        .disable()
+})
+selectLocation.dispatchEvent(new Event('change'));
 const columns = [
     {
         orderable: true,

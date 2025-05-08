@@ -67,7 +67,7 @@
                                         <th class="table-dark-custom">No.</th>
                                         <th class="table-dark-custom">Status</th>
                                         <th class="table-dark-custom">Bulan</th>
-                                        <th class="table-dark-custom">Organisasi</th>
+                                        <th class="table-dark-custom">Unit</th>
                                     </tr>
                                 </thead>
                                 <tbody>

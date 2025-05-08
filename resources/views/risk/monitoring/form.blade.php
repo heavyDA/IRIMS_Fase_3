@@ -5,7 +5,7 @@
             <div class="d-flex flex-column gap-2 align-items-center justify-content-center">
                 <h2 style="width: 72px !important; height: 72px;"
                     class="bg-success rounded-circle d-flex px-4 py-1 align-items-center justify-content-center text-white">
-                    III.A
+                    1
                 </h2>
                 <a class="not-allowed active py-1" role="tab" href="#stepperResidual" aria-selected="true"
                     tabindex="-1">
@@ -16,7 +16,7 @@
         <li class="not-allowed nav-item" role="presentation">
             <div class="d-flex flex-column gap-2 align-items-center justify-content-center">
                 <h2 style="width: 72px !important; height: 72px;"
-                    class="bg-light rounded-circle d-flex px-4 py-1 align-items-center justify-content-center">III.B
+                    class="bg-light rounded-circle d-flex px-4 py-1 align-items-center justify-content-center">2
                 </h2>
                 <a class="not-allowed py-1" role="tab" href="#stepperActualization" aria-selected="false"
                     tabindex="-1">Realisasi Pelaksanaan Perlakuan Risiko dan Biaya</a>
@@ -25,7 +25,7 @@
         <li class="not-allowed nav-item" role="presentation">
             <div class="d-flex flex-column gap-2 align-items-center justify-content-center">
                 <h2 style="width: 72px !important; height: 72px;"
-                    class="bg-light rounded-circle d-flex px-4 py-1 align-items-center justify-content-center">III.C
+                    class="bg-light rounded-circle d-flex px-4 py-1 align-items-center justify-content-center">3
                 </h2>
                 <a class="not-allowed" role="tab" href="#stepperMap" aria-selected="false">Peta Risiko
                     Residual</a>
