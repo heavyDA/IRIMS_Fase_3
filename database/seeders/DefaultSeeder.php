@@ -96,6 +96,11 @@ class DefaultSeeder extends Seeder
                         'position' => 0,
                     ],
                     [
+                        'name' => 'KRI Unit',
+                        'route' => 'master.kri_units.index',
+                        'position' => 0,
+                    ],
+                    [
                         'name' => 'Jenis Existing Control',
                         'route' => 'master.existing_control_types.index',
                         'position' => 0,
@@ -212,6 +217,10 @@ class DefaultSeeder extends Seeder
                 'permissions' => $defaultPermissions,
             ],
             [
+                'route' => 'master.kri_units',
+                'permissions' => $defaultPermissions,
+            ],
+            [
                 'route' => 'master.existing_control_types',
                 'permissions' => $defaultPermissions,
             ],
@@ -274,28 +283,29 @@ class DefaultSeeder extends Seeder
             }
         }
 
-        if (Permission::count() == 0) {
-            Permission::insert($generatedPermissions);
-        }
-
+        Permission::insert($generatedPermissions);
         $menus = Menu::all();
+        $permissions = Permission::all();
         $roles = [['name' => 'root'], ['name' => 'administrator'], ['name' => 'risk admin'], ['name' => 'risk owner'], ['name' => 'risk otorisator'], ['name' => 'risk analis'], ['name' => 'risk reviewer'], ['name' => 'risk analis pusat']];
         foreach ($roles as $role) {
             $role = Role::firstOrCreate($role);
             if (in_array($role->name, ['root', 'administrator'])) {
-                $permissions = Permission::all();
 
                 $role->syncPermissions($permissions->pluck('name'));
                 $role->menus()->sync($menus->pluck('id'));
             } else if ($role->name == 'risk reviewer') {
-                $permissions = Permission::where('name', 'not like', '%access%')
-                    ->orWhereNotLike('name', '%master%')
-                    ->orWhereNotLike('name', '%setting%')
-                    ->orWhereNotLike('name', '%create%')
-                    ->orWhereNotLike('name', '%update%')
-                    ->orWhereNotLike('name', '%destroy%')
-                    ->get();
-                $role->syncPermissions($permissions->pluck('name'));
+                $role->syncPermissions(
+                    $permissions
+                        ->filter(
+                            fn($p) => (!str_contains($p->name, 'access') ||
+                                !str_contains($p->name, 'master') ||
+                                !str_contains($p->name, 'setting')) &&
+                                (!str_contains($p->name, 'create') ||
+                                    !str_contains($p->name, 'update') ||
+                                    !str_contains($p->name, 'destroy'))
+                        )
+                        ->pluck('name')
+                );
                 $role->menus()->sync(
                     $menus->filter(
                         function ($menu) {

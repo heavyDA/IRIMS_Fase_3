@@ -61,6 +61,9 @@
                             Risk Otorisator</option>
                         <option value="risk analis" {{ in_array('risk analis', $user->role) ? 'selected' : null }}>Risk
                             Analis</option>
+                        <option value="risk analis pusat"
+                            {{ in_array('risk analis pusat', $user->role) ? 'selected' : null }}>Risk
+                            Analis Pusat</option>
                         <option value="risk reviewer" {{ in_array('risk reviewer', $user->role) ? 'selected' : null }}>
                             Risk Reviewer</option>
                     </select>

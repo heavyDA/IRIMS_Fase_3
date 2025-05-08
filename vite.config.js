@@ -46,6 +46,7 @@ export default defineConfig({
                 'resources/js/pages/master/incident_category/index.js',
                 'resources/js/pages/master/risk_treatment_type/index.js',
                 'resources/js/pages/master/risk_treatment_option/index.js',
+                'resources/js/pages/master/kri_unit/index.js',
                 'resources/js/pages/setting/risk_metric/index.js',
                 'resources/js/pages/setting/risk_metric/form.js',
                 'resources/js/pages/setting/position/index.js',

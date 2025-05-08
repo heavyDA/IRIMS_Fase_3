@@ -9,6 +9,7 @@ use App\Http\Controllers\Master\{
     HeatmapController,
     IncidentCategoryController,
     KBUMNRiskCategoryController,
+    KRIUnitController,
     PICController,
     RiskMetricsController,
     RiskTreatmentOptionController,
@@ -159,6 +160,14 @@ Route::group(['middleware' => 'auth'], function () {
             [
                 'names' => custom_route_names('risk_treatment_options'),
                 'parameters' => ['risk_treatment_options' => 'risk_treatment_option'],
+            ]
+        );
+        Route::resource(
+            'kri-units',
+            KRIUnitController::class,
+            [
+                'names' => custom_route_names('kri_units'),
+                'parameters' => ['kri_units' => 'kri_unit'],
             ]
         );
 
