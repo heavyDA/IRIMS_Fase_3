@@ -191,7 +191,6 @@ const datatable = createDatatable('#loss_event-table', {
     responsive: false,
     serverSide: true,
     processing: true,
-    columnDefs: [{ targets: [3], width: 128 }],
     ajax: {
         url: window.location.href,
         data: function (d) {
@@ -200,13 +199,13 @@ const datatable = createDatatable('#loss_event-table', {
         }
     },
     fixedColumns: {
-        start: 2
+        start: 3
     },
     scrollX: true,
     scrollY: '48vh',
     scrollCollapse: true,
     lengthChange: false,
-    autoWidth: true,
+    autoWidth: false,
     pageLength: 10,
     columns: columns,
     order: [[columns.length - 1, 'desc']],

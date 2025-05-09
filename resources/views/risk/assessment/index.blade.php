@@ -67,6 +67,8 @@
                         <th class="table-dark-custom" style="text-align: center !important;" colspan="8">Target
                             Residual
                         </th>
+                        <th style="text-align: center !important;" class="table-dark-custom" rowspan="3">Kualifikasi
+                            Risiko</th>
                     </tr>
                     <tr>
                         <th style="text-align: center !important;" class="table-dark-custom" rowspan="2">Level</th>
@@ -144,6 +146,17 @@
                                         [{{ $child->sub_unit_code_doc }}] {{ $child->sub_unit_name }}
                                     </option>
                                 @endforeach
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-12 d-flex flex-column">
+                        <label for="risk_qualification" class="form-label">Kualifikasi Risiko</label>
+                        <select name="risk_qualification" class="form-select">
+                            <option value="">Semua</option>
+                            @foreach ($risk_qualifications as $risk_qualification)
+                                <option value="{{ $risk_qualification->id }}">
+                                    {{ $risk_qualification->name }}
+                                </option>
                             @endforeach
                         </select>
                     </div>

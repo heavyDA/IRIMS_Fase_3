@@ -79,6 +79,7 @@ class WorksheetController extends Controller
 
         $data['context'] = [
             'worksheet_number' => strip_tags(purify($validated['context']['risk_number'])),
+            'risk_qualification' => strip_tags(purify($validated['context']['risk_qualification'])),
             'company_code' => 'API',
             'company_name' => 'PT Angkasa Pura Indonesia',
             'status' => DocumentStatus::DRAFT->value,
@@ -282,6 +283,7 @@ class WorksheetController extends Controller
                     'period_date' => $worksheet->created_at->format('M d, Y'),
                     'period_year' => $worksheet->created_at->format('Y'),
                     'risk_number' => $worksheet->worksheet_number,
+                    'risk_qualification' => $worksheet->risk_qualification_id,
                     'target_body' => $worksheet->target_body,
                     'unit_name' => $worksheet->sub_unit_name,
                 ],

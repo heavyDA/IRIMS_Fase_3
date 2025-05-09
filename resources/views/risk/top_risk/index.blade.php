@@ -149,6 +149,17 @@
                             @endforeach
                         </select>
                     </div>
+                    <div class="col-12 d-flex flex-column">
+                        <label for="risk_qualification" class="form-label">Kualifikasi Risiko</label>
+                        <select name="risk_qualification" class="form-select">
+                            <option value>Semua</option>
+                            @foreach ($risk_qualifications as $risk_qualification)
+                                <option value="{{ $risk_qualification->id }}">
+                                    {{ $risk_qualification->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
                     <div class="col-12 d-grid">
                         <button form="worksheet-table-filter" type="submit" class="btn btn-block btn-primary-light"><i
                                 class="ti ti-filter"></i> Filter</button>

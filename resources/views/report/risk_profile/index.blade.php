@@ -44,7 +44,7 @@
                     </div>
                 </div>
             </div>
-            <table id="worksheet-table" class="table table-bordered table-stripped display nowrap" style="width: 100%;">
+            <table id="worksheet-table" class="table table-bordered table-stripped display" style="width: 100%;">
                 <thead>
                     <tr>
                         <th class="table-dark-custom" style="text-align: center !important;" rowspan="3">No.</th>
@@ -60,6 +60,9 @@
                         <th class="table-dark-custom" style="text-align: center !important;" colspan="2">Risiko Inheren
                         </th>
                         <th class="table-dark-custom" style="text-align: center !important;" colspan="8">Risiko Residual
+                        </th>
+                        <th class="table-dark-custom" style="text-align: center !important;" rowspan="3">Kualifikasi
+                            Risiko
                         </th>
                     </tr>
                     <tr>
@@ -138,6 +141,17 @@
                                         [{{ $child->sub_unit_code_doc }}] {{ $child->sub_unit_name }}
                                     </option>
                                 @endforeach
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-12 d-flex flex-column">
+                        <label for="risk_qualification" class="form-label">Kualifikasi Risiko</label>
+                        <select name="risk_qualification" class="form-select">
+                            <option value="">Semua</option>
+                            @foreach ($risk_qualifications as $risk_qualification)
+                                <option value="{{ $risk_qualification->id }}">
+                                    {{ $risk_qualification->name }}
+                                </option>
                             @endforeach
                         </select>
                     </div>

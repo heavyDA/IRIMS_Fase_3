@@ -44,6 +44,7 @@ class WorksheetIncident extends Model
 
                 'worksheet.worksheet_code',
                 'worksheet.worksheet_number',
+                'rq.name as risk_qualification_name',
                 'worksheet.unit_code',
                 'worksheet.unit_name',
                 'worksheet.sub_unit_code',
@@ -120,6 +121,7 @@ class WorksheetIncident extends Model
             ->withExpression('heatmaps', DB::table('m_heatmaps'))
             ->withExpression('risk_categories', DB::table('m_kbumn_risk_categories'))
             ->leftJoin('ra_worksheets as worksheet', 'worksheet.id', '=', 'incident.worksheet_id')
+            ->leftJoin('m_risk_qualifications as rq', 'rq.id', '=', 'worksheet.risk_qualification_id')
             ->leftJoin('ra_worksheet_identifications as identification', 'identification.worksheet_id', '=', 'worksheet.id')
             ->leftJoin('m_kri_units as kri_unit', 'kri_unit.id', '=', 'incident.kri_unit_id')
             ->leftJoin('m_existing_control_types', 'm_existing_control_types.id', '=', 'identification.existing_control_type_id')
@@ -151,6 +153,7 @@ class WorksheetIncident extends Model
                 'incident.kri_threshold_caution',
                 'incident.kri_threshold_danger',
                 'worksheet.worksheet_number',
+                'rq.name as risk_qualification_name',
                 'worksheet.unit_code',
                 'worksheet.unit_name',
                 'worksheet.sub_unit_code',
@@ -243,6 +246,7 @@ class WorksheetIncident extends Model
             ->withExpression('heatmaps', DB::table('m_heatmaps'))
             ->withExpression('risk_categories', DB::table('m_kbumn_risk_categories'))
             ->rightJoin('worksheets as worksheet', 'worksheet.id', '=', 'incident.worksheet_id')
+            ->leftJoin('m_risk_qualifications as rq', 'rq.id', '=', 'worksheet.risk_qualification_id')
             ->leftJoin('top_risks as tr', 'tr.worksheet_id', '=', 'incident.worksheet_id')
             ->leftJoin('ra_worksheet_identifications as identification', 'identification.worksheet_id', '=', 'worksheet.id')
             ->leftJoin('m_kri_units as kri_unit', 'kri_unit.id', '=', 'incident.kri_unit_id')

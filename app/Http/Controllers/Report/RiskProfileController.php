@@ -53,6 +53,9 @@ class RiskProfileController extends Controller
                         return $q->whereNotIn('status', ['draft', 'approved']);
                     }
                 )
+                ->when(request('risk_qualification'), function ($q) {
+                    return $q->where('risk_qualification', request('risk_qualification'));
+                })
                 ->whereYear('w.created_at', request('year', date('Y')));
 
             return DataTables::query($worksheets)

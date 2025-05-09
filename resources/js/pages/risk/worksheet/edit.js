@@ -137,6 +137,7 @@ const identificationValidate = () => {
 
 const contextValidate = () => {
     const contextData = new FormData(contextForm);
+    contextData.delete('search_terms')
     for (let item of contextForm.querySelectorAll("input:disabled, textarea")) {
         if (item.tagName == "TEXTAREA") {
             contextData.append(item.name, item.innerHTML);
@@ -247,6 +248,7 @@ worksheetTabPreviousButton.addEventListener("click", (e) => {
 
 const worksheet = {
     context: {
+        risk_qualification: null,
         risk_number: "",
         unit_name: "",
         period_date: "",
@@ -358,6 +360,8 @@ const tables = {
 };
 
 const contextForm = document.querySelector("#contextForm");
+const riskQualificationSelect = contextForm.querySelector('[name="risk_qualification"]');
+const riskQualificationChoices = new Choices(riskQualificationSelect, defaultConfigChoices);
 const currentRiskNumber = contextForm.querySelector('[name="risk_number"]');
 currentRiskNumber.addEventListener("input", (e) => {
     incidentRiskCauseCode.value =
@@ -2033,8 +2037,12 @@ if (worksheet?.mitigations[0]?.mitigation_pic) {
 }
 
 for (const key of Object.keys(fetchers.data.context)) {
-    contextForm.querySelector(`[name="${key}"]`).value =
-        fetchers.data.context[key];
+    if (key == "risk_qualification" && fetchers.data.context[key]) {
+        riskQualificationChoices.setChoiceByValue(fetchers.data.context[key].toString());
+    } else {
+        contextForm.querySelector(`[name="${key}"]`).value =
+            fetchers.data.context[key];
+    }
 }
 
 for (const key of Object.keys(fetchers.data.identification)) {

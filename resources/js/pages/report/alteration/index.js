@@ -54,13 +54,13 @@ const columns = [
         orderable: true,
         data: 'worksheet_number',
         name: 'worksheet_number',
-        width: '96px'
+        width: '128px'
     },
     {
         orderable: true,
         data: 'sub_unit_name',
         name: 'sub_unit_name',
-        width: '128px',
+        width: '196px',
         render: function (data, type, row) {
             if (type !== 'display') {
                 return data
@@ -73,7 +73,7 @@ const columns = [
         orderable: true,
         data: 'target_body',
         name: 'target_body',
-        width: '128px',
+        width: '312px',
         render: function (data, type, row) {
             if (type !== 'display') {
                 return data
@@ -93,7 +93,7 @@ const columns = [
         orderable: true,
         data: 'body',
         name: 'body',
-        width: '200px',
+        width: '312px',
         render: function (data, type, row) {
             if (type !== 'display') {
                 return data
@@ -113,7 +113,7 @@ const columns = [
         orderable: true,
         data: 'impact',
         name: 'impact',
-        width: '256px',
+        width: '312px',
         render: function (data, type, row) {
             if (type !== 'display') {
                 return data
@@ -133,7 +133,7 @@ const columns = [
         orderable: true,
         data: 'description',
         name: 'description',
-        width: '256px',
+        width: '312px',
         render: function (data, type, row) {
             if (type !== 'display') {
                 return data
@@ -153,6 +153,7 @@ const columns = [
         orderable: true,
         data: 'employee_name',
         name: 'employee_name',
+        width: '192px',
         visible: false  // Hidden but used for default sorting
     },
     {
@@ -176,7 +177,6 @@ const datatable = createDatatable('#alteration-table', {
     responsive: false,
     serverSide: true,
     processing: true,
-    columnDefs: [{ targets: [3], width: 128 }],
     ajax: {
         url: window.location.href,
         data: function (d) {
@@ -185,13 +185,13 @@ const datatable = createDatatable('#alteration-table', {
         }
     },
     fixedColumns: {
-        start: 2
+        start: 3
     },
     scrollX: true,
     scrollY: '48vh',
     scrollCollapse: true,
     lengthChange: false,
-    autoWidth: true,
+    autoWidth: false,
     pageLength: 10,
     columns: columns,
     order: [[columns.length - 1, 'desc']],

@@ -137,6 +137,8 @@ const identificationValidate = () => {
 
 const contextValidate = () => {
     const contextData = new FormData(contextForm);
+    contextData.delete('search_terms')
+
     for (let item of contextForm.querySelectorAll("input:disabled, textarea")) {
         if (item.tagName == "TEXTAREA") {
             contextData.append(item.name, item.innerHTML);
@@ -248,6 +250,7 @@ worksheetTabPreviousButton.addEventListener("click", (e) => {
 
 const worksheet = {
     context: {
+        risk_qualification: "",
         unit_name: "",
         risk_number: "",
         period_date: "",
@@ -358,6 +361,9 @@ const tables = {
 };
 
 const contextForm = document.querySelector("#contextForm");
+const riskQualificationSelect = contextForm.querySelector('[name="risk_qualification"]');
+const riskQualificationChoices = new Choices(riskQualificationSelect, defaultConfigChoices);
+
 const currentRiskNumber = contextForm.querySelector('[name="risk_number"]');
 currentRiskNumber.addEventListener("input", (e) => {
     incidentRiskCauseCode.value =
