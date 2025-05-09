@@ -112,9 +112,9 @@
                         <div class="d-inline-block lh-1 flex-shrink-1" style="max-width: 320px; !important">
                             <span class="fw-bold lh-1">{{ auth()->user()->employee_name }}</span><br>
                             <span class="fs-12 text-muted text-capitalize text-wrap">
-                                [{{ session()->get('current_unit')->personnel_area_code }}]
-                                {{ session()->get('current_unit')->position_name }}<br>
-                                {{ session()->get('current_role')?->name ?? '' }}
+                                [{{ role()->getCurrentUnit()->personnel_area_code }}]
+                                {{ role()->getCurrentUnit()->position_name }}<br>
+                                {{ role()->getCurrentRole()?->name ?? '' }}
                             </span>
                         </div>
                     </div>
@@ -130,8 +130,8 @@
                             <div class="d-flex flex-column align-self-top gap-1">
                                 <div class="d-flex align-self-top p-0">
                                     <i class="ti ti-buildings me-2 fs-16"></i>
-                                    [{{ session()->get('current_unit')->sub_unit_code }}]
-                                    {{ session()->get('current_unit')->sub_unit_name }}
+                                    [{{ role()->getCurrentUnit()->sub_unit_code_doc }}]
+                                    {{ role()->getCurrentUnit()->sub_unit_name }}
                                 </div>
                                 <div class="d-flex align-self-top p-0">
                                     <i class="me-2" style="width: 1rem;"></i>
@@ -200,8 +200,8 @@
                             <div>
                                 <select name="unit_target" id="changeUnitSelect" class="form-select form-control-sm">
                                     @foreach ($current_units as $unit)
-                                        <option {{ session()->get('current_unit')->id === $unit->id ? 'selected' : null }}
-                                            value="{{ $unit->id }}">{{ $unit->personnel_area_code }}
+                                        <option {{ role()->getCurrentUnit()->id === $unit->id ? 'selected' : null }}
+                                            value="{{ $unit->id }}">[{{ $unit->sub_unit_code_doc }}]
                                             {{ $unit->position_name }}</option>
                                     @endforeach
                                 </select>

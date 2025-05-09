@@ -1,39 +1,65 @@
+import { formatNumeral } from "cleave-zen";
 import { Offcanvas } from "bootstrap";
 import Choices from "choices.js";
 import createDatatable from "~js/components/datatable";
-import { decodeHtml, defaultConfigChoices } from "~js/components/helper";
+import { decodeHtml, defaultConfigChoices, defaultConfigFormatNumeral } from "~js/components/helper";
 import debounce from "~js/utils/debounce";
 
 const inputSearch = document.querySelector('input[name="search"]')
 
-const lossEventOffcanvas = document.querySelector('#lossEvent-table-offcanvas')
+const lossEventOffcanvas = document.querySelector('#loss_event-table-offcanvas')
 const lossEventOffcanvasInstance = new Offcanvas(lossEventOffcanvas)
-const lossEventFilterButton = document.querySelector('#lossEvent-filter-button')
+const lossEventFilterButton = document.querySelector('#loss_event-filter-button')
 lossEventFilterButton.addEventListener('click', () => {
     lossEventOffcanvasInstance.show()
 })
-const lossEventTableFilter = lossEventOffcanvas.querySelector('#lossEvent-table-filter')
+const lossEventTableFilter = lossEventOffcanvas.querySelector('#loss_event-table-filter')
 
 const selectLength = lossEventTableFilter.querySelector('select[name="length"]')
 const selectYear = lossEventTableFilter.querySelector('select[name="year"]')
 const selectUnit = lossEventTableFilter.querySelector('select[name="unit"]')
+const selectLocation = lossEventTableFilter.querySelector('select[name="location"]')
 
 const selectLengthChoices = new Choices(selectLength, defaultConfigChoices)
 const selectYearChoices = new Choices(selectYear, defaultConfigChoices)
 const selectUnitChoices = new Choices(selectUnit, defaultConfigChoices)
+const selectLocationChoices = new Choices(selectLocation, defaultConfigChoices)
 
-const exportButton = document.querySelector('#lossEvent-export')
+const units = selectUnitChoices._currentState.choices;
+const placeholder = { label: 'Semua', value: '', placeholder: true, selected: true };
+selectUnitChoices.disable()
+selectLocation.addEventListener('change', (e) => {
+    const item = selectLocationChoices.getValue();
+
+    if (item.value) {
+        selectUnitChoices.clearChoices()
+        selectUnitChoices.setChoices([
+            placeholder,
+            ...units.filter(
+                (choice) => choice.customProperties.parent == item.value
+            )
+        ])
+            .enable()
+        return
+    }
+
+    selectUnitChoices.clearChoices()
+    selectUnitChoices.setChoices([placeholder])
+        .disable()
+})
+selectLocation.dispatchEvent(new Event('change'));
+const exportButton = document.querySelector('#loss_event-export')
 
 const columns = [
     {
         orderable: true,
-        data: 'worksheet.worksheet_number',
+        data: 'worksheet_number',
         name: 'worksheet_number',
         width: '96px'
     },
     {
         orderable: true,
-        data: 'worksheet.sub_unit_name',
+        data: 'sub_unit_name',
         name: 'sub_unit_name',
         width: '128px',
         render: function (data, type, row) {
@@ -41,94 +67,116 @@ const columns = [
                 return data
             }
 
-            return `[${row.personnel_area_code}] ${row.sub_unit_name}`
+            return `[${row.sub_unit_code_doc}] ${row.sub_unit_name}`
         }
     },
     {
         orderable: true,
-        data: 'worksheet.target_body',
+        data: 'target_body',
         name: 'target_body',
         width: '128px',
-        render: function (data, type, row) {
-            if (type !== 'display') {
-                return data
-            }
-
-            if (!data) {
-                return '';
-            }
-
-            const decodeData = decodeHtml(decodeHtml(data))
-            const parsedData = new DOMParser().parseFromString(decodeData, 'text/html');
-
-            return parsedData.body ? parsedData.body.innerHTML : '';
-        }
     },
     {
         orderable: true,
-        data: 'body',
-        name: 'body',
-        width: '200px',
-        render: function (data, type, row) {
-            if (type !== 'display') {
-                return data
-            }
-
-            if (!data) {
-                return '';
-            }
-
-            const decodeData = decodeHtml(decodeHtml(data))
-            const parsedData = new DOMParser().parseFromString(decodeData, 'text/html');
-
-            return parsedData.body ? parsedData.body.innerHTML : '';
-        }
-    },
-    {
-        orderable: true,
-        data: 'impact',
-        name: 'impact',
+        data: 'incident_body',
+        name: 'incident_body',
         width: '256px',
-        render: function (data, type, row) {
-            if (type !== 'display') {
-                return data
-            }
-
-            if (!data) {
-                return '';
-            }
-
-            const decodeData = decodeHtml(decodeHtml(data))
-            const parsedData = new DOMParser().parseFromString(decodeData, 'text/html');
-
-            return parsedData.body ? parsedData.body.innerHTML : '';
-        }
     },
     {
         orderable: true,
-        data: 'description',
-        name: 'description',
+        data: 'incident_date',
+        name: 'incident_date',
+        width: '128px',
+    },
+    {
+        orderable: true,
+        data: 'incident_source',
+        name: 'incident_source',
+        width: '160px',
+    },
+    {
+        orderable: true,
+        data: 'incident_handling',
+        name: 'incident_handling',
         width: '256px',
+    },
+    {
+        orderable: true,
+        data: 'risk_category',
+        name: 'risk_category',
         render: function (data, type, row) {
-            if (type !== 'display') {
-                return data
-            }
-
-            if (!data) {
-                return '';
-            }
-
-            const decodeData = decodeHtml(decodeHtml(data))
-            const parsedData = new DOMParser().parseFromString(decodeData, 'text/html');
-
-            return parsedData.body ? parsedData.body.innerHTML : '';
+            return `${row.risk_category_t2_name} & ${row.risk_category_t3_name}`;
         }
     },
     {
         orderable: true,
-        data: 'creator.employee_name',
-        name: 'creator.employee_name',
-        visible: false  // Hidden but used for default sorting
+        data: 'loss_value',
+        name: 'loss_value',
+        width: '160px',
+        render: function (data, type, row) {
+            if (data) {
+                return formatNumeral(data, defaultConfigFormatNumeral);
+            }
+
+            return '';
+        }
+    },
+    {
+        orderable: true,
+        data: 'related_party',
+        name: 'related_party',
+        width: '256px',
+    },
+    {
+        orderable: true,
+        data: 'restoration_status',
+        name: 'restoration_status',
+        width: '256px',
+    },
+    {
+        orderable: true,
+        data: 'insurance_status',
+        name: 'insurance_status',
+    },
+    {
+        orderable: true,
+        data: 'insurance_permit',
+        name: 'insurance_permit',
+        width: '160px',
+        render: function (data, type, row) {
+            if (data) {
+                return formatNumeral(data, defaultConfigFormatNumeral);
+            }
+
+            return '';
+        }
+    },
+    {
+        orderable: true,
+        data: 'insurance_claim',
+        name: 'insurance_claim',
+        width: '160px',
+        render: function (data, type, row) {
+            if (data) {
+                return formatNumeral(data, defaultConfigFormatNumeral);
+            }
+
+            return '';
+        }
+    },
+    {
+        orderable: true,
+        data: 'employee_name',
+        name: 'employee_name',
+        width: '160px',
+    },
+    {
+        defaultContent: "Aksi",
+        data: 'action',
+        name: 'action',
+        searchable: false,
+        sortable: false,
+        responsivePriority: 1
     },
     {
         orderable: true,
@@ -138,7 +186,7 @@ const columns = [
     }
 ]
 
-const datatable = createDatatable('#lossEvent-table', {
+const datatable = createDatatable('#loss_event-table', {
     handleColumnSearchField: false,
     responsive: false,
     serverSide: true,
@@ -162,88 +210,6 @@ const datatable = createDatatable('#lossEvent-table', {
     pageLength: 10,
     columns: columns,
     order: [[columns.length - 1, 'desc']],
-    drawCallback: function (settings) {
-        const api = this.api();
-
-        // Your existing row merging logic
-        const columnsToMerge = [0, 1, 2, 3, 4, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16];
-
-        // Reset all cells visibility first
-        api.cells().every(function () {
-            const node = this.node();
-            if (node) {
-                node.style.display = '';
-                node.setAttribute('rowspan', 1);
-            }
-        });
-
-        // Group rows by worksheet ID
-        const groups = {};
-        api.rows({ page: 'current' }).every(function (rowIdx) {
-            const data = this.data();
-            const worksheetNumber = data.worksheet_number;
-            if (!groups[worksheetNumber]) {
-                groups[worksheetNumber] = [];
-            }
-            groups[worksheetNumber].push(rowIdx);
-        });
-
-        // Process each column for each worksheet group separately
-        Object.values(groups).forEach(groupRows => {
-            columnsToMerge.forEach(colIdx => {
-                let lastValue = null;
-                let rowsToMerge = 1;
-                let firstRow = null;
-
-                groupRows.forEach(rowIdx => {
-                    const value = api.cell(rowIdx, colIdx).data();
-                    const currentCell = api.cell(rowIdx, colIdx).node();
-
-                    let equalStatusButton = false;
-
-                    if (lastValue === null) {
-                        lastValue = value;
-                        firstRow = rowIdx;
-                        return;
-                    }
-
-                    if (colIdx == 1) {
-                        equalStatusButton = value.includes(`worksheet_number="${currentCell.children[0]?.dataset.worksheet_number ?? 'x'}"`)
-                    }
-
-                    // Strict comparison for values
-                    if (JSON.stringify(lastValue) === JSON.stringify(value) || equalStatusButton) {
-                        rowsToMerge++;
-                        if (currentCell) {
-                            currentCell.style.display = 'none';
-                        }
-                    } else {
-                        if (rowsToMerge > 1) {
-                            const firstCell = api.cell(firstRow, colIdx).node();
-                            if (firstCell) {
-                                firstCell.setAttribute('rowspan', rowsToMerge);
-                            }
-                        }
-                        lastValue = value;
-                        firstRow = rowIdx;
-                        rowsToMerge = 1;
-                    }
-                });
-
-                // Handle the last group
-                if (rowsToMerge > 1) {
-                    const firstCell = api.cell(firstRow, colIdx).node();
-                    if (firstCell) {
-                        firstCell.setAttribute('rowspan', rowsToMerge);
-                    }
-                }
-            });
-        });
-
-        // Ensure proper header rendering
-        // api.fixedHeader.adjust();
-        // api.columns.adjust();
-    },
 })
 
 datatable.on('draw.dt', e => {

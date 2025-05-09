@@ -11,7 +11,7 @@ class PositionRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return role()->checkPermission('setting.positions.create') || role()->checkPermission('setting.positions.update') || role()->checkPermission('setting.positions.destroy');
     }
 
     /**
@@ -22,7 +22,10 @@ class PositionRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'sub_unit_code' => 'required|exists:m_positions,sub_unit_code',
+            'position_name' => 'required',
+            'roles' => 'required|array|min:1',
+            'roles.*' => 'required|exists:roles,name',
         ];
     }
 }

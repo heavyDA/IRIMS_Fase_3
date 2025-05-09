@@ -18,21 +18,28 @@ const table = createDatatable("#position-table", {
             sortable: true,
             data: 'position_name',
             name: 'position_name',
-            width: '120px'
+            width: '120px',
         },
         {
             sortable: true,
-            data: 'personnel_area_name',
-            name: 'personnel_area_name',
+            data: 'branch_code',
+            name: 'branch_code',
             defaultContent: '',
             width: '120px'
         },
         {
             sortable: true,
-            data: 'unit_name',
-            name: 'unit_name',
+            data: 'sub_unit_name',
+            name: 'sub_unit_name',
             defaultContent: '',
             width: '120px',
+            render: function (data, type, row) {
+                if (data) {
+                    return `<div class="d-flex flex-column"><strong>${data}</strong><span>${row.sub_unit_code_doc}</span></div>`;
+                }
+
+                return row.sub_unit_code;
+            }
         },
         {
             sortable: true,
@@ -46,13 +53,6 @@ const table = createDatatable("#position-table", {
                 }
                 return `<div class="text-capitalize">${data}</div>`
             }
-        },
-        {
-            sortable: true,
-            data: 'creator.employee_name',
-            name: 'creator.employee_name',
-            defaultContent: '',
-            width: '164px',
         },
         {
             sortable: true,

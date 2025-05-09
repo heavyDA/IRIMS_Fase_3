@@ -25,13 +25,11 @@ import Swal from 'sweetalert2';
 dayjs.locale('id');
 
 let currentStep = 0;
-const totalStep = 6;
+const totalStep = 3;
 const monitoring = {
 	residual: {},
 	residual_target: {},
 	actualizations: [],
-	alteration: {},
-	incident: {},
 };
 let inherent = {};
 
@@ -93,10 +91,6 @@ monitoringTabNextButton.addEventListener('click', (e) => {
 			currentStep -= 1;
 			return;
 		}
-	} else if (currentStep == 4) {
-		alterationFormSubmit();
-	} else if (currentStep == 5) {
-		incidentFormSubmit();
 	}
 
 	const previousTab = monitoringTabList[currentStep - 1].querySelector('h2');
@@ -221,8 +215,6 @@ const fetchData = async () => {
 				monitoring.residual = data.residual;
 				monitoring.residual_target = data.residual_target;
 				monitoring.actualizations = data.actualizations;
-				monitoring.alteration = data.alteration;
-				monitoring.incident = data.incident;
 			}
 		}
 	});
@@ -1261,121 +1253,9 @@ const enableQuarterQuantitative = (quarter) => {
 	}
 };
 
-const alterationForm = document.querySelector('#alterationForm');
-const alterationTextareas = {};
-const alterationQuills = {};
-
-for (const textarea of alterationForm.querySelectorAll('textarea')) {
-	let value =
-		monitoring?.alteration[textarea.name.replaceAll('alteration_', '')] ??
-		'';
-	textarea.innerHTML = value;
-	alterationTextareas[textarea.name] = textarea;
-	alterationQuills[textarea.name] = new Quill(
-		alterationForm.querySelector('#' + textarea.name + '-editor'),
-		defaultConfigQuill
-	);
-	alterationQuills[textarea.name].root.innerHTML = value;
-	alterationQuills[textarea.name].on(
-		'text-change',
-		(delta, oldDelta, source) => {
-			alterationTextareas[textarea.name].innerHTML =
-				alterationQuills[textarea.name].root.innerHTML;
-		}
-	);
-}
-
-const alterationFormSubmit = () => {
-	const data = Object.fromEntries(new FormData(alterationForm));
-	monitoring.alteration = data;
-};
-
-const incidentForm = document.querySelector('#incidentForm');
-const incidentTextareas = {};
-const incidentQuills = {};
-
-for (const textarea of incidentForm.querySelectorAll('textarea')) {
-	let value = monitoring?.incident[textarea.name] ?? '';
-	textarea.innerHTML = value;
-
-	incidentTextareas[textarea.name] = textarea;
-	incidentQuills[textarea.name] = new Quill(
-		incidentForm.querySelector('#' + textarea.name + '-editor'),
-		defaultConfigQuill
-	);
-	incidentQuills[textarea.name].root.innerHTML = value;
-	incidentQuills[textarea.name].on(
-		'text-change',
-		(delta, oldDelta, source) => {
-			incidentTextareas[textarea.name].innerHTML =
-				incidentQuills[textarea.name].root.innerHTML;
-		}
-	);
-}
-
-const incidentSelects = {};
-const incidentChoices = {};
-for (let select of incidentForm.querySelectorAll('.form-select')) {
-	incidentSelects[select.name] = select;
-	incidentChoices[select.name] = new Choices(select, defaultConfigChoices);
-	incidentChoices[select.name].setChoiceByValue(
-		monitoring?.incident[select.name]?.toString() ?? 'Pilih'
-	);
-}
-
-const incidentLossValue = incidentForm.querySelector('[name="loss_value"]');
-incidentLossValue.value = monitoring.incident.loss_value
-	? formatNumeral(monitoring.incident.loss_value, defaultConfigFormatNumeral)
-	: '';
-incidentLossValue.addEventListener('input', (e) => {
-	e.target.value = formatNumeral(e.target.value, defaultConfigFormatNumeral);
-});
-
-const incidentInsurancePermit = incidentForm.querySelector(
-	'[name="insurance_permit"]'
-);
-incidentInsurancePermit.value = monitoring.incident.insurance_permit
-	? formatNumeral(
-		monitoring.incident.insurance_permit,
-		defaultConfigFormatNumeral
-	)
-	: '';
-incidentInsurancePermit.addEventListener('input', (e) => {
-	e.target.value = formatNumeral(e.target.value, defaultConfigFormatNumeral);
-});
-
-const incidentInsuranceClaim = incidentForm.querySelector(
-	'[name="insurance_claim"]'
-);
-incidentInsuranceClaim.value = monitoring.incident.insurance_claim
-	? formatNumeral(
-		monitoring.incident.insurance_claim,
-		defaultConfigFormatNumeral
-	)
-	: '';
-incidentInsuranceClaim.addEventListener('input', (e) => {
-	e.target.value = formatNumeral(e.target.value, defaultConfigFormatNumeral);
-});
 
 residualBlockOnMap();
 
-const incidentFormSubmit = () => {
-	const data = Object.fromEntries(new FormData(incidentForm));
-	data.loss_value = unformatNumeral(
-		data.loss_value,
-		defaultConfigFormatNumeral
-	);
-	data.insurance_permit = unformatNumeral(
-		data.insurance_permit,
-		defaultConfigFormatNumeral
-	);
-	data.insurance_claim = unformatNumeral(
-		data.insurance_claim,
-		defaultConfigFormatNumeral
-	);
-	delete data.search_terms;
-	monitoring.incident = data;
-};
 
 const save = async () => {
 	const data = { ...monitoring };

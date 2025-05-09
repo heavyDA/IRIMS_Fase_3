@@ -11,6 +11,7 @@ use App\Models\RBAC\Role;
 use App\Models\User;
 use App\Models\UserUnit;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class DefaultSeeder extends Seeder
 {
@@ -24,130 +25,113 @@ class DefaultSeeder extends Seeder
                 'name' => 'Dashboard',
                 'route' => 'dashboard',
                 'icon_name' => 'layout-dashboard',
-                'position' => 1,
                 'children' => [
                     [
                         'name' => 'Dashboard',
                         'route' => 'dashboard.index',
-                        'position' => 1,
+                        'position' => 0,
                     ],
-                    // [
-                    //     'name' => 'Residual Top Risk',
-                    //     'route' => 'dashboard.residual_top_risk.index',
-                    //     'position' => 2,
-                    // ],
-                    // [
-                    //     'name' => 'Top Risk',
-                    //     'route' => 'dashboard.top_risk.index',
-                    //     'position' => 3,
-                    // ],
-                    // [
-                    //     'name' => 'Operational Risk',
-                    //     'route' => 'dashboard.operational_risk,index',
-                    //     'position' => 4,
-                    // ],
-                    // [
-                    //     'name' => 'KRIs Dashboard',
-                    //     'route' => 'dashboard.kris.index',
-                    //     'position' => 5,
-                    // ],
-                    // [
-                    //     'name' => 'Risk Profile Dashboard',
-                    //     'route' => 'dashboard.risk_profile.index',
-                    //     'position' => 6,
-                    // ]
-                ]
+                ],
             ],
-            // Risk Process BUMN section
+
             [
                 'name' => 'Risk Process',
-                'route' => 'risk.process',
+                'route' => 'risk',
                 'icon_name' => 'presentation',
-                'position' => 2,
                 'children' => [
                     [
                         'name' => 'Risk Assessment',
                         'route' => 'risk.assessment.index',
-                        'icon_name' => 'list',
-                        'position' => 1,
+                        'position' => 0,
                     ],
                     [
                         'name' => 'Risk Monitoring',
                         'route' => 'risk.monitoring.index',
-                        'icon_name' => 'grid',
-                        'position' => 2,
+                        'position' => 0,
                     ],
                     [
                         'name' => 'Top Risk',
                         'route' => 'risk.top_risk.index',
-                        'icon_name' => 'graph',
-                        'position' => 3,
-                    ]
+                        'position' => 0,
+                    ],
                 ],
             ],
+
             [
                 'name' => 'Risk Report',
                 'route' => 'risk.report',
                 'icon_name' => 'clipboard-text',
-                'position' => 3,
                 'children' => [
                     [
                         'name' => 'Risk Profile',
                         'route' => 'risk.report.risk_profile.index',
-                        'icon_name' => 'graph',
-                        'position' => 1,
+                        'position' => 0,
                     ],
                     [
                         'name' => 'Risk Monitoring',
                         'route' => 'risk.report.risk_monitoring.index',
-                        'icon_name' => 'graph',
-                        'position' => 2,
+                        'position' => 0,
+                    ],
+                    [
+                        'name' => 'Ikhtisar Perubahan Profil Risiko',
+                        'route' => 'risk.report.alterations.index',
+                        'position' => 0,
+                    ],
+                    [
+                        'name' => 'Loss Event Database',
+                        'route' => 'risk.report.loss_events.index',
+                        'position' => 0,
                     ],
                 ],
             ],
+
             [
                 'name' => 'Master Data',
                 'route' => 'master',
                 'icon_name' => 'cube',
-                'position' => 8,
                 'children' => [
                     [
                         'name' => 'Skala',
                         'route' => 'master.bumn_scales.index',
-                        'position' => 0
+                        'position' => 0,
+                    ],
+                    [
+                        'name' => 'KRI Unit',
+                        'route' => 'master.kri_units.index',
+                        'position' => 0,
                     ],
                     [
                         'name' => 'Jenis Existing Control',
                         'route' => 'master.existing_control_types.index',
-                        'position' => 1
-                    ],
-                    [
-                        'name' => 'Kategori Risiko',
-                        'route' => 'master.risk_categories.index',
-                        'position' => 3
-                    ],
-                    [
-                        'name' => 'Opsi Perlakuan Risiko',
-                        'route' => 'master.risk_treatment_options.index',
-                        'position' => 4
-                    ],
-                    [
-                        'name' => 'Jenis Rencana Perlakuan Risiko',
-                        'route' => 'master.risk_treatment_types.index',
-                        'position' => 5
+                        'position' => 0,
                     ],
                     [
                         'name' => 'Kategori Kejadian',
                         'route' => 'master.incident_categories.index',
-                        'position' => 6
+                        'position' => 0,
                     ],
-                ]
+                    [
+                        'name' => 'Kategori Risiko',
+                        'route' => 'master.risk_categories.index',
+                        'position' => 0,
+                    ],
+                    [
+                        'name' => 'Opsi Perlakuan Risiko',
+                        'route' => 'master.risk_treatment_options.index',
+                        'position' => 0,
+                    ],
+                    [
+                        'name' => 'Jenis Rencana Perlakuan Risiko',
+                        'route' => 'master.risk_treatment_types.index',
+                        'position' => 0,
+                    ],
+                ],
             ],
+
             [
                 'name' => 'Pengaturan',
                 'route' => 'setting',
                 'icon_name' => 'settings',
-                'position' => 9,
                 'children' => [
                     [
                         'name' => 'Matrik Strategi Risiko',
@@ -157,39 +141,34 @@ class DefaultSeeder extends Seeder
                     [
                         'name' => 'Posisi',
                         'route' => 'setting.positions.index',
-                        'position' => 1,
+                        'position' => 0,
                     ],
-                ]
+                ],
             ],
+
             [
                 'name' => 'Akses',
-                'route' => 'access',
+                'route' => 'rbac',
                 'icon_name' => 'shield-lock',
-                'position' => 10,
                 'children' => [
                     [
                         'name' => 'Pengguna',
-                        'route' => 'rbac.user.index',
+                        'route' => 'rbac.users.index',
                         'position' => 0,
                     ],
-                    // [
-                    //     'name' => 'Menu',
-                    //     'route' => 'rbac.menu.index',
-                    //     'position' => 1,
-                    // ],
-                    // [
-                    //     'name' => 'Grup',
-                    //     'route' => 'rbac.role.index',
-                    //     'position' => 2,
-                    // ],
-                    // [
-                    //     'name' => 'Hak Akses',
-                    //     'route' => 'rbac.permission.index',
-                    //     'position' => 3,
-                    // ],
                 ],
             ],
         ];
+
+        DB::statement('SET FOREIGN_KEY_CHECKS=0');
+        DB::statement('delete from menu_role');
+        Menu::whereRaw('1 = 1')->delete();
+        Permission::whereRaw('1 = 1')->delete();
+
+        DB::statement('TRUNCATE menu_role');
+        DB::statement('TRUNCATE menus');
+        DB::statement('TRUNCATE permissions');
+        DB::statement('SET FOREIGN_KEY_CHECKS=1');
 
         // if (Menu::count() == 0) {
         foreach ($menus as $key => $menu) {
@@ -211,49 +190,92 @@ class DefaultSeeder extends Seeder
         /**
          * Generate default permissions
          */
-        $menus = Menu::all();
+        $defaultPermissions = ['index', 'create', 'update', 'destroy'];
+        $permissions = [
+            [
+                'route' => 'dashboard',
+                'permissions' => $defaultPermissions,
+            ],
+            [
+                'route' => 'risk.assessment',
+                'permissions' => $defaultPermissions,
+            ],
+            [
+                'route' => 'risk.worksheet',
+                'permissions' => $defaultPermissions + ['update_status'],
+            ],
+            [
+                'route' => 'risk.monitoring',
+                'permissions' => $defaultPermissions + ['update_status_monitoring'],
+            ],
+            [
+                'route' => 'risk.top_risk',
+                'permissions' => $defaultPermissions,
+            ],
+            [
+                'route' => 'master.bumn_scales',
+                'permissions' => $defaultPermissions,
+            ],
+            [
+                'route' => 'master.kri_units',
+                'permissions' => $defaultPermissions,
+            ],
+            [
+                'route' => 'master.existing_control_types',
+                'permissions' => $defaultPermissions,
+            ],
+            [
+                'route' => 'master.incident_categories',
+                'permissions' => $defaultPermissions,
+            ],
+            [
+                'route' => 'master.risk_categories',
+                'permissions' => $defaultPermissions,
+            ],
+            [
+                'route' => 'master.risk_treatment_options',
+                'permissions' => $defaultPermissions,
+            ],
+            [
+                'route' => 'master.risk_treatment_types',
+                'permissions' => $defaultPermissions,
+            ],
+            [
+                'route' => 'rbac.users',
+                'permissions' => $defaultPermissions,
+            ],
 
-        $defaultActions = ['index', 'show', 'create', 'store', 'edit', 'update', 'destroy'];
-        $actions = [
             [
-                'name' => 'risk.worksheet.',
-                'permissions' => ['index', 'show', 'create', 'store', 'edit', 'update', 'destroy', 'update_status'],
+                'route' => 'risk.report.alterations',
+                'permissions' => $defaultPermissions,
             ],
             [
-                'name' => 'risk.monitoring.',
-                'permissions' => ['show_monitoring', 'edit_monitoring', 'update_monitoring', 'update_status_monitoring', 'destroy_monitoring'],
+                'route' => 'risk.report.loss_events',
+                'permissions' => $defaultPermissions,
             ],
             [
-                'name' => 'bumn_scales',
-                'permissions' => $defaultActions,
+                'route' => 'risk.report.risk_profile',
+                'permissions' => $defaultPermissions,
             ],
             [
-                'name' => 'existing_control_types',
-                'permissions' => $defaultActions,
+                'route' => 'risk.report.risk_monitoring',
+                'permissions' => $defaultPermissions,
             ],
             [
-                'name' => 'incident_categories',
-                'permissions' => $defaultActions,
+                'route' => 'setting.risk_metrics',
+                'permissions' => $defaultPermissions,
             ],
             [
-                'name' => 'risk_categories',
-                'permissions' => $defaultActions,
-            ],
-            [
-                'name' => 'risk_treatment_types',
-                'permissions' => $defaultActions,
-            ],
-            [
-                'name' => 'risk_treatment_options',
-                'permissions' => $defaultActions,
+                'route' => 'setting.positions',
+                'permissions' => $defaultPermissions,
             ],
         ];
 
-        $permissions = [];
-        foreach ($actions as $action) {
-            foreach ($action['permissions'] as $permission) {
-                $permissions[] = [
-                    'name' => $action['name'] . $permission,
+        $generatedPermissions = [];
+        foreach ($permissions as $item) {
+            foreach ($item['permissions'] as $permission) {
+                $generatedPermissions[] = [
+                    'name' => "{$item['route']}.{$permission}",
                     'guard_name' => 'web',
                     'created_at' => now(),
                     'updated_at' => now(),
@@ -261,64 +283,29 @@ class DefaultSeeder extends Seeder
             }
         }
 
-        foreach ($menus as $menu) {
-            if (str_contains($menu->route, 'index')) {
-                foreach ($defaultActions as $action) {
-                    $permissions[] = [
-                        'name' => str_replace('index', $action, $menu->route),
-                        'guard_name' => 'web',
-                        'created_at' => now(),
-                        'updated_at' => now(),
-                    ];
-                }
-            } elseif ($menu->route !== '#') {
-                $permissions[] = [
-                    'name' => $menu->route,
-                    'guard_name' => 'web',
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ];
-            }
-        }
-
-        if (Permission::count() == 0) {
-            $permissions = Permission::insert($permissions);
-        }
-
-        $roles = [['name' => 'root'], ['name' => 'administrator'], ['name' => 'risk admin'], ['name' => 'risk owner'], ['name' => 'risk otorisator'], ['name' => 'risk analis'], ['name' => 'risk reviewer']];
+        Permission::insert($generatedPermissions);
+        $menus = Menu::all();
+        $permissions = Permission::all();
+        $roles = [['name' => 'root'], ['name' => 'administrator'], ['name' => 'risk admin'], ['name' => 'risk owner'], ['name' => 'risk otorisator'], ['name' => 'risk analis'], ['name' => 'risk reviewer'], ['name' => 'risk analis pusat']];
         foreach ($roles as $role) {
             $role = Role::firstOrCreate($role);
-
             if (in_array($role->name, ['root', 'administrator'])) {
-                $permissions = Permission::all();
 
                 $role->syncPermissions($permissions->pluck('name'));
                 $role->menus()->sync($menus->pluck('id'));
             } else if ($role->name == 'risk reviewer') {
-                $permissions = Permission::where('name', 'not like', '%access%')
-                    ->where(
-                        fn($q) => $q
-                            ->whereNotIn(
-                                'name',
-                                [
-                                    'risk.worksheet.create',
-                                    'risk.worksheet.store',
-                                    'risk.worksheet.edit',
-                                    'risk.worksheet.update',
-                                    'risk.worksheet.destroy',
-                                    'risk.monitoring.create',
-                                    'risk.monitoring.store',
-                                    'risk.monitoring.edit',
-                                    'risk.monitoring.update',
-                                    'risk.monitoring.destroy',
-                                    'risk.monitoring.edit_monitoring',
-                                    'risk.monitoring.update_monitoring',
-                                    'riks.top_risk.store',
-                                ]
-                            )
-                    )
-                    ->get();
-                $role->syncPermissions($permissions->pluck('name'));
+                $role->syncPermissions(
+                    $permissions
+                        ->filter(
+                            fn($p) => (!str_contains($p->name, 'access') ||
+                                !str_contains($p->name, 'master') ||
+                                !str_contains($p->name, 'setting')) &&
+                                (!str_contains($p->name, 'create') ||
+                                    !str_contains($p->name, 'update') ||
+                                    !str_contains($p->name, 'destroy'))
+                        )
+                        ->pluck('name')
+                );
                 $role->menus()->sync(
                     $menus->filter(
                         function ($menu) {
@@ -327,8 +314,25 @@ class DefaultSeeder extends Seeder
                         }
                     )->pluck('id')
                 );
+            } else if ($role->name == 'risk analis pusat') {
+                $permissions = Permission::whereNotLike('name', '%access%')
+                    ->get();
+                $role->syncPermissions($permissions->pluck('name'));
+                $role->menus()->sync(
+                    $menus->filter(
+                        function ($menu) {
+                            return str_contains($menu->route, 'risk') ||
+                                str_contains($menu->route, 'master') ||
+                                str_contains($menu->route, 'setting') ||
+                                str_contains($menu->route, 'dashboard');
+                        }
+                    )->pluck('id')
+                );
             } else if ($role->name == 'risk analis') {
-                $permissions = Permission::where('name', 'not like', '%access%')->get();
+                $permissions = Permission::whereNotLike('name', '%access%')
+                    ->orWhereNotLike('name', '%master%')
+                    ->orWhereNotLike('name', '%setting%')
+                    ->get();
                 $role->syncPermissions($permissions->pluck('name'));
                 $role->menus()->sync(
                     $menus->filter(
@@ -340,26 +344,14 @@ class DefaultSeeder extends Seeder
                 );
             } else if ($role->name == 'risk otorisator') {
                 $permissions = Permission::whereNotLike('name', '%access%')
-                    ->where(
-                        fn($q) => $q->whereNotIn(
-                            'name',
-                            [
-                                'risk.worksheet.create',
-                                'risk.worksheet.store',
-                                'risk.worksheet.edit',
-                                'risk.worksheet.update',
-                                'risk.worksheet.destroy',
-                                'risk.monitoring.create',
-                                'risk.monitoring.store',
-                                'risk.monitoring.edit',
-                                'risk.monitoring.update',
-                                'risk.monitoring.destroy',
-                                'risk.monitoring.edit_monitoring',
-                                'risk.monitoring.update_monitoring',
-                            ]
-                        )
-                    )
-
+                    ->orWhereNotLike('name', '%master%')
+                    ->orWhereNotLike('name', '%setting%')
+                    ->orWhereNotLike('name', '%create%')
+                    ->orWhereNotLike('name', '%destroy%')
+                    ->orWhere('name', '!=', 'risk.worksheet.update')
+                    ->orWhere('name', '!=', 'risk.monitoring.update')
+                    ->orWhere('name', 'risk.worksheet.update_status')
+                    ->orWhere('name', 'risk.monitoring.update_status_monitoring')
                     ->get();
                 $role->syncPermissions($permissions->pluck('name'));
                 $role->menus()->sync(
@@ -372,42 +364,33 @@ class DefaultSeeder extends Seeder
                     )->pluck('id')
                 );
             } else if ($role->name == 'risk owner') {
-                $permissions = Permission::where('name', 'not like', '%access%')
-                    ->orWhereNotLike('name', 'risk.top_risk%')
+                $permissions = Permission::whereNotLike('name', '%access%')
+                    ->orWhereNotLike('name', '%master%')
+                    ->orWhereNotLike('name', '%setting%')
+                    ->orWhereNotLike('name', '%top_risk%')
                     ->get();
 
                 $role->syncPermissions($permissions->pluck('name'));
                 $role->menus()->sync(
                     $menus->filter(
                         function ($menu) {
-                            return
-                                str_contains($menu->route, 'risk.assessment') ||
-                                str_contains($menu->route, 'risk.worksheet') ||
-                                str_contains($menu->route, 'risk.monitoring') ||
-                                str_contains($menu->route, 'risk.process') ||
-                                str_contains($menu->route, 'risk.report') ||
+                            return (str_contains($menu->route, 'risk') && !str_contains($menu->route, 'top_risk')) ||
                                 str_contains($menu->route, 'dashboard');
                         }
                     )->pluck('id')
                 );
             } else if ($role->name == 'risk admin') {
-                $permissions = Permission::where('name', 'not like', '%access%')
-                    ->where(
-                        fn($q) => $q->orWhereNotLike('name', 'risk.report%')
-                            ->orWhereNotLike('name', 'risk.top_risk%')
-                    )
+                $permissions = Permission::whereNotLike('name', '%access%')
+                    ->orWhereNotLike('name', '%master%')
+                    ->orWhereNotLike('name', '%setting%')
+                    ->orWhereNotLike('name', '%top_risk%')
                     ->get();
 
                 $role->syncPermissions($permissions->pluck('name'));
                 $role->menus()->sync(
                     $menus->filter(
                         function ($menu) {
-                            return
-                                str_contains($menu->route, 'risk.assessment') ||
-                                str_contains($menu->route, 'risk.worksheet') ||
-                                str_contains($menu->route, 'risk.monitoring') ||
-                                str_contains($menu->route, 'risk.process') ||
-                                str_contains($menu->route, 'risk.report') ||
+                            return (str_contains($menu->route, 'risk') && !str_contains($menu->route, 'top_risk')) ||
                                 str_contains($menu->route, 'dashboard');
                         }
                     )->pluck('id')

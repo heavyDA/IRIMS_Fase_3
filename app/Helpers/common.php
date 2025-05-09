@@ -3,12 +3,10 @@
 use App\Enums\State;
 use Carbon\Carbon;
 
-use function Aws\is_associative;
-
 if (!function_exists('format_date')) {
     function format_date(string $date): Carbon
     {
-        return Carbon::parse($date);
+        return Carbon::parse($date)->setTimezone(get_current_timezone());
     }
 }
 

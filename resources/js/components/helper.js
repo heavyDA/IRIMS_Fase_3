@@ -157,6 +157,11 @@ const defaultConfigChoices = {
     placeholderValue: null,
     allowHTML: true,
     searchResultLimit: 99999,
+    searchFloor: 3,
+    fuseOptions: {
+        threshold: 0.2,
+        ignoreLocation: true
+    }
 }
 
 const defaultLocaleFlatpickr = {

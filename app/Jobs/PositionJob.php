@@ -61,6 +61,7 @@ class PositionJob implements ShouldQueue
                         [
                             'sub_unit_code' => $item['sub_unit_code']
                         ],
+                        $item
                     );
 
                     if ($position->wasRecentlyCreated) {

@@ -54,7 +54,7 @@
                 <thead>
                     <tr>
                         <th class="table-dark-custom" style="text-align: center !important;" rowspan="3">No.</th>
-                        <th class="table-dark-custom" style="text-align: center !important;" rowspan="3">Organisasi</th>
+                        <th class="table-dark-custom" style="text-align: center !important;" rowspan="3">Unit</th>
                         <th class="table-dark-custom" style="text-align: center !important;" rowspan="3">Pilihan Sasaran
                         </th>
                         <th class="table-dark-custom" style="text-align: center !important;" rowspan="3">Peristiwa Risiko
@@ -124,14 +124,28 @@
                         </select>
                     </div>
                     <div class="col-12 d-flex flex-column">
-                        <label for="unit" class="form-label">Unit Kerja</label>
-                        <select name="unit" class="form-select">
+                        <label for="location" class="form-label">Lokasi</label>
+                        <select name="location" class="form-select">
                             @if ($units->count() > 1)
                                 <option value="">Semua</option>
                             @endif
                             @foreach ($units as $unit)
                                 <option value="{{ $unit->sub_unit_code }}">
-                                    [{{ $unit->sub_unit_code_doc }}] {{ $unit->sub_unit_name }}</option>
+                                    [{{ $unit->branch_code }}] {{ $unit->branch_name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-12 d-flex flex-column">
+                        <label for="unit" class="form-label">Unit Kerja</label>
+                        <select name="unit" class="form-select">
+                            <option value>Semua</option>
+                            @foreach ($units as $unit)
+                                @foreach ($unit->children as $child)
+                                    <option data-custom-properties='@json(['parent' => $child->parent_id])'
+                                        value="{{ $child->sub_unit_code }}">
+                                        [{{ $child->sub_unit_code_doc }}] {{ $child->sub_unit_name }}
+                                    </option>
+                                @endforeach
                             @endforeach
                         </select>
                     </div>

@@ -17,36 +17,35 @@ use Yajra\DataTables\Facades\DataTables;
 class AssessmentController extends Controller
 {
     public function __construct(
-        private RoleService $roleService,
         private PositionService $positionService
     ) {}
 
     public function index()
     {
         if (request()->ajax()) {
-            $unit = $this->roleService->getCurrentUnit();
+            $unit = role()->getCurrentUnit();
             if (request('unit')) {
                 $unit = $this->positionService->getUnitBelow(
                     $unit?->sub_unit_code,
                     request('unit'),
-                    $this->roleService->isRiskOwner() || $this->roleService->isRiskAdmin()
+                    role()->isRiskOwner() || role()->isRiskAdmin()
                 ) ?: $unit;
             }
 
             $worksheets = Worksheet::assessmentQuery()
                 ->when(
-                    !$this->roleService->isRiskAdmin(),
+                    !role()->isRiskAdmin(),
                     fn($q) => $q->withExpression(
                         'position_hierarchy',
                         Position::hierarchyQuery(
                             $unit?->sub_unit_code ?? '-',
-                            $this->roleService->isRiskOwner() || $this->roleService->isRiskAdmin()
+                            role()->isRiskOwner() || role()->isRiskAdmin()
                         )
                     )
                         ->join('position_hierarchy as ph', 'ph.sub_unit_code', 'w.sub_unit_code')
                 )
                 ->when(
-                    $this->roleService->isRiskAdmin(),
+                    role()->isRiskAdmin(),
                     fn($q) => $q->where('w.sub_unit_code', $unit?->sub_unit_code ?? '')
                 )
                 ->when(

@@ -5,19 +5,25 @@ namespace App\Policies\Risk;
 use App\Models\Risk\WorksheetLossEvent;
 use App\Models\User;
 use App\Services\RoleService;
+use Illuminate\Auth\Access\HandlesAuthorization;
 use Illuminate\Auth\Access\Response;
+use Symfony\Component\HttpFoundation\Response as HttpFoundationResponse;
 
 class WorksheetLossEventPolicy
 {
+    use HandlesAuthorization;
+
     public function __construct(
         private RoleService $roleService
     ) {}
+
     /**
      * Determine whether the user can view any models.
      */
     public function viewAny(User $user): Response
     {
-        return Response::allow();
+        return $this->roleService->checkPermission('risk.report.loss_events.index') ?
+            Response::allow() : Response::denyAsNotFound(code: HttpFoundationResponse::HTTP_NOT_FOUND);
     }
 
     /**
@@ -25,15 +31,17 @@ class WorksheetLossEventPolicy
      */
     public function view(User $user, WorksheetLossEvent $worksheetLossEvent): Response
     {
-        return $this->checkIfRiskAdmin($user, $worksheetLossEvent);
+        return $this->roleService->checkPermission('risk.report.loss_events.index') ?
+            Response::allow() : Response::denyAsNotFound(code: HttpFoundationResponse::HTTP_NOT_FOUND);
     }
 
     /**
      * Determine whether the user can create models.
      */
-    public function create(User $user): Response
+    public function create(User $user): Response|bool
     {
-        return $this->roleService->isRiskOtorisator() || $this->roleService->isRiskReviewer() ? Response::denyAsNotFound(code: 404) : Response::allow();
+        return $this->roleService->checkPermission('risk.report.loss_events.create') ?
+            Response::allow() : Response::denyAsNotFound(code: HttpFoundationResponse::HTTP_NOT_FOUND);
     }
 
     /**
@@ -41,7 +49,11 @@ class WorksheetLossEventPolicy
      */
     public function update(User $user, WorksheetLossEvent $worksheetLossEvent): Response
     {
-        return $this->checkIfRiskAdmin($user, $worksheetLossEvent);
+        $allow = $this->roleService->checkPermission('risk.report.loss_events.update');
+        $allow = $this->isRiskAdmin($user, $worksheetLossEvent) ? false : $allow;
+
+        return $allow ?
+            Response::allow() : Response::denyAsNotFound(code: HttpFoundationResponse::HTTP_NOT_FOUND);
     }
 
     /**
@@ -49,7 +61,10 @@ class WorksheetLossEventPolicy
      */
     public function delete(User $user, WorksheetLossEvent $worksheetLossEvent): Response
     {
-        return $this->checkIfRiskAdmin($user, $worksheetLossEvent);
+        $allow = $this->roleService->checkPermission('risk.report.loss_events.destroy');
+        $allow = $this->isRiskAdmin($user, $worksheetLossEvent) ? false : $allow;
+
+        return $allow ? Response::allow() : Response::denyAsNotFound(code: HttpFoundationResponse::HTTP_NOT_FOUND);
     }
 
     /**
@@ -57,7 +72,10 @@ class WorksheetLossEventPolicy
      */
     public function restore(User $user, WorksheetLossEvent $worksheetLossEvent): Response
     {
-        return $this->checkIfRiskAdmin($user, $worksheetLossEvent);
+        $allow = $this->roleService->checkPermission('risk.report.loss_events.destroy');
+        $allow = $this->isRiskAdmin($user, $worksheetLossEvent) ? false : $allow;
+
+        return $allow ? Response::allow() : Response::denyAsNotFound(code: HttpFoundationResponse::HTTP_NOT_FOUND);
     }
 
     /**
@@ -65,12 +83,14 @@ class WorksheetLossEventPolicy
      */
     public function forceDelete(User $user, WorksheetLossEvent $worksheetLossEvent): Response
     {
-        return $this->checkIfRiskAdmin($user, $worksheetLossEvent);
+        $allow = $this->roleService->checkPermission('risk.report.loss_events.destroy');
+        $allow = $this->isRiskAdmin($user, $worksheetLossEvent) ? false : $allow;
+
+        return $allow ? Response::allow() : Response::denyAsNotFound(code: HttpFoundationResponse::HTTP_NOT_FOUND);
     }
 
-    private function checkIfRiskAdmin(User $user, WorksheetLossEvent $worksheetLossEvent)
+    private function isRiskAdmin(User $user, WorksheetLossEvent $worksheetLossEvent)
     {
-        return ($this->roleService->isRiskAdmin() && $worksheetLossEvent->created_by == $user->employee_id) ||
-            !$this->roleService->isRiskAdmin() ? Response::allow() : Response::denyAsNotFound(code: 404);
+        return $this->roleService->isRiskAdmin() && $worksheetLossEvent->created_by != $user->employee_id;
     }
 }

@@ -37,7 +37,7 @@
                         <thead class="table-dark">
                             <tr>
                                 <th class="table-dark-custom" rowspan="3">No.</th>
-                                <th class="table-dark-custom" rowspan="3">Organisasi</th>
+                                <th class="table-dark-custom" rowspan="3">Unit</th>
                                 <th class="table-dark-custom" rowspan="3">Peristiwa Risiko</th>
                                 <th class="table-dark-custom" rowspan="3">Penyebab Risiko</th>
                                 <th class="table-dark-custom" rowspan="3">Rencana Perlakuan Risiko</th>

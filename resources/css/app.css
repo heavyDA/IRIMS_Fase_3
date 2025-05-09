@@ -32874,3 +32874,14 @@ th[col-width-80], td[col-width-80] { min-width: 120px; max-width: 120px; }
   border-left: 1px solid #dee2e6;
   background-color: #fff;
 }
+
+.table-text-ellipsis {
+  display: block; /* Fallback for non-webkit */
+  display: -webkit-box;
+  height: 1.3em * 2 * 4; /* Fallback for non-webkit, line-height * 2 */
+  line-height: 1.3em * 4; /* default line-height 1.3em*/
+  -webkit-line-clamp: 4; /* if you change this, make sure to change the fallback line-height and height */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

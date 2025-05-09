@@ -18,12 +18,12 @@
         </div>
     </div>
     <div class="btn-list">
-        @canany('setting.positions.store', 'setting.positions.create')
+        @if (role()->checkPermission('setting.positions.create'))
             <a href="{{ route('setting.positions.create') }}"
                 class="btn btn-primary-light btn-wave me-2 waves-effect waves-light">
                 <i class="ti ti-plus align-middle"></i> Tambah Posisi
             </a>
-        @endcanany
+        @endif
     </div>
 @endsection
 
@@ -48,12 +48,11 @@
             <table id="position-table" class="table table-bordered table-hover display nowrap" style="width: 100%;">
                 <thead class="table-dark">
                     <tr>
-                        <th class="text-center">Nama Posisi</th>
-                        <th class="text-center">Cabang</th>
-                        <th class="text-center">Unit</th>
-                        <th class="text-center">Grup</th>
-                        <th class="text-center">Diperbarui Oleh</th>
-                        <th class="text-center">Aksi</th>
+                        <th class="table-dark-custom text-center">Nama Posisi</th>
+                        <th class="table-dark-custom text-center">Cabang</th>
+                        <th class="table-dark-custom text-center">Unit</th>
+                        <th class="table-dark-custom text-center">Role</th>
+                        <th class="table-dark-custom text-center">Aksi</th>
                     </tr>
                 </thead>
             </table>

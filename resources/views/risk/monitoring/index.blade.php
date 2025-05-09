@@ -52,13 +52,7 @@
                         <div class="accordion-body">
                             <div class="mb-4">
                                 @if ($worksheet->status == \App\Enums\DocumentStatus::APPROVED->value)
-                                    @if (in_array(session()->get('current_role')?->name, [
-                                            'risk admin',
-                                            'risk owner',
-                                            'risk analis',
-                                            'root',
-                                            'administrator',
-                                        ]))
+                                    @if (role()->checkPermission('risk.monitoring.create'))
                                         <a href="{{ route('risk.monitoring.create', $worksheet->getEncryptedId()) }}"
                                             style="min-width: 128px;" class="btn btn-primary-light">
                                             <span><i class="ti ti-plus"></i></span>&nbsp;Laporan Monitoring
@@ -73,7 +67,7 @@
                                         <th class="table-dark-custom">No.</th>
                                         <th class="table-dark-custom">Status</th>
                                         <th class="table-dark-custom">Bulan</th>
-                                        <th class="table-dark-custom">Organisasi</th>
+                                        <th class="table-dark-custom">Unit</th>
                                     </tr>
                                 </thead>
                                 <tbody>

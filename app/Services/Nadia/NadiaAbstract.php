@@ -52,6 +52,8 @@ abstract class NadiaAbstract
         }
 
         $request = Http::withoutVerifying()
+            ->withHeader('Accept', 'application/json')
+            ->withHeader('Content-Type', 'application/json')
             ->asForm()
             ->timeout($this->timeout);
 

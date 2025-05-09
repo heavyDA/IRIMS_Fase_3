@@ -88,7 +88,7 @@ class StoreWorksheetRequest extends FormRequest
             'strategies.*.strategy_expected_feedback' => 'nullable',
             'strategies.*.strategy_risk_value' => 'nullable',
             'strategies.*.strategy_risk_value_limit' => 'required|numeric',
-            'strategies.*.strategy_decision' => 'required|in:accept,avoid',
+            'strategies.*.strategy_decision' => 'nullable|in:accept,avoid',
 
             'mitigations' => 'required|array',
             'mitigations.*' => 'required|array',

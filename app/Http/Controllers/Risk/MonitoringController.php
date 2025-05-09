@@ -10,13 +10,11 @@ use App\Models\Master\IncidentCategory;
 use App\Models\Master\IncidentFrequency;
 use App\Models\Master\KBUMNRiskCategory;
 use App\Models\Master\Position;
-use App\Models\RBAC\Role;
 use App\Models\Risk\Worksheet;
 use App\Models\Risk\Monitoring;
 use App\Models\Risk\MonitoringHistory;
 use App\Models\Risk\WorksheetIdentification;
 use App\Services\PositionService;
-use App\Services\RoleService;
 use App\Services\UploadFileService;
 use Exception;
 use Illuminate\Http\Request;
@@ -24,15 +22,12 @@ use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use League\Flysystem\FilesystemException;
-use Mews\Purifier\Facades\Purifier;
 use Symfony\Component\HttpFoundation\Response;
 use Yajra\DataTables\Facades\DataTables;
 
 class MonitoringController extends Controller
 {
     public function __construct(
-        private RoleService $roleService,
         private PositionService $positionService,
         private UploadFileService $uploadFileService
     ) {}
@@ -40,29 +35,29 @@ class MonitoringController extends Controller
     public function index()
     {
         if (request()->ajax()) {
-            $unit = $this->roleService->getCurrentUnit();
+            $unit = role()->getCurrentUnit();
             if (request('unit')) {
                 $unit = $this->positionService->getUnitBelow(
                     $unit?->sub_unit_code,
                     request('unit'),
-                    $this->roleService->isRiskOwner() || $this->roleService->isRiskAdmin()
+                    role()->isRiskOwner() || role()->isRiskAdmin()
                 ) ?: $unit;
             }
 
             $worksheets = Worksheet::latestMonitoringWithMitigationQuery()
                 ->when(
-                    !$this->roleService->isRiskAdmin(),
+                    !role()->isRiskAdmin(),
                     fn($q) => $q->withExpression(
                         'position_hierarchy',
                         Position::hierarchyQuery(
                             $unit?->sub_unit_code ?? '-',
-                            $this->roleService->isRiskOwner() || $this->roleService->isRiskAdmin()
+                            role()->isRiskOwner() || role()->isRiskAdmin()
                         )
                     )
                         ->join('position_hierarchy as ph', 'ph.sub_unit_code', 'w.sub_unit_code')
                 )
                 ->when(
-                    $this->roleService->isRiskAdmin(),
+                    role()->isRiskAdmin(),
                     fn($q) => $q->where('w.created_by', auth()->user()->employee_id)
                         ->where('w.sub_unit_code', $unit?->sub_unit_code ?? '-')
                 )
@@ -230,12 +225,8 @@ class MonitoringController extends Controller
             ]);
 
             $monitoring->residual()->create($this->residualRequestMapping($request->residual));
-            $monitoring->alteration()->create([
-                'body' => Purifier::clean($request->alteration['alteration_body'] ?? ''),
-                'impact' => Purifier::clean($request->alteration['alteration_impact'] ?? ''),
-                'description' => Purifier::clean($request->alteration['alteration_description'] ?? ''),
-            ]);
-            $monitoring->incident()->create($this->incidentRequestMapping($request->incident));
+            $monitoring->alteration()->create(['body' => '', 'impact' => '', 'description' => '']);
+            $monitoring->incident()->create($this->incidentRequestMapping([]));
 
             $actualizations = [];
             foreach ($request->actualizations as $actual) {
@@ -500,12 +491,6 @@ class MonitoringController extends Controller
             $monitoring->update(['period_date' => $request->residual['period_date']]);
             $monitoring->residual()->delete();
             $monitoring->residual()->create($this->residualRequestMapping($request->residual));
-            $monitoring->alteration()->update([
-                'body' => $request->alteration['alteration_body'] ?? '',
-                'impact' => $request->alteration['alteration_impact'] ?? '',
-                'description' => $request->alteration['alteration_description'] ?? '',
-            ]);
-            $monitoring->incident()->update($this->incidentRequestMapping($request->incident));
 
             $actualizations = [];
             $actualizations_new = [];
@@ -625,15 +610,13 @@ class MonitoringController extends Controller
     public function update_status_monitoring(string $monitoring_id, Request $request)
     {
         $monitoring = Monitoring::findByEncryptedIdOrFail($monitoring_id);
-        $currentRole = session()->get('current_role');
-
         try {
-            $rule = Str::snake($currentRole->name == 'risk analis' ? $request->role : $currentRole->name) . '_rule';
+            $rule = Str::snake(role()->isAdministrator() || role()->isRiskAnalis() ? $request->role : role()->getCurrentRole()->name) . '_rule';
             if (!method_exists($this, $rule)) {
                 throw new Exception("Target role not found: {$rule}");
             }
             DB::beginTransaction();
-            $this->$rule($monitoring, strip_tags(Purifier::clean($request->status)), Purifier::clean($request->note));
+            $this->$rule($monitoring, strip_tags(purify($request->status)), purify($request->note));
             DB::commit();
 
             flash_message('flash_message', 'Laporan monitoring berhasil disubmit.', State::SUCCESS);
@@ -756,49 +739,49 @@ class MonitoringController extends Controller
     {
         return [
             'worksheet_mitigation_id' => $data['actualization_mitigation_id'] ?? null,
-            'actualization_mitigation_plan' => Purifier::clean($data['actualization_mitigation_plan'] ?? ''),
+            'actualization_mitigation_plan' => purify($data['actualization_mitigation_plan'] ?? ''),
             'actualization_cost' => (float) $data['actualization_cost'] ?? 0,
             'actualization_cost_absorption' => (float) $data['actualization_cost_absorption'] ?? 0,
             'quarter' => (int) $data['quarter'] ?? '',
             'documents' => '',
             'kri_unit_id' => null,
-            'kri_threshold' => strip_tags(Purifier::clean($data['actualization_kri_threshold'] ?? '')),
-            'kri_threshold_score' => strip_tags(Purifier::clean($data['actualization_kri_threshold_score'] ?? '')),
-            'actualization_plan_body' => Purifier::clean($data['actualization_plan_body'] ?? ''),
-            'actualization_plan_output' => Purifier::clean($data['actualization_plan_output'] ?? ''),
-            'actualization_plan_status' => strip_tags(Purifier::clean($data['actualization_plan_status'] ?? '')),
-            'actualization_plan_explanation' => Purifier::clean($data['actualization_plan_explanation'] ?? ''),
+            'kri_threshold' => strip_tags(purify($data['actualization_kri_threshold'] ?? '')),
+            'kri_threshold_score' => strip_tags(purify($data['actualization_kri_threshold_score'] ?? '')),
+            'actualization_plan_body' => purify($data['actualization_plan_body'] ?? ''),
+            'actualization_plan_output' => purify($data['actualization_plan_output'] ?? ''),
+            'actualization_plan_status' => strip_tags(purify($data['actualization_plan_status'] ?? '')),
+            'actualization_plan_explanation' => purify($data['actualization_plan_explanation'] ?? ''),
             'actualization_plan_progress' => (float) $data['actualization_plan_progress'] ?? '',
-            'unit_code' => strip_tags(Purifier::clean($data['unit_code'] ?? '')),
-            'unit_name' => strip_tags(Purifier::clean($data['unit_name'] ?? '')),
-            'personnel_area_code' => strip_tags(Purifier::clean($data['personnel_area_code'] ?? '')),
-            'position_name' => strip_tags(Purifier::clean($data['position_name'] ?? '')),
+            'unit_code' => strip_tags(purify($data['unit_code'] ?? '')),
+            'unit_name' => strip_tags(purify($data['unit_name'] ?? '')),
+            'personnel_area_code' => strip_tags(purify($data['personnel_area_code'] ?? '')),
+            'position_name' => strip_tags(purify($data['position_name'] ?? '')),
         ];
     }
 
     protected function incidentRequestMapping(?array $data = []): array
     {
         return [
-            'incident_body' => Purifier::clean($data['incident_body'] ?? ''),
-            'incident_identification' => Purifier::clean($data['incident_identification'] ?? ''),
+            'incident_body' => purify($data['incident_body'] ?? ''),
+            'incident_identification' => purify($data['incident_identification'] ?? ''),
             'incident_category_id' => check_select_option_value($data['incident_category'] ?? ''),
             'incident_source' => check_select_option_value($data['incident_source'] ?? ''),
-            'incident_cause' => Purifier::clean($data['incident_cause'] ?? ''),
-            'incident_handling' => Purifier::clean($data['incident_handling'] ?? ''),
-            'incident_description' => Purifier::clean($data['incident_description'] ?? ''),
+            'incident_cause' => purify($data['incident_cause'] ?? ''),
+            'incident_handling' => purify($data['incident_handling'] ?? ''),
+            'incident_description' => purify($data['incident_description'] ?? ''),
             'risk_category_t2_id' => check_select_option_value($data['risk_category_t2'] ?? ''),
             'risk_category_t3_id' => check_select_option_value($data['risk_category_t3'] ?? ''),
-            'loss_description' => Purifier::clean($data['loss_description'] ?? ''),
-            'loss_value' => (float) $data['loss_value'] ?? '',
+            'loss_description' => purify($data['loss_description'] ?? ''),
+            'loss_value' => (float) ($data['loss_value'] ?? 0),
             'incident_repetitive' => string_to_bool($data['incident_repetitive'] ?? ''),
             'incident_frequency_id' => check_select_option_value($data['incident_frequency'] ?? ''),
-            'mitigation_plan' => Purifier::clean($data['mitigation_plan'] ?? ''),
-            'actualization_plan' => Purifier::clean($data['actualization_plan'] ?? ''),
-            'follow_up_plan' => Purifier::clean($data['follow_up_plan'] ?? ''),
-            'related_party' => Purifier::clean($data['related_party'] ?? ''),
+            'mitigation_plan' => purify($data['mitigation_plan'] ?? ''),
+            'actualization_plan' => purify($data['actualization_plan'] ?? ''),
+            'follow_up_plan' => purify($data['follow_up_plan'] ?? ''),
+            'related_party' => purify($data['related_party'] ?? ''),
             'insurance_status' => string_to_bool($data['insurance_status'] ?? ''),
-            'insurance_permit' => (float) $data['insurance_permit'] ?? '',
-            'insurance_claim' => (float) $data['insurance_claim'] ?? '',
+            'insurance_permit' => (float) ($data['insurance_permit'] ?? 0),
+            'insurance_claim' => (float) ($data['insurance_claim'] ?? 0),
         ];
     }
 }

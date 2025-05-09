@@ -29,7 +29,7 @@ class UserUpdateRequest extends FormRequest
             'employee_id' => 'required',
             'employee_name' => 'required',
             'role' => 'required|array',
-            'role.*' => 'in:risk admin,risk owner,risk otorisator,risk analis,risk reviewer',
+            'role.*' => 'in:risk admin,risk owner,risk otorisator,risk analis,risk analis pusat,risk reviewer',
             'sub_unit_code' => 'required',
             'position_name' => 'required',
             'expired_at' => 'nullable|date|date_format:Y-m-d',

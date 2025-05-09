@@ -59,6 +59,9 @@
                             {{ in_array('risk otorisator', old('role', [])) ? 'selected' : null }}>Risk Otorisator</option>
                         <option value="risk analis" {{ in_array('risk analis', old('role', [])) ? 'selected' : null }}>Risk
                             Analis</option>
+                        <option value="risk analis pusat"
+                            {{ in_array('risk analis pusat', old('role', [])) ? 'selected' : null }}>Risk
+                            Analis Pusat</option>
                         <option value="risk reviewer" {{ in_array('risk reviewer', old('role', [])) ? 'selected' : null }}>
                             Risk Reviewer</option>
                     </select>
