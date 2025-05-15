@@ -430,7 +430,7 @@ class Worksheet extends Model
             ->withExpression('scales', DB::table('m_bumn_scales'))
             ->withExpression('heatmaps', DB::table('m_heatmaps'))
             ->withExpression('risk_categories', DB::table('m_kbumn_risk_categories'))
-            ->leftJoin('risk_qualifications as rq', 'rq.id', '=', 'w.risk_qualification_id')
+            ->leftJoin('m_risk_qualifications as rq', 'rq.id', '=', 'w.risk_qualification_id')
             ->leftJoin('ra_worksheet_identifications as wi', 'wi.worksheet_id', '=', 'w.id')
             ->leftJoin('ra_worksheet_incidents as winc', 'winc.worksheet_id', '=', 'w.id')
             ->leftJoin('ra_worksheet_mitigations as wim', 'wim.worksheet_incident_id', '=', 'winc.id')

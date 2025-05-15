@@ -491,7 +491,7 @@ class WorksheetController extends Controller
                 $worksheet->histories()->create([
                     'created_by' => auth()->user()->employee_id,
                     'created_role' => 'risk owner',
-                    'receiver_id' => $worksheet->last_history?->created_by,
+                    'receiver_id' => null,
                     'receiver_role' => $worksheet->last_history?->created_role,
                     'status' => DocumentStatus::APPROVED->value,
                     'note' => 'Kertas kerja berhasil diperbarui'

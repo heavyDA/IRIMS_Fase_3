@@ -8,8 +8,14 @@
                         style="vertical-align: middle !important; text-align:center !important; width: 100px;">No.
                         Penyebab Risiko</th>
                     <th rowspan="2"
+                        style="vertical-align: middle !important; text-align:center !important; width: 100px;">Penyebab
+                        Risiko</th>
+                    <th rowspan="2"
                         style="vertical-align: middle !important; text-align:center !important; width: 240px;">Rencana
                         Perlakuan Risiko</th>
+                    <th rowspan="2"
+                        style="vertical-align: middle !important; text-align:center !important; width: 140px;">Biaya
+                        Mitigasi</th>
                     <th rowspan="2"
                         style="vertical-align: middle !important; text-align:center !important; width: 240px;">Realisasi
                         Perlakuan Risiko
@@ -57,39 +63,6 @@
                 </tr>
             </thead>
             <tbody>
-                {{-- @foreach ($worksheet->target->identification->incidents as $incident)
-                    @foreach ($incident->mitigations as $key => $mitigation)
-                        <tr>
-                            <td>
-                                <button id="actualization-{{ $key }}" type="button"
-                                    class="actualization-button btn btn-sm btn-info-light">
-                                    <span>
-                                        <div class="ti ti-edit"></div>
-                                    </span>
-                                </button>
-                            </td>
-                            <td class="d-none" data-name="mitigation_id">{{ $mitigation->id }}</td>
-                            <td class="d-none" data-name="quarter">{{ ceil((int) date('m') / 4) }}</td>
-                            <td data-name="risk_cause_number">{{ $incident->risk_cause_number }}</td>
-                            <td data-name="actualization_mitigation_plan">{!! html_entity_decode($mitigation->mitigation_plan) !!}</td>
-                            <td data-name="actualization_plan_body"></td>
-                            <td data-name="actualization_output"></td>
-                            <td data-name="actualization_cost">Rp.0</td>
-                            <td data-name="actualization_percentage" class="text-center">0</td>
-                            <td data-name="actualization_pic">{{ $mitigation->mitigation_pic }}</td>
-                            <td data-name="actualization_pic_related"></td>
-                            <td data-name="actualization_kri"></td>
-                            <td data-name="actualization_kri_threshold"></td>
-                            <td data-name="actualization_kri_score"></td>
-                            <td data-name="actualization_status"></td>
-                            <td data-name="actualization_explanation"></td>
-                            <td data-name="actualization_progress[1]"></td>
-                            <td data-name="actualization_progress[2]"></td>
-                            <td data-name="actualization_progress[3]"></td>
-                            <td data-name="actualization_progress[4]"></td>
-                        </tr>
-                    @endforeach
-                @endforeach --}}
             </tbody>
         </table>
     </div>
@@ -117,6 +90,15 @@
                             </div>
                             <div class="col">
                                 <input type="text" disabled class="not-allowed form-control" name="risk_cause_number">
+                            </div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-3">
+                                Penyebab Risiko
+                            </div>
+                            <div class="col">
+                                <div id="risk_cause_body-editor" class="textarea"></div>
+                                <textarea class="form-control d-none" name="risk_cause_body" rows="4"></textarea>
                             </div>
                         </div>
                         <div class="row mb-2">
@@ -168,6 +150,15 @@
                         </div>
                         <div class="row mb-2">
                             <div class="col-3">
+                                Biaya mitigasi
+                            </div>
+                            <div class="col">
+                                <input type="text" class="form-control form-control-readonly not-allowed disabled"
+                                    name="actualization_mitigation_cost" readonly>
+                            </div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-3">
                                 Realisasi Biaya Perlakuan Risiko<span class="text-danger">*</span>
                             </div>
                             <div class="col">
@@ -176,11 +167,15 @@
                         </div>
                         <div class="row mb-2">
                             <div class="col-3">
-                                Presentase Serapan Biaya<span class="text-danger">*</span>
+                                Persentase Serapan Biaya
                             </div>
                             <div class="col">
-                                <input type="number" step="0.01" max=100 class="form-control"
-                                    name="actualization_cost_absorption">
+                                <div class="input-group mb-3">
+                                    <input readonly type="number" step="0.01" min=100 max=100
+                                        class="form-control form-control-readonly not-allowed"
+                                        name="actualization_cost_absorption">
+                                    <span class="input-group-text">%</span>
+                                </div>
                             </div>
                         </div>
                         <div class="row mb-2">

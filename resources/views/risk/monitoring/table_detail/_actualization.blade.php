@@ -4,6 +4,9 @@
             <thead class="table-dark">
                 <tr>
                     <th rowspan="2" style="width: 100px;">No. Penyebab Risiko</th>
+                    <th rowspan="2" style="width: 240px !important;">Penyebab Risiko</th>
+                    <th rowspan="2" style="width: 240px !important;">Rencana Perlakuan Risiko</th>
+                    <th rowspan="2" style="width: 140px !important;">Biaya Mitigasi</th>
                     <th rowspan="2" style="width: 240px !important;">Realisasi Perlakuan Risiko</th>
                     <th rowspan="2" style="width: 240px !important;">Realisasi Output atas masing-masing Breakdown
                         Perlakuan
@@ -37,6 +40,9 @@
                     @foreach ($monitoring->actualizations as $actualization)
                         <tr>
                             <td>{{ $actualization->mitigation->incident->risk_cause_number }}</td>
+                            <td>{!! html_entity_decode($actualization->mitigation->incident->risk_cause_body) !!}</td>
+                            <td>{!! html_entity_decode($actualization->mitigation->mitigation_plan) !!}</td>
+                            <td>{{ money_format((float) $actualization->mitigation->mitigation_cost ?? 0) }}</td>
                             <td>{!! html_entity_decode($actualization->actualization_plan_body) !!}</td>
                             <td>{!! html_entity_decode($actualization->actualization_plan_output) !!}</td>
                             <td>{{ money_format((float) $actualization->actualization_cost ?? 0) }}</td>
