@@ -407,6 +407,7 @@ class WorksheetController extends Controller
                 'company_name' => 'PT Angkasa Pura Indonesia',
                 'target_body' => purify($validated['context']['target_body']),
                 'risk_number' => strip_tags(purify($validated['context']['risk_number'])),
+                'risk_qualification' => strip_tags(purify($validated['context']['risk_qualification'])),
             ];
 
             $data['strategies'] = array_map(function ($strategy) {
