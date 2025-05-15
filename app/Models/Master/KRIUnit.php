@@ -14,6 +14,7 @@ class KRIUnit extends Model
 
     protected $fillable = [
         'name',
+        'created_by',
     ];
 
     public function creator()

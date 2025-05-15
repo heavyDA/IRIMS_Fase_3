@@ -17,12 +17,12 @@
         </div>
     </div>
     <div class="btn-list">
-        @canany('master.existing_control_types.store', 'master.existing_control_types.create')
+        @if (role()->checkPermission('master.existing_control_types.create'))
             <a href="{{ route('master.existing_control_types.create') }}"
                 class="btn btn-primary-light btn-wave me-2 waves-effect waves-light">
                 <i class="ti ti-plus align-middle"></i> Tambah Jenis Existing Control
             </a>
-        @endcanany
+        @endif
     </div>
 @endsection
 

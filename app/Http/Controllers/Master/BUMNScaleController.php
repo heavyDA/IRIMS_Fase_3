@@ -17,21 +17,17 @@ class BUMNScaleController extends Controller
             return DataTables::of($bumn_scales)
                 ->addColumn('action', function ($bumn_scale) {
                     $id = $bumn_scale->getEncryptedId();
-                    $actions = [
-                        [
-                            'type' => 'link',
-                            'permission' => 'master.bumn_scales.edit',
-                            'text' => 'Edit',
-                            'route' => route('master.bumn_scales.edit', $id),
-                        ],
-                        [
-                            'id' => $id,
-                            'type' => 'delete',
-                            'permission' => 'master.bumn_scales.destroy',
-                            'text' => 'Hapus',
-                            'route' => route('master.bumn_scales.destroy', $id),
-                        ],
-                    ];
+                    $actions = [];
+                    if (role()->checkPermission('master.bumn_scales.update')) {
+                        $actions[] = ['id' => $id, 'route' => route('master.bumn_scales.edit', $id), 'type' => 'link', 'text' => 'edit', 'permission' => true];
+                    }
+                    if (role()->checkPermission('master.bumn_scales.destroy')) {
+                        $actions[] = ['id' => $id, 'route' => route('master.bumn_scales.destroy', $id), 'type' => 'delete', 'text' => 'hapus', 'permission' => true];
+                    }
+
+                    if (empty($actions)) {
+                        return '';
+                    }
                     return view('layouts.partials._table_action', compact('actions'));
                 })
                 ->rawColumns(['action'])

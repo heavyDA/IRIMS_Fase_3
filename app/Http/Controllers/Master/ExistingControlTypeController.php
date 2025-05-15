@@ -17,21 +17,17 @@ class ExistingControlTypeController extends Controller
             return DataTables::of($existing_control_types)
                 ->addColumn('action', function ($existing_control_type) {
                     $id = $existing_control_type->getEncryptedId();
-                    $actions = [
-                        [
-                            'type' => 'link',
-                            'permission' => 'master.existing_control_types.edit',
-                            'text' => 'Edit',
-                            'route' => route('master.existing_control_types.edit', $id),
-                        ],
-                        [
-                            'id' => $id,
-                            'type' => 'delete',
-                            'permission' => 'master.existing_control_types.destroy',
-                            'text' => 'Hapus',
-                            'route' => route('master.existing_control_types.destroy', $id),
-                        ],
-                    ];
+                    $actions = [];
+                    if (role()->checkPermission('master.existing_control_types.update')) {
+                        $actions[] = ['id' => $id, 'route' => route('master.existing_control_types.edit', $id), 'type' => 'link', 'text' => 'edit', 'permission' => true];
+                    }
+                    if (role()->checkPermission('master.existing_control_types.destroy')) {
+                        $actions[] = ['id' => $id, 'route' => route('master.existing_control_types.destroy', $id), 'type' => 'delete', 'text' => 'hapus', 'permission' => true];
+                    }
+
+                    if (empty($actions)) {
+                        return '';
+                    }
                     return view('layouts.partials._table_action', compact('actions'));
                 })
                 ->rawColumns(['action'])

@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Models\Risk\Worksheet;
 use App\Models\Risk\WorksheetAlteration;
 use App\Models\Risk\WorksheetLossEvent;
+use App\Traits\HasEncryptedId;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -13,7 +14,7 @@ use Spatie\Permission\Traits\HasRoles;
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, HasRoles;
+    use HasFactory, Notifiable, HasRoles, HasEncryptedId;
 
     /**
      * The attributes that are mass assignable.

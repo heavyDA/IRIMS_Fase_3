@@ -17,21 +17,17 @@ class KBUMNRiskCategoryController extends Controller
             return DataTables::of($risk_categories)
                 ->addColumn('action', function ($risk_categories) {
                     $id = $risk_categories->getEncryptedId();
-                    $actions = [
-                        [
-                            'type' => 'link',
-                            'permission' => 'master.risk_categories.edit',
-                            'text' => 'Edit',
-                            'route' => route('master.risk_categories.edit', $id),
-                        ],
-                        [
-                            'id' => $id,
-                            'type' => 'delete',
-                            'permission' => 'master.risk_categories.destroy',
-                            'text' => 'Hapus',
-                            'route' => route('master.risk_categories.destroy', $id),
-                        ],
-                    ];
+                    $actions = [];
+                    if (role()->checkPermission('master.kbumn_risk_categories.update')) {
+                        $actions[] = ['id' => $id, 'route' => route('master.kbumn_risk_categories.edit', $id), 'type' => 'link', 'text' => 'edit', 'permission' => true];
+                    }
+                    if (role()->checkPermission('master.kbumn_risk_categories.destroy')) {
+                        $actions[] = ['id' => $id, 'route' => route('master.kbumn_risk_categories.destroy', $id), 'type' => 'delete', 'text' => 'hapus', 'permission' => true];
+                    }
+
+                    if (empty($actions)) {
+                        return '';
+                    }
                     return view('layouts.partials._table_action', compact('actions'));
                 })
                 ->rawColumns(['action'])

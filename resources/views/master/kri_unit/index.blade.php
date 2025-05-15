@@ -17,11 +17,12 @@
         </div>
     </div>
     <div class="btn-list">
-        @canany('master.kri_units.store', 'master.kri_units.create')
-            <a href="{{ route('master.kri_units.create') }}" class="btn btn-primary-light btn-wave me-2 waves-effect waves-light">
+        @if (role()->checkPermission('master.kri_units.create'))
+            <a href="{{ route('master.kri_units.create') }}"
+                class="btn btn-primary-light btn-wave me-2 waves-effect waves-light">
                 <i class="ti ti-plus align-middle"></i> Tambah Unit
             </a>
-        @endcanany
+        @endif
     </div>
 @endsection
 
