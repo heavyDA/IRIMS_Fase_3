@@ -22,6 +22,14 @@ class WorksheetYearComposer
             $worksheet_years = collect([(object) ['year' => date('Y')]]);
         }
 
-        $view->with('worksheet_years', $worksheet_years);
+        $months = array_map(
+            fn($month) => format_date("2000-$month-01")->translatedFormat('F'),
+            range(1, 12)
+        );
+
+        $view->with([
+            'worksheet_years' => $worksheet_years,
+            'worksheet_months' => $months,
+        ]);
     }
 }

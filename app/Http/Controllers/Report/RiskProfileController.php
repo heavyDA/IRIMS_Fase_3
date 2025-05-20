@@ -34,6 +34,7 @@ class RiskProfileController extends Controller
                 ) ?: $unit;
             }
 
+            $date = format_year_month((int) request('year', date('Y')), (int) request('month'));
             $worksheets = Worksheet::assessmentQuery()
                 ->withExpression(
                     'position_hierarchy',
@@ -56,7 +57,8 @@ class RiskProfileController extends Controller
                 ->when(request('risk_qualification'), function ($q) {
                     return $q->where('risk_qualification', request('risk_qualification'));
                 })
-                ->whereYear('w.created_at', request('year', date('Y')));
+                ->when(is_array($date), fn($q) => $q->whereBetween('w.created_at', $date))
+                ->when(is_int($date), fn($q) => $q->whereYear('w.created_at', $date));
 
             return DataTables::query($worksheets)
                 ->filter(function ($q) {
@@ -129,6 +131,7 @@ class RiskProfileController extends Controller
             ) ?: $unit;
         }
 
+        $date = format_year_month((int) request('year', date('Y')), (int) request('month'));
         $incidents = WorksheetIncident::incident_query()
             ->withExpression(
                 'position_hierarchy',
@@ -138,7 +141,8 @@ class RiskProfileController extends Controller
                 )
             )
             ->join('position_hierarchy as ph', 'ph.sub_unit_code', 'worksheet.sub_unit_code')
-            ->whereYear('worksheet.created_at', request('year', date('Y')))
+            ->when(is_array($date), fn($q) => $q->whereBetween('worksheet.created_at', $date))
+            ->when(is_int($date), fn($q) => $q->whereYear('worksheet.created_at', $date))
             ->when(
                 request('document_status'),
                 function ($q) {
@@ -192,9 +196,9 @@ class RiskProfileController extends Controller
             return $worksheet;
         });
 
-        $year = $request->year ?? Date('Y');
-        $date = now()->translatedFormat('j F Y');
+        $date = format_date(is_array($date) ? $date[0] : $date)->translatedFormat('F Y');
+        $date_export = now()->translatedFormat('d F Y');
 
-        return Excel::download(new WorksheetExport($worksheets), "Laporan {$date} - Profil Risiko {$year}.xlsx");
+        return Excel::download(new WorksheetExport($worksheets), "Laporan Profil Risiko ({$date}) - {$date_export}.xlsx");
     }
 }

@@ -44,7 +44,8 @@ class MonitoringController extends Controller
                 ) ?: $unit;
             }
 
-            $worksheets = Worksheet::latestMonitoringWithMitigationQuery()
+            $date = format_year_month((int) request('year', date('Y')), (int) request('month', null));
+            $worksheets = Worksheet::latestMonitoringWithMitigationQuery(is_array($date) ? $date : [])
                 ->when(
                     !role()->isRiskAdmin(),
                     fn($q) => $q->withExpression(
@@ -57,7 +58,7 @@ class MonitoringController extends Controller
                         ->join('position_hierarchy as ph', 'ph.sub_unit_code', 'w.sub_unit_code')
                 )
                 ->when(request('document_status'), fn($q) => $q->where('w.status_monitoring', request('document_status')))
-                ->where('worksheet_year', request('year', date('Y')))
+                ->when(is_int($date), fn($q) => $q->where('worksheet_year', $date))
                 ->when(request('risk_qualification'), fn($q) => $q->where('w.risk_qualification_id', request('risk_qualification')));
 
             return DataTables::query($worksheets)

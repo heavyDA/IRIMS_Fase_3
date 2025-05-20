@@ -16,11 +16,13 @@ const alterationTableFilter = alterationOffcanvas.querySelector('#alteration-tab
 
 const selectLength = alterationTableFilter.querySelector('select[name="length"]')
 const selectYear = alterationTableFilter.querySelector('select[name="year"]')
+const selectMonth = alterationTableFilter.querySelector('select[name="month"]')
 const selectUnit = alterationTableFilter.querySelector('select[name="unit"]')
 const selectLocation = alterationTableFilter.querySelector('select[name="location"]')
 
 const selectLengthChoices = new Choices(selectLength, defaultConfigChoices)
 const selectYearChoices = new Choices(selectYear, defaultConfigChoices)
+const selectMonthChoices = new Choices(selectMonth, defaultConfigChoices)
 const selectUnitChoices = new Choices(selectUnit, defaultConfigChoices)
 const selectLocationChoices = new Choices(selectLocation, defaultConfigChoices)
 
@@ -181,6 +183,7 @@ const datatable = createDatatable('#alteration-table', {
         url: window.location.href,
         data: function (d) {
             d.year = selectYear.value
+            d.month = selectMonth.value
             d.unit = selectUnit.value
         }
     },
@@ -252,6 +255,8 @@ alterationTableFilter.addEventListener('reset', e => {
     selectLengthChoices.init()
     selectYearChoices.destroy()
     selectYearChoices.init()
+    selectMonthChoices.destroy()
+    selectMonthChoices.init()
     selectUnitChoices.destroy()
     selectUnitChoices.init()
 

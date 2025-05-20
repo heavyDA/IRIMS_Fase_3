@@ -124,6 +124,16 @@
                         </select>
                     </div>
                     <div class="col-12 d-flex flex-column">
+                        <label for="month" class="form-label">Bulan</label>
+                        <select name="month" class="form-select">
+                            <option value="">Semua</option>
+                            @foreach ($worksheet_months as $month => $name)
+                                <option value={{ $month + 1 }}>
+                                    {{ $name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-12 d-flex flex-column">
                         <label for="location" class="form-label">Lokasi</label>
                         <select name="location" class="form-select">
                             @if ($units->count() > 1)

@@ -17,6 +17,7 @@ const worksheetTableFilter = worksheetOffcanvas.querySelector('#worksheet-table-
 
 const selectLength = worksheetTableFilter.querySelector('select[name="length"]')
 const selectYear = worksheetTableFilter.querySelector('select[name="year"]')
+const selectMonth = worksheetTableFilter.querySelector('select[name="month"]')
 const selectUnit = worksheetTableFilter.querySelector('select[name="unit"]')
 const selectDocumentStatus = worksheetTableFilter.querySelector('select[name="document_status"]')
 const selectLocation = worksheetTableFilter.querySelector('select[name="location"]')
@@ -24,6 +25,7 @@ const selectRiskQualification = worksheetTableFilter.querySelector('select[name=
 
 const selectLengthChoices = new Choices(selectLength, defaultConfigChoices)
 const selectYearChoices = new Choices(selectYear, defaultConfigChoices)
+const selectMonthChoices = new Choices(selectMonth, defaultConfigChoices)
 const selectUnitChoices = new Choices(selectUnit, defaultConfigChoices)
 const selectDocumentStatusChoices = new Choices(selectDocumentStatus, defaultConfigChoices)
 const selectLocationChoices = new Choices(selectLocation, defaultConfigChoices)
@@ -59,6 +61,10 @@ worksheetTableFilter.addEventListener('reset', e => {
     selectLengthChoices.init()
     selectYearChoices.destroy()
     selectYearChoices.init()
+    selectMonthChoices.destroy()
+    selectMonthChoices.init()
+    selectLocationChoices.destroy()
+    selectLocationChoices.init()
     selectUnitChoices.destroy()
     selectUnitChoices.init()
     selectDocumentStatusChoices.destroy()
@@ -260,6 +266,7 @@ const datatable = createDatatable('table', {
         url: window.location.href,
         data: function (d) {
             d.year = selectYear.value
+            d.month = selectMonth.value
             d.unit = selectUnit.value
             d.document_status = selectDocumentStatus.value
             d.risk_qualification = selectRiskQualification.value

@@ -17,11 +17,13 @@ const lossEventTableFilter = lossEventOffcanvas.querySelector('#loss_event-table
 
 const selectLength = lossEventTableFilter.querySelector('select[name="length"]')
 const selectYear = lossEventTableFilter.querySelector('select[name="year"]')
+const selectMonth = lossEventTableFilter.querySelector('select[name="month"]')
 const selectUnit = lossEventTableFilter.querySelector('select[name="unit"]')
 const selectLocation = lossEventTableFilter.querySelector('select[name="location"]')
 
 const selectLengthChoices = new Choices(selectLength, defaultConfigChoices)
 const selectYearChoices = new Choices(selectYear, defaultConfigChoices)
+const selectMonthChoices = new Choices(selectMonth, defaultConfigChoices)
 const selectUnitChoices = new Choices(selectUnit, defaultConfigChoices)
 const selectLocationChoices = new Choices(selectLocation, defaultConfigChoices)
 
@@ -195,6 +197,7 @@ const datatable = createDatatable('#loss_event-table', {
         url: window.location.href,
         data: function (d) {
             d.year = selectYear.value
+            d.month = selectMonth.value
             d.unit = selectUnit.value
         }
     },
@@ -266,6 +269,8 @@ lossEventTableFilter.addEventListener('reset', e => {
     selectLengthChoices.init()
     selectYearChoices.destroy()
     selectYearChoices.init()
+    selectMonthChoices.destroy()
+    selectMonthChoices.init()
     selectUnitChoices.destroy()
     selectUnitChoices.init()
 

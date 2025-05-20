@@ -767,7 +767,7 @@ class Worksheet extends Model
             ->leftJoin('heatmaps as h_r4', 'h_r4.id', '=', 'wi.residual_4_impact_probability_scale_id');
     }
 
-    public static function latestMonitoringWithMitigationQuery()
+    public static function latestMonitoringWithMitigationQuery(?array $dates = [])
     {
         return DB::table('worksheets as w')
             ->withExpression(
@@ -810,6 +810,7 @@ class Worksheet extends Model
                     ->joinSub(
                         DB::table('ra_monitorings')
                             ->select('worksheet_id', DB::raw('MAX(period_date) as period_date'))
+                            ->when(!empty($dates), fn($q) => $q->whereBetween('period_date', $dates))
                             ->groupBy('worksheet_id'),
                         'latest',
                         function ($join) {
@@ -855,8 +856,9 @@ class Worksheet extends Model
                 'lm.period_date'
             )
             ->withExpression('heatmaps', DB::table('m_heatmaps'))
+            ->when(empty($dates), fn($q) => $q->leftJoin('latest_monitoring as lm', 'lm.worksheet_id', '=', 'w.id'))
+            ->when(!empty($dates), fn($q) => $q->join('latest_monitoring as lm', 'lm.worksheet_id', '=', 'w.id'))
             ->leftJoin('heatmaps as hi', 'hi.id', '=', 'w.inherent_impact_probability_scale_id')
-            ->leftJoin('latest_monitoring as lm', 'lm.worksheet_id', '=', 'w.id')
             ->leftJoin('ra_monitoring_actualizations as ma', 'ma.monitoring_id', '=', 'lm.id')
             ->leftJoin('ra_worksheet_incidents as winc', 'winc.worksheet_id', '=', 'w.id')
             ->leftJoin('ra_worksheet_mitigations as wmit', 'wmit.worksheet_incident_id', '=', 'winc.id')

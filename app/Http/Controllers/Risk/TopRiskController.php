@@ -36,6 +36,7 @@ class TopRiskController extends Controller
                 ) ?: $unit;
             }
 
+            $date = format_year_month((int) request('year', date('Y')), (int) request('month'));
             if ($currentLevel < 2) {
                 $worksheets = Worksheet::topRiskUpperQuery(
                     $unit->unit_code,
@@ -49,7 +50,8 @@ class TopRiskController extends Controller
                         )
                     )
                     ->join('position_hierarchy as ph', 'ph.sub_unit_code', 'w.sub_unit_code')
-                    ->whereYear('w.created_at', request('year', date('Y')))
+                    ->when(is_array($date), fn($q) => $q->whereBetween('w.created_at', $date))
+                    ->when(is_int($date), fn($q) => $q->whereYear('w.created_at', $date))
                     ->where('w.status', DocumentStatus::APPROVED->value);
             } else {
                 $worksheets = Worksheet::topRiskLowerQuery(
@@ -63,7 +65,8 @@ class TopRiskController extends Controller
                         )
                     )
                     ->join('position_hierarchy as ph', 'ph.sub_unit_code', 'w.sub_unit_code')
-                    ->whereYear('w.created_at', request('year', date('Y')))
+                    ->when(is_array($date), fn($q) => $q->whereBetween('w.created_at', $date))
+                    ->when(is_int($date), fn($q) => $q->whereYear('w.created_at', $date))
                     ->where('w.status', DocumentStatus::APPROVED->value);
             }
 
