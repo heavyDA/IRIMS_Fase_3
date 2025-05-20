@@ -14,7 +14,6 @@ use App\Models\Risk\Worksheet;
 use App\Models\Risk\Monitoring;
 use App\Models\Risk\MonitoringHistory;
 use App\Models\Risk\WorksheetIdentification;
-use App\Services\PositionService;
 use App\Services\UploadFileService;
 use Exception;
 use Illuminate\Http\Request;
@@ -28,7 +27,6 @@ use Yajra\DataTables\Facades\DataTables;
 class MonitoringController extends Controller
 {
     public function __construct(
-        private PositionService $positionService,
         private UploadFileService $uploadFileService
     ) {}
 
@@ -37,7 +35,7 @@ class MonitoringController extends Controller
         if (request()->ajax()) {
             $unit = role()->getCurrentUnit();
             if (request('unit')) {
-                $unit = $this->positionService->getUnitBelow(
+                $unit = position_helper()->getUnitBelow(
                     $unit?->sub_unit_code,
                     request('unit'),
                     role()->isRiskOwner() || role()->isRiskAdmin()
@@ -46,17 +44,14 @@ class MonitoringController extends Controller
 
             $date = format_year_month((int) request('year', date('Y')), (int) request('month', null));
             $worksheets = Worksheet::latestMonitoringWithMitigationQuery(is_array($date) ? $date : [])
-                ->when(
-                    !role()->isRiskAdmin(),
-                    fn($q) => $q->withExpression(
-                        'position_hierarchy',
-                        Position::hierarchyQuery(
-                            $unit?->sub_unit_code ?? '-',
-                            role()->isRiskOwner() || role()->isRiskAdmin()
-                        )
+                ->withExpression(
+                    'position_hierarchy',
+                    Position::hierarchyQuery(
+                        $unit?->sub_unit_code ?? '-',
+                        role()->isRiskOwner() || role()->isRiskAdmin()
                     )
-                        ->join('position_hierarchy as ph', 'ph.sub_unit_code', 'w.sub_unit_code')
                 )
+                ->join('position_hierarchy as ph', 'ph.sub_unit_code', 'w.sub_unit_code')
                 ->when(request('document_status'), fn($q) => $q->where('w.status_monitoring', request('document_status')))
                 ->when(is_int($date), fn($q) => $q->where('worksheet_year', $date))
                 ->when(request('risk_qualification'), fn($q) => $q->where('w.risk_qualification_id', request('risk_qualification')));
