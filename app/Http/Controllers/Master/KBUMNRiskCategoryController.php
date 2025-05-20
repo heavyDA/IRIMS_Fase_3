@@ -18,11 +18,11 @@ class KBUMNRiskCategoryController extends Controller
                 ->addColumn('action', function ($risk_categories) {
                     $id = $risk_categories->getEncryptedId();
                     $actions = [];
-                    if (role()->checkPermission('master.kbumn_risk_categories.update')) {
-                        $actions[] = ['id' => $id, 'route' => route('master.kbumn_risk_categories.edit', $id), 'type' => 'link', 'text' => 'edit', 'permission' => true];
+                    if (role()->checkPermission('master.risk_categories.update')) {
+                        $actions[] = ['id' => $id, 'route' => route('master.risk_categories.edit', $id), 'type' => 'link', 'text' => 'edit', 'permission' => true];
                     }
-                    if (role()->checkPermission('master.kbumn_risk_categories.destroy')) {
-                        $actions[] = ['id' => $id, 'route' => route('master.kbumn_risk_categories.destroy', $id), 'type' => 'delete', 'text' => 'hapus', 'permission' => true];
+                    if (role()->checkPermission('master.risk_categories.destroy')) {
+                        $actions[] = ['id' => $id, 'route' => route('master.risk_categories.destroy', $id), 'type' => 'delete', 'text' => 'hapus', 'permission' => true];
                     }
 
                     if (empty($actions)) {
