@@ -11,6 +11,7 @@ use App\View\Composers\Master\FrequencyComposer;
 use App\View\Composers\Master\IncidentCategoryComposer;
 use App\View\Composers\Master\RiskCategoryComposer;
 use App\View\Composers\Master\RiskQualificationComposer;
+use App\View\Composers\Risk\RiskMetricComposer;
 use App\View\Composers\Risk\WorksheetComposer;
 use App\View\Composers\Risk\WorksheetYearComposer;
 use Illuminate\Support\Facades\View;
@@ -91,5 +92,9 @@ class ViewServiceProvider extends ServiceProvider
             'report.loss_event.create',
             'report.loss_event.edit',
         ], IncidentCategoryComposer::class);
+
+        View::composer([
+            'risk.worksheet.form',
+        ], RiskMetricComposer::class);
     }
 }

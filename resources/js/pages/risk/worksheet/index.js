@@ -329,7 +329,6 @@ const fetchers = {
         sub_unit_code: "",
         sub_unit_name: "",
     },
-    risk_metric: {},
     risk_categories: [],
 };
 
@@ -338,7 +337,6 @@ const fetchData = async () => {
         axios.get("/master/data/bumn-scales"),
         axios.get("/master/data/heatmaps"),
         axios.get("/profile/unit_head"),
-        axios.get("/profile/risk_metric"),
         axios.get("/master/data/risk-categories"),
     ]).then((res) => {
         for (let [index, key] of Object.keys(fetchers).entries()) {
@@ -435,9 +433,10 @@ for (let editor of strategyForm.querySelectorAll(".textarea")) {
 const strategyRiskValueLimit = strategyForm.querySelector(
     '[name="strategy_risk_value_limit"]'
 );
-strategyRiskValueLimit.value = fetchers?.risk_metric?.limit
-    ? formatNumeral(fetchers?.risk_metric?.limit.replace('.', ','), defaultConfigFormatNumeral)
-    : "";
+strategyRiskValueLimit.value = formatNumeral(
+    strategyRiskValueLimit.value,
+    defaultConfigFormatNumeral
+);
 const strategyDecision = strategyForm.querySelector(
     '[name="strategy_decision"]'
 );
@@ -566,7 +565,7 @@ const onStrategyEdit = (data) => {
     strategyQuills["strategy_risk_value"].root.innerHTML =
         data.strategy_risk_value;
     strategyRiskValueLimit.value = formatNumeral(
-        data.strategy_risk_value_limit.replace('.', ','),
+        strategyRiskValueLimit.value.replace('.', ','),
         defaultConfigFormatNumeral
     );
     strategyDecisionChoices.setChoiceByValue(data.strategy_decision);
@@ -591,15 +590,11 @@ strategyForm.addEventListener("submit", (e) => {
 });
 
 strategyModalElement.addEventListener("hidden.bs.modal", () => {
+    const riskValueLimit = strategyRiskValueLimit.value
     strategyForm.reset();
     strategyForm.querySelector('[name="key"]').value = "";
 
-    strategyRiskValueLimit.value = fetchers?.risk_metric?.limit
-        ? formatNumeral(
-            fetchers?.risk_metric?.limit.replace('.', ','),
-            defaultConfigFormatNumeral
-        )
-        : "";
+    strategyRiskValueLimit.value = riskValueLimit;
     strategyDecisionChoices.destroy();
     strategyDecisionChoices.init();
 
@@ -1117,7 +1112,7 @@ const calculateRisk = (
             targetExposure.value = formatNumeral(
                 parseFloat(
                     (1 / 100) *
-                    parseFloat(fetchers?.risk_metric?.limit ?? "0") *
+                    parseFloat(unformatNumeral(strategyRiskValueLimit.value, defaultConfigFormatNumeral)) *
                     parseInt(scale.customProperties.scale) *
                     (probabilityValue / 100)
                 )
@@ -1223,7 +1218,6 @@ residualItemsInit();
 
 identificationInherentImpactValue.addEventListener("input", (e) => {
     const value = formatNumeral(e.target.value, defaultConfigFormatNumeral);
-    const limit = fetchers.risk_metric.limit;
 
     e.target.value = value;
     for (let i = 0; i < 4; i++) {

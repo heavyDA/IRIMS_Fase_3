@@ -327,7 +327,6 @@ const fetchers = {
         sub_unit_code: "",
         sub_unit_name: "",
     },
-    risk_metric: {},
     risk_categories: [],
 };
 
@@ -337,7 +336,6 @@ const fetchData = async () => {
         axios.get("/master/data/bumn-scales"),
         axios.get("/master/data/heatmaps"),
         axios.get("/profile/unit_head"),
-        axios.get("/profile/risk_metric"),
         axios.get("/master/data/risk-categories"),
     ]).then((res) => {
         for (let [index, key] of Object.keys(fetchers).entries()) {
@@ -433,9 +431,7 @@ for (let editor of strategyForm.querySelectorAll(".textarea")) {
 const strategyRiskValueLimit = strategyForm.querySelector(
     '[name="strategy_risk_value_limit"]'
 );
-strategyRiskValueLimit.value = fetchers.risk_metric.limit
-    ? formatNumeral(fetchers.risk_metric.limit.replace('.', ','), defaultConfigFormatNumeral)
-    : "";
+strategyRiskValueLimit.value = formatNumeral(strategyRiskValueLimit.value, defaultConfigFormatNumeral)
 
 const strategyDecision = strategyForm.querySelector(
     '[name="strategy_decision"]'
@@ -589,13 +585,12 @@ strategyForm.addEventListener("submit", (e) => {
 });
 
 strategyModalElement.addEventListener("hidden.bs.modal", () => {
+    const riskValueLimit = strategyRiskValueLimit.value;
     strategyForm.reset();
     strategyForm.querySelector('[name="key"]').value = "";
     strategyForm.querySelector('[name="id"]').value = "";
 
-    strategyRiskValueLimit.value = fetchers.risk_metric.limit
-        ? formatNumeral(fetchers.risk_metric.limit.replace('.', ','), defaultConfigFormatNumeral)
-        : "";
+    strategyRiskValueLimit.value = riskValueLimit;
     strategyDecisionChoices.destroy();
     strategyDecisionChoices.init();
 
@@ -1109,7 +1104,7 @@ const calculateRisk = (
             targetExposure.value = formatNumeral(
                 parseFloat(
                     (1 / 100) *
-                    parseFloat(fetchers?.risk_metric?.limit ?? "0") *
+                    parseFloat(unformatNumeral(strategyRiskValueLimit.value, defaultConfigFormatNumeral)) *
                     parseInt(scale.customProperties.scale) *
                     (probabilityValue / 100)
                 )

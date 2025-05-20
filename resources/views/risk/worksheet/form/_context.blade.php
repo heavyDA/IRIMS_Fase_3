@@ -193,7 +193,7 @@
                             </div>
                             <div>
                                 <input type="text" class="not-allowed form-control" name="strategy_risk_value_limit"
-                                    disabled>
+                                    value="{{ $risk_metric->limit }}" readonly>
                             </div>
                         </div>
                         <div class="d-flex flex-column mb-2">
