@@ -63,7 +63,7 @@ class RiskQualificationController extends Controller
     public function edit(string $riskQualification)
     {
         $riskQualification = RiskQualification::findByEncryptedIdOrFail($riskQualification);
-        return view('master.risk_qualification.edit', compact('riskQualification.,'));
+        return view('master.risk_qualification.edit', compact('riskQualification'));
     }
 
     public function update(RiskQualificationRequest $request, string $riskQualification)
