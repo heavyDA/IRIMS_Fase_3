@@ -20,13 +20,17 @@ const worksheetTableFilter = worksheetOffcanvas.querySelector('#worksheet-table-
 
 const selectLength = worksheetTableFilter.querySelector('select[name="length"]')
 const selectYear = worksheetTableFilter.querySelector('select[name="year"]')
+const selectMonth = worksheetTableFilter.querySelector('select[name="month"]')
 const selectUnit = worksheetTableFilter.querySelector('select[name="unit"]')
 const selectLocation = worksheetTableFilter.querySelector('select[name="location"]')
+const selectRiskQualification = worksheetTableFilter.querySelector('select[name="risk_qualification"]')
 
 const selectLengthChoices = new Choices(selectLength, defaultConfigChoices)
 const selectYearChoices = new Choices(selectYear, defaultConfigChoices)
+const selectMonthChoices = new Choices(selectMonth, defaultConfigChoices)
 const selectUnitChoices = new Choices(selectUnit, defaultConfigChoices)
 const selectLocationChoices = new Choices(selectLocation, defaultConfigChoices)
+const selectRiskQualificationChoices = new Choices(selectRiskQualification, defaultConfigChoices)
 
 const units = selectUnitChoices._currentState.choices;
 const placeholder = { label: 'Semua', value: '', placeholder: true, selected: true };
@@ -56,7 +60,7 @@ const columns = [
         orderable: true,
         data: 'worksheet_number',
         name: 'worksheet_number',
-        width: '64px',
+        width: '128px',
         render: function (data, type, row) {
             if (type !== 'display') {
                 return data
@@ -69,7 +73,7 @@ const columns = [
         orderable: true,
         data: 'sub_unit_name',
         name: 'sub_unit_name',
-        width: '256px',
+        width: '192px',
         render: function (data, type, row) {
             if (type !== 'display') {
                 return data
@@ -82,7 +86,7 @@ const columns = [
         orderable: true,
         data: 'target_body',
         name: 'target_body',
-        width: '256px',
+        width: '312px',
         render: function (data, type, row) {
             if (type !== 'display') {
                 return data
@@ -102,7 +106,7 @@ const columns = [
         orderable: true,
         data: 'risk_chronology_body',
         name: 'risk_chronology_body',
-        width: '256px',
+        width: '312px',
         render: function (data, type, row) {
             if (type !== 'display') {
                 return data
@@ -122,7 +126,7 @@ const columns = [
         orderable: true,
         data: 'risk_cause_body',
         name: 'risk_cause_body',
-        width: '256px',
+        width: '312px',
         render: function (data, type, row) {
             if (type !== 'display') {
                 return data
@@ -142,7 +146,7 @@ const columns = [
         orderable: true,
         data: 'risk_impact_body',
         name: 'risk_impact_body',
-        width: '256px',
+        width: '312px',
         render: function (data, type, row) {
             if (type !== 'display') {
                 return data
@@ -162,7 +166,7 @@ const columns = [
         orderable: true,
         data: 'inherent_risk_level',
         name: 'inherent_risk_level',
-        width: '100px',
+        width: '128px',
         render: function (data, type, row) {
             if (type != 'display') {
                 return data;
@@ -179,7 +183,7 @@ const columns = [
         orderable: true,
         data: 'inherent_risk_scale',
         name: 'inherent_risk_scale',
-        width: '100px',
+        width: '128px',
     },
     {
         orderable: true,
@@ -297,18 +301,21 @@ const datatable = createDatatable('#worksheet-table', {
         url: window.location.href,
         data: function (d) {
             d.year = selectYear.value
+            d.month = selectMonth.value
             d.unit = selectUnit.value
+            d.risk_qualification = selectRiskQualification.value
         }
     },
     scrollX: true,
+    autoWidth: false,
     fixedColumns: {
-        start: 2
+        start: 3
     },
     lengthChange: false,
     pageLength: 10,
     drawCallback: function (settings) {
         const api = this.api()
-        const columnsToMerge = [0, 1, 2, 3, 6, 16]
+        const columnsToMerge = [0, 1, 2, 3, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
 
         // Reset all cells visibility first
         api.cells().every(function () {
@@ -410,8 +417,14 @@ worksheetTableFilter.addEventListener('reset', e => {
     selectLengthChoices.init()
     selectYearChoices.destroy()
     selectYearChoices.init()
+    selectMonthChoices.destroy()
+    selectMonthChoices.init()
+    selectLocationChoices.destroy()
+    selectLocationChoices.init()
     selectUnitChoices.destroy()
     selectUnitChoices.init()
+    selectRiskQualificationChoices.destroy()
+    selectRiskQualificationChoices.init()
 
     inputCheckAll.checked = false;
     inputCheckAll.dispatchEvent(new Event('change'))

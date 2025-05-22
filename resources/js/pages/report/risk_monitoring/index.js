@@ -16,12 +16,14 @@ const worksheetTableFilter = worksheetOffcanvas.querySelector('#worksheet-table-
 
 const selectLength = worksheetTableFilter.querySelector('select[name="length"]')
 const selectYear = worksheetTableFilter.querySelector('select[name="year"]')
+const selectMonth = worksheetTableFilter.querySelector('select[name="month"]')
 const selectLocation = worksheetTableFilter.querySelector('select[name="location"]')
 const selectUnit = worksheetTableFilter.querySelector('select[name="unit"]')
 const selectDocumentStatus = worksheetTableFilter.querySelector('select[name="document_status"]')
 
 const selectLengthChoices = new Choices(selectLength, defaultConfigChoices)
 const selectYearChoices = new Choices(selectYear, defaultConfigChoices)
+const selectMonthChoices = new Choices(selectMonth, defaultConfigChoices)
 const selectLocationChoices = new Choices(selectLocation, defaultConfigChoices)
 const selectUnitChoices = new Choices(selectUnit, defaultConfigChoices)
 const selectDocumentStatusChoices = new Choices(selectDocumentStatus, defaultConfigChoices)
@@ -229,6 +231,7 @@ const datatable = createDatatable('table', {
         url: window.location.href,
         data: function (d) {
             d.year = selectYear.value
+            d.month = selectMonth.value
             d.unit = selectUnit.value
             d.document_status = selectDocumentStatus.value
         }
@@ -354,6 +357,7 @@ worksheetTableFilter.addEventListener('submit', e => {
     query.unit = selectUnit.value
     query.year = selectYear.value
     query.document_status = selectDocumentStatus.value
+    query.month = selectMonth.value
 
     datatable.page.len(selectLength.value).draw();
 
@@ -376,6 +380,8 @@ worksheetTableFilter.addEventListener('reset', e => {
     selectLengthChoices.init()
     selectYearChoices.destroy()
     selectYearChoices.init()
+    selectMonthChoices.destroy()
+    selectMonthChoices.init()
     selectUnitChoices.destroy()
     selectUnitChoices.init()
     selectDocumentStatusChoices.destroy()

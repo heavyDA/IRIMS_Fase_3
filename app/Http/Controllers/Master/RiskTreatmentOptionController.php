@@ -17,21 +17,17 @@ class RiskTreatmentOptionController extends Controller
             return DataTables::of($risk_treatment_options)
                 ->addColumn('action', function ($risk_treatment_option) {
                     $id = $risk_treatment_option->getEncryptedId();
-                    $actions = [
-                        [
-                            'type' => 'link',
-                            'permission' => 'master.risk_treatment_options.edit',
-                            'text' => 'Edit',
-                            'route' => route('master.risk_treatment_options.edit', $id),
-                        ],
-                        [
-                            'id' => $id,
-                            'type' => 'delete',
-                            'permission' => 'master.risk_treatment_options.destroy',
-                            'text' => 'Hapus',
-                            'route' => route('master.risk_treatment_options.destroy', $id),
-                        ],
-                    ];
+                    $actions = [];
+                    if (role()->checkPermission('master.risk_treatment_options.update')) {
+                        $actions[] = ['id' => $id, 'route' => route('master.risk_treatment_options.edit', $id), 'type' => 'link', 'text' => 'edit', 'permission' => true];
+                    }
+                    if (role()->checkPermission('master.risk_treatment_options.destroy')) {
+                        $actions[] = ['id' => $id, 'route' => route('master.risk_treatment_options.destroy', $id), 'type' => 'delete', 'text' => 'hapus', 'permission' => true];
+                    }
+
+                    if (empty($actions)) {
+                        return '';
+                    }
                     return view('layouts.partials._table_action', compact('actions'));
                 })
                 ->rawColumns(['action'])

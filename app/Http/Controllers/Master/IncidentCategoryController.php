@@ -17,21 +17,17 @@ class IncidentCategoryController extends Controller
             return DataTables::of($incident_categories)
                 ->addColumn('action', function ($incident_category) {
                     $id = $incident_category->getEncryptedId();
-                    $actions = [
-                        [
-                            'type' => 'link',
-                            'permission' => 'master.incident_categories.edit',
-                            'text' => 'Edit',
-                            'route' => route('master.incident_categories.edit', $id),
-                        ],
-                        [
-                            'id' => $id,
-                            'type' => 'delete',
-                            'permission' => 'master.incident_categories.destroy',
-                            'text' => 'Hapus',
-                            'route' => route('master.incident_categories.destroy', $id),
-                        ],
-                    ];
+                    $actions = [];
+                    if (role()->checkPermission('master.incident_categories.update')) {
+                        $actions[] = ['id' => $id, 'route' => route('master.incident_categories.edit', $id), 'type' => 'link', 'text' => 'edit', 'permission' => true];
+                    }
+                    if (role()->checkPermission('master.incident_categories.destroy')) {
+                        $actions[] = ['id' => $id, 'route' => route('master.incident_categories.destroy', $id), 'type' => 'delete', 'text' => 'hapus', 'permission' => true];
+                    }
+
+                    if (empty($actions)) {
+                        return '';
+                    }
                     return view('layouts.partials._table_action', compact('actions'));
                 })
                 ->rawColumns(['action'])

@@ -137,6 +137,7 @@ const identificationValidate = () => {
 
 const contextValidate = () => {
     const contextData = new FormData(contextForm);
+    contextData.delete("search_terms")
     for (let item of contextForm.querySelectorAll("input:disabled, textarea")) {
         if (item.tagName == "TEXTAREA") {
             contextData.append(item.name, item.innerHTML);
@@ -248,6 +249,7 @@ worksheetTabPreviousButton.addEventListener("click", (e) => {
 const worksheet = {
     context: {
         risk_number: "",
+        risk_qualification: null,
         unit_name: "",
         period_date: "",
         period_year: 0,
@@ -314,7 +316,6 @@ const fetchers = {
     bumn_scales: [],
     heat_maps: [],
     unit_heads: [],
-    risk_metric: {},
     risk_categories: [],
 };
 
@@ -324,7 +325,6 @@ const fetchData = async () => {
         axios.get("/master/data/bumn-scales"),
         axios.get("/master/data/heatmaps"),
         axios.get("/profile/unit-heads"),
-        axios.get("/profile/risk_metric"),
         axios.get("/master/data/risk-categories"),
     ]).then((res) => {
         for (let [index, key] of Object.keys(fetchers).entries()) {
@@ -347,6 +347,8 @@ const tables = {
 };
 
 const contextForm = document.querySelector("#contextForm");
+const riskQualificationSelect = contextForm.querySelector('[name="risk_qualification"]');
+const riskQualificationChoices = new Choices(riskQualificationSelect, defaultConfigChoices);
 const currentRiskNumber = contextForm.querySelector('[name="risk_number"]');
 currentRiskNumber.addEventListener("input", (e) => {
     incidentRiskCauseCode.value =
@@ -418,9 +420,7 @@ for (let editor of strategyForm.querySelectorAll(".textarea")) {
 const strategyRiskValueLimit = strategyForm.querySelector(
     '[name="strategy_risk_value_limit"]'
 );
-strategyRiskValueLimit.value = fetchers.risk_metric.limit
-    ? formatNumeral(fetchers.risk_metric.limit.replace('.', ','), defaultConfigFormatNumeral)
-    : "";
+strategyRiskValueLimit.value = formatNumeral(strategyRiskValueLimit.value, defaultConfigFormatNumeral);
 
 const strategyDecision = strategyForm.querySelector(
     '[name="strategy_decision"]'
@@ -574,13 +574,12 @@ strategyForm.addEventListener("submit", (e) => {
 });
 
 strategyModalElement.addEventListener("hidden.bs.modal", () => {
+    const riskValueLimit = strategyRiskValueLimit.value;
     strategyForm.reset();
     strategyForm.querySelector('[name="key"]').value = "";
     strategyForm.querySelector('[name="id"]').value = "";
 
-    strategyRiskValueLimit.value = fetchers.risk_metric.limit
-        ? formatNumeral(fetchers.risk_metric.limit.replace('.', ','), defaultConfigFormatNumeral)
-        : "";
+    strategyRiskValueLimit.value = riskValueLimit;
     strategyDecisionChoices.destroy();
     strategyDecisionChoices.init();
 
@@ -1094,7 +1093,7 @@ const calculateRisk = (
             targetExposure.value = formatNumeral(
                 parseFloat(
                     (1 / 100) *
-                    parseFloat(fetchers?.risk_metric?.limit ?? "0") *
+                    parseFloat(unformatNumeral(strategyRiskValueLimit.value, defaultConfigFormatNumeral)) *
                     parseInt(scale.customProperties.scale) *
                     (probabilityValue / 100)
                 )

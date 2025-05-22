@@ -36,6 +36,7 @@ class UnitComposer
             ->filter(fn($p) => $p->level == 1 || ($p->level == 2 && str_contains($p->sub_unit_name, 'KC ')));
         $unitsCount = $units->count();
 
+        cache()->delete('current_unit_hierarchy.' . auth()->user()->employee_id . '.' . $currentUnit->sub_unit_code);
         $units = cache()->remember(
             'current_unit_hierarchy.' . auth()->user()->employee_id . '.' . $currentUnit->sub_unit_code,
             now()->addMinutes(5),

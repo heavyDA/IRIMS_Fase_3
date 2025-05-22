@@ -32,6 +32,7 @@ class AssessmentController extends Controller
                 ) ?: $unit;
             }
 
+            $date = format_year_month((int) request('year', date('Y')), (int) request('month'));
             $worksheets = Worksheet::assessmentQuery()
                 ->when(
                     !role()->isRiskAdmin(),
@@ -44,10 +45,7 @@ class AssessmentController extends Controller
                     )
                         ->join('position_hierarchy as ph', 'ph.sub_unit_code', 'w.sub_unit_code')
                 )
-                ->when(
-                    role()->isRiskAdmin(),
-                    fn($q) => $q->where('w.sub_unit_code', $unit?->sub_unit_code ?? '')
-                )
+                ->when(role()->isRiskAdmin(), fn($q) => $q->where('w.sub_unit_code', $unit?->sub_unit_code ?? ''))
                 ->when(
                     request('document_status'),
                     function ($q) {
@@ -58,7 +56,9 @@ class AssessmentController extends Controller
                         return $q->whereNotIn('status', ['draft', 'approved']);
                     }
                 )
-                ->whereYear('w.created_at', request('year', date('Y')));
+                ->when(is_array($date), fn($q) => $q->whereBetween('w.created_at', $date))
+                ->when(is_int($date), fn($q) => $q->whereYear('w.created_at', $date))
+                ->when(request('risk_qualification'), fn($q) => $q->where('rq.id', request('risk_qualification')));
 
             return DataTables::query($worksheets)
                 ->filter(function ($q) {
@@ -66,7 +66,8 @@ class AssessmentController extends Controller
 
                     if ($value) {
                         $q->where(
-                            fn($q) => $q->orWhereLike('w.worksheet_number', '%' . $value . '%')
+                            fn($q) => $q->whereLike('w.worksheet_number', '%' . $value . '%')
+                                ->orWhereLike('rq.name', '%' . $value . '%')
                                 ->orWhereLike('w.status', '%' . $value . '%')
                                 ->orWhereLike('w.sub_unit_name', '%' . $value . '%')
                                 ->orWhereLike('w.target_body', '%' . $value . '%')

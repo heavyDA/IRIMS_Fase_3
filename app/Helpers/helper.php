@@ -1,11 +1,19 @@
 <?php
 
+use App\Services\PositionService;
 use App\Services\RoleService;
 
 if (!function_exists('role')) {
     function role()
     {
         return app(RoleService::class);
+    }
+}
+
+if (!function_exists('position_helper')) {
+    function position_helper()
+    {
+        return app(PositionService::class);
     }
 }
 

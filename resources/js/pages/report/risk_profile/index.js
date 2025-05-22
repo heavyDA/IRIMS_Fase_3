@@ -16,14 +16,18 @@ const worksheetTableFilter = worksheetOffcanvas.querySelector('#worksheet-table-
 
 const selectLength = worksheetTableFilter.querySelector('select[name="length"]')
 const selectYear = worksheetTableFilter.querySelector('select[name="year"]')
+const selectMonth = worksheetTableFilter.querySelector('select[name="month"]')
 const selectLocation = worksheetTableFilter.querySelector('select[name="location"]')
 const selectUnit = worksheetTableFilter.querySelector('select[name="unit"]')
+const selectRiskQualification = worksheetTableFilter.querySelector('select[name="risk_qualification"]')
 const selectDocumentStatus = worksheetTableFilter.querySelector('select[name="document_status"]')
 
 const selectLengthChoices = new Choices(selectLength, defaultConfigChoices)
 const selectYearChoices = new Choices(selectYear, defaultConfigChoices)
+const selectMonthChoices = new Choices(selectMonth, defaultConfigChoices)
 const selectLocationChoices = new Choices(selectLocation, defaultConfigChoices)
 const selectUnitChoices = new Choices(selectUnit, defaultConfigChoices)
+const selectRiskQualificationChoices = new Choices(selectRiskQualification, defaultConfigChoices)
 const selectDocumentStatusChoices = new Choices(selectDocumentStatus, defaultConfigChoices)
 
 const units = selectUnitChoices._currentState.choices;
@@ -56,19 +60,19 @@ const columns = [
         orderable: true,
         data: 'worksheet_number',
         name: 'worksheet_number',
-        width: '96px'
+        width: '128px'
     },
     {
         orderable: true,
         data: 'status',
         name: 'status',
-        width: '120px'
+        width: '128px'
     },
     {
         orderable: true,
         data: 'sub_unit_name',
         name: 'sub_unit_name',
-        width: '128px',
+        width: '192px',
         render: function (data, type, row) {
             if (type !== 'display') {
                 return data
@@ -81,7 +85,7 @@ const columns = [
         orderable: true,
         data: 'target_body',
         name: 'target_body',
-        width: '128px',
+        width: '312px ',
         render: function (data, type, row) {
             if (type !== 'display') {
                 return data
@@ -101,7 +105,7 @@ const columns = [
         orderable: true,
         data: 'risk_chronology_body',
         name: 'risk_chronology_body',
-        width: '200px',
+        width: '312px',
         render: function (data, type, row) {
             if (type !== 'display') {
                 return data
@@ -121,7 +125,7 @@ const columns = [
         orderable: true,
         data: 'risk_cause_body',
         name: 'risk_cause_body',
-        width: '256px',
+        width: '312px',
         render: function (data, type, row) {
             if (type !== 'display') {
                 return data
@@ -141,7 +145,7 @@ const columns = [
         orderable: true,
         data: 'risk_impact_body',
         name: 'risk_impact_body',
-        width: '256px',
+        width: '312px',
         render: function (data, type, row) {
             if (type !== 'display') {
                 return data
@@ -161,7 +165,7 @@ const columns = [
         orderable: true,
         data: 'inherent_risk_level',
         name: 'inherent_risk_level',
-        width: '100px',
+        width: '164px',
         render: function (data, type, row) {
             if (type !== 'display') {
                 return data
@@ -178,7 +182,7 @@ const columns = [
         orderable: true,
         data: 'inherent_risk_scale',
         name: 'inherent_risk_scale',
-        width: '100px',
+        width: '164px',
     },
     {
         orderable: true,
@@ -274,6 +278,12 @@ const columns = [
     },
     {
         orderable: true,
+        data: 'risk_qualification_name',
+        name: 'risk_qualification_name',
+        width: '164px',
+    },
+    {
+        orderable: true,
         data: 'created_at',
         name: 'created_at',
         visible: false  // Hidden but used for default sorting
@@ -290,7 +300,9 @@ const datatable = createDatatable('#worksheet-table', {
         url: window.location.href,
         data: function (d) {
             d.year = selectYear.value
+            d.month = selectMonth.value
             d.unit = selectUnit.value
+            d.risk_qualification = selectRiskQualification.value
             d.document_status = selectDocumentStatus.value
         }
     },
@@ -301,7 +313,7 @@ const datatable = createDatatable('#worksheet-table', {
     scrollY: '48vh',
     scrollCollapse: true,
     lengthChange: false,
-    autoWidth: true,
+    autoWidth: false,
     pageLength: 10,
     columns: columns,
     order: [[columns.length - 1, 'desc']],
@@ -309,7 +321,7 @@ const datatable = createDatatable('#worksheet-table', {
         const api = this.api();
 
         // Your existing row merging logic
-        const columnsToMerge = [0, 1, 2, 3, 4, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16];
+        const columnsToMerge = [0, 1, 2, 3, 4, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16];
 
         // Reset all cells visibility first
         api.cells().every(function () {
@@ -445,8 +457,14 @@ worksheetTableFilter.addEventListener('reset', e => {
     selectLengthChoices.init()
     selectYearChoices.destroy()
     selectYearChoices.init()
+    selectMonthChoices.destroy()
+    selectMonthChoices.init()
+    selectLocationChoices.destroy()
+    selectLocationChoices.init()
     selectUnitChoices.destroy()
     selectUnitChoices.init()
+    selectRiskQualificationChoices.destroy()
+    selectRiskQualificationChoices.init()
     selectDocumentStatusChoices.destroy()
     selectDocumentStatusChoices.init()
 
@@ -456,6 +474,7 @@ worksheetTableFilter.addEventListener('reset', e => {
     query.unit = selectUnit.value
     query.year = selectYear.value
     query.document_status = selectDocumentStatus.value
+    query.risk_qualification = selectRiskQualification.value
 
     datatable.page.len(selectLength.value).search('').order([columns.length - 1, 'desc']).draw();
 })

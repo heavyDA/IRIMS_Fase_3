@@ -26,26 +26,27 @@ class RiskMonitoringController extends Controller
         $title = 'Risk Monitoring';
 
         if (request()->ajax()) {
-            $unit = $this->roleService->getCurrentUnit();
+            $unit = role()->getCurrentUnit();
             if (request('unit')) {
                 $unit = $this->positionService->getUnitBelow(
                     $unit?->sub_unit_code,
                     request('unit'),
-                    $this->roleService->isRiskOwner() || $this->roleService->isRiskAdmin()
+                    role()->isRiskOwner() || role()->isRiskAdmin()
                 ) ?: $unit;
             }
 
-            $worksheets = Worksheet::latestMonitoringWithMitigationQuery()
+            $date = format_year_month((int) request('year', date('Y')), (int) request('month'));
+            $worksheets = Worksheet::latestMonitoringWithMitigationQuery(is_array($date) ? $date : [])
                 ->withExpression(
                     'position_hierarchy',
                     Position::hierarchyQuery(
                         $unit?->sub_unit_code,
-                        $this->roleService->isRiskOwner() || $this->roleService->isRiskAdmin()
+                        role()->isRiskOwner() || role()->isRiskAdmin()
                     )
                 )
                 ->join('position_hierarchy as ph', 'ph.sub_unit_code', 'w.sub_unit_code')
                 ->when(request('document_status'), fn($q) => $q->where('w.status_monitoring', request('document_status')))
-                ->where('worksheet_year', request('year', date('Y')));
+                ->when(is_int($date), fn($q) => $q->whereYear('w.created_at', $date));
 
             return DataTables::query($worksheets)
                 ->filter(function ($q) {
@@ -97,21 +98,22 @@ class RiskMonitoringController extends Controller
 
     public function export()
     {
-        $unit = $this->roleService->getCurrentUnit();
+        $unit = role()->getCurrentUnit();
         if (request('unit')) {
             $unit = $this->positionService->getUnitBelow(
                 $unit?->sub_unit_code,
                 request('unit'),
-                $this->roleService->isRiskOwner() || $this->roleService->isRiskAdmin()
+                role()->isRiskOwner() || role()->isRiskAdmin()
             ) ?: $unit;
         }
 
+        $date = format_year_month((int) request('year', date('Y')), (int) request('month'));
         $worksheets = Worksheet::latestMonitoringWithMitigationQuery()
             ->withExpression(
                 'position_hierarchy',
                 Position::hierarchyQuery(
                     $unit?->sub_unit_code,
-                    $this->roleService->isRiskOwner() || $this->roleService->isRiskAdmin()
+                    role()->isRiskOwner() || role()->isRiskAdmin()
                 )
             )
             ->join('position_hierarchy as ph', 'ph.sub_unit_code', 'w.sub_unit_code')
@@ -146,21 +148,23 @@ class RiskMonitoringController extends Controller
                 'incident',
                 'residual.impact_scale',
                 'residual.impact_probability_scale',
-            )->oldest('period_date'),
+            )
+                ->when(is_array($date), fn($q) => $q->whereBetween('period_date', $date))
+                ->oldest('period_date'),
         ])
             ->whereIn('id', $worksheets->pluck('worksheet_id'))
             ->simplePaginate(request('per_page', 10));
 
-        $worksheets = collect($worksheets->items());
+        $worksheets = collect($worksheets->filter(fn($worksheet) => $worksheet->monitorings->count()));
         $identifications = WorksheetIdentification::identificationQuery()->whereIn('worksheet_id', $worksheets->pluck('id'))->get();
         $worksheets = $worksheets->map(function ($worksheet) use ($identifications) {
             $worksheet->identification = $identifications->firstWhere('worksheet_id', $worksheet->id);
             return $worksheet;
         });
 
-        $year = $request->year ?? Date('Y');
-        $date = now()->translatedFormat('j F Y');
+        $date = format_date(is_array($date) ? $date[0] : $date)->translatedFormat('F Y');
+        $date_export = now()->translatedFormat('d F Y');
 
-        return Excel::download(new MonitoringExport($worksheets), "Laporan {$date} - Monitoring dan Evaluasi {$year}.xlsx");
+        return Excel::download(new MonitoringExport($worksheets), "Laporan Monitoring dan Evaluasi {$date} - {$date_export}.xlsx");
     }
 }

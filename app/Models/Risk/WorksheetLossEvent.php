@@ -82,6 +82,7 @@ class WorksheetLossEvent extends Model
                 'ph.sub_unit_name',
                 'ra_worksheets.target_body',
                 'ra_worksheets.worksheet_number',
+                'rq.name as risk_qualification_name',
                 'users.employee_name',
                 'ra_worksheet_loss_events.created_by',
                 'ra_worksheet_loss_events.created_at',
@@ -90,6 +91,7 @@ class WorksheetLossEvent extends Model
             ->join('ph', 'ph.sub_unit_code', 'ra_worksheets.sub_unit_code')
             ->leftJoin('m_kbumn_risk_categories as risk_categories_t2', 'ra_worksheet_loss_events.risk_category_t2_id', 'risk_categories_t2.id')
             ->leftJoin('m_kbumn_risk_categories as risk_categories_t3', 'ra_worksheet_loss_events.risk_category_t3_id', 'risk_categories_t3.id')
-            ->leftJoin('users', 'ra_worksheet_loss_events.created_by', 'users.employee_id');
+            ->leftJoin('users', 'ra_worksheet_loss_events.created_by', 'users.employee_id')
+            ->leftJoin('m_risk_qualifications as rq', 'rq.id', '=', 'ra_worksheets.risk_qualification_id');
     }
 }

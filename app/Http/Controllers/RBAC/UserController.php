@@ -41,10 +41,17 @@ class UserController extends Controller
                 })
                 ->addColumn('action', function (UserUnit $user) {
                     if ($user->source_type == UnitSourceType::SYSTEM->value) {
-                        $actions = [
-                            ['id' => $user->getEncryptedId(), 'route' => route('rbac.users.edit', $user->getEncryptedId()), 'type' => 'link', 'text' => 'edit', 'permission' => 'rbac.user.edit'],
-                            ['id' => $user->getEncryptedId(), 'route' => route('rbac.users.destroy', $user->getEncryptedId()), 'type' => 'delete', 'text' => 'hapus', 'permission' => 'rbac.user.destroy'],
-                        ];
+                        $actions = [];
+                        if (role()->checkPermission('rbac.users.update')) {
+                            $actions[] = ['id' => $user->getEncryptedId(), 'route' => route('rbac.users.edit', $user->getEncryptedId()), 'type' => 'link', 'text' => 'edit', 'permission' => true];
+                        }
+                        if (role()->checkPermission('rbac.users.destroy')) {
+                            $actions[] = ['id' => $user->getEncryptedId(), 'route' => route('rbac.users.destroy', $user->getEncryptedId()), 'type' => 'delete', 'text' => 'hapus', 'permission' => true];
+                        }
+
+                        if (empty($actions)) {
+                            return '';
+                        }
                         return view('layouts.partials._table_action', compact('actions'));
                     }
 

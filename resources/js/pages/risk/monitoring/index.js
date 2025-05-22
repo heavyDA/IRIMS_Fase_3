@@ -17,15 +17,19 @@ const worksheetTableFilter = worksheetOffcanvas.querySelector('#worksheet-table-
 
 const selectLength = worksheetTableFilter.querySelector('select[name="length"]')
 const selectYear = worksheetTableFilter.querySelector('select[name="year"]')
+const selectMonth = worksheetTableFilter.querySelector('select[name="month"]')
 const selectUnit = worksheetTableFilter.querySelector('select[name="unit"]')
 const selectDocumentStatus = worksheetTableFilter.querySelector('select[name="document_status"]')
 const selectLocation = worksheetTableFilter.querySelector('select[name="location"]')
+const selectRiskQualification = worksheetTableFilter.querySelector('select[name="risk_qualification"]')
 
 const selectLengthChoices = new Choices(selectLength, defaultConfigChoices)
 const selectYearChoices = new Choices(selectYear, defaultConfigChoices)
+const selectMonthChoices = new Choices(selectMonth, defaultConfigChoices)
 const selectUnitChoices = new Choices(selectUnit, defaultConfigChoices)
 const selectDocumentStatusChoices = new Choices(selectDocumentStatus, defaultConfigChoices)
 const selectLocationChoices = new Choices(selectLocation, defaultConfigChoices)
+const selectRiskQualificationChoices = new Choices(selectRiskQualification, defaultConfigChoices)
 
 const units = selectUnitChoices._currentState.choices;
 const placeholder = { label: 'Semua', value: '', placeholder: true, selected: true };
@@ -57,11 +61,16 @@ worksheetTableFilter.addEventListener('reset', e => {
     selectLengthChoices.init()
     selectYearChoices.destroy()
     selectYearChoices.init()
+    selectMonthChoices.destroy()
+    selectMonthChoices.init()
+    selectLocationChoices.destroy()
+    selectLocationChoices.init()
     selectUnitChoices.destroy()
     selectUnitChoices.init()
     selectDocumentStatusChoices.destroy()
     selectDocumentStatusChoices.init()
-
+    selectRiskQualificationChoices.destroy()
+    selectRiskQualificationChoices.init()
     datatable.page.len(selectLength.value).search('').order([columns.length - 1, 'desc']).draw();
 })
 
@@ -79,38 +88,24 @@ inputSearch.addEventListener('input', debounce(
     875
 ))
 
-selectLength.addEventListener('change', e => {
-    datatable.page.len(e.target.value).draw();
-})
-
-selectUnit.addEventListener('change', e => {
-    datatable.draw()
-})
-selectYear.addEventListener('change', e => {
-    datatable.draw()
-})
-selectDocumentStatus.addEventListener('change', e => {
-    datatable.draw()
-})
-
 const columns = [
     {
         orderable: true,
         data: 'worksheet_number',
         name: 'worksheet_number',
-        width: '96px'
+        width: '128px'
     },
     {
         orderable: true,
         data: 'status_monitoring',
         name: 'status_monitoring',
-        width: '120px'
+        width: '128px'
     },
     {
         orderable: true,
         data: 'sub_unit_name',
         name: 'sub_unit_name',
-        width: '128px',
+        width: '192px',
         render: function (data, type, row) {
             if (type !== 'display') {
                 return data
@@ -123,7 +118,7 @@ const columns = [
         orderable: true,
         data: 'target_body',
         name: 'target_body',
-        width: '256px',
+        width: '312px',
         render: function (data, type, row) {
             if (type !== 'display') {
                 return data
@@ -143,7 +138,7 @@ const columns = [
         orderable: true,
         data: 'risk_chronology_body',
         name: 'risk_chronology_body',
-        width: '256px',
+        width: '312px',
         render: function (data, type, row) {
             if (type !== 'display') {
                 return data
@@ -163,7 +158,7 @@ const columns = [
         orderable: true,
         data: 'mitigation_plan',
         name: 'mitigation_plan',
-        width: '256px',
+        width: '312px',
         render: function (data, type, row) {
             if (type !== 'display') {
                 return data
@@ -183,7 +178,7 @@ const columns = [
         orderable: true,
         data: 'actualization_plan_output',
         name: 'actualization_plan_output',
-        width: '256px',
+        width: '312px',
         render: function (data, type, row) {
             if (type !== 'display') {
                 return data
@@ -203,7 +198,7 @@ const columns = [
         orderable: true,
         data: 'inherent_risk_level',
         name: 'inherent_risk_level',
-        width: '160px',
+        width: '128px',
         render: function (data, type, row) {
             if (type !== 'display') {
                 return data
@@ -220,7 +215,7 @@ const columns = [
         orderable: true,
         data: 'inherent_risk_scale',
         name: 'inherent_risk_scale',
-        width: '160px',
+        width: '128px',
         render: function (data, type, row) {
             if (type !== 'display') return data;
 
@@ -231,7 +226,7 @@ const columns = [
         orderable: true,
         data: 'residual_risk_level',
         name: 'residual_risk_level',
-        width: '160px',
+        width: '128px',
         render: function (data, type, row) {
             if (type !== 'display') {
                 return data
@@ -248,7 +243,7 @@ const columns = [
         orderable: true,
         data: 'residual_risk_scale',
         name: 'residual_risk_scale',
-        width: '160px',
+        width: '128px',
         render: function (data, type, row) {
             if (type !== 'display') return data;
 
@@ -271,8 +266,10 @@ const datatable = createDatatable('table', {
         url: window.location.href,
         data: function (d) {
             d.year = selectYear.value
+            d.month = selectMonth.value
             d.unit = selectUnit.value
             d.document_status = selectDocumentStatus.value
+            d.risk_qualification = selectRiskQualification.value
         }
     },
     columnDefs: [{ targets: [3], width: 128 }],
@@ -283,7 +280,7 @@ const datatable = createDatatable('table', {
     scrollY: '48vh',
     scrollCollapse: true,
     lengthChange: false,
-    autoWidth: true,
+    autoWidth: false,
     pageLength: 10,
     columns: columns,
     order: [[columns.length - 1, 'desc']],

@@ -25,6 +25,7 @@ class StoreWorksheetRequest extends FormRequest
             'context' => 'required|array',
             'context.target_body' => 'required',
             'context.risk_number' => 'required',
+            'context.risk_qualification' => 'required',
 
             'identification' => 'required|array',
             'identification.risk_category_t2' => 'required|numeric',

@@ -14,7 +14,6 @@ use App\Models\Risk\Worksheet;
 use App\Models\Risk\Monitoring;
 use App\Models\Risk\MonitoringHistory;
 use App\Models\Risk\WorksheetIdentification;
-use App\Services\PositionService;
 use App\Services\UploadFileService;
 use Exception;
 use Illuminate\Http\Request;
@@ -28,7 +27,6 @@ use Yajra\DataTables\Facades\DataTables;
 class MonitoringController extends Controller
 {
     public function __construct(
-        private PositionService $positionService,
         private UploadFileService $uploadFileService
     ) {}
 
@@ -37,32 +35,26 @@ class MonitoringController extends Controller
         if (request()->ajax()) {
             $unit = role()->getCurrentUnit();
             if (request('unit')) {
-                $unit = $this->positionService->getUnitBelow(
+                $unit = position_helper()->getUnitBelow(
                     $unit?->sub_unit_code,
                     request('unit'),
                     role()->isRiskOwner() || role()->isRiskAdmin()
                 ) ?: $unit;
             }
 
-            $worksheets = Worksheet::latestMonitoringWithMitigationQuery()
-                ->when(
-                    !role()->isRiskAdmin(),
-                    fn($q) => $q->withExpression(
-                        'position_hierarchy',
-                        Position::hierarchyQuery(
-                            $unit?->sub_unit_code ?? '-',
-                            role()->isRiskOwner() || role()->isRiskAdmin()
-                        )
+            $date = format_year_month((int) request('year', date('Y')), (int) request('month', null));
+            $worksheets = Worksheet::latestMonitoringWithMitigationQuery(is_array($date) ? $date : [])
+                ->withExpression(
+                    'position_hierarchy',
+                    Position::hierarchyQuery(
+                        $unit?->sub_unit_code ?? '-',
+                        role()->isRiskOwner() || role()->isRiskAdmin()
                     )
-                        ->join('position_hierarchy as ph', 'ph.sub_unit_code', 'w.sub_unit_code')
                 )
-                ->when(
-                    role()->isRiskAdmin(),
-                    fn($q) => $q->where('w.created_by', auth()->user()->employee_id)
-                        ->where('w.sub_unit_code', $unit?->sub_unit_code ?? '-')
-                )
+                ->join('position_hierarchy as ph', 'ph.sub_unit_code', 'w.sub_unit_code')
                 ->when(request('document_status'), fn($q) => $q->where('w.status_monitoring', request('document_status')))
-                ->where('worksheet_year', request('year', date('Y')));
+                ->when(is_int($date), fn($q) => $q->where('worksheet_year', $date))
+                ->when(request('risk_qualification'), fn($q) => $q->where('w.risk_qualification_id', request('risk_qualification')));
 
             return DataTables::query($worksheets)
                 ->filter(function ($q) {
@@ -117,7 +109,11 @@ class MonitoringController extends Controller
     {
         $worksheet = Worksheet::findByEncryptedIdOrFail($worksheetId);
         $worksheet->identification = WorksheetIdentification::identificationQuery()->whereWorksheetId($worksheet->id)->firstOrFail();
-        $worksheet->load('strategies', 'incidents.mitigations', 'monitorings');
+        $worksheet->load([
+            'strategies',
+            'incidents.mitigations',
+            'monitorings' => fn($q) => $q->oldest('period_date'),
+        ]);
         $title = 'Laporan Risk Monitoring';
         return view('risk.monitoring.index', compact('title', 'worksheet'));
     }
@@ -145,8 +141,10 @@ class MonitoringController extends Controller
                     $actualizations[] = [
                         'key' => $actualizationsIndex,
                         'risk_cause_number' => $incident->risk_cause_number,
+                        'risk_cause_body' => $incident->risk_cause_body,
                         'actualization_mitigation_id' => $mitigation->id,
                         'actualization_mitigation_plan' => $mitigation->mitigation_plan,
+                        'actualization_mitigation_cost' => $mitigation->mitigation_cost,
                         'actualization_cost' => '',
                         'actualization_cost_absorption' => '',
                         'quarter' => $quarter,
@@ -300,7 +298,6 @@ class MonitoringController extends Controller
     {
         $monitoring = Monitoring::findByEncryptedIdOrFail($monitoring_id);
         $worksheet = Worksheet::findOrFail($monitoring->worksheet_id);
-
         if (
             session()->get('current_role')?->name == 'risk admin' &&
             $worksheet->created_by != auth()->user()->employee_id
@@ -311,8 +308,8 @@ class MonitoringController extends Controller
         $worksheet->load('monitorings');
 
         $monitoringMonths = array_fill(0, 11, 0);
-        foreach ($worksheet->monitorings as $monitoring) {
-            $month = format_date($monitoring->period_date)->month - 1;
+        foreach ($worksheet->monitorings as $item) {
+            $month = format_date($item->period_date)->month - 1;
             if (array_key_exists($month, $monitoringMonths)) {
                 $monitoringMonths[$month] = 1;
             }
@@ -390,6 +387,7 @@ class MonitoringController extends Controller
                     'risk_cause_body' => $actualization->mitigation->incident->risk_cause_body,
                     'actualization_mitigation_id' => $actualization->mitigation->id,
                     'actualization_mitigation_plan' => $actualization->mitigation->mitigation_plan,
+                    'actualization_mitigation_cost' => $actualization->mitigation->mitigation_cost,
                     'actualization_cost' => $monitoring->actualizations[$index]->actualization_cost,
                     'actualization_cost_absorption' => $monitoring->actualizations[$index]->actualization_cost_absorption,
                     'quarter' => $monitoring->residual->quarter,

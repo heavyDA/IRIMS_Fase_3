@@ -17,12 +17,12 @@
         </div>
     </div>
     <div class="btn-list">
-        @canany('master.risk_treatment_options.store', 'master.risk_treatment_options.create')
+        @if (role()->checkPermission('master.risk_treatment_options.create'))
             <a href="{{ route('master.risk_treatment_options.create') }}"
                 class="btn btn-primary-light btn-wave me-2 waves-effect waves-light">
                 <i class="ti ti-plus align-middle"></i> Tambah Opsi Perlakuan Risiko
             </a>
-        @endcanany
+        @endif
     </div>
 @endsection
 

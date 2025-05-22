@@ -12,6 +12,7 @@ use App\Http\Controllers\Master\{
     KRIUnitController,
     PICController,
     RiskMetricsController,
+    RiskQualificationController,
     RiskTreatmentOptionController,
     RiskTreatmentTypeController
 };
@@ -168,6 +169,14 @@ Route::group(['middleware' => 'auth'], function () {
             [
                 'names' => custom_route_names('kri_units'),
                 'parameters' => ['kri_units' => 'kri_unit'],
+            ]
+        );
+        Route::resource(
+            'risk-qualifications',
+            RiskQualificationController::class,
+            [
+                'names' => custom_route_names('risk_qualifications'),
+                'parameters' => ['risk_qualifications' => 'risk_qualification'],
             ]
         );
 

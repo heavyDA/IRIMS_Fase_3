@@ -252,3 +252,14 @@ if (!function_exists('excel_merge_same_values')) {
         return $mergedRanges;
     }
 }
+
+if (!function_exists('format_year_month')) {
+    function format_year_month(int $year, ?int $month): int|array
+    {
+        if (!$month) {
+            return $year;
+        }
+
+        return [date('Y-m-d', strtotime("{$year}-{$month}-01")), date('Y-m-t', strtotime("{$year}-{$month}-01"))];
+    }
+}

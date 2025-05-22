@@ -2,6 +2,17 @@
     <div class="row w-75 mx-auto">
         <div class="col">
             <div class="row mb-1">
+                <div class="col-3">Kualifikasi Risiko</div>
+                <div class="col">
+                    <select name="risk_qualification" class="form-select">
+                        <option value="">Pilih</option>
+                        @foreach ($risk_qualifications as $risk_qualification)
+                            <option value="{{ $risk_qualification->id }}">{{ $risk_qualification->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
+            <div class="row mb-1">
                 <div class="col-3">Unit Kerja</div>
                 <div class="col">
                     <input disabled type="text" name="unit_name" class="form-control not-allowed"
@@ -182,7 +193,7 @@
                             </div>
                             <div>
                                 <input type="text" class="not-allowed form-control" name="strategy_risk_value_limit"
-                                    disabled>
+                                    value="{{ $risk_metric->limit }}" readonly>
                             </div>
                         </div>
                         <div class="d-flex flex-column mb-2">

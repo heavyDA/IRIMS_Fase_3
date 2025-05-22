@@ -44,9 +44,11 @@ class AlterationController extends Controller
                 ) ?: $unit;
             }
 
+            $date = format_year_month((int) request('year', date('Y')), (int) request('month'));
             $alterations = WorksheetAlteration::getAlterations($unit->sub_unit_code)
                 ->when(role()->isRiskAdmin(), fn($q) => $q->where('ra_worksheets.sub_unit_code', $unit->sub_unit_code))
-                ->whereYear('ra_worksheet_alterations.created_at', request('year', date('Y')));
+                ->when(is_array($date), fn($q) => $q->whereBetween('ra_worksheet_alterations.created_at', $date))
+                ->when(is_int($date), fn($q) => $q->whereYear('ra_worksheet_alterations.created_at', $date));
 
             return DataTables::query($alterations)
                 ->filter(function ($q) {
@@ -172,11 +174,12 @@ class AlterationController extends Controller
             ) ?: $unit;
         }
 
-        $year = request('year', date('Y'));
         $value = '%' . strip_html(purify(request('search'))) . '%';
+        $date = format_year_month((int) request('year', date('Y')), (int) request('month'));
         $alterations = WorksheetAlteration::getAlterations($unit->sub_unit_code)
             ->when(role()->isRiskAdmin(), fn($q) => $q->where('ra_worksheets.sub_unit_code', $unit->sub_unit_code))
-            ->whereYear('ra_worksheet_alterations.created_at', $year)
+            ->when(is_array($date), fn($q) => $q->whereBetween('ra_worksheet_alterations.created_at', $date))
+            ->when(is_int($date), fn($q) => $q->whereYear('ra_worksheet_alterations.created_at', $date))
             ->when(
                 $value,
                 fn($q) => $q->where(
@@ -193,7 +196,8 @@ class AlterationController extends Controller
             ->simplePaginate(request('per_page', 10));
         $alterations = collect($alterations->items());
 
-        $date = now()->translatedFormat('d F Y');
-        return Excel::download(new WorksheetAlterationExport($alterations), "Laporan Ikhtisar Perubahan Profil Risiko {$year} - {$date}.xlsx");
+        $date = format_date(is_array($date) ? $date[0] : $date)->translatedFormat('F Y');
+        $date_export = now()->translatedFormat('d F Y');
+        return Excel::download(new WorksheetAlterationExport($alterations), "Laporan Ikhtisar Perubahan Profil Risiko ({$date}) - {$date_export}.xlsx");
     }
 }

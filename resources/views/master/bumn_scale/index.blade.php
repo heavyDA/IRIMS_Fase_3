@@ -17,12 +17,12 @@
         </div>
     </div>
     <div class="btn-list">
-        @canany('master.bumn_scales.store', 'master.bumn_scales.create')
+        @if (role()->checkPermission('master.bumn_scales.create'))
             <a href="{{ route('master.bumn_scales.create') }}"
                 class="btn btn-primary-light btn-wave me-2 waves-effect waves-light">
                 <i class="ti ti-plus align-middle"></i> Tambah Skala
             </a>
-        @endcanany
+        @endif
     </div>
 @endsection
 

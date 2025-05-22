@@ -101,6 +101,11 @@ class DefaultSeeder extends Seeder
                         'position' => 0,
                     ],
                     [
+                        'name' => 'Kualifikasi Risiko',
+                        'route' => 'master.risk_qualifications.index',
+                        'position' => 0,
+                    ],
+                    [
                         'name' => 'Jenis Existing Control',
                         'route' => 'master.existing_control_types.index',
                         'position' => 0,
@@ -218,6 +223,10 @@ class DefaultSeeder extends Seeder
             ],
             [
                 'route' => 'master.kri_units',
+                'permissions' => $defaultPermissions,
+            ],
+            [
+                'route' => 'master.risk_qualifications',
                 'permissions' => $defaultPermissions,
             ],
             [

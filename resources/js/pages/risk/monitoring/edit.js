@@ -163,6 +163,7 @@ const actualizationValidate = () => {
 				[
 					'actualization_pic_related',
 					'key',
+					'actualization_plan_explanation',
 				].includes(key)
 			) {
 				continue;
@@ -172,6 +173,7 @@ const actualizationValidate = () => {
 				!actualization[key] ||
 				actualization[key] == 'Pilih'
 			) {
+				console.log(key, actualization[key])
 				return false;
 			}
 		}
@@ -582,7 +584,7 @@ for (const textarea of actualizationForm.querySelectorAll('textarea')) {
 		actualizationForm.querySelector('#' + textarea.name + '-editor'),
 		defaultConfigQuill
 	);
-	if (textarea.name == 'actualization_mitigation_plan') {
+	if (['actualization_mitigation_plan', 'risk_cause_body'].includes(textarea.name)) {
 		actualizationQuills[textarea.name].enable(false);
 	} else {
 		actualizationQuills[textarea.name].on(
@@ -592,6 +594,7 @@ for (const textarea of actualizationForm.querySelectorAll('textarea')) {
 					actualizationQuills[textarea.name].root.innerHTML;
 			}
 		);
+		actualizationQuills[textarea.name].enable(textarea.name !== 'actualization_plan_explanation');
 	}
 }
 const actualizationDocumentWrapper = actualizationForm.querySelector(
@@ -617,15 +620,31 @@ actualizationPICRelatedChoice.setChoices(
 	}, [])
 );
 
+const actualizationPlanStatusSelect = actualizationForm.querySelector(
+	'[name="actualization_plan_status"]'
+);
+const actualizationPlanStatusSelectChoice = new Choices(
+	actualizationPlanStatusSelect,
+	defaultConfigChoices
+);
+
+actualizationPlanStatusSelect.addEventListener('change', e => actualizationQuills['actualization_plan_explanation'].enable(['discontinue', 'revisi'].includes(e.target.value)))
+
 let temporaryDocuments = [];
 
 for (const input of actualizationForm.querySelectorAll('input, select')) {
 	if (input.name == 'actualization_cost') {
 		input.addEventListener('input', (e) => {
+
 			e.target.value = formatNumeral(
 				e.target.value,
 				defaultConfigFormatNumeral
 			);
+
+			actualizationInputs['actualization_cost_absorption'].value = calculateCostAbsorption(
+				unformatNumeral(e.target.value, defaultConfigFormatNumeral),
+				unformatNumeral(actualizationInputs['actualization_mitigation_cost'].value, defaultConfigFormatNumeral)
+			)
 		});
 	} else if (input.name == 'actualization_pic_related') {
 		continue;
@@ -693,11 +712,22 @@ for (const input of actualizationForm.querySelectorAll('input, select')) {
 	actualizationInputs[input.name] = input;
 }
 
+const calculateCostAbsorption = (actual, cost) => cost == 0 ? -100 : parseFloat((actual / cost) * 100).toFixed(2);
+
 const onActualizationSave = (data) => {
+	if (['discontinue', 'revisi'].includes(data.actualization_plan_status) && actualizationQuills['actualization_plan_explanation']?.getLength() <= 1) {
+		Swal.fire({
+			icon: 'warning',
+			text: `Pastikan isian Realisasi Pelaksanaan Perlakuan Risiko dan Biaya telah diisi`,
+		});
+		return;
+	}
+
 	for (let key of Object.keys(data)) {
 		if (
 			[
 				'actualization_pic_related',
+				'actualization_plan_explanation',
 				'key',
 			].includes(key)
 		) {
@@ -735,7 +765,14 @@ const onActualizationSave = (data) => {
 	}
 	row.innerHTML = `
         <td class="text-center">${data.risk_cause_number}</td>
+        <td class="text-center">${data.risk_cause_body}</td>
         <td class="text-center">${data.actualization_mitigation_plan}</td>
+        <td class="text-center">
+			${data.actualization_mitigation_cost ? formatNumeral(
+		data.actualization_mitigation_cost.replaceAll('.', ','),
+		defaultConfigFormatNumeral
+	) : ''}
+		</td>
         <td class="text-center">${data.actualization_plan_body}</td>
         <td class="text-center">${data.actualization_plan_output}</td>
         <td class="text-center">${data.actualization_cost
@@ -807,8 +844,15 @@ monitoring.actualizations.forEach((actualization, index) => {
 	}
 	row.innerHTML = `
         <td class="text-center">${actualization.risk_cause_number}</td>
-        <td class="text-left">${actualization.actualization_mitigation_plan
+        <td class="text-left">${actualization.risk_cause_body
 		}</td>
+        <td class="text-left">${actualization.actualization_mitigation_plan}</td>
+        <td class="text-left">
+		${actualization.actualization_mitigation_cost ? formatNumeral(
+			actualization.actualization_mitigation_cost.replace('.', ','),
+			defaultConfigFormatNumeral
+		) : ''}
+		</td>
         <td class="text-left">${actualization.actualization_plan_body}</td>
         <td class="text-left">${actualization.actualization_plan_output}</td>
         <td class="text-center">${actualization.actualization_cost
@@ -871,11 +915,14 @@ const actualizationEdit = (index, data) => {
 				actualizationPICRelatedChoice.setChoiceByValue(pic.unit_code);
 			}
 			continue;
+		} else if (key == 'actualization_plan_status') {
+			actualizationPlanStatusSelectChoice.setChoiceByValue(data[key]);
+			continue;
 		}
 
 		const input = actualizationInputs[key];
 		if (input) {
-			if (key == 'actualization_cost') {
+			if (['actualization_cost', 'actualization_mitigation_cost'].includes(key)) {
 				input.value = formatNumeral(
 					data[key].replace('.', ','),
 					defaultConfigFormatNumeral
@@ -946,7 +993,15 @@ actualizationForm.addEventListener('submit', (e) => {
 		data.actualization_cost,
 		defaultConfigFormatNumeral
 	);
+	data.actualization_mitigation_cost = unformatNumeral(
+		data.actualization_mitigation_cost,
+		defaultConfigFormatNumeral
+	);
 
+	data.actualization_plan_explanation = ['discontinue', 'revisi'].includes(data.actualization_plan_status) ? data.actualization_plan_explanation : '';
+	data.actualization_cost_absorption = calculateCostAbsorption(data.actualization_cost, data.actualization_mitigation_cost);
+
+	console.log(data)
 	const current = monitoring.actualizations[data.key];
 	current.actualization_documents = temporaryDocuments;
 
@@ -978,6 +1033,10 @@ actualizationModalElement.addEventListener('hidden.bs.modal', (e) => {
 		)
 	);
 	actualizationPICRelatedChoice.setChoiceByValue('Pilih');
+
+	actualizationPlanStatusSelectChoice.destroy();
+	actualizationPlanStatusSelectChoice.init();
+
 	temporaryDocuments = [];
 });
 

@@ -51,7 +51,7 @@ class KRIUnitController extends Controller
 
     public function store(KRIUnitRequest $request)
     {
-        if (KRIUnit::create($request->validated())) {
+        if (KRIUnit::create($request->validated() + ['created_by' => auth()->user()->employee_id])) {
             flash_message('success', 'KRI Unit berhasil ditambahkan');
         } else {
             flash_message('error', 'KRI Unit gagal ditambahkan', State::ERROR);

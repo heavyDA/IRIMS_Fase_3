@@ -79,6 +79,7 @@ class WorksheetController extends Controller
 
         $data['context'] = [
             'worksheet_number' => strip_tags(purify($validated['context']['risk_number'])),
+            'risk_qualification' => strip_tags(purify($validated['context']['risk_qualification'])),
             'company_code' => 'API',
             'company_name' => 'PT Angkasa Pura Indonesia',
             'status' => DocumentStatus::DRAFT->value,
@@ -282,6 +283,7 @@ class WorksheetController extends Controller
                     'period_date' => $worksheet->created_at->format('M d, Y'),
                     'period_year' => $worksheet->created_at->format('Y'),
                     'risk_number' => $worksheet->worksheet_number,
+                    'risk_qualification' => $worksheet->risk_qualification_id,
                     'target_body' => $worksheet->target_body,
                     'unit_name' => $worksheet->sub_unit_name,
                 ],
@@ -405,6 +407,7 @@ class WorksheetController extends Controller
                 'company_name' => 'PT Angkasa Pura Indonesia',
                 'target_body' => purify($validated['context']['target_body']),
                 'risk_number' => strip_tags(purify($validated['context']['risk_number'])),
+                'risk_qualification' => strip_tags(purify($validated['context']['risk_qualification'])),
             ];
 
             $data['strategies'] = array_map(function ($strategy) {
@@ -489,7 +492,7 @@ class WorksheetController extends Controller
                 $worksheet->histories()->create([
                     'created_by' => auth()->user()->employee_id,
                     'created_role' => 'risk owner',
-                    'receiver_id' => $worksheet->last_history?->created_by,
+                    'receiver_id' => null,
                     'receiver_role' => $worksheet->last_history?->created_role,
                     'status' => DocumentStatus::APPROVED->value,
                     'note' => 'Kertas kerja berhasil diperbarui'

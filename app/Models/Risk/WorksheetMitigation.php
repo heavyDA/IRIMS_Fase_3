@@ -67,6 +67,7 @@ class WorksheetMitigation extends Model
             ->select(
                 'wi.worksheet_id',
                 'w.worksheet_number',
+                'rq.name as risk_qualification_name',
                 'w.target_body',
                 'w.sub_unit_code as worksheet_sub_unit_code',
                 'w.personnel_area_code as worksheet_personnel_area_code',
@@ -121,6 +122,7 @@ class WorksheetMitigation extends Model
             )
             ->leftJoin('ra_worksheet_incidents as wi', 'wm.worksheet_incident_id', '=', 'wi.id')
             ->leftJoin('worksheets as w', 'wi.worksheet_id', '=', 'w.id')
+            ->leftJoin('m_risk_qualifications as rq', 'rq.id', '=', 'w.risk_qualification_id')
             ->leftJoin('m_risk_treatment_options as m_o', 'wm.risk_treatment_option_id', '=', 'm_o.id')
             ->leftJoin('m_risk_treatment_types as m_t', 'wm.risk_treatment_type_id', '=', 'm_t.id')
             ->leftJoin('m_kri_units as m_kri', 'wi.kri_unit_id', '=', 'm_kri.id')

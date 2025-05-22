@@ -1,12 +1,12 @@
 @push('bottom-script')
     @if (str_contains(request()->route()->getName(), 'worksheet.edit'))
-        @if (str_contains('risk analis', app(\App\Services\RoleService::class)->getCurrentRole()->name))
+        @if (role()->isRiskAnalis() || role()->isAdministrator())
             @vite(['resources/js/pages/risk/worksheet/edit_editor.js'])
         @else
             @vite(['resources/js/pages/risk/worksheet/edit.js'])
         @endif
     @elseif (str_contains(request()->route()->getName(), 'worksheet.index'))
-        @if (str_contains('risk analis', app(\App\Services\RoleService::class)->getCurrentRole()->name))
+        @if (role()->isRiskAnalis() || role()->isAdministrator())
             @vite(['resources/js/pages/risk/worksheet/index_editor.js'])
         @else
             @vite(['resources/js/pages/risk/worksheet/index.js'])
@@ -54,7 +54,7 @@
             @include('risk.worksheet.form._identification')
         </div>
         <div class="tab-pane border-0 p-2" id="stepperTreatment" role="tabpanel">
-            @if (str_contains('risk analis', app(\App\Services\RoleService::class)->getCurrentRole()->name))
+            @if (role()->isRiskAnalis() || role()->isAdministrator())
                 @include('risk.worksheet.form._treatment_editor')
             @else
                 @include('risk.worksheet.form._treatment')

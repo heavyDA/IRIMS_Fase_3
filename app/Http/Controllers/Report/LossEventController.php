@@ -38,9 +38,11 @@ class LossEventController extends Controller
                 ) ?: $unit;
             }
 
+            $date = format_year_month((int) request('year', date('Y')), (int) request('month'));
             $lossEvents = WorksheetLossEvent::getLossEvents($unit->sub_unit_code)
                 ->when(role()->isRiskAdmin(), fn($q) => $q->where('ra_worksheets.sub_unit_code', $unit->sub_unit_code))
-                ->whereYear('ra_worksheet_loss_events.created_at', request('year', date('Y')));
+                ->when(is_array($date), fn($q) => $q->whereBetween('ra_worksheet_loss_events.created_at', $date))
+                ->when(is_int($date), fn($q) => $q->whereYear('ra_worksheet_loss_events.created_at', $date));
 
             return DataTables::query($lossEvents)->filter(function ($q) {
                 $value = strip_html(purify(request('search.value')));
@@ -195,12 +197,13 @@ class LossEventController extends Controller
             ) ?: $unit;
         }
 
-        $year = request('year', date('Y'));
         $value = '%' . strip_html(purify(request('search'))) . '%';
         $value = "%{$value}%";
+        $date = format_year_month((int) request('year', date('Y')), (int) request('month'));
         $lossEvents = WorksheetLossEvent::getLossEvents($unit->sub_unit_code)
             ->when(role()->isRiskAdmin(), fn($q) => $q->where('ra_worksheets.sub_unit_code', $unit->sub_unit_code))
-            ->whereYear('ra_worksheet_loss_events.created_at', $year)
+            ->when(is_array($date), fn($q) => $q->whereBetween('ra_worksheet_loss_events.created_at', $date))
+            ->when(is_int($date), fn($q) => $q->whereYear('ra_worksheet_loss_events.created_at', $date))
             ->when(
                 fn($q) => $q->where(
                     fn($q) => $q->orWhereLike('incident_body', $value)
@@ -225,7 +228,8 @@ class LossEventController extends Controller
             ->simplePaginate(request('per_page', 10));
         $lossEvents = collect($lossEvents->items());
 
-        $date = now()->translatedFormat('d F Y');
-        return Excel::download(new WorksheetLossEventExport($lossEvents), "Laporan Loss Event Database {$year} - {$date}.xlsx");
+        $date = format_date(is_array($date) ? $date[0] : $date)->translatedFormat('F Y');
+        $date_export = now()->translatedFormat('d F Y');
+        return Excel::download(new WorksheetLossEventExport($lossEvents), "Laporan Loss Event Database ({$date}) - {$date_export}.xlsx");
     }
 }

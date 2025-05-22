@@ -16,11 +16,13 @@ const alterationTableFilter = alterationOffcanvas.querySelector('#alteration-tab
 
 const selectLength = alterationTableFilter.querySelector('select[name="length"]')
 const selectYear = alterationTableFilter.querySelector('select[name="year"]')
+const selectMonth = alterationTableFilter.querySelector('select[name="month"]')
 const selectUnit = alterationTableFilter.querySelector('select[name="unit"]')
 const selectLocation = alterationTableFilter.querySelector('select[name="location"]')
 
 const selectLengthChoices = new Choices(selectLength, defaultConfigChoices)
 const selectYearChoices = new Choices(selectYear, defaultConfigChoices)
+const selectMonthChoices = new Choices(selectMonth, defaultConfigChoices)
 const selectUnitChoices = new Choices(selectUnit, defaultConfigChoices)
 const selectLocationChoices = new Choices(selectLocation, defaultConfigChoices)
 
@@ -54,13 +56,13 @@ const columns = [
         orderable: true,
         data: 'worksheet_number',
         name: 'worksheet_number',
-        width: '96px'
+        width: '128px'
     },
     {
         orderable: true,
         data: 'sub_unit_name',
         name: 'sub_unit_name',
-        width: '128px',
+        width: '196px',
         render: function (data, type, row) {
             if (type !== 'display') {
                 return data
@@ -73,7 +75,7 @@ const columns = [
         orderable: true,
         data: 'target_body',
         name: 'target_body',
-        width: '128px',
+        width: '312px',
         render: function (data, type, row) {
             if (type !== 'display') {
                 return data
@@ -93,7 +95,7 @@ const columns = [
         orderable: true,
         data: 'body',
         name: 'body',
-        width: '200px',
+        width: '312px',
         render: function (data, type, row) {
             if (type !== 'display') {
                 return data
@@ -113,7 +115,7 @@ const columns = [
         orderable: true,
         data: 'impact',
         name: 'impact',
-        width: '256px',
+        width: '312px',
         render: function (data, type, row) {
             if (type !== 'display') {
                 return data
@@ -133,7 +135,7 @@ const columns = [
         orderable: true,
         data: 'description',
         name: 'description',
-        width: '256px',
+        width: '312px',
         render: function (data, type, row) {
             if (type !== 'display') {
                 return data
@@ -153,6 +155,7 @@ const columns = [
         orderable: true,
         data: 'employee_name',
         name: 'employee_name',
+        width: '192px',
         visible: false  // Hidden but used for default sorting
     },
     {
@@ -176,22 +179,22 @@ const datatable = createDatatable('#alteration-table', {
     responsive: false,
     serverSide: true,
     processing: true,
-    columnDefs: [{ targets: [3], width: 128 }],
     ajax: {
         url: window.location.href,
         data: function (d) {
             d.year = selectYear.value
+            d.month = selectMonth.value
             d.unit = selectUnit.value
         }
     },
     fixedColumns: {
-        start: 2
+        start: 3
     },
     scrollX: true,
     scrollY: '48vh',
     scrollCollapse: true,
     lengthChange: false,
-    autoWidth: true,
+    autoWidth: false,
     pageLength: 10,
     columns: columns,
     order: [[columns.length - 1, 'desc']],
@@ -252,6 +255,8 @@ alterationTableFilter.addEventListener('reset', e => {
     selectLengthChoices.init()
     selectYearChoices.destroy()
     selectYearChoices.init()
+    selectMonthChoices.destroy()
+    selectMonthChoices.init()
     selectUnitChoices.destroy()
     selectUnitChoices.init()
 

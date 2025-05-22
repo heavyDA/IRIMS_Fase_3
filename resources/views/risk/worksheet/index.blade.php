@@ -76,9 +76,11 @@
 
                                     @isset($worksheet)
                                         @if (
-                                            ($worksheet->status == 'draft' && in_array(session()->get('current_role')?->name, ['risk admin', 'risk owner'])) ||
-                                                ($worksheet->status == 'on review' && session()->get('current_role')?->name == 'risk owner') ||
-                                                in_array(session()->get('current_role')?->name, ['root', 'administrator', 'risk analis']))
+                                            ($worksheet->status == \App\Enums\DocumentStatus::DRAFT->value &&
+                                                (role()->isRiskAdmin() || role()->isRiskOwner())) ||
+                                                ($worksheet->status == 'on review' && role()->isRiskOwner()) ||
+                                                role()->isAdministrator() ||
+                                                role()->isRiskAnalis())
                                             <form action="{{ route('risk.worksheet.destroy', $worksheet->getEncryptedId()) }}"
                                                 method="POST">
                                                 @csrf

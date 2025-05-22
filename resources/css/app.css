@@ -32885,3 +32885,8 @@ th[col-width-80], td[col-width-80] { min-width: 120px; max-width: 120px; }
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+.form-control-readonly {
+  background-color: var(--bs-secondary-bg);
+  opacity: 1;
+}

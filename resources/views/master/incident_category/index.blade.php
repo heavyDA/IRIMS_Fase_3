@@ -17,12 +17,12 @@
         </div>
     </div>
     <div class="btn-list">
-        @canany('master.incident_categories.store', 'master.incident_categories.create')
+        @if (role()->checkPermission('master.incident_categories.create'))
             <a href="{{ route('master.incident_categories.create') }}"
                 class="btn btn-primary-light btn-wave me-2 waves-effect waves-light">
                 <i class="ti ti-plus align-middle"></i> Tambah Kategori Kejadian
             </a>
-        @endcanany
+        @endif
     </div>
 @endsection
 
