@@ -531,7 +531,7 @@ class MonitoringController extends Controller
                     }
                 }
 
-                $files = $request->actualizations[$item['key']]['actualization_documents'];
+                $files = $request->actualizations[$item['key']]['documents'] ?? [];
                 if ($files) {
                     foreach ($files as $key => $file) {
                         if (is_array($file)) {

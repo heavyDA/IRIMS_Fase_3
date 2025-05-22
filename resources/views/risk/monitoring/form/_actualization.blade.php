@@ -52,6 +52,9 @@
                     <th colspan="4" style="vertical-align: middle !important; text-align:center !important;">Progress
                         Pelaksanaan Rencana Perlakuan
                         Risiko</th>
+                    <th rowspan="2" style="vertical-align: middle !important; text-align:center !important;">
+                        Dokumen Pendukung
+                    </th>
                 </tr>
                 <tr>
                     <th style="text-align:center !important;">Threshold</th>
