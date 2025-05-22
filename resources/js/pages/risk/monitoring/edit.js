@@ -170,10 +170,21 @@ const actualizationValidate = () => {
 			}
 
 			if (
+				[
+					'actualization_mitigation_cost',
+					'actualization_cost_absorption',
+				].includes(key)
+			) {
+				if (actualization.actualization_mitigation_cost == 0) continue;
+				if (actualization.actualization_cost_absorption != 0) continue;
+
+				return false
+			}
+
+			if (
 				!actualization[key] ||
 				actualization[key] == 'Pilih'
 			) {
-				console.log(key, actualization[key])
 				return false;
 			}
 		}
@@ -712,14 +723,15 @@ for (const input of actualizationForm.querySelectorAll('input, select')) {
 	actualizationInputs[input.name] = input;
 }
 
-const calculateCostAbsorption = (actual, cost) => cost == 0 ? -100 : parseFloat((actual / cost) * 100).toFixed(2);
+const calculateCostAbsorption = (actual, cost) => actual == 0 ? 0 : (cost == 0 ? -100 : parseFloat((actual / cost) * 100).toFixed(2));
 
 const onActualizationSave = (data) => {
+	const swalAlert = () => Swal.fire({
+		icon: 'warning',
+		text: `Pastikan isian Realisasi Pelaksanaan Perlakuan Risiko dan Biaya telah diisi`,
+	});
 	if (['discontinue', 'revisi'].includes(data.actualization_plan_status) && actualizationQuills['actualization_plan_explanation']?.getLength() <= 1) {
-		Swal.fire({
-			icon: 'warning',
-			text: `Pastikan isian Realisasi Pelaksanaan Perlakuan Risiko dan Biaya telah diisi`,
-		});
+		swalAlert()
 		return;
 	}
 
@@ -734,15 +746,21 @@ const onActualizationSave = (data) => {
 			continue;
 		}
 
+		if (['actualization_cost_absorption', 'actualization_mitigation_cost'].includes(key)) {
+			if (data.actualization_mitigation_cost == 0) continue;
+			if (data.actualization_cost_absorption != 0) continue;
+			swalAlert()
+			return
+
+		}
+
 		if (
 			!data[key] ||
 			data[key] == 'Pilih' ||
-			actualizationQuills[key]?.getLength() <= 1
+			actualizationQuills[key]?.getLength() <= 1 ||
+			data[key]?.length < 1
 		) {
-			Swal.fire({
-				icon: 'warning',
-				text: `Pastikan isian Realisasi Pelaksanaan Perlakuan Risiko dan Biaya telah diisi`,
-			});
+			swalAlert()
 
 			return;
 		}
@@ -814,6 +832,17 @@ const onActualizationSave = (data) => {
 		}</td>
     `;
 
+	let documentCell = '<td><div class="d-flex flex-column gap-2">'
+	data.actualization_documents.forEach(document => {
+		documentCell += `
+			<a style="max-width: 164px;" class="badge bg-success-transparent text-truncate"
+				target="_blank"
+				href="${document.url}">${document.name}</a>
+		`
+	})
+	documentCell += '</div></td>'
+
+	row.innerHTML += documentCell
 	row.prepend(editButton);
 	editButton.addEventListener('click', (e) => {
 		actualizationEdit(data.key, data);
@@ -895,6 +924,17 @@ monitoring.actualizations.forEach((actualization, index) => {
 			: ''
 		}</td>
     `;
+
+	let documentCell = '<td><div class="d-flex flex-column gap-2">'
+	actualization.actualization_documents.forEach(document => {
+		documentCell += `
+			<a style="max-width: 164px;" class="badge bg-success-transparent text-truncate"
+				target="_blank"
+				href="/file/${document.url}">${document.name}</a>
+		`
+	})
+	documentCell += '</div></td>'
+	row.innerHTML += documentCell
 
 	row.prepend(editButton);
 	editButton.addEventListener('click', (e) => {
@@ -1001,7 +1041,6 @@ actualizationForm.addEventListener('submit', (e) => {
 	data.actualization_plan_explanation = ['discontinue', 'revisi'].includes(data.actualization_plan_status) ? data.actualization_plan_explanation : '';
 	data.actualization_cost_absorption = calculateCostAbsorption(data.actualization_cost, data.actualization_mitigation_cost);
 
-	console.log(data)
 	const current = monitoring.actualizations[data.key];
 	current.actualization_documents = temporaryDocuments;
 
