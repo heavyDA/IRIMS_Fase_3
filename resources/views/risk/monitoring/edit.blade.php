@@ -42,7 +42,7 @@
                     <h2 class="accordion-header " id="headingOne">
                         <button class="accordion-button" type="button" data-bs-toggle="collapse"
                             data-bs-target="#listRiskMonitoring" aria-expanded="true" aria-controls="listRiskMonitoring">
-                            <i class="fs-3 ti ti-clipboard-text"></i>&nbsp;&nbsp;List Risk Monitoring
+                            <i class="fs-3 ti ti-clipboard-text"></i>&nbsp;&nbsp;Form Risk Monitoring
                         </button>
                     </h2>
                     <div id="listRiskMonitoring" class="accordion-collapse collapse show" aria-labelledby="headingOne"

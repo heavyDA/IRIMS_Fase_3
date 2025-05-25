@@ -111,6 +111,7 @@ class MonitoringController extends Controller
         $worksheet->identification = WorksheetIdentification::identificationQuery()->whereWorksheetId($worksheet->id)->firstOrFail();
         $worksheet->load([
             'strategies',
+            'qualification',
             'incidents.mitigations',
             'monitorings' => fn($q) => $q->oldest('period_date'),
         ]);
@@ -122,18 +123,44 @@ class MonitoringController extends Controller
     {
         $worksheet = Worksheet::findByEncryptedIdOrFail($worksheetId);
         $worksheet->identification = WorksheetIdentification::identificationQuery()->whereWorksheetId($worksheet->id)->firstOrFail();
+        $worksheet->load('qualification');
         if (request()->ajax()) {
             $worksheet->load('incidents.mitigations');
 
             $actualizations = [];
             $quarter = ceil(date('m') / 3);
+
+            $monitoring = Monitoring::with('residual')
+                ->where('worksheet_id', $worksheet->id)
+                ->first();
+
             $residual = [
-                'period_date' => date('Y-m-d'),
-                'quarter' => $quarter,
+                'period_date' => $monitoring?->period_date ?? date('Y-m-d'),
                 'risk_chronology_body' => $worksheet->identification->risk_chronology_body,
                 'risk_impact_category' => $worksheet->identification->risk_impact_category,
-                'risk_mitigation_effectiveness' => '',
+                'risk_mitigation_effectiveness' => $monitoring?->residual->risk_mitigation_effectiveness ?? '',
+                'impact_probability' => 0,
+                'impact_probability_scale' => null,
+                'impact_scale' => null,
+                'impact_value' => 0,
+                'risk_exposure' => '',
+                'risk_level' => '',
+                'risk_scale' => '',
+                'quarter' => $monitoring?->residual->quarter ?? $quarter,
             ];
+
+            for ($i = 0; $i <= 4; $i++) {
+                if ($i == $monitoring?->residual->quarter ?? $quarter) {
+                    $residual['impact_probability'] = $monitoring?->residual->impact_probability ?? null;
+                    $residual['impact_probability_scale'] = $monitoring?->residual->impact_probability_scale_id ?? '' ?? null;
+                    $residual['impact_scale'] = $monitoring?->residual->impact_scale_id ?? '' ?? null;
+                    $residual['impact_value'] = $monitoring?->residual->impact_value ?? null;
+                    $residual['risk_exposure'] = $monitoring?->residual->risk_exposure ?? null;
+                    $residual['risk_level'] = $monitoring?->residual->risk_level ?? null;
+                    $residual['risk_scale'] = $monitoring?->residual->risk_scale ?? null;
+                    break;
+                }
+            }
 
             $actualizationsIndex = 0;
             $worksheet->incidents->each(function ($incident) use ($quarter, &$actualizations, &$actualizationsIndex) {
@@ -169,8 +196,10 @@ class MonitoringController extends Controller
             for ($i = 1; $i <= 4; $i++) {
                 $riskLevel = "residual_{$i}_risk_level";
                 $riskScale = "residual_{$i}_risk_scale";
+                $impactProbability = "residual_{$i}_impact_probability";
                 $residualTargets[] = [
                     'quarter' => $i,
+                    'impact_probability' => $worksheet->identification->$impactProbability,
                     'risk_level' => $worksheet->identification->$riskLevel,
                     'risk_scale' => (int) $worksheet->identification->$riskScale ?? '',
                 ];
@@ -438,8 +467,10 @@ class MonitoringController extends Controller
             for ($i = 1; $i <= 4; $i++) {
                 $riskLevel = "residual_{$i}_risk_level";
                 $riskScale = "residual_{$i}_risk_scale";
+                $impactProbability = "residual_{$i}_impact_probability";
                 $residualTargets[] = [
                     'quarter' => $i,
+                    'impact_probability' => $worksheet->identification->$impactProbability,
                     'risk_level' => $worksheet->identification->$riskLevel,
                     'risk_scale' => (int) $worksheet->identification->$riskScale ?? '',
                 ];

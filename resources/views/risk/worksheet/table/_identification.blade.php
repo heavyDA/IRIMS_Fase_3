@@ -13,9 +13,9 @@
                     Risiko</th>
                 <th class="table-dark-custom" style="text-align:center !important;" rowspan="3">No. Penyebab Risiko
                 </th>
-                <th class="table-dark-custom" style="text-align:center !important;" rowspan="3">Kode Penyebab risiko
+                <th class="table-dark-custom" style="text-align:center !important;" rowspan="3">Kode Penyebab Risiko
                 </th>
-                <th class="table-dark-custom" style="text-align:center !important;" rowspan="3">Penyebab risiko</th>
+                <th class="table-dark-custom" style="text-align:center !important;" rowspan="3">Penyebab Risiko</th>
                 <th class="table-dark-custom" style="text-align:center !important;" rowspan="3">Key Risk Indicators
                 </th>
                 <th class="table-dark-custom" style="text-align:center !important;" rowspan="3">Unit Satuan KRI</th>
@@ -33,6 +33,8 @@
                 <th class="table-dark-custom" style="text-align:center !important;" colspan="8">Risiko Inheren</th>
                 <th class="table-dark-custom" style="text-align:center !important;" colspan="28">Target Risiko
                     Residual</th>
+                <th class="table-dark-custom" style="text-align:center !important;" rowspan="3">Kualifikasi Risiko
+                </th>
             </tr>
             <tr style="vertical-align: bottom;">
                 <th class="table-dark-custom" style="text-align:center !important;" rowspan="2">Aman</th>
@@ -74,28 +76,28 @@
                     <tr>
                         <td class="col-width-180 freeze">{{ $worksheet->company_name }}</td>
                         <td>{{ $worksheet->company_code }}</td>
-                        <td>{!! html_entity_decode($worksheet->target_body) !!}</td>
+                        <td>{!! $worksheet->target_body !!}</td>
                         <td>
                             {{ $worksheet->identification->risk_category_t2_name . ' & ' . $worksheet->identification->risk_category_t3_name }}
                         </td>
-                        <td>{!! html_entity_decode($worksheet->identification->risk_chronology_body) !!}</td>
-                        <td>{!! html_entity_decode($worksheet->identification->risk_chronology_description) !!}</td>
+                        <td>{!! $worksheet->identification->risk_chronology_body !!}</td>
+                        <td>{!! $worksheet->identification->risk_chronology_description !!}</td>
                         <td>{{ $incident->risk_cause_number }}</td>
                         <td>{{ $incident->risk_cause_code }}</td>
-                        <td>{!! html_entity_decode($incident->risk_cause_body) !!}</td>
-                        <td>{!! html_entity_decode($incident->kri_body) !!}</td>
+                        <td>{!! $incident->risk_cause_body !!}</td>
+                        <td>{!! $incident->kri_body !!}</td>
                         <td>{{ $incident?->kri_unit?->name }}</td>
-                        <td>{!! html_entity_decode($incident?->kri_threshold_safe) !!}</td>
-                        <td>{!! html_entity_decode($incident?->kri_threshold_caution) !!}</td>
-                        <td>{!! html_entity_decode($incident?->kri_threshold_danger) !!}</td>
+                        <td>{!! $incident?->kri_threshold_safe !!}</td>
+                        <td>{!! $incident?->kri_threshold_caution !!}</td>
+                        <td>{!! $incident?->kri_threshold_danger !!}</td>
                         <td>{{ $worksheet->identification->existing_control_type_name }}</td>
-                        <td>{!! html_entity_decode($worksheet->identification->existing_control_body) !!}</td>
+                        <td>{!! $worksheet->identification->existing_control_body !!}</td>
                         <td>{{ $worksheet->identification->control_effectiveness_assessment_name }}</td>
                         <td>{{ $worksheet->identification->risk_impact_category }}</td>
-                        <td>{!! html_entity_decode($worksheet->identification->risk_impact_body) !!}</td>
+                        <td>{!! $worksheet->identification->risk_impact_body !!}</td>
                         <td>{{ format_date($worksheet->identification->risk_impact_start_date)->translatedFormat('d F Y') . ' s.d. ' . format_date($worksheet->identification->risk_impact_end_date)->translatedFormat('d F Y') }}
                         </td>
-                        <td>{!! html_entity_decode($worksheet->identification->inherent_body) !!}</td>
+                        <td>{!! $worksheet->identification->inherent_body !!}</td>
                         <td>
                             @if ($worksheet->identification->inherent_impact_value)
                                 Rp.{{ number_format((float) $worksheet->identification->inherent_impact_value, 2, ',', '.') }}
@@ -138,6 +140,7 @@
                                 }
                             @endphp
                         @endforeach
+                        <td>{{ $worksheet?->qualification?->name ?? '' }}</td>
                     </tr>
                 @endforeach
             @endisset
