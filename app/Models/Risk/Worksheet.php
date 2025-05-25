@@ -4,6 +4,7 @@ namespace App\Models\Risk;
 
 use App\Enums\DocumentStatus;
 use App\Models\Master\Position;
+use App\Models\Master\RiskQualification;
 use App\Models\RBAC\Role;
 use App\Models\User;
 use App\Traits\HasEncryptedId;
@@ -93,6 +94,11 @@ class Worksheet extends Model
     public function creator()
     {
         return $this->belongsTo(User::class, 'created_by', 'employee_id');
+    }
+
+    public function qualification()
+    {
+        return $this->belongsTo(RiskQualification::class, 'risk_qualification_id', 'id');
     }
 
     public function strategies()

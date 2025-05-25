@@ -1193,9 +1193,12 @@ const residualItemsInit = () => {
             );
 
         residualItems.push(residualItem);
+
+        if (identificationSelects[`residual[${i}][impact_scale]`].value) {
+            identificationSelects[`residual[${i}][impact_scale]`].dispatchEvent(new Event("change"))
+        }
     }
 };
-residualItemsInit();
 
 identificationInherentImpactValue.addEventListener("input", (e) => {
     const value = formatNumeral(e.target.value, defaultConfigFormatNumeral);
@@ -2047,8 +2050,12 @@ if (worksheet?.mitigations[0]?.mitigation_pic) {
 }
 
 for (const key of Object.keys(fetchers.data.context)) {
-    contextForm.querySelector(`[name="${key}"]`).value =
-        fetchers.data.context[key];
+    if (key == "risk_qualification" && fetchers.data.context[key]) {
+        riskQualificationChoices.setChoiceByValue(fetchers.data.context[key].toString());
+    } else {
+        contextForm.querySelector(`[name="${key}"]`).value =
+            fetchers.data.context[key];
+    }
 }
 
 for (const key of Object.keys(fetchers.data.identification)) {
@@ -2170,7 +2177,11 @@ treatmentRiskCauseNumberChoices
     .setChoices(treatmentIncidentChoices)
     .setChoiceByValue("Pilih");
 
-for (const strategy of worksheet.strategies) {
+for (const [idx, strategy] of worksheet.strategies.entries()) {
+    const riskValueLimit = unformatNumeral(strategyRiskValueLimit.value, defaultConfigFormatNumeral);
+    worksheet.strategies[idx].strategy_risk_value_limit = riskValueLimit;
+    strategy.strategy_risk_value_limit = riskValueLimit;
+
     strategy.key = strategy.id.toString();
     addStrategyRow(strategy);
 }
@@ -2184,3 +2195,5 @@ for (const mitigation of worksheet.mitigations) {
     mitigation.key = mitigation.id.toString();
     addTreatmentRow(mitigation);
 }
+
+residualItemsInit();

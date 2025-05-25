@@ -215,7 +215,7 @@ class WorksheetController extends Controller
     {
         $worksheet = Worksheet::findByEncryptedIdOrFail($worksheet);
         $worksheet->identification = WorksheetIdentification::identificationQuery()->whereWorksheetId($worksheet->id)->firstOrFail();
-        $worksheet->load('strategies', 'incidents.mitigations');
+        $worksheet->load('strategies', 'qualification', 'incidents.mitigations');
 
         if (request()->ajax()) {
             $identification = (array) $worksheet->identification;

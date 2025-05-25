@@ -540,8 +540,9 @@ const calculateRisk = (quarter) => {
 	};
 
 	const residualTarget = monitoring.residual_target.find(item => item.quarter == quarter)
-	if (residualTarget && monitoring.residual.risk_scale) {
-		if (monitoring.residual.risk_scale < residualTarget.risk_scale) {
+	const impactProbability = parseInt(monitoring?.residual?.impact_probability || 0)
+	if (residualTarget && impactProbability) {
+		if (impactProbability <= residualTarget.impact_probability) {
 			monitoring.residual.risk_mitigation_effectiveness = '1'
 			residualRiskMitigationEffectivenessChoices.setChoiceByValue('1')
 		} else {
