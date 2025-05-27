@@ -23,6 +23,7 @@
 		"spatie/laravel-permission": "^6.10",
 		"spatie/menu": "^3.2",
 		"staudenmeir/laravel-cte": "^1.11",
+		"voku/simple_html_dom": "^4.8",
 		"yajra/laravel-datatables-oracle": "11.0"
 	},
 	"require-dev": {

@@ -1,6 +1,7 @@
 <?php
 
 use App\Jobs\FetchEmployeeJob;
+use App\Jobs\HTMLCheckerJob;
 use App\Jobs\OfficialJob;
 use App\Jobs\PositionJob;
 use Illuminate\Foundation\Inspiring;
@@ -32,3 +33,7 @@ Artisan::command('fetch:position', function () {
 Artisan::command('fetch:employee', function () {
     FetchEmployeeJob::dispatch();
 })->purpose('Fetch employee from API');
+
+Artisan::command('html:checker', function () {
+    HTMLCheckerJob::dispatch();
+})->purpose('Check HTML content');
