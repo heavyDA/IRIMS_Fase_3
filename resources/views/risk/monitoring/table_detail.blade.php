@@ -56,8 +56,9 @@
 
                                 @if (!str_contains(request()->route()->getName(), 'edit'))
                                     @if (
-                                        ($monitoring->status == 'draft' && (role()->isRiskAdmin() || role()->isRiskOwner() || role()->isRiskAnalis())) ||
-                                            ($monitoring->status == 'on review' && role()->isRiskOwner()) ||
+                                        ($monitoring->status === \App\Enums\DocumentStatus::DRAFT->value &&
+                                            (role()->isRiskAdmin() || role()->isRiskOwner())) ||
+                                            ($monitoring->status === \App\Enums\DocumentStatus::ON_REVIEW->value && role()->isRiskOwner()) ||
                                             (role()->isAdministrator() || role()->isRiskAnalis()))
                                         <a href="{{ route('risk.monitoring.edit_monitoring', $monitoring->getEncryptedId()) }}"
                                             style="min-width: 128px;" class="btn btn-success">
@@ -78,7 +79,7 @@
                                         action="{{ route('risk.monitoring.destroy_monitoring', $monitoring->getEncryptedId()) }}">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="btn btn-danger"
+                                        <button type="submit" style="min-width: 128px;" class="btn btn-danger"
                                             onclick="return confirm('Hapus data ini?')">
                                             <span><i class="ti ti-trash"></i></span>&nbsp;Hapus
                                         </button>

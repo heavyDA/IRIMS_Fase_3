@@ -49,7 +49,7 @@
                     <th rowspan="2" style="vertical-align: middle !important; text-align:center !important;">
                         Penjelasan Status Rencana Perlakuan Risiko
                     </th>
-                    <th colspan="4" style="vertical-align: middle !important; text-align:center !important;">Progress
+                    <th rowspan="2" style="vertical-align: middle !important; text-align:center !important;">Progress
                         Pelaksanaan Rencana Perlakuan
                         Risiko</th>
                     <th rowspan="2" style="vertical-align: middle !important; text-align:center !important;">
@@ -59,10 +59,6 @@
                 <tr>
                     <th style="text-align:center !important;">Threshold</th>
                     <th style="text-align:center !important;">Skor</th>
-                    <th style="text-align:center !important;">Q1</th>
-                    <th style="text-align:center !important;">Q2</th>
-                    <th style="text-align:center !important;">Q3</th>
-                    <th style="text-align:center !important;">Q4</th>
                 </tr>
             </thead>
             <tbody>
@@ -215,15 +211,42 @@
                                 <div class="col">
                                     <label class="badge bg-success">Threshold</label>
                                     <select name="actualization_kri_threshold" class="form-select">
-                                        <option>Pilih</option>
-                                        <option value="hijau">Hijau</option>
-                                        <option value="kuning">Kuning</option>
-                                        <option value="merah">Merah</option>
+                                        <option value="">Pilih</option>
+                                        @foreach ($worksheet->incidents as $incident)
+                                            <option
+                                                data-custom-properties='{{ json_encode([
+                                                    'id' => $incident->risk_cause_number,
+                                                    'value' => html_entity_decode($incident->kri_threshold_safe),
+                                                    'color' => \App\Enums\KRIThreshold::SAFE->color(),
+                                                ]) }}'
+                                                value="hijau">
+                                                Hijau
+                                            </option>
+                                            <option
+                                                data-custom-properties='{{ json_encode([
+                                                    'id' => $incident->risk_cause_number,
+                                                    'value' => html_entity_decode($incident->kri_threshold_caution),
+                                                    'color' => \App\Enums\KRIThreshold::CAUTION->color(),
+                                                ]) }}'
+                                                value="kuning">
+                                                Kuning
+                                            </option>
+                                            <option
+                                                data-custom-properties='{{ json_encode([
+                                                    'id' => $incident->risk_cause_number,
+                                                    'value' => html_entity_decode($incident->kri_threshold_danger),
+                                                    'color' => \App\Enums\KRIThreshold::DANGER->color(),
+                                                ]) }}'
+                                                value="merah">
+                                                Merah
+                                            </option>
+                                        @endforeach
                                     </select>
                                 </div>
                                 <div class="col">
                                     <label class="badge bg-secondary">Skor</label>
-                                    <input type="number" class="form-control" name="actualization_kri_threshold_score">
+                                    <input type="text" readonly class="form-control not-allowed"
+                                        name="actualization_kri_threshold_score">
                                 </div>
                             </div>
                         </div>
@@ -253,15 +276,12 @@
                             <div class="col-3">
                                 Progress Pelaksanaan Rencana Perlakuan<span class="text-danger">*</span>
                             </div>
-                            <div class="col row">
-                                @for ($i = 1; $i <= 4; $i++)
-                                    <div class="col">
-                                        <label
-                                            for="actualization_plan_progress[{{ $i }}]">Q{{ $i }}</label>
-                                        <input type="number" step="0.01" class="form-control not-allowed"
-                                            name="actualization_plan_progress[{{ $i }}]" disabled>
-                                    </div>
-                                @endfor
+                            <div class="col">
+                                <div class="input-group mb-3">
+                                    <input type="number" step="0.01" min="0" max="100"
+                                        class="form-control" name="actualization_plan_progress">
+                                    <span class="input-group-text">%</span>
+                                </div>
                             </div>
                         </div>
                     </form>

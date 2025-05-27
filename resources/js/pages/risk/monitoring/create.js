@@ -16,6 +16,8 @@ import {
 	defaultLocaleFlatpickr,
 	generateRandomKey,
 	jsonToFormData,
+	renderBadge,
+	calculateCostAbsorptionPercentage
 } from '~js/components/helper';
 import Swal from 'sweetalert2';
 
@@ -70,25 +72,17 @@ monitoringTabNextButton.addEventListener('click', (e) => {
 	currentStep += 1;
 
 	if (currentStep == 1) {
+		if (!actualizationValidate()) {
+			currentStep -= 1;
+			return;
+		}
+	} else if (currentStep == 2) {
 		if (!residualValidate()) {
-			Swal.fire({
-				icon: 'warning',
-				text: 'Pastikan seluruh isian Realisasi Risiko Residual telah diisi',
-			});
 			currentStep -= 1;
 			return;
 		}
 
 		residualBlockOnMap();
-	} else if (currentStep == 2) {
-		if (!actualizationValidate()) {
-			Swal.fire({
-				icon: 'warning',
-				text: 'Pastikan seluruh isian Realisasi Pelaksanaan Perlakuan Risiko dan Biaya telah diisi',
-			});
-			currentStep -= 1;
-			return;
-		}
 	}
 
 	const previousTab = monitoringTabList[currentStep - 1].querySelector('h2');
@@ -147,6 +141,10 @@ const residualValidate = () => {
 	for (let key of Object.keys(monitoring.residual)) {
 		if (key == 'impact_value') continue;
 		if (!monitoring.residual[key] || monitoring.residual[key] == 'Pilih') {
+			Swal.fire({
+				icon: 'warning',
+				text: 'Pastikan seluruh isian Realisasi Risiko Residual telah diisi',
+			});
 			return false;
 		}
 	}
@@ -160,6 +158,7 @@ const actualizationValidate = () => {
 				[
 					'actualization_pic_related',
 					'actualization_plan_explanation',
+					'actualization_cost_absorption',
 					'key',
 				].includes(key)
 			) {
@@ -180,8 +179,13 @@ const actualizationValidate = () => {
 
 			if (
 				!actualization[key] ||
-				actualization[key] == 'Pilih'
+				actualization[key] == 'Pilih' ||
+				actualization[key]?.length < 1
 			) {
+				Swal.fire({
+					icon: 'warning',
+					text: 'Pastikan seluruh isian Realisasi Pelaksanaan Perlakuan Risiko dan Biaya telah diisi',
+				});
 				return false;
 			}
 		}
@@ -636,6 +640,20 @@ actualizationPICRelatedChoice.setChoices(
 	}, [])
 );
 
+const actualizationKRIThresholdSelect = actualizationForm.querySelector('[name="actualization_kri_threshold"]');
+const actualizationKRIThresholdSelectChoice = new Choices(actualizationKRIThresholdSelect, defaultConfigChoices);
+const kriThresholds = actualizationKRIThresholdSelectChoice._currentState.choices;
+
+actualizationKRIThresholdSelect.addEventListener('change', e => {
+	if (e.target.value) {
+		const value = actualizationKRIThresholdSelectChoice.getValue(false)
+		actualizationInputs.actualization_kri_threshold_score.value = value.customProperties.value
+		return
+	}
+
+	actualizationInputs.actualization_kri_threshold_score.value = ''
+})
+
 const actualizationPlanStatusSelect = actualizationForm.querySelector(
 	'[name="actualization_plan_status"]'
 );
@@ -651,16 +669,11 @@ let temporaryDocuments = [];
 for (const input of actualizationForm.querySelectorAll('input, select')) {
 	if (input.name == 'actualization_cost') {
 		input.addEventListener('input', (e) => {
-
-			e.target.value = formatNumeral(
-				e.target.value,
-				defaultConfigFormatNumeral
-			);
-
-			actualizationInputs['actualization_cost_absorption'].value = calculateCostAbsorption(
+			actualizationInputs['actualization_cost_absorption'].value = calculateCostAbsorptionPercentage(
 				unformatNumeral(e.target.value, defaultConfigFormatNumeral),
-				unformatNumeral(actualizationInputs['actualization_mitigation_cost'].value, defaultConfigFormatNumeral)
+				unformatNumeral(actualizationInputs['actualization_mitigation_cost'].value, defaultConfigFormatNumeral),
 			)
+			e.target.value = formatNumeral(e.target.value, defaultConfigFormatNumeral);
 		});
 	} else if (input.name == 'actualization_pic_related') {
 		continue;
@@ -727,8 +740,6 @@ for (const input of actualizationForm.querySelectorAll('input, select')) {
 	actualizationInputs[input.name] = input;
 }
 
-const calculateCostAbsorption = (actual, cost) => actual == 0 ? 0 : (cost == 0 ? -100 : parseFloat((actual / cost) * 100).toFixed(2));
-
 const onActualizationSave = (data) => {
 	const swalAlert = () => Swal.fire({
 		icon: 'warning',
@@ -744,6 +755,8 @@ const onActualizationSave = (data) => {
 			[
 				'actualization_pic_related',
 				'actualization_plan_explanation',
+				'actualization_cost_absorption',
+				'actualization_kri_threshold_color',
 				'key',
 			].includes(key)
 		) {
@@ -751,8 +764,8 @@ const onActualizationSave = (data) => {
 		}
 
 		if (['actualization_cost_absorption', 'actualization_mitigation_cost'].includes(key)) {
-			if (data.actualization_mitigation_cost == 0) continue;
-			if (data.actualization_cost_absorption != 0) continue;
+			if (!data.actualization_mitigation_cost || data.actualization_mitigation_cost <= 0) continue;
+			if (data.actualization_cost || data.actualization_cost == 0) continue;
 			swalAlert()
 			return
 
@@ -765,7 +778,6 @@ const onActualizationSave = (data) => {
 			data[key]?.length < 1
 		) {
 			swalAlert();
-
 			return;
 		}
 	}
@@ -787,6 +799,11 @@ const onActualizationSave = (data) => {
 	if (picRelated) {
 		picRelatedLabel = `[${picRelated.personnel_area_code}] ${picRelated.position_name}`;
 	}
+
+	data.actualization_kri_threshold_color = kriThresholds.find(
+		kri => kri.value == data.actualization_kri_threshold
+	)?.customProperties.color
+
 	row.innerHTML = `
         <td class="text-center">${data.risk_cause_number}</td>
         <td class="text-center">${data.risk_cause_body}</td>
@@ -814,29 +831,14 @@ const onActualizationSave = (data) => {
         <td class="text-center">${data.actualization_pic}</td>
         <td class="text-center">${picRelatedLabel}</td>
         <td class="text-center">${data.actualization_kri}</td>
-        <td class="text-center">${data.actualization_kri_threshold}</td>
+        <td class="text-center">${data.actualization_kri_threshold ? renderBadge(data.actualization_kri_threshold, data.actualization_kri_threshold_color) : ''}</td>
         <td class="text-center">${data.actualization_kri_threshold_score
-			? data.actualization_kri_threshold_score + '%'
+			? data.actualization_kri_threshold_score
 			: ''
 		}</td>
         <td class="text-center">${data.actualization_plan_status}</td>
         <td class="text-center">${data.actualization_plan_explanation}</td>
-        <td class="text-center">${data.hasOwnProperty('actualization_plan_progress[1]')
-			? data['actualization_plan_progress[1]'] + '%'
-			: ''
-		}</td>
-        <td class="text-center">${data.hasOwnProperty('actualization_plan_progress[2]')
-			? data['actualization_plan_progress[2]'] + '%'
-			: ''
-		}</td>
-        <td class="text-center">${data.hasOwnProperty('actualization_plan_progress[3]')
-			? data['actualization_plan_progress[3]'] + '%'
-			: ''
-		}</td>
-        <td class="text-center">${data.hasOwnProperty('actualization_plan_progress[4]')
-			? data['actualization_plan_progress[4]'] + '%'
-			: ''
-		}</td>
+        <td class="text-center">${data.actualization_plan_progress ? data.actualization_plan_progress + '%' : ''}</td>
     `;
 
 	let documentCell = '<td><div class="d-flex flex-column gap-2">'
@@ -848,7 +850,6 @@ const onActualizationSave = (data) => {
 		`
 	})
 	documentCell += '</div></td>'
-
 	row.innerHTML += documentCell
 
 	row.prepend(editButton);
@@ -898,29 +899,13 @@ monitoring.actualizations.forEach((actualization, index) => {
         <td class="text-center">${actualization.actualization_pic}</td>
         <td class="text-center">${actualization.actualization_pic_related}</td>
         <td class="text-center">${actualization.actualization_kri}</td>
-        <td class="text-center">${actualization.actualization_kri_threshold
-		}</td>
+        <td class="text-center">${actualization.actualization_kri_threshold ? renderBadge(actualization.actualization_kri_threshold, actualization.actualization_kri_threshold_color) : ''}</td>
         <td class="text-center">${actualization.actualization_kri_threshold_score
-			? actualization.actualization_kri_threshold_score + '%'
+			? actualization.actualization_kri_threshold_score
 			: ''
 		}</td>
         <td class="text-center">${actualization.actualization_plan_status}</td>
-        <td class="text-center">${actualization.hasOwnProperty('actualization_plan_progress[1]')
-			? actualization['actualization_plan_progress[1]'] + '%'
-			: ''
-		}</td>
-        <td class="text-center">${actualization.hasOwnProperty('actualization_plan_progress[2]')
-			? actualization['actualization_plan_progress[2]'] + '%'
-			: ''
-		}</td>
-        <td class="text-center">${actualization.hasOwnProperty('actualization_plan_progress[3]')
-			? actualization['actualization_plan_progress[3]'] + '%'
-			: ''
-		}</td>
-        <td class="text-center">${actualization.hasOwnProperty('actualization_plan_progress[4]')
-			? actualization['actualization_plan_progress[4]'] + '%'
-			: ''
-		}</td>
+        <td class="text-center">${actualization.actualization_plan_progress ? actualization.actualization_plan_progress + '%' : ''}</td>
     `;
 
 	let documentCell = '<td><div class="d-flex flex-column gap-2">'
@@ -944,6 +929,7 @@ monitoring.actualizations.forEach((actualization, index) => {
 
 const actualizationEdit = (index, data) => {
 	for (let key of Object.keys(data)) {
+		if (key == 'actualization_cost_absorption') continue;
 		if (key == 'actualization_pic_related') {
 			const pic = fetchers.pics.find(
 				(pic) =>
@@ -965,6 +951,10 @@ const actualizationEdit = (index, data) => {
 					data[key].replaceAll('.', ','),
 					defaultConfigFormatNumeral
 				);
+
+				if (key == 'actualization_cost') {
+					input.dispatchEvent(new Event('input'));
+				}
 			} else {
 				input.value = data[key];
 			}
@@ -1022,6 +1012,13 @@ const actualizationEdit = (index, data) => {
 	}
 
 	actualizationModal.show();
+
+	actualizationKRIThresholdSelectChoice
+		.clearChoices()
+		.setChoices(kriThresholds.filter(
+			(threshold) => threshold.customProperties.id == data.risk_cause_number
+		))
+		.setChoiceByValue(data.actualization_kri_threshold);
 };
 
 actualizationForm.addEventListener('submit', (e) => {
@@ -1037,7 +1034,7 @@ actualizationForm.addEventListener('submit', (e) => {
 	);
 
 	data.actualization_plan_explanation = ['discontinue', 'revisi'].includes(data.actualization_plan_status) ? data.actualization_plan_explanation : '';
-	data.actualization_cost_absorption = calculateCostAbsorption(data.actualization_cost, data.actualization_mitigation_cost);
+	data.actualization_cost_absorption = calculateCostAbsorptionPercentage(data.actualization_cost, data.actualization_mitigation_cost);
 
 	const current = monitoring.actualizations[data.key];
 	current.actualization_documents = temporaryDocuments;
@@ -1072,6 +1069,11 @@ actualizationModalElement.addEventListener('hidden.bs.modal', (e) => {
 		)
 	);
 	actualizationPICRelatedChoice.setChoiceByValue('Pilih');
+	actualizationKRIThresholdSelectChoice.destroy();
+	actualizationKRIThresholdSelectChoice.init();
+	actualizationKRIThresholdSelectChoice.clearChoices().setChoices(kriThresholds)
+	actualizationKRIThresholdSelectChoice.setChoiceByValue('');
+
 	temporaryDocuments = [];
 });
 
@@ -1107,26 +1109,8 @@ const enableQuarterQualitative = (quarter) => {
 			residualImpactProbability[
 				`residual[${q}][impact_probability]`
 			].classList.remove('not-allowed');
-			actualizationInputs[`actualization_plan_progress[${q}]`].value = '';
-			actualizationInputs[
-				`actualization_plan_progress[${q}]`
-			].disabled = false;
-			actualizationInputs[
-				`actualization_plan_progress[${q}]`
-			].classList.remove('not-allowed');
 
-			monitoring.actualizations.map((actualization) => {
-				if (
-					!actualization.hasOwnProperty(
-						`actualization_plan_progress[${q}]`
-					)
-				) {
-					actualization[`actualization_plan_progress[${q}]`] = null;
-				}
-
-				actualization.quarter = q;
-				return actualization;
-			});
+			monitoring.actualizations.map((actualization) => ({ ...actualization, quarter: q }));
 		} else {
 			residualImpactScale[`residual[${q}][impact_scale]`].disabled = true;
 			residualImpactScale[`residual[${q}][impact_scale]`].value = '';
@@ -1164,46 +1148,12 @@ const enableQuarterQualitative = (quarter) => {
 			residualRiskExposure[`residual[${q}][risk_exposure]`].value = '';
 			residualRiskScale[`residual[${q}][risk_scale]`].value = '';
 			residualRiskLevel[`residual[${q}][risk_level]`].value = '';
-
-			actualizationInputs[`actualization_plan_progress[${q}]`].value = '';
-			actualizationInputs[
-				`actualization_plan_progress[${q}]`
-			].disabled = true;
-			if (
-				!actualizationInputs[
-					`actualization_plan_progress[${q}]`
-				].classList.contains('not-allowed')
-			) {
-				actualizationInputs[
-					`actualization_plan_progress[${q}]`
-				].classList.remove('not-allowed');
-			}
-
-			monitoring.actualizations.map((actualization) => {
-				if (
-					actualization.hasOwnProperty(
-						`actualization_plan_progress[${q}]`
-					)
-				) {
-					delete actualization[`actualization_plan_progress[${q}]`];
-				}
-
-				return actualization;
-			});
 		}
 
 		actualizationTableRows.forEach((row) => {
 			for (let col of row.querySelectorAll('td')) {
 				if (col.dataset?.name == 'quarter') {
 					col.innerHTML = q;
-				} else if (
-					col.dataset?.name?.includes('actualization_progress')
-				) {
-					if (
-						col.dataset.name != `actualization_plan_progress[${q}]`
-					) {
-						col.innerHTML = '';
-					}
 				}
 			}
 		});
@@ -1231,27 +1181,8 @@ const enableQuarterQuantitative = (quarter) => {
 			residualImpactProbability[
 				`residual[${q}][impact_probability]`
 			].classList.remove('not-allowed');
-			actualizationInputs[`actualization_plan_progress[${q}]`].value =
-				null;
-			actualizationInputs[
-				`actualization_plan_progress[${q}]`
-			].disabled = false;
-			actualizationInputs[
-				`actualization_plan_progress[${q}]`
-			].classList.remove('not-allowed');
 
-			monitoring.actualizations.map((actualization) => {
-				if (
-					!actualization.hasOwnProperty(
-						`actualization_plan_progress[${q}]`
-					)
-				) {
-					actualization[`actualization_plan_progress[${q}]`] = null;
-				}
-
-				actualization.quarter = q;
-				return actualization;
-			});
+			monitoring.actualizations.map((actualization) => ({ ...actualization, quarter: q }));
 		} else {
 			residualImpactValue[`residual[${q}][impact_value]`].disabled = true;
 			residualImpactValue[`residual[${q}][impact_value]`].value = null;
@@ -1300,47 +1231,12 @@ const enableQuarterQuantitative = (quarter) => {
 			residualRiskExposure[`residual[${q}][risk_exposure]`].value = null;
 			residualRiskScale[`residual[${q}][risk_scale]`].value = null;
 			residualRiskLevel[`residual[${q}][risk_level]`].value = null;
-
-			actualizationInputs[`actualization_plan_progress[${q}]`].value =
-				null;
-			actualizationInputs[
-				`actualization_plan_progress[${q}]`
-			].disabled = true;
-			if (
-				!actualizationInputs[
-					`actualization_plan_progress[${q}]`
-				].classList.contains('not-allowed')
-			) {
-				actualizationInputs[
-					`actualization_plan_progress[${q}]`
-				].classList.remove('not-allowed');
-			}
-
-			monitoring.actualizations.map((actualization) => {
-				if (
-					actualization.hasOwnProperty(
-						`actualization_plan_progress[${q}]`
-					)
-				) {
-					delete actualization[`actualization_plan_progress[${q}]`];
-				}
-
-				return actualization;
-			});
 		}
 
 		actualizationTableRows.forEach((row) => {
 			for (let col of row.querySelectorAll('td')) {
 				if (col.dataset?.name == 'quarter') {
 					col.innerHTML = q;
-				} else if (
-					col.dataset?.name?.includes('actualization_progress')
-				) {
-					if (
-						col.dataset.name != `actualization_plan_progress[${q}]`
-					) {
-						col.innerHTML = '';
-					}
 				}
 			}
 		});
@@ -1354,9 +1250,6 @@ const save = async () => {
 		defaultConfigFormatNumeral
 	);
 	data.actualizations = data.actualizations.map((actualization) => {
-		actualization.actualization_plan_progress =
-			actualization[`actualization_plan_progress[${currentQuarter}]`];
-
 		const picRelated = fetchers.pics.find(
 			(pic) => pic.unit_code == actualization.actualization_pic_related
 		);

@@ -20,7 +20,7 @@
                     <th colspan="2" style="width: 180px;">Realisasi KRI Threshold</th>
                     <th rowspan="2" style="width: 100px;">Status Rencana Perlakuan Risiko</th>
                     <th rowspan="2">Penjelasan Status Rencana Perlakuan Risiko</th>
-                    <th colspan="4">Progress Pelaksanaan Rencana Perlakuan Risiko</th>
+                    <th rowspan="2">Progress Pelaksanaan Rencana Perlakuan Risiko</th>
                     <th rowspan="2">Dokumen Pendukung</th>
                 </tr>
                 <tr>
@@ -29,10 +29,6 @@
                     @endfor
                     <th>Threshold</th>
                     <th>Skor</th>
-                    <th>Q1</th>
-                    <th>Q2</th>
-                    <th>Q3</th>
-                    <th>Q4</th>
                 </tr>
             </thead>
             <tbody>
@@ -62,20 +58,19 @@
                                 @endif
                             @endfor
                             <td>{{ $actualization->mitigation->incident->kri_body }}</td>
-                            <td>{{ $actualization->kri_threshold }}</td>
-                            <td>{{ $actualization->kri_threshold_score ? $actualization->kri_threshold_score . '%' : '' }}
+                            <td>
+                                @if ($actualization->kri_threshold)
+                                    <x-badge :color="$actualization->kri_threshold_color" :label="ucwords($actualization->kri_threshold)" />
+                                @endif
+                            </td>
+                            <td>
+                                {{ $actualization->kri_threshold_score }}
                             </td>
                             <td>{{ $actualization->actualization_plan_status }}</td>
                             <td>{!! html_entity_decode($actualization->actualization_plan_explanation) !!}</td>
-                            @for ($i = 1; $i <= 4; $i++)
-                                @if ($i == $actualization->quarter)
-                                    <td>{{ $actualization->actualization_plan_progress ? $actualization->actualization_plan_progress . '%' : '' }}
-                                    </td>
-                                @else
-                                    <td>-</td>
-                                @endif
-                            @endfor
-
+                            <td>
+                                {{ $actualization->actualization_plan_progress ? $actualization->actualization_plan_progress . '%' : '0%' }}
+                            </td>
                             @if ($actualization->documents)
                                 <td>
                                     <div class="d-flex flex-column gap-2">

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Risk;
 
 use App\Enums\DocumentStatus;
+use App\Enums\KRIThreshold;
 use App\Enums\State;
 use App\Exceptions\Services\UploadFileException;
 use App\Http\Controllers\Controller;
@@ -122,10 +123,14 @@ class MonitoringController extends Controller
     public function create(string $worksheetId)
     {
         $worksheet = Worksheet::findByEncryptedIdOrFail($worksheetId);
+        $worksheet->load('incidents');
         $worksheet->identification = WorksheetIdentification::identificationQuery()->whereWorksheetId($worksheet->id)->firstOrFail();
         $worksheet->load('qualification');
         if (request()->ajax()) {
             $worksheet->load('incidents.mitigations');
+            $latestMonitoring = $worksheet->monitorings()->oldest('period_date')
+                ->with('actualizations')
+                ->first();
 
             $actualizations = [];
             $quarter = ceil(date('m') / 3);
@@ -163,29 +168,37 @@ class MonitoringController extends Controller
             }
 
             $actualizationsIndex = 0;
-            $worksheet->incidents->each(function ($incident) use ($quarter, &$actualizations, &$actualizationsIndex) {
-                $incident->mitigations->each(function ($mitigation) use ($incident, $quarter, &$actualizations, &$actualizationsIndex) {
+            $worksheet->incidents->each(function ($incident) use ($quarter, &$actualizations, &$actualizationsIndex, $latestMonitoring) {
+                $incident->mitigations->each(function ($mitigation) use ($incident, $quarter, &$actualizations, &$actualizationsIndex, $latestMonitoring) {
+                    $actualization = null;
+                    if ($latestMonitoring) {
+                        $actualization = $latestMonitoring->actualizations->where('worksheet_mitigation_id', $mitigation->id)->first();
+                    }
+
+                    $threshold = $actualization ? KRIThreshold::fromID($actualization->kri_threshold) : null;
+                    $threshold_column = $threshold ? "kri_threshold_{$threshold->value}" : '';
                     $actualizations[] = [
                         'key' => $actualizationsIndex,
                         'risk_cause_number' => $incident->risk_cause_number,
                         'risk_cause_body' => $incident->risk_cause_body,
                         'actualization_mitigation_id' => $mitigation->id,
                         'actualization_mitigation_plan' => $mitigation->mitigation_plan,
-                        'actualization_mitigation_cost' => $mitigation->mitigation_cost,
-                        'actualization_cost' => '',
-                        'actualization_cost_absorption' => '',
+                        'actualization_mitigation_cost' => $mitigation?->mitigation_cost ?: '0',
+                        'actualization_cost' => $actualization ? $actualization->actualization_cost : '0',
+                        'actualization_cost_absorption' => $actualization ? $actualization->actualization_cost_absorption : '0',
                         'quarter' => $quarter,
                         'actualization_documents' => [],
                         'actualization_kri' => $incident->kri_body,
-                        'actualization_kri_threshold' => '',
-                        'actualization_kri_threshold_score' => '',
-                        'actualization_plan_body' => '',
-                        'actualization_plan_output' => '',
-                        "actualization_plan_progress[{$quarter}]" => '',
-                        'actualization_plan_status' => '',
-                        'actualization_plan_explanation' => '',
+                        'actualization_kri_threshold' => $threshold ? $actualization->kri_threshold : '',
+                        'actualization_kri_threshold_score' => $actualization ? html_entity_decode($actualization->kri_threshold_score) : 0,
+                        'actualization_kri_threshold_color' => $threshold ? $threshold->color() : '',
+                        'actualization_plan_body' => $actualization ? $actualization->actualization_plan_body : '',
+                        'actualization_plan_output' => $actualization ? $actualization->actualization_plan_output : '',
+                        'actualization_plan_progress' => $actualization ? $actualization->actualization_plan_progress : '',
+                        'actualization_plan_status' => $actualization ? $actualization->actualization_plan_status : '',
+                        'actualization_plan_explanation' => $actualization ? $actualization->actualization_plan_explanation : '',
                         'actualization_pic' => $mitigation->mitigation_pic,
-                        'actualization_pic_related' => '',
+                        'actualization_pic_related' => $actualization ? $actualization->unit_code : '',
                     ];
 
                     $actualizationsIndex +=  1;
@@ -355,6 +368,14 @@ class MonitoringController extends Controller
             'last_history',
         ]);
 
+        $monitoring->actualizations = $monitoring->actualizations->map(function ($actualization) {
+            $threshold = KRIThreshold::fromID($actualization->kri_threshold);
+            $threshold_column = 'kri_threshold_' . $threshold->value;
+            $actualization->kri_threshold_score = $actualization->mitigation->incident->$threshold_column;
+            $actualization->kri_threshold_color = $threshold->color();
+            return $actualization;
+        });
+
         $worksheet->identification = WorksheetIdentification::identificationQuery()->whereWorksheetId($worksheet->id)->firstOrFail();
 
         $title = 'Risk Monitoring';
@@ -377,6 +398,15 @@ class MonitoringController extends Controller
 
         $worksheet = Worksheet::findOrFail($monitoring->worksheet_id);
         $worksheet->identification = WorksheetIdentification::identificationQuery()->whereWorksheetId($worksheet->id)->firstOrFail();
+
+        $monitoring->actualizations = $monitoring->actualizations->map(function ($actualization) {
+            $threshold = KRIThreshold::fromID($actualization->kri_threshold);
+            $threshold_column = "kri_threshold_{$threshold->value}";
+            $actualization->kri_threshold_score = $actualization->mitigation->incident->$threshold_column;
+            $actualization->kri_threshold_color = $threshold->color();
+
+            return $actualization;
+        });
 
         if (request()->ajax()) {
             $residual = [
@@ -409,28 +439,31 @@ class MonitoringController extends Controller
 
             $actualizations = [];
             foreach ($monitoring->actualizations as $index => $actualization) {
+                $threshold = KRIThreshold::fromID($actualization->kri_threshold);
+                $threshold_column = "kri_threshold_{$threshold->value}";
                 $actualizations[] = [
                     'key' => $index,
-                    'id' => $monitoring->actualizations[$index]->id,
+                    'id' => $actualization->id,
                     'risk_cause_number' => $actualization->mitigation->incident->risk_cause_number,
                     'risk_cause_body' => $actualization->mitigation->incident->risk_cause_body,
                     'actualization_mitigation_id' => $actualization->mitigation->id,
                     'actualization_mitigation_plan' => $actualization->mitigation->mitigation_plan,
                     'actualization_mitigation_cost' => $actualization->mitigation->mitigation_cost,
-                    'actualization_cost' => $monitoring->actualizations[$index]->actualization_cost,
-                    'actualization_cost_absorption' => $monitoring->actualizations[$index]->actualization_cost_absorption,
+                    'actualization_cost' => $actualization->actualization_cost,
+                    'actualization_cost_absorption' => $actualization->actualization_cost_absorption,
                     'quarter' => $monitoring->residual->quarter,
-                    'actualization_documents' => $monitoring->actualizations[$index]->documents,
+                    'actualization_documents' => $actualization->documents,
                     'actualization_kri' => $actualization->mitigation->incident->kri_body,
-                    'actualization_kri_threshold' => $monitoring->actualizations[$index]->kri_threshold ?? '',
-                    'actualization_kri_threshold_score' => $monitoring->actualizations[$index]->kri_threshold_score ?? '',
-                    'actualization_plan_body' => $monitoring->actualizations[$index]->actualization_plan_body,
-                    'actualization_plan_output' => $monitoring->actualizations[$index]->actualization_plan_output,
-                    "actualization_plan_progress[{$monitoring->residual->quarter}]" => $monitoring->actualizations[$index]->actualization_plan_progress,
-                    'actualization_plan_status' => $monitoring->actualizations[$index]->actualization_plan_status,
-                    'actualization_plan_explanation' => $monitoring->actualizations[$index]->actualization_plan_explanation,
+                    'actualization_kri_threshold' => $actualization->kri_threshold ?? '',
+                    'actualization_kri_threshold_score' => html_entity_decode($actualization->kri_threshold_score ?? ''),
+                    'actualization_kri_threshold_color' => $threshold->color(),
+                    'actualization_plan_body' => $actualization->actualization_plan_body,
+                    'actualization_plan_output' => $actualization->actualization_plan_output,
+                    "actualization_plan_progress" => $actualization->actualization_plan_progress,
+                    'actualization_plan_status' => $actualization->actualization_plan_status,
+                    'actualization_plan_explanation' => $actualization->actualization_plan_explanation,
                     'actualization_pic' => $actualization->mitigation->mitigation_pic,
-                    'actualization_pic_related' => $monitoring->actualizations[$index]->unit_code,
+                    'actualization_pic_related' => $actualization->unit_code,
                 ];
             }
 
@@ -562,7 +595,7 @@ class MonitoringController extends Controller
                     }
                 }
 
-                $files = $request->actualizations[$item['key']]['documents'] ?? [];
+                $files = $request->actualizations[$item['key']]['actualization_documents'] ?? [];
                 if ($files) {
                     foreach ($files as $key => $file) {
                         if (is_array($file)) {
@@ -590,9 +623,9 @@ class MonitoringController extends Controller
 
             $monitoring->histories()->create([
                 'created_by' => $user->employee_id,
-                'created_role' => session()->get('current_role')->name,
+                'created_role' => role()->getCurrentRole()->name,
                 'receiver_id' => 2,
-                'receiver_role' => session()->get('current_role')->name,
+                'receiver_role' => role()->getCurrentRole()->name,
                 'status' => $monitoring->last_history->status,
                 'note' => 'Memperbarui laporan monitoring'
             ]);

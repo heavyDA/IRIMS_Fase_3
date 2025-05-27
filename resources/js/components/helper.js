@@ -209,6 +209,25 @@ const renderHeatmapBadge = (value, color) => {
     return `<div class="d-flex justify-content-center align-items-center"><span style="background-color: ${color};color: #212020" class="badge text-capitalize">${value}</span></div>`
 }
 
+const renderBadge = (value, color) => {
+    return `<span class="badge text-capitalize rounded-pill bg-${color} ${color == 'light' ? 'text-dark' : 'text-white'}">${value}</span>`
+}
+
+/**
+ * Risk Monitoring Helper
+ */
+
+const calculateCostAbsorptionPercentage = (actual, cost) => {
+    actual = parseInt(actual);
+    cost = parseInt(cost);
+
+    if (cost > 0) {
+        return actual <= 0 ? -100 : parseFloat((actual / cost) * 100).toFixed(2);
+    }
+
+    return 0
+}
+
 export {
     defaultConfigFormatNumeral,
     defaultConfigQuill,
@@ -222,5 +241,7 @@ export {
     buildFormData,
     jsonToFormData,
     generateRandomKey,
-    renderHeatmapBadge
+    renderHeatmapBadge,
+    renderBadge,
+    calculateCostAbsorptionPercentage
 }
