@@ -799,13 +799,14 @@ const onActualizationSave = (data) => {
         <td class="text-center">${data.risk_cause_number}</td>
         <td class="text-center">${data.risk_cause_body}</td>
         <td class="text-center">${data.actualization_mitigation_plan}</td>
-        <td class="text-center">
-			${data.actualization_mitigation_cost ? formatNumeral(
-		data.actualization_mitigation_cost.replaceAll('.', ','),
-		defaultConfigFormatNumeral
-	) : ''}
-		</td>
-        <td class="text-center">${data.actualization_plan_body}</td>
+        <td class="text-center">${data.actualization_mitigation_cost
+			? formatNumeral(
+				data.actualization_mitigation_cost.replaceAll('.', ','),
+				defaultConfigFormatNumeral
+			)
+			: ''
+		}</td>
+		<td class="text-center">${data.actualization_plan_body}</td>
         <td class="text-center">${data.actualization_plan_output}</td>
         <td class="text-center">${data.actualization_cost
 			? formatNumeral(
@@ -822,25 +823,13 @@ const onActualizationSave = (data) => {
         <td class="text-center">${picRelatedLabel}</td>
         <td class="text-center">${data.actualization_kri}</td>
         <td class="text-center">${data.actualization_kri_threshold ? renderBadge(data.actualization_kri_threshold, data.actualization_kri_threshold_color) : ''}</td>
-        <td class="text-center">${data.actualization_kri_threshold_score ? data.actualization_kri_threshold_score : ''}</td>
+        <td class="text-center">${data.actualization_kri_threshold_score
+			? data.actualization_kri_threshold_score
+			: ''
+		}</td>
         <td class="text-center">${data.actualization_plan_status}</td>
         <td class="text-center">${data.actualization_plan_explanation}</td>
-        <td class="text-center">${data.hasOwnProperty('actualization_plan_progress[1]')
-			? data['actualization_plan_progress[1]'] + '%'
-			: ''
-		}</td>
-        <td class="text-center">${data.hasOwnProperty('actualization_plan_progress[2]')
-			? data['actualization_plan_progress[2]'] + '%'
-			: ''
-		}</td>
-        <td class="text-center">${data.hasOwnProperty('actualization_plan_progress[3]')
-			? data['actualization_plan_progress[3]'] + '%'
-			: ''
-		}</td>
-        <td class="text-center">${data.hasOwnProperty('actualization_plan_progress[4]')
-			? data['actualization_plan_progress[4]'] + '%'
-			: ''
-		}</td>
+        <td class="text-center">${data.actualization_plan_progress ? data.actualization_plan_progress + '%' : ''}</td>
     `;
 
 	let documentCell = '<td><div class="d-flex flex-column gap-2">'
@@ -852,9 +841,8 @@ const onActualizationSave = (data) => {
 		`
 	})
 	documentCell += '</div></td>'
-
 	row.innerHTML += documentCell
-	row.prepend(editButton);
+
 	editButton.addEventListener('click', (e) => {
 		actualizationEdit(data.key, data);
 	});
@@ -1039,7 +1027,7 @@ actualizationForm.addEventListener('submit', (e) => {
 	);
 
 	data.actualization_plan_explanation = ['discontinue', 'revisi'].includes(data.actualization_plan_status) ? data.actualization_plan_explanation : '';
-	data.actualization_cost_absorption = calculateCostAbsorptionPercentage(data.actualization_mitigation_cost, data.actualization_cost);
+	data.actualization_cost_absorption = calculateCostAbsorptionPercentage(data.actualization_cost, data.actualization_mitigation_cost);
 
 	const current = monitoring.actualizations[data.key];
 	current.actualization_documents = temporaryDocuments;
