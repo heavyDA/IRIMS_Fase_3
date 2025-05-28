@@ -13,7 +13,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\DB;
 
-class FetchEmployeeJob
+class FetchEmployeeJob implements ShouldQueue
 {
     use Queueable;
 
