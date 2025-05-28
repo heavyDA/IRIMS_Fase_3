@@ -269,7 +269,9 @@ class MonitoringController extends Controller
 
             $actualizations = [];
             foreach ($request->actualizations as $actual) {
-                $actualizations[] = $this->actualizationRequestMapping($actual);
+                $actual = $this->actualizationRequestMapping($actual);
+                $actual['quarter'] = $request->residual['quarter'];
+                $actualizations[] = $actual;
             }
 
             $actualizations = $monitoring->actualizations()->createMany($actualizations);
@@ -562,6 +564,7 @@ class MonitoringController extends Controller
                     $actualization['actualization_pic_related'],
                 );
 
+                $actualization['quarter'] = $request->residual['quarter'];
                 if ($actual['id']) {
                     $actualization = $monitoring->actualizations->where('id', $actual['id'])->first();
                     $actualizations[] = $actualization->toArray();

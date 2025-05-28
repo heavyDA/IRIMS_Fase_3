@@ -69,10 +69,11 @@ class MonitoringActualizationExport implements FromCollection, WithHeadings, Wit
             $plan_progress = [];
             foreach ($worksheet->monitorings as $monitoring) {
                 foreach ($monitoring->actualizations as $actualization) {
-                    $plan_progress[$actualization->worksheet_mitigation_id] = array_fill(0, 4, 0);
-                    if ($actualization->actualization_plan_progress) {
-                        $plan_progress[$actualization->worksheet_mitigation_id][$actualization->quarter - 1] = $actualization->actualization_plan_progress;
+                    if (!array_key_exists($actualization->worksheet_mitigation_id, $plan_progress)) {
+                        $plan_progress[$actualization->worksheet_mitigation_id] = array_fill(0, 4, 0);
                     }
+
+                    $plan_progress[$actualization->worksheet_mitigation_id][$actualization->quarter - 1] = $actualization->actualization_plan_progress;
                 }
             }
 
