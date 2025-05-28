@@ -36,6 +36,7 @@ class WorksheetContextExport implements FromCollection, WithHeadings, WithStyles
         'Kategori Dampak',
         'Deskripsi Dampak',
         'Perkiraan Waktu Terpapar Risiko',
+        'Kualifikasi Risiko',
     ];
 
     protected array $nested_columns = [
@@ -78,6 +79,7 @@ class WorksheetContextExport implements FromCollection, WithHeadings, WithStyles
                     'Kategori Dampak' => $worksheet->identification->risk_impact_category,
                     'Deskripsi Dampak' => strip_html($worksheet->identification->risk_impact_body),
                     'Perkiraan Waktu' => format_date($worksheet->identification->risk_impact_start_date)->translatedFormat('M') . '-' . format_date($worksheet->identification->risk_impact_end_date)->translatedFormat('M'),
+                    'Kualifikasi Risiko' => $worksheet->qualification->name ?? '',
                 ];
             });
         });
@@ -165,36 +167,12 @@ class WorksheetContextExport implements FromCollection, WithHeadings, WithStyles
             'T' => 24,
             'U' => 54,
             'V' => 30,
+            'W' => 24,
         ];
 
         foreach (range('A', $this->lastColumn) as $column) {
             $sheet->getColumnDimension($column)->setWidth($columnWidths[$column] ?? 18);
         }
-
-        // // Merge cells with same values for specific columns
-        // excel_merge_same_values(
-        //     $sheet,
-        //     [
-        //         'B',
-        //         'C',
-        //         'D',
-        //         'E',
-        //         'F',
-        //         'L',
-        //         'M',
-        //         'N',
-        //         'O',
-        //         'P',
-        //         'Q',
-        //         'R',
-        //         'S',
-        //         'T',
-        //         'U',
-        //         'V',
-        //     ], // Columns to merge - adjust as needed
-        //     3, // Start from row 3 (after headers)
-        //     $this->count
-        // );
 
         $sheet->getStyle("A1:{$this->lastColumn}{$this->count}")->applyFromArray([
             'borders' => [

@@ -180,6 +180,7 @@ class RiskProfileController extends Controller
 
         $worksheets = Worksheet::with([
             'strategies',
+            'qualification',
             'incidents.kri_unit',
             'incidents.mitigations',
             'incidents.mitigations.risk_treatment_option',
