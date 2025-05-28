@@ -137,6 +137,7 @@ const identificationValidate = () => {
 
 const contextValidate = () => {
     const contextData = new FormData(contextForm);
+    contextData.delete('search_terms')
     for (let item of contextForm.querySelectorAll("input:disabled, textarea")) {
         if (item.tagName == "TEXTAREA") {
             contextData.append(item.name, item.innerHTML);

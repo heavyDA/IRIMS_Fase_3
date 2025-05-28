@@ -128,7 +128,7 @@ class MonitoringController extends Controller
         $worksheet->load('qualification');
         if (request()->ajax()) {
             $worksheet->load('incidents.mitigations');
-            $latestMonitoring = $worksheet->monitorings()->oldest('period_date')
+            $latestMonitoring = $worksheet->monitorings()->latest('period_date')
                 ->with('actualizations')
                 ->first();
 
@@ -176,7 +176,6 @@ class MonitoringController extends Controller
                     }
 
                     $threshold = $actualization ? KRIThreshold::fromID($actualization->kri_threshold) : null;
-                    $threshold_column = $threshold ? "kri_threshold_{$threshold->value}" : '';
                     $actualizations[] = [
                         'key' => $actualizationsIndex,
                         'risk_cause_number' => $incident->risk_cause_number,
@@ -187,7 +186,7 @@ class MonitoringController extends Controller
                         'actualization_cost' => $actualization ? $actualization->actualization_cost : '0',
                         'actualization_cost_absorption' => $actualization ? $actualization->actualization_cost_absorption : '0',
                         'quarter' => $quarter,
-                        'actualization_documents' => [],
+                        'actualization_documents' => $actualization ? $actualization->documents : [],
                         'actualization_kri' => $incident->kri_body,
                         'actualization_kri_threshold' => $threshold ? $actualization->kri_threshold : '',
                         'actualization_kri_threshold_score' => $actualization ? html_entity_decode($actualization->kri_threshold_score) : 0,
@@ -285,7 +284,6 @@ class MonitoringController extends Controller
 
             $worksheet->update(['status_monitoring' => DocumentStatus::ON_PROGRESS_MONITORING->value]);
 
-
             foreach ($request->actualizations as $key => $item) {
                 $directory = $user->sub_unit_code
                     . '/risk_monitoring/'
@@ -295,7 +293,7 @@ class MonitoringController extends Controller
                     Storage::disk('s3')->makeDirectory($directory);
                 }
 
-                $documents = [];
+                $documents = array_filter($actualizations[$key]['documents'],  fn($value, $key) => !($value instanceof \Illuminate\Http\File) ? !empty($value) : false, ARRAY_FILTER_USE_BOTH);
                 if ($request->hasFile("actualizations.{$key}.actualization_documents")) {
                     $files = $request->file("actualizations.{$key}.actualization_documents");
                     if ($files) {
@@ -370,8 +368,6 @@ class MonitoringController extends Controller
 
         $monitoring->actualizations = $monitoring->actualizations->map(function ($actualization) {
             $threshold = KRIThreshold::fromID($actualization->kri_threshold);
-            $threshold_column = 'kri_threshold_' . $threshold->value;
-            $actualization->kri_threshold_score = $actualization->mitigation->incident->$threshold_column;
             $actualization->kri_threshold_color = $threshold->color();
             return $actualization;
         });
@@ -401,8 +397,6 @@ class MonitoringController extends Controller
 
         $monitoring->actualizations = $monitoring->actualizations->map(function ($actualization) {
             $threshold = KRIThreshold::fromID($actualization->kri_threshold);
-            $threshold_column = "kri_threshold_{$threshold->value}";
-            $actualization->kri_threshold_score = $actualization->mitigation->incident->$threshold_column;
             $actualization->kri_threshold_color = $threshold->color();
 
             return $actualization;
@@ -805,7 +799,7 @@ class MonitoringController extends Controller
             'actualization_cost' => (float) $data['actualization_cost'] ?? 0,
             'actualization_cost_absorption' => (float) $data['actualization_cost_absorption'] ?? 0,
             'quarter' => (int) $data['quarter'] ?? '',
-            'documents' => '',
+            'documents' => $data['actualization_documents'] ?? [],
             'kri_unit_id' => null,
             'kri_threshold' => strip_tags(purify($data['actualization_kri_threshold'] ?? '')),
             'kri_threshold_score' => strip_tags(purify($data['actualization_kri_threshold_score'] ?? '')),

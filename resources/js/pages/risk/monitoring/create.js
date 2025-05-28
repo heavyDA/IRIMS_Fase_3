@@ -74,11 +74,19 @@ monitoringTabNextButton.addEventListener('click', (e) => {
 	if (currentStep == 1) {
 		if (!actualizationValidate()) {
 			currentStep -= 1;
+			Swal.fire({
+				icon: 'warning',
+				text: 'Pastikan seluruh isian Realisasi Pelaksanaan Perlakuan Risiko dan Biaya telah diisi',
+			});
 			return;
 		}
 	} else if (currentStep == 2) {
 		if (!residualValidate()) {
 			currentStep -= 1;
+			Swal.fire({
+				icon: 'warning',
+				text: 'Pastikan seluruh isian Realisasi Risiko Residual telah diisi',
+			});
 			return;
 		}
 
@@ -141,10 +149,6 @@ const residualValidate = () => {
 	for (let key of Object.keys(monitoring.residual)) {
 		if (key == 'impact_value') continue;
 		if (!monitoring.residual[key] || monitoring.residual[key] == 'Pilih') {
-			Swal.fire({
-				icon: 'warning',
-				text: 'Pastikan seluruh isian Realisasi Risiko Residual telah diisi',
-			});
 			return false;
 		}
 	}
@@ -159,6 +163,8 @@ const actualizationValidate = () => {
 					'actualization_pic_related',
 					'actualization_plan_explanation',
 					'actualization_cost_absorption',
+					'actualization_mitigation_cost',
+					'actualization_cost_absorption',
 					'key',
 				].includes(key)
 			) {
@@ -166,26 +172,11 @@ const actualizationValidate = () => {
 			}
 
 			if (
-				[
-					'actualization_mitigation_cost',
-					'actualization_cost_absorption',
-				].includes(key)
-			) {
-				if (actualization.actualization_mitigation_cost == 0) continue;
-				if (actualization.actualization_cost_absorption != 0) continue;
-
-				return false
-			}
-
-			if (
 				!actualization[key] ||
 				actualization[key] == 'Pilih' ||
 				actualization[key]?.length < 1
 			) {
-				Swal.fire({
-					icon: 'warning',
-					text: 'Pastikan seluruh isian Realisasi Pelaksanaan Perlakuan Risiko dan Biaya telah diisi',
-				});
+				console.log(key, actualization[key])
 				return false;
 			}
 		}
@@ -288,6 +279,7 @@ const residualRiskImpactCategory = residualForm.querySelector(
 const residualTextareas = {};
 const residualQuills = {};
 for (const textarea of residualForm.querySelectorAll('textarea')) {
+	if (textarea.name == 'actualization_kri_threshold_score') continue;
 	residualTextareas[textarea.name] = textarea;
 	residualQuills[textarea.name] = new Quill(
 		residualForm.querySelector('#' + textarea.name + '-editor'),
@@ -599,6 +591,7 @@ const actualizationForm =
 const actualizationTextareas = {};
 const actualizationQuills = {};
 for (const textarea of actualizationForm.querySelectorAll('textarea')) {
+	if (textarea.name == 'actualization_kri_threshold_score') continue;
 	actualizationTextareas[textarea.name] = textarea;
 	actualizationQuills[textarea.name] = new Quill(
 		actualizationForm.querySelector('#' + textarea.name + '-editor'),
@@ -644,16 +637,6 @@ const actualizationKRIThresholdSelect = actualizationForm.querySelector('[name="
 const actualizationKRIThresholdSelectChoice = new Choices(actualizationKRIThresholdSelect, defaultConfigChoices);
 const kriThresholds = actualizationKRIThresholdSelectChoice._currentState.choices;
 
-actualizationKRIThresholdSelect.addEventListener('change', e => {
-	if (e.target.value) {
-		const value = actualizationKRIThresholdSelectChoice.getValue(false)
-		actualizationInputs.actualization_kri_threshold_score.value = value.customProperties.value
-		return
-	}
-
-	actualizationInputs.actualization_kri_threshold_score.value = ''
-})
-
 const actualizationPlanStatusSelect = actualizationForm.querySelector(
 	'[name="actualization_plan_status"]'
 );
@@ -662,7 +645,11 @@ const actualizationPlanStatusSelectChoice = new Choices(
 	defaultConfigChoices
 );
 
-actualizationPlanStatusSelect.addEventListener('change', e => actualizationQuills['actualization_plan_explanation'].enable(['discontinue', 'revisi'].includes(e.target.value)))
+actualizationPlanStatusSelect.addEventListener('change', e => {
+	actualizationQuills['actualization_plan_explanation'].enable(['discontinue', 'revisi'].includes(e.target.value))
+	actualizationQuills['actualization_plan_explanation'].root.innerHTML = '';
+	actualizationQuills['actualization_plan_explanation'].emitter.emit('text-change');
+})
 
 let temporaryDocuments = [];
 
@@ -670,8 +657,8 @@ for (const input of actualizationForm.querySelectorAll('input, select')) {
 	if (input.name == 'actualization_cost') {
 		input.addEventListener('input', (e) => {
 			actualizationInputs['actualization_cost_absorption'].value = calculateCostAbsorptionPercentage(
-				unformatNumeral(e.target.value, defaultConfigFormatNumeral),
-				unformatNumeral(actualizationInputs['actualization_mitigation_cost'].value, defaultConfigFormatNumeral),
+				unformatNumeral(e.target.value, defaultConfigFormatNumeral) ?? '0',
+				unformatNumeral(actualizationInputs['actualization_mitigation_cost'].value, defaultConfigFormatNumeral) ?? '0',
 			)
 			e.target.value = formatNumeral(e.target.value, defaultConfigFormatNumeral);
 		});
@@ -739,6 +726,7 @@ for (const input of actualizationForm.querySelectorAll('input, select')) {
 	}
 	actualizationInputs[input.name] = input;
 }
+actualizationInputs['actualization_kri_threshold_score'] = actualizationForm.querySelector('[name="actualization_kri_threshold_score"]')
 
 const onActualizationSave = (data) => {
 	const swalAlert = () => Swal.fire({
@@ -757,18 +745,11 @@ const onActualizationSave = (data) => {
 				'actualization_plan_explanation',
 				'actualization_cost_absorption',
 				'actualization_kri_threshold_color',
+				'actualization_cost_absorption', 'actualization_mitigation_cost',
 				'key',
 			].includes(key)
 		) {
 			continue;
-		}
-
-		if (['actualization_cost_absorption', 'actualization_mitigation_cost'].includes(key)) {
-			if (!data.actualization_mitigation_cost || data.actualization_mitigation_cost <= 0) continue;
-			if (data.actualization_cost || data.actualization_cost == 0) continue;
-			swalAlert()
-			return
-
 		}
 
 		if (
@@ -806,28 +787,24 @@ const onActualizationSave = (data) => {
 
 	row.innerHTML = `
         <td class="text-center">${data.risk_cause_number}</td>
-        <td class="text-center">${data.risk_cause_body}</td>
-        <td class="text-center">${data.actualization_mitigation_plan}</td>
-        <td class="text-center">${data.actualization_mitigation_cost
-			? formatNumeral(
-				data.actualization_mitigation_cost.replaceAll('.', ','),
-				defaultConfigFormatNumeral
-			)
-			: ''
-		}</td>
-		<td class="text-center">${data.actualization_plan_body}</td>
-        <td class="text-center">${data.actualization_plan_output}</td>
+        <td class="text-left">${data.risk_cause_body}</td>
+        <td class="text-left">${data.actualization_mitigation_plan}</td>
+        <td class="text-left">
+		${data.actualization_mitigation_cost ? formatNumeral(
+		data.actualization_mitigation_cost.replace('.', ','),
+		defaultConfigFormatNumeral
+	) : ''}
+		</td>
+        <td class="text-left">${data.actualization_plan_body}</td>
+        <td class="text-left">${data.actualization_plan_output}</td>
         <td class="text-center">${data.actualization_cost
 			? formatNumeral(
-				data.actualization_cost.replaceAll('.', ','),
+				data.actualization_cost.replace('.', ','),
 				defaultConfigFormatNumeral
 			)
 			: ''
 		}</td>
-        <td class="text-center">${data.actualization_cost_absorption
-			? data.actualization_cost_absorption + '%'
-			: ''
-		}</td>
+        <td class="text-center">${data.actualization_cost_absorption + '%'}</td>
         <td class="text-center">${data.actualization_pic}</td>
         <td class="text-center">${picRelatedLabel}</td>
         <td class="text-center">${data.actualization_kri}</td>
@@ -892,10 +869,7 @@ monitoring.actualizations.forEach((actualization, index) => {
 			)
 			: ''
 		}</td>
-        <td class="text-center">${actualization.actualization_cost_absorption
-			? actualization.actualization_cost_absorption + '%'
-			: ''
-		}</td>
+        <td class="text-center">${actualization.actualization_cost_absorption + '%'}</td>
         <td class="text-center">${actualization.actualization_pic}</td>
         <td class="text-center">${actualization.actualization_pic_related}</td>
         <td class="text-center">${actualization.actualization_kri}</td>
@@ -905,6 +879,7 @@ monitoring.actualizations.forEach((actualization, index) => {
 			: ''
 		}</td>
         <td class="text-center">${actualization.actualization_plan_status}</td>
+        <td class="text-center">${actualization.actualization_plan_explanation}</td>
         <td class="text-center">${actualization.actualization_plan_progress ? actualization.actualization_plan_progress + '%' : ''}</td>
     `;
 
@@ -941,6 +916,7 @@ const actualizationEdit = (index, data) => {
 			continue;
 		} else if (key == 'actualization_plan_status') {
 			actualizationPlanStatusSelectChoice.setChoiceByValue(data[key]);
+			actualizationQuills['actualization_plan_explanation'].enable(['discontinue', 'revisi'].includes(data[key]))
 			continue;
 		}
 
@@ -1054,6 +1030,8 @@ actualizationModalElement.addEventListener('hidden.bs.modal', (e) => {
 
 	actualizationPlanStatusSelectChoice.destroy();
 	actualizationPlanStatusSelectChoice.init();
+	actualizationQuills['actualization_plan_explanation'].enable(false);
+
 	actualizationPICRelatedChoice.clearChoices();
 	actualizationPICRelatedChoice.setChoices(
 		fetchers.pics.reduce(
@@ -1069,6 +1047,7 @@ actualizationModalElement.addEventListener('hidden.bs.modal', (e) => {
 		)
 	);
 	actualizationPICRelatedChoice.setChoiceByValue('Pilih');
+
 	actualizationKRIThresholdSelectChoice.destroy();
 	actualizationKRIThresholdSelectChoice.init();
 	actualizationKRIThresholdSelectChoice.clearChoices().setChoices(kriThresholds)

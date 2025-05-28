@@ -42,8 +42,7 @@
                             <td>{!! html_entity_decode($actualization->actualization_plan_body) !!}</td>
                             <td>{!! html_entity_decode($actualization->actualization_plan_output) !!}</td>
                             <td>{{ money_format((float) $actualization->actualization_cost ?? 0) }}</td>
-                            <td>{{ $actualization->actualization_cost_absorption ? $actualization->actualization_cost_absorption . '%' : '' }}
-                            </td>
+                            <td>{{ $actualization->actualization_cost_absorption ?: 0 }} %</td>
                             <td>{{ $actualization->mitigation->mitigation_pic }}</td>
                             @if ($actualization->unit_code)
                                 <td>[{{ $actualization->personnel_area_code }}] {{ $actualization->position_name }}</td>
@@ -64,7 +63,7 @@
                                 @endif
                             </td>
                             <td>
-                                {{ $actualization->kri_threshold_score }}
+                                {{ html_entity_decode($actualization->kri_threshold_score) }}
                             </td>
                             <td>{{ $actualization->actualization_plan_status }}</td>
                             <td>{!! html_entity_decode($actualization->actualization_plan_explanation) !!}</td>

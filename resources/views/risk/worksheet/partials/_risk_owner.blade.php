@@ -25,7 +25,7 @@
                             </div>
                             <div>
                                 <div id="revise-note-editor" class="textarea"></div>
-                                <textarea class="form-control" name="revise-note" rows="4"></textarea>
+                                <textarea class="form-control" id="revise-note" name="note" rows="4"></textarea>
                             </div>
                         </div>
                     </form>
@@ -58,7 +58,7 @@
                             </div>
                             <div>
                                 <div id="submit-note-editor" class="textarea"></div>
-                                <textarea class="form-control" name="submit-note" rows="4"></textarea>
+                                <textarea class="form-control" id="submit-note" name="note" rows="4"></textarea>
                             </div>
                         </div>
                     </form>

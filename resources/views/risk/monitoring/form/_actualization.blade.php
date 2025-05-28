@@ -209,44 +209,60 @@
                             </div>
                             <div class="col row">
                                 <div class="col">
-                                    <label class="badge bg-success">Threshold</label>
-                                    <select name="actualization_kri_threshold" class="form-select">
-                                        <option value="">Pilih</option>
-                                        @foreach ($worksheet->incidents as $incident)
-                                            <option
-                                                data-custom-properties='{{ json_encode([
-                                                    'id' => $incident->risk_cause_number,
-                                                    'value' => html_entity_decode($incident->kri_threshold_safe),
-                                                    'color' => \App\Enums\KRIThreshold::SAFE->color(),
-                                                ]) }}'
-                                                value="hijau">
-                                                Hijau
-                                            </option>
-                                            <option
-                                                data-custom-properties='{{ json_encode([
-                                                    'id' => $incident->risk_cause_number,
-                                                    'value' => html_entity_decode($incident->kri_threshold_caution),
-                                                    'color' => \App\Enums\KRIThreshold::CAUTION->color(),
-                                                ]) }}'
-                                                value="kuning">
-                                                Kuning
-                                            </option>
-                                            <option
-                                                data-custom-properties='{{ json_encode([
-                                                    'id' => $incident->risk_cause_number,
-                                                    'value' => html_entity_decode($incident->kri_threshold_danger),
-                                                    'color' => \App\Enums\KRIThreshold::DANGER->color(),
-                                                ]) }}'
-                                                value="merah">
-                                                Merah
-                                            </option>
-                                        @endforeach
-                                    </select>
+                                    <div class="d-flex justify-content-center">
+                                        <label class="badge bg-success">Threshold</label>
+                                    </div>
+                                    <div>
+                                        <select name="actualization_kri_threshold" class="form-select">
+                                            <option value="">Pilih</option>
+                                            @foreach ($worksheet->incidents as $incident)
+                                                <option
+                                                    data-custom-properties='{{ json_encode([
+                                                        'id' => $incident->risk_cause_number,
+                                                        'value' => html_entity_decode($incident->kri_threshold_safe),
+                                                        'color' => \App\Enums\KRIThreshold::SAFE->color(),
+                                                    ]) }}'
+                                                    value="hijau">
+                                                    <div class="d-flex gap-2">
+                                                        <x-badge :label="'Hijau'" :color="\App\Enums\KRIThreshold::SAFE->color()"></x-badge>
+                                                        {!! html_entity_decode($incident->kri_threshold_safe) !!}
+                                                    </div>
+                                                </option>
+                                                <option
+                                                    data-custom-properties='{{ json_encode([
+                                                        'id' => $incident->risk_cause_number,
+                                                        'value' => html_entity_decode($incident->kri_threshold_caution),
+                                                        'color' => \App\Enums\KRIThreshold::CAUTION->color(),
+                                                    ]) }}'
+                                                    value="kuning">
+                                                    <div class="d-flex gap-2">
+                                                        <x-badge :label="'Kuning'" :color="\App\Enums\KRIThreshold::CAUTION->color()"></x-badge>
+                                                        {!! html_entity_decode($incident->kri_threshold_caution) !!}
+                                                    </div>
+                                                </option>
+                                                <option
+                                                    data-custom-properties='{{ json_encode([
+                                                        'id' => $incident->risk_cause_number,
+                                                        'value' => html_entity_decode($incident->kri_threshold_danger),
+                                                        'color' => \App\Enums\KRIThreshold::DANGER->color(),
+                                                    ]) }}'
+                                                    value="merah">
+                                                    <div class="d-flex gap-2">
+                                                        <x-badge :label="'Merah'" :color="\App\Enums\KRIThreshold::DANGER->color()"></x-badge>
+                                                        {!! html_entity_decode($incident->kri_threshold_danger) !!}
+                                                    </div>
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
                                 </div>
                                 <div class="col">
-                                    <label class="badge bg-secondary">Skor</label>
-                                    <input type="text" readonly class="form-control not-allowed"
-                                        name="actualization_kri_threshold_score">
+                                    <div class="d-flex justify-content-center">
+                                        <label class="badge bg-secondary">Skor</label>
+                                    </div>
+                                    <div>
+                                        <textarea style="resize: none;" class="form-control" rows=2 name="actualization_kri_threshold_score"></textarea>
+                                    </div>
                                 </div>
                             </div>
                         </div>

@@ -222,10 +222,10 @@ const calculateCostAbsorptionPercentage = (actual, cost) => {
     cost = parseInt(cost);
 
     if (cost > 0) {
-        return actual <= 0 ? -100 : parseFloat((actual / cost) * 100).toFixed(2);
+        return actual <= 0 ? 0 : parseFloat((actual / cost) * 100).toFixed(2);
     }
 
-    return 0
+    return actual > 0 ? -100 : 0
 }
 
 export {

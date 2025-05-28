@@ -320,6 +320,10 @@ class WorksheetController extends Controller
                 ])->map(function ($incident) {
                     $incident['key'] = $incident['id'];
                     $incident['kri_unit'] = (string) $incident['kri_unit']['id'];
+                    $incident['kri_threshold_safe'] = html_entity_decode($incident['kri_threshold_safe']);
+                    $incident['kri_threshold_caution'] = html_entity_decode($incident['kri_threshold_caution']);
+                    $incident['kri_threshold_danger'] = html_entity_decode($incident['kri_threshold_danger']);
+
                     return $incident;
                 }),
                 'mitigations' => $worksheet->incidents->flatMap(function ($incident) {

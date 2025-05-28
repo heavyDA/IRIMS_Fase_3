@@ -13,7 +13,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\DB;
 
-class FetchEmployeeJob implements ShouldQueue
+class FetchEmployeeJob
 {
     use Queueable;
 
@@ -124,11 +124,12 @@ class FetchEmployeeJob implements ShouldQueue
                 }
 
                 if (array_key_exists($user->id, $users)) {
-                    $users[$user->id] = [$unit->id];
-                } else {
                     $users[$user->id][] = $unit->id;
+                } else {
+                    $users[$user->id] = [$unit->id];
                 }
             }
+
 
             foreach ($staffs as $staff) {
                 $headUnit = Position::where('sub_unit_code', $staff->sub_unit_code)
